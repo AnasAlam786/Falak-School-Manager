@@ -157,10 +157,11 @@ def paper():
                 std =  payload.get('std')
                 MM =  payload.get('MM')
                 hrs =  payload.get('hrs')
+                school="Falak Public School"
 
                 #questions = [{"marks": "10", "type": "singleWord", "qText": "Define the following:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"]},{"marks": "10", "type": "match", "qText": "Match the following countries with their capitals:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"], "options": ["New Delhi", "Paris", "Tokyo", "Berlin", "Brasília", "Ottawa"]}, {"type": "QnA","marks": "10",  "qText": "Answer the following general knowledge questions:", "subQuestion": ["Who is known as the Father of the Nation in India?", "What is the chemical symbol for water?", "Who wrote 'Pride and Prejudice'?", "What is the highest mountain in the world?", "Which planet is known as the Red Planet?"]}, {"type": "fillUp", "qText": "Fill in the blanks:", "marks": "10", "subQuestion": ["The Great Wall of _____ is visible from space.", "The boiling point of water is _____ degrees Celsius.", "Albert Einstein developed the theory of _____", "The largest desert in the world is the _____ Desert.", "Light travels at approximately _____ km/s."]}, {"type": "T-F", "marks": "10", "qText": "State whether the following statements are True or False:", "subQuestion": ["The Great Pyramid of Giza is one of the Seven Wonders of the Ancient World.", "The Pacific Ocean is the smallest ocean in the world.", "Mount Everest is in the Himalayas.", "Venus is the hottest planet in the solar system.", "The human body has 206 bones."]}, {"type": "mcq", "qText": "Choose the correct options:", "marks": "10", "subQuestion": [{"text": "Which is the largest mammal on Earth?", "options": ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"]}, {"marks": "10", "text": "Which is the closest star to Earth?", "options": ["Proxima Centauri", "Sirius", "Betelgeuse", "Alpha Centauri"]}, {"text": "Which is the longest river in the world?", "options": ["Amazon", "Nile", "Yangtze", "Mississippi"]}, {"text": "Which of the following is a primary color?", "options": ["Red", "Green", "Blue", "Yellow"]}]}, {"type": "mcq", "qText": "Science and Technology Questions:", "subQuestion": [{"text": "Who invented the light bulb?", "options": ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Isaac Newton"]}, {"text": "Which planet has the most moons?", "options": ["Jupiter", "Saturn", "Mars", "Uranus"]}, {"text": "What does CPU stand for?", "options": ["Central Processing Unit", "Computer Power Unit", "Control Panel Unit", "Central Program Unit"]}, {"text": "What is the chemical formula for carbon dioxide?", "options": ["CO2", "H2O", "O2", "C2O"]}]}]
 
-                html = render_template('paper_elements.html',questions=questions, event=event, subject=subject, std=std,MM=MM, hrs=hrs)
+                html = render_template('paper_elements.html',questions=questions, school=school, event=event, subject=subject, std=std,MM=MM, hrs=hrs)
                 soup=BeautifulSoup(html,"lxml")
                 content = soup.find('div', id=value).decode_contents()
 
@@ -367,6 +368,119 @@ def marks():
     
     else:
         return redirect(url_for('login'))
+
+@app.route('/report_card')
+def report_card():
+    Data = {
+        "Urdu": {
+        "FA1": 15,
+        "SA1": 35,
+        "Total": 63,
+        "FA2": 20,
+        "SA2": 60,
+        "GTotal": 133,
+    },
+    "Urdu": {
+        "FA1": 15,
+        "SA1": 35,
+        "Total": 63,
+        "FA2": 20,
+        "SA2": 60,
+        "GTotal": 133,
+    },
+    "Urdu": {
+        "FA1": 15,
+        "SA1": 35,
+        "Total": 63,
+        "FA2": 20,
+        "SA2": 60,
+        "GTotal": 133,
+    },
+    "Urdu": {
+        "FA1": 15,
+        "SA1": 35,
+        "Total": 63,
+        "FA2": 20,
+        "SA2": 60,
+        "GTotal": 133,
+    },
+    
+    "Math": {
+        "FA1": 18,
+        "SA1": 35,
+        "Total": 53,
+        "FA2": 20,
+        "SA2": 40,
+        "GTotal": 113,
+    },
+    "English": {
+        "FA1": 17,
+        "SA1": 30,
+        "Total": 47,
+        "FA2": 19,
+        "SA2": 38,
+        "GTotal": 104,
+    },
+    "Science": {
+        "FA1": 20,
+        "SA1": 40,
+        "Total": 60,
+        "FA2": 22,
+        "SA2": 45,
+        "GTotal": 127,
+    },
+    "History": {
+        "FA1": 15,
+        "SA1": 25,
+        "Total": 40,
+        "FA2": 18,
+        "SA2": 35,
+        "GTotal": 93,
+    },
+}
+    Data = [StudentData("STUDENTS_NAME","ROLL","DOB","MOTHERS_NAME","FATHERS_NAME", "FA1", "PEN","IMAGE","ADDRESS","SR","FA2", "SA1", "SA2", class_filter_json = {"CLASS": ['8th']})[0]]
+
+    for student in Data:
+        # Add 'Total' to each FA1, FA2, SA1, and SA2
+        for key in ['FA1', 'FA2', 'SA1', 'SA2']:
+            scores = student[key]
+            total = sum(int(value) for value in scores.values() if value.isdigit())
+            scores['Total'] = total
+
+        # Calculate FA1_SA1 (Sum of FA1 and SA1)
+        fa1_sa1 = {}
+        for subject in student['FA1']:
+            if subject != 'Total':
+                fa1_value = int(student['FA1'].get(subject, 0)) if student['FA1'].get(subject, '').isdigit() else 0
+                sa1_value = int(student['SA1'].get(subject, 0)) if student['SA1'].get(subject, '').isdigit() else 0
+                fa1_sa1[subject] = str(fa1_value + sa1_value)
+        fa1_sa1['Total'] = sum(int(value) for value in fa1_sa1.values() if value.isdigit())
+        student['FA1_SA1'] = fa1_sa1
+
+        # Calculate FA2_SA2 (Sum of FA2 and SA2)
+        fa2_sa2 = {}
+        for subject in student['FA2']:
+            if subject != 'Total':
+                fa2_value = int(student['FA2'].get(subject, 0)) if student['FA2'].get(subject, '').isdigit() else 0
+                sa2_value = int(student['SA2'].get(subject, 0)) if student['SA2'].get(subject, '').isdigit() else 0
+                fa2_sa2[subject] = str(fa2_value + sa2_value)
+        fa2_sa2['Total'] = sum(int(value) for value in fa2_sa2.values() if value.isdigit())
+        student['FA2_SA2'] = fa2_sa2
+
+        # Calculate Grand_Total (Sum of all scores across FA1, FA2, SA1, and SA2)
+        grand_total = {}
+        for subject in student['FA1']:
+            if subject != 'Total':
+                total_value = sum(
+                    int(student[key].get(subject, 0)) if student[key].get(subject, '').isdigit() else 0
+                    for key in ['FA1', 'FA2', 'SA1', 'SA2']
+                )
+                grand_total[subject] = str(total_value)
+        grand_total['Total'] = sum(int(value) for value in grand_total.values() if value.isdigit())
+        student['Grand_Total'] = grand_total
+
+    return render_template('components/result2.html',Data=Data)
+
 
 
 @app.route('/aapar', methods=["GET", "POST"])
