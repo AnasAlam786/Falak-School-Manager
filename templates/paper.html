@@ -1,6 +1,29 @@
 {% extends "base.html" %}
 {% block title %}Create Paper{% endblock %}
 {% block content %}
+
+<style>
+  .font-size-label {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #4A90E2;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+  }
+
+  .font-size-value {
+      background: #4A90E2;
+      color: white;
+      font-weight: bold;
+      padding: 2px 10px;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      min-width: 40px;
+      text-align: center;
+  }
+</style>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -77,6 +100,12 @@
   </div>
 </div>
 
+<div class="container mt-5">
+  <label for="customRange" class="form-label font-size-label">
+      Font Size: <span id="fontSize" class="font-size-value">20</span>
+  </label>
+  <input type="range" class="form-range" min="10" max="30" step="1" id="customRange" value="20" oninput="updateRangeValue(this.value)">
+</div>
 
 
 <div class="container text-center mt-3">
@@ -132,6 +161,7 @@
       }
       
     }
+
     function remove(element) {
       const parent = element.parentElement;
       if (parent.classList.contains('question')){
@@ -194,16 +224,25 @@
         };
         
       })
+      
       event=document.getElementsByClassName("event")[0].value
       subject=document.getElementsByClassName("subject")[0].value
       std=document.getElementsByClassName("class")[0].value
       hrs=document.getElementsByClassName("hrs")[0].value
       MM=document.getElementsByClassName("M-M")[0].value
+      fontSize=document.getElementsByClassName("font-size-value")[0].textContent
 
-      const html = await updatePage('/paper', null, { questions:questions, event:event, subject:subject, std:std, hrs:hrs, MM:MM, value:"a4PDF" })
-      console.log(html)
+
+
+      const html = await updatePage('/paper', null, { 
+                                    questions:questions, event:event, subject:subject, 
+                                    std:std, hrs:hrs, MM:MM, value:"a4PDF", fontSize: fontSize 
+                                  })
+      
 
       const newWindow = window.open("", "_blank");
+
+      console.log(fontSize)
         
       newWindow.document.write(`
             <!DOCTYPE html>
@@ -215,26 +254,22 @@
                     margin: 0;
                     size: A4;
                 }
-                html, body {
+                body {
                     margin: 0;
                     padding: 5px;
                     width: 210mm;
                     height: 297mm;
+                    color: black;
+                    background: rgb(255, 555, 255);
+                    line-height: 1.2;
+                    font-size: ${fontSize}px;
+                    border: 2px solid black;
                 }
 
                 @media print {
                     body {
-                        width: 210mm;
-                        height: 297mm;
-                        color: black;
-                        overflow: hidden;
-                        background: rgb(255, 555, 255);
-                        line-height: 1.2;
                         page-break-after: always;
-                        font-size: 20px;
-                        
-
-                        
+                        border: 0px solid black;
                     }
                 }
                 </style>
@@ -252,8 +287,15 @@
         `);
         newWindow.document.close();
 
+
     }
 
+    function updateRangeValue(value) {
+            const label = document.getElementById('fontSize');
+            label.textContent = value;
+            label.style.fontSize = value + "px";
+
+        }
 
   </script>
 
