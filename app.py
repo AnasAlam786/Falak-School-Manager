@@ -291,7 +291,7 @@ def entryCard():
 def seatChits():
     if "email" in session:
         result = StudentData("STUDENTS_NAME","FATHERS_NAME","CLASS","ROLL")
-        fitlerData = [row for row in result if row["CLASS"] not in ['Nursery/KG/PP3', 'LKG/KG1/PP2','UKG/KG2/PP1']]
+        fitlerData = [row for row in result if row["CLASS"] not in ['Nursery', 'LKG','UKG']]
         data = [fitlerData[i:i + 28] for i in range(0, len(fitlerData), 28)]
         
         return render_template('seatChits.html', data=data)
