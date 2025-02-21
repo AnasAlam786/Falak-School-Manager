@@ -277,7 +277,7 @@ def entryCard():
         data = [data[i:i + 4] for i in range(0, len(data), 4)]
 
 
-        logo="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s300"
+        logo="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s200"
         school="FALAK PUBLIC SCHOOL"
         year="2024-25"
         exam="SA1"
