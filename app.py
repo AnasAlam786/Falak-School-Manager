@@ -1,11 +1,11 @@
-from flask import Flask, render_template, jsonify, request, session, url_for, redirect, make_response
+from flask import Flask, render_template, jsonify, request, session, url_for, redirect
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateParentsAdhar, Schools
 from bs4 import BeautifulSoup
 import datetime
-
+import json
 
 load_dotenv()
 
@@ -13,18 +13,17 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('SESSION_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=50)
 
 db.init_app(app)
 
 @app.route('/')
 def home():
-    session.clear()
     return render_template('home.html')
 
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
-    session.clear()
     error=None
     
     if "email" in session:
@@ -35,7 +34,6 @@ def login():
         password = request.form.get('password')
         login_as = "admin"
 
-        session.permanent = True
         session["role"] = login_as
 
         if login_as=="admin":
@@ -165,6 +163,13 @@ def paper():
                 soup=BeautifulSoup(html,"lxml")
                 content = soup.find('div', id=value).decode_contents()
 
+                paper_key = f"{subject}_{std}"
+
+                session[paper_key] = questions
+                session.modified = True
+
+                print(session.get(paper_key))
+
                 return jsonify({"html":str(content)})
 
 
@@ -277,7 +282,7 @@ def entryCard():
         data = [data[i:i + 4] for i in range(0, len(data), 4)]
 
 
-        logo="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w"
+        logo="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s200"
         school="FALAK PUBLIC SCHOOL"
         year="2024-25"
         exam="SA1"
