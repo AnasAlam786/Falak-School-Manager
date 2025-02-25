@@ -217,7 +217,7 @@ def paper():
             return jsonify({"html":str(content)})
             
         #papers = session['papers']
-        return render_template('paper.html', index=1, papers=papers)
+        return render_template('paper.html', index=1)
 
     else:
         return redirect(url_for('login'))
