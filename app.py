@@ -179,13 +179,13 @@ def paper():
                 soup=BeautifulSoup(html,"lxml")
                 content = soup.find('div', id=value).decode_contents()
 
-                paper_key = f"{subject}_{std}"
+                #paper_key = f"{subject}_{std}"
 
-                if 'papers' not in session:
-                    session['papers'] = {}
+                #if 'papers' not in session:
+                #    session['papers'] = {}
 
                 #session["papers"][paper_key] = questions
-                session.modified = True
+                #session.modified = True
 
                 try:
                     msg = Message(
@@ -216,7 +216,7 @@ def paper():
             
             return jsonify({"html":str(content)})
             
-        papers = session['papers']
+        #papers = session['papers']
         return render_template('paper.html', index=1, papers=papers)
 
     else:
