@@ -5,6 +5,7 @@ from werkzeug.security import check_password_hash
 from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateParentsAdhar, Schools
 from bs4 import BeautifulSoup
 import datetime
+from flask_mail import Mail, Message
 import json
 
 load_dotenv()
@@ -14,6 +15,14 @@ app.config['SECRET_KEY'] = os.getenv('SESSION_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=50)
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # SMTP server (e.g., Gmail)
+app.config['MAIL_PORT'] = 587  # Port for sending emails
+app.config['MAIL_USE_TLS'] = True  # Use TLS security
+app.config['MAIL_USERNAME'] = os.getenv('EMAIL')  # Your email
+app.config['MAIL_PASSWORD'] = os.getenv('PASSWORD')  # Your email password (or App Password)
+app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL')
+mail = Mail(app)
 
 db.init_app(app)
 
@@ -157,7 +166,14 @@ def paper():
                 hrs =  payload.get('hrs')
                 school="Falak Public School"
 
-                #questions = [{"marks": "10", "type": "singleWord", "qText": "Define the following:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"]},{"marks": "10", "type": "match", "qText": "Match the following countries with their capitals:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"], "options": ["New Delhi", "Paris", "Tokyo", "Berlin", "Brasília", "Ottawa"]}, {"type": "QnA","marks": "10",  "qText": "Answer the following general knowledge questions:", "subQuestion": ["Who is known as the Father of the Nation in India?", "What is the chemical symbol for water?", "Who wrote 'Pride and Prejudice'?", "What is the highest mountain in the world?", "Which planet is known as the Red Planet?"]}, {"type": "fillUp", "qText": "Fill in the blanks:", "marks": "10", "subQuestion": ["The Great Wall of _____ is visible from space.", "The boiling point of water is _____ degrees Celsius.", "Albert Einstein developed the theory of _____", "The largest desert in the world is the _____ Desert.", "Light travels at approximately _____ km/s."]}, {"type": "T-F", "marks": "10", "qText": "State whether the following statements are True or False:", "subQuestion": ["The Great Pyramid of Giza is one of the Seven Wonders of the Ancient World.", "The Pacific Ocean is the smallest ocean in the world.", "Mount Everest is in the Himalayas.", "Venus is the hottest planet in the solar system.", "The human body has 206 bones."]}, {"type": "mcq", "qText": "Choose the correct options:", "marks": "10", "subQuestion": [{"text": "Which is the largest mammal on Earth?", "options": ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"]}, {"marks": "10", "text": "Which is the closest star to Earth?", "options": ["Proxima Centauri", "Sirius", "Betelgeuse", "Alpha Centauri"]}, {"text": "Which is the longest river in the world?", "options": ["Amazon", "Nile", "Yangtze", "Mississippi"]}, {"text": "Which of the following is a primary color?", "options": ["Red", "Green", "Blue", "Yellow"]}]}, {"type": "mcq", "qText": "Science and Technology Questions:", "subQuestion": [{"text": "Who invented the light bulb?", "options": ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Isaac Newton"]}, {"text": "Which planet has the most moons?", "options": ["Jupiter", "Saturn", "Mars", "Uranus"]}, {"text": "What does CPU stand for?", "options": ["Central Processing Unit", "Computer Power Unit", "Control Panel Unit", "Central Program Unit"]}, {"text": "What is the chemical formula for carbon dioxide?", "options": ["CO2", "H2O", "O2", "C2O"]}]}]
+                #questions = [{"marks": "10", "type": "singleWord", "qText": "Define the following:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"]},
+                            # {"marks": "10", "type": "match", "qText": "Match the following countries with their capitals:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"], "options": ["New Delhi", "Paris", "Tokyo", "Berlin", "Brasília", "Ottawa"]}, 
+                            # {"type": "QnA","marks": "10",  "qText": "Answer the following general knowledge questions:", "subQuestion": ["Who is known as the Father of the Nation in India?", "What is the chemical symbol for water?", "Who wrote 'Pride and Prejudice'?", "What is the highest mountain in the world?", "Which planet is known as the Red Planet?"]}, 
+                            # {"type": "fillUp", "qText": "Fill in the blanks:", "marks": "10", "subQuestion": ["The Great Wall of _____ is visible from space.", "The boiling point of water is _____ degrees Celsius.", "Albert Einstein developed the theory of _____", "The largest desert in the world is the _____ Desert.", "Light travels at approximately _____ km/s."]}, 
+                            # {"type": "T-F", "marks": "10", "qText": "State whether the following statements are True or False:", "subQuestion": ["The Great Pyramid of Giza is one of the Seven Wonders of the Ancient World.", "The Pacific Ocean is the smallest ocean in the world.", "Mount Everest is in the Himalayas.", "Venus is the hottest planet in the solar system.", "The human body has 206 bones."]}, 
+                            # {"type": "mcq", "qText": "Choose the correct options:", "marks": "10", "subQuestion": [{"text": "Which is the largest mammal on Earth?", "options": ["Elephant", "Blue Whale", "Giraffe", "Hippopotamus"]}, 
+                            # {"marks": "10", "text": "Which is the closest star to Earth?", "options": ["Proxima Centauri", "Sirius", "Betelgeuse", "Alpha Centauri"]}, {"text": "Which is the longest river in the world?", "options": ["Amazon", "Nile", "Yangtze", "Mississippi"]}, {"text": "Which of the following is a primary color?", "options": ["Red", "Green", "Blue", "Yellow"]}]}, 
+                            # {"type": "mcq", "qText": "Science and Technology Questions:", "subQuestion": [{"text": "Who invented the light bulb?", "options": ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "Isaac Newton"]}, {"text": "Which planet has the most moons?", "options": ["Jupiter", "Saturn", "Mars", "Uranus"]}, {"text": "What does CPU stand for?", "options": ["Central Processing Unit", "Computer Power Unit", "Control Panel Unit", "Central Program Unit"]}, {"text": "What is the chemical formula for carbon dioxide?", "options": ["CO2", "H2O", "O2", "C2O"]}]}]
 
                 html = render_template('paper_elements.html',questions=questions, school=school, event=event, subject=subject, std=std,MM=MM, hrs=hrs)
                 soup=BeautifulSoup(html,"lxml")
@@ -165,10 +181,24 @@ def paper():
 
                 paper_key = f"{subject}_{std}"
 
-                session[paper_key] = questions
+                if 'papers' not in session:
+                    session['papers'] = {}
+
+                #session["papers"][paper_key] = questions
                 session.modified = True
 
-                print(session.get(paper_key))
+                try:
+                    msg = Message(
+                        subject=f"Question Paper {subject} {std}",
+                        recipients=["anasalam702@gmail.com"],
+                        body=f"{event} {subject} {std}\n\n" + "\n\n".join(json.dumps(q, indent=3) for q in questions)
+                    )
+
+                    mail.send(msg)
+                    print('message', 'Email sent successfully!')
+                except Exception as e:
+                    print('error', str(e))
+
 
                 return jsonify({"html":str(content)})
 
@@ -186,7 +216,8 @@ def paper():
             
             return jsonify({"html":str(content)})
             
-        return render_template('paper.html', index=1)
+        papers = session['papers']
+        return render_template('paper.html', index=1, papers=papers)
 
     else:
         return redirect(url_for('login'))
@@ -285,7 +316,7 @@ def entryCard():
         logo="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s200"
         school="FALAK PUBLIC SCHOOL"
         year="2024-25"
-        exam="SA1"
+        exam="SA2"
         quality = "200"
 
         return render_template('admit.html', data=data, school=school, year=year, exam=exam, logo=logo,quality=quality)
