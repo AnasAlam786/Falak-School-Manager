@@ -216,7 +216,10 @@ def paper():
             
             return jsonify({"html":str(content)})
             
-        papers = session['papers']
+        papers = None
+        if 'papers' in session:
+            papers = session['papers']
+        
         return render_template('paper.html', index=1, papers=papers)
 
     else:
