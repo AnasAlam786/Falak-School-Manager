@@ -29,7 +29,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <div class="d-flex flex-column justify-content-center align-items-center mb-3">
-  <h1 class="fw-bold text-center mb-2">{{ session['school_name'] }}</h1>
+  <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
+
 
   <input type="text" class="event form-control text-center fw-bold mb-2 w-75" list="EventList" placeholder="Event">
   <datalist id="EventList">
@@ -112,9 +113,45 @@
     <button class="btn btn-primary w-75" onclick="convert()">Convert</button>
 </div>
 
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <!-- Modal Header with Inline CSS -->
+      <div class="modal-header" style="background-color: #007bff; color: white;">
+        <h5 class="modal-title" id="historyModalLabel">Question Paper History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" 
+                style="background-color: transparent; border: none;"></button>
+      </div>
+      <!-- Modal Body with Inline Styled List -->
+      <div class="modal-body">
+        <div class="list-group">
+          {% for paper_key, questions in papers.items(): %}
+          <a class="list-group-item list-group-item-action" onclick="loadQuestionPaper({{ questions }},'{{ paper_key }}')" 
+             style="cursor: pointer;">
+            <div class="d-flex w-100 justify-content-between">
+              <h5 class="mb-1">{{ paper_key }}</h5>
+            </div>
+          </a>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 
     var questionCount=1
+
+    async function loadQuestionPaper(questions, paper_key){
+      questions.forEach(question => {
+
+        console.log(question["type"])
+        element = document.getElementsByClassName("question")[0]
+        updatePage('/paper', element.id , { value : question["type"] }, append="beforeend");
+        updatePage('/paper', element.id , { value : question["type"] }, append="beforeend");
+      })
+    }
 
     function addQuestion(element) {
       const parent = element.parentElement;
@@ -164,15 +201,43 @@
 
     function remove(element) {
       const parent = element.parentElement;
-      if (parent.classList.contains('question')){
-        parent.parentElement.remove()
+      const parentClass = parent.classList[0];
+
+      if (!parentClass) return;
+
+      const parentElements = document.getElementsByClassName(parentClass);
+
+      if (parentElements.length > 1) {
+
+        if (parent.classList.contains('question')){
+          parent.parentElement.remove()
+        }
+        else{parent.remove()}
       }
-      else{parent.remove()}
     }
 
     async function convert() {
 
       let questions = [];
+
+      event=document.getElementsByClassName("event")[0].value
+      subject=document.getElementsByClassName("subject")[0].value
+      std=document.getElementsByClassName("class")[0].value
+      hrs=document.getElementsByClassName("hrs")[0].value
+      MM=document.getElementsByClassName("M-M")[0].value
+      fontSize=document.getElementsByClassName("font-size-value")[0].textContent
+      let errorAlert = document.getElementById("errorAlert");
+
+      if (!event || !subject || !std) {
+          errorAlert.innerHTML = "All labels are required!";
+          errorAlert.classList.remove("d-none"); // Show the alert
+
+          setTimeout(() => {
+              errorAlert.classList.add("d-none");
+          }, 5000);
+
+          return; // Stop execution
+      }
 
       const ele = document.querySelectorAll('.mcq, .fillUp, .match, .QnA, .T-F');
       let elements = document.querySelectorAll('[id^="Question-"]');
@@ -182,7 +247,6 @@
 
       elements.forEach(el => {
         let q=el.querySelectorAll('.mcq, .fillUp, .match, .QnA, .T-F, .singleWord');
-        if (q.length === 0) {alert("Please select all the select ."); return 0};
 
         if (q[0].id==="fillUp" || q[0].id==="T-F" || q[0].id==="QnA"){
           questions.push({
@@ -225,14 +289,6 @@
         
       })
       
-      event=document.getElementsByClassName("event")[0].value
-      subject=document.getElementsByClassName("subject")[0].value
-      std=document.getElementsByClassName("class")[0].value
-      hrs=document.getElementsByClassName("hrs")[0].value
-      MM=document.getElementsByClassName("M-M")[0].value
-      fontSize=document.getElementsByClassName("font-size-value")[0].textContent
-
-
 
       const html = await updatePage('/paper', null, { 
                                     questions:questions, event:event, subject:subject, 
@@ -241,8 +297,6 @@
       
 
       const newWindow = window.open("", "_blank");
-
-      console.log(fontSize)
         
       newWindow.document.write(`
             <!DOCTYPE html>
@@ -285,7 +339,7 @@
             </body>
             </html>
         `);
-        newWindow.document.close();
+      newWindow.document.close();
 
 
     }
