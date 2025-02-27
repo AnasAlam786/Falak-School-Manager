@@ -125,14 +125,16 @@
       <!-- Modal Body with Inline Styled List -->
       <div class="modal-body">
         <div class="list-group">
-          {% for paper_key, questions in papers.items(): %}
-          <a class="list-group-item list-group-item-action" onclick="loadQuestionPaper({{ questions }},'{{ paper_key }}')" 
-             style="cursor: pointer;">
-            <div class="d-flex w-100 justify-content-between">
-              <h5 class="mb-1">{{ paper_key }}</h5>
-            </div>
-          </a>
-          {% endfor %}
+          {% if paper %}
+            {% for paper_key, questions in papers.items(): %}
+            <a class="list-group-item list-group-item-action" onclick="loadQuestionPaper({{ questions }},'{{ paper_key }}')" 
+              style="cursor: pointer;">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ paper_key }}</h5>
+              </div>
+            </a>
+            {% endfor %}
+          {% endif %}
         </div>
       </div>
     </div>
