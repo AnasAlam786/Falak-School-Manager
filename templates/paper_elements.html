@@ -135,7 +135,9 @@
 
         <div style="display: flex; flex-wrap: wrap; justify-content: center;">
             {% for subQuestion in question.subQuestion %}
-            <p style="margin-right: 20px; margin-bottom: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+                {% if subQuestion %}
+                <p style="margin-right: 20px; margin-bottom: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+                {% endif %}
             {% endfor %}
         </div>
         {% endif %}
