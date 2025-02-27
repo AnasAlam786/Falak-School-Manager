@@ -151,7 +151,7 @@ def getfees():
 
 @app.route('/paper', methods=["GET", "POST"])
 def paper():
-    if "email" in session:
+    if 1:
 
         if request.method == "POST":
             payload = request.json
