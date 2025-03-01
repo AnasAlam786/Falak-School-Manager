@@ -175,7 +175,7 @@ def paper():
 
             if value=="a4PDF":
                 questions =  payload.get('questions')
-                event =  payload.get('event')
+                event =  payload.get('eventName')
                 subject =  payload.get('subject')
                 std =  payload.get('std')
                 MM =  payload.get('MM')
