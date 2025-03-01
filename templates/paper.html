@@ -82,7 +82,6 @@
 
 <div id="content" style="width: 100%;">
   <div  class="d-flex flex-column align-items-end mb-4" id="Question-{{ index }}">
-
     <div class="question input-group mb-1">
         <select  class="form-select fw-bold" rows="1" style="overflow: hidden; resize: none;" onchange="addQuestion(this)">
           <option selected>Select Question Type</option>
@@ -125,7 +124,7 @@
       <!-- Modal Body with Inline Styled List -->
       <div class="modal-body">
         <div class="list-group">
-          {% if paper %}
+          {% if papers %}
             {% for paper_key, questions in papers.items(): %}
             <a class="list-group-item list-group-item-action" onclick="loadQuestionPaper({{ questions }},'{{ paper_key }}')" 
               style="cursor: pointer;">
@@ -142,6 +141,33 @@
 </div>
 
 <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        loadData(); // Load saved HTML content on page load
+    });
+    function loadData() {
+      let container = document.getElementById("content");
+      let savedHTML = localStorage.getItem("questionPaperHTML");
+
+      if (savedHTML) {
+          container.outerHTML = savedHTML;
+      }
+  }
+
+    function saveData() {
+          let container = document.getElementById("content");
+          console.log("Hello")
+
+          // Ensure input values are included
+          container.querySelectorAll("input, textarea").forEach(element => {
+            if (element.tagName === "TEXTAREA") {
+                element.textContent = element.value; // Store textarea content inside
+            } else {
+                element.setAttribute("value", element.value); // Works for input fields
+            }
+        });
+
+          localStorage.setItem("questionPaperHTML", container.outerHTML);
+      }
 
     var questionCount=1
 
@@ -173,13 +199,11 @@
         qinput.type = 'text';
         qinput.value = qtext
         qinput.className = 'form-control mb-2 me-1 q-text'
-        qinput.onclick = function() { this.select(); };
         qinput.placeholder = 'Enter Question Text';
 
         const mInput = document.createElement('input');
         mInput.type = 'number';
         mInput.className = 'form-control mb-2 m-text';
-        mInput.onclick = function() { this.select(); };
         mInput.placeholder = 'Marks';
         mInput.style="width: 75px;"
 
@@ -198,6 +222,7 @@
       else{
         updatePage('/paper', grandparent.id , { value : parent.id }, append="beforeend");
       }
+
       
     }
 
@@ -216,6 +241,7 @@
         }
         else{parent.remove()}
       }
+
     }
 
     async function convert() {
@@ -352,6 +378,11 @@
             label.style.fontSize = value + "px";
 
         }
+
+    document.addEventListener("keydown", function(event) {
+      saveData()
+    });
+
 
   </script>
 
