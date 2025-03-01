@@ -109,7 +109,14 @@
 
 
 <div class="container text-center mt-3">
-    <button class="btn btn-primary w-75" onclick="convert()">Convert</button>
+  <div class="row">
+    <div class="col-12 col-md-6 mb-2">
+      <button class="btn btn-primary w-100" onclick="convert()">Convert</button>
+    </div>
+    <div class="col-12 col-md-6 mb-2">
+      <button class="btn btn-secondary w-100" onclick="clearLocalStorage()">Clear</button>
+    </div>
+  </div>
 </div>
 
 <div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
@@ -141,9 +148,10 @@
 </div>
 
 <script>
-      document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
         loadData(); // Load saved HTML content on page load
     });
+
     function loadData() {
       let container = document.getElementById("content");
       let savedHTML = localStorage.getItem("questionPaperHTML");
@@ -155,7 +163,6 @@
 
     function saveData() {
           let container = document.getElementById("content");
-          console.log("Hello")
 
           // Ensure input values are included
           container.querySelectorAll("input, textarea").forEach(element => {
@@ -379,10 +386,18 @@
 
         }
 
+    function clearLocalStorage(){
+      if (confirm("Are you sure you want to clear the local storage?")) {
+        localStorage.removeItem("questionPaperHTML");
+        window.location.reload();
+    }
+    }
+        
     document.addEventListener("keydown", function(event) {
       saveData()
     });
 
+  
 
   </script>
 
