@@ -1,12 +1,15 @@
-from flask import Flask, render_template, jsonify, request, session, url_for, redirect
+from flask import Flask, render_template, jsonify, request, session, url_for, redirect, after_this_request
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
 from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateParentsAdhar, Schools
 from bs4 import BeautifulSoup
 import datetime
-from flask_mail import Mail, Message
+from threading import Thread
+from flask_mail import Message, Mail
 import json
+
+
 
 load_dotenv()
 
@@ -25,6 +28,19 @@ app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL')
 mail = Mail(app)
 
 db.init_app(app)
+
+def send_email(subject, std, event, questions):
+    with app.app_context():  # Fixes "Working outside of application context" error
+        try:
+            msg = Message(
+                subject=f"Question Paper {subject} {std}",
+                recipients=["anasalam702@gmail.com"],
+                body=f"{event} {subject} {std}\n\n" + "\n\n".join(json.dumps(q, indent=3) for q in questions)
+            )
+            mail.send(msg)
+            print("✅ Email sent successfully!")
+        except Exception as e:
+            print("❌ Error sending email:", str(e))
 
 @app.route('/')
 def home():
@@ -187,19 +203,8 @@ def paper():
                 session["papers"][paper_key] = questions
                 session.modified = True
 
-                try:
-                    msg = Message(
-                        subject=f"Question Paper {subject} {std}",
-                        recipients=["anasalam702@gmail.com"],
-                        body=f"{event} {subject} {std}\n\n" + "\n\n".join(json.dumps(q, indent=3) for q in questions)
-                    )
 
-                    mail.send(msg)
-                    print('message', 'Email sent successfully!')
-                except Exception as e:
-                    print('error', str(e))
-
-
+                Thread(target=send_email, args=(subject, std, event, questions)).start()
                 return jsonify({"html":str(content)})
 
 
@@ -225,6 +230,7 @@ def paper():
     else:
         return redirect(url_for('login'))
         
+
 
 @app.route('/updatemarks', methods=["GET", "POST"])
 def updatemarks():
