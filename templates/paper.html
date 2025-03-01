@@ -29,7 +29,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <div class="d-flex flex-column justify-content-center align-items-center mb-3">
-  <div id="errorAlert" class="alert alert-danger d-none" role="alert"></div>
 
 
   <input type="text" class="event form-control text-center fw-bold mb-2 w-75" list="EventList" placeholder="Event">
@@ -261,17 +260,10 @@
       const hrs=document.getElementsByClassName("hrs")[0].value
       const MM=document.getElementsByClassName("M-M")[0].value
       const fontSize=document.getElementsByClassName("font-size-value")[0].textContent
-      const errorAlert = document.getElementById("errorAlert");
 
-      if (!eventName || !subject || !std) {
-          errorAlert.innerHTML = "All labels are required!";
-          errorAlert.classList.remove("d-none"); // Show the alert
-
-          setTimeout(() => {
-              errorAlert.classList.add("d-none");
-          }, 5000);
-
-          return; // Stop execution
+      if (!eventName || !std) {
+          alert("Please Fill the class and event");
+          return;
       }
 
       const ele = document.querySelectorAll('.mcq, .fillUp, .match, .QnA, .T-F');
@@ -282,6 +274,10 @@
 
       elements.forEach(el => {
         let q=el.querySelectorAll('.mcq, .fillUp, .match, .QnA, .T-F, .singleWord');
+
+        if (!q[0]) {
+          return;
+        }
 
         if (q[0].id==="fillUp" || q[0].id==="T-F" || q[0].id==="QnA"){
           questions.push({
