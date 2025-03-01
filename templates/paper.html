@@ -222,15 +222,15 @@
 
       let questions = [];
 
-      event=document.getElementsByClassName("event")[0].value
-      subject=document.getElementsByClassName("subject")[0].value
-      std=document.getElementsByClassName("class")[0].value
-      hrs=document.getElementsByClassName("hrs")[0].value
-      MM=document.getElementsByClassName("M-M")[0].value
-      fontSize=document.getElementsByClassName("font-size-value")[0].textContent
-      let errorAlert = document.getElementById("errorAlert");
+      const eventName=document.getElementsByClassName("event")[0].value
+      const subject=document.getElementsByClassName("subject")[0].value
+      const std=document.getElementsByClassName("class")[0].value
+      const hrs=document.getElementsByClassName("hrs")[0].value
+      const MM=document.getElementsByClassName("M-M")[0].value
+      const fontSize=document.getElementsByClassName("font-size-value")[0].textContent
+      const errorAlert = document.getElementById("errorAlert");
 
-      if (!event || !subject || !std) {
+      if (!eventName || !subject || !std) {
           errorAlert.innerHTML = "All labels are required!";
           errorAlert.classList.remove("d-none"); // Show the alert
 
@@ -293,7 +293,7 @@
       
 
       const html = await updatePage('/paper', null, { 
-                                    questions:questions, event:event, subject:subject, 
+                                    questions:questions, eventName:eventName, subject:subject, 
                                     std:std, hrs:hrs, MM:MM, value:"a4PDF", fontSize: fontSize 
                                   })
       
