@@ -114,7 +114,7 @@
         {% endif %}
 
         {% if question.type in ["QnA", "fillUp", "T-F"] and question.subQuestion|length != 0 %}
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
+        <div style="display: flex; white-space: pre-wrap; justify-content: space-between; margin-bottom: 0; width: 100%;">
             <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
             <span style="font-weight: bold;">{{ question.marks }}</span>
         </div>
