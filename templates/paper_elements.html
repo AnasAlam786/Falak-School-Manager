@@ -114,12 +114,12 @@
         {% endif %}
 
         {% if question.type in ["QnA", "fillUp", "T-F"] and question.subQuestion|length != 0 %}
-        <div style="display: flex; white-space: pre-wrap; justify-content: space-between; margin-bottom: 0; width: 100%;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
             <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
             <span style="font-weight: bold;">{{ question.marks }}</span>
         </div>
 
-        <div style="margin-bottom: 5px; padding-left: 15px;">
+        <div style="margin-bottom: 5px; white-space: pre-wrap; padding-left: 15px;">
             {% for subQuestion in question.subQuestion %}
             <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
             {% endfor %}
