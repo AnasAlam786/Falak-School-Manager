@@ -235,10 +235,11 @@
     function remove(element) {
       const parent = element.parentElement;
       const parentClass = parent.classList[0];
+      //console.log(parentClass)
 
       if (!parentClass) return;
 
-      const parentElements = document.getElementsByClassName(parentClass);
+      const parentElements = parent.parentElement.getElementsByClassName(parentClass);
 
       if (parentElements.length > 1) {
 
