@@ -239,7 +239,11 @@
       if (!parentClass) return;
 
       if (parentClass==="question"){
-        parent.parentElement.remove()
+        const parentElements = document.getElementsByClassName(parentClass);
+        
+        if (parentElements.length > 1) {
+          parent.parentElement.remove()
+        }
       }
 
       else{
