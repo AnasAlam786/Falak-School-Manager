@@ -83,7 +83,7 @@
           <div class="d-flex flex-column justify-content-center align-items-center w-100">
             <span class="fw-bold mb-1">{{ row.FATHERS_NAME }}</span>
             <input type="text" inputmode="numeric" oninput="formatAadharNumber(this)" maxlength="14"
-                   placeholder="Enter Father's Aadhar" value="{{ row.Parents_Aadhar['Father'] if row.Parents_Aadhar and 'Father' in row.Parents_Aadhar else '' }}"
+                   placeholder="Enter Father's Aadhar" value="{{ row.FATHERS_AADHAR }}"
                    class="form-control"
                    onfocus="this.select()" 
                    id="FAadhar-{{ row.id }}">
@@ -93,7 +93,7 @@
         <td class="align-middle text-center">
           <div class="d-flex flex-column justify-content-center align-items-center w-100">
             <span class="fw-bold mb-1">{{ row.MOTHERS_NAME }}</span>
-            <input type="text" inputmode="numeric" value="{{ row.Parents_Aadhar['Mother'] if row.Parents_Aadhar and 'Mother' in row.Parents_Aadhar else '' }}"
+            <input type="text" inputmode="numeric" value="{{ row.MOTHERS_AADHAR }}"
                    placeholder="Enter Mother's Aadhar"  oninput="formatAadharNumber(this)" maxlength="14"
                    class="form-control"
                    onfocus="this.select()" 
