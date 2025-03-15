@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, session, url_for, re
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateParentsAdhar, Schools
+from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateCell, Schools, Verhoeff
 from bs4 import BeautifulSoup
 import datetime
 from threading import Thread
@@ -65,13 +65,13 @@ def login():
             school = Schools.query.filter_by(Email=email).first()
 
             if school and check_password_hash(school.Password, password):
-                print(school.School_Name)
 
                 session["school_name"] = school.School_Name
                 session["classes"] = school.Classes
                 session["logo"] = school.Logo
                 session["email"] = school.Email
                 session["school_id"] = school.User
+                session["session_id"] = school.session_id
 
                 return redirect(url_for('studentsData'))
             
@@ -230,7 +230,132 @@ def paper():
     else:
         return redirect(url_for('login'))
         
+@app.route('/addstudent', methods=["GET", "POST"])
+def addStudent():
+    if "email" in session:
 
+        if request.method == "POST":
+            data = request.form.to_dict()
+            password = data["password"]
+            image = request.files['IMAGE'].read()
+            data.pop('password', None)
+            data.pop('image', None)
+            print(image)
+            school_id=session["school_id"]
+
+            school = Schools.query.filter_by(User=school_id).first()
+            if school and check_password_hash(school.Password, password):
+                return jsonify({'status': 'SUCCESS', "message": "Student Added Succesfully"})
+            else:
+                return jsonify({'status': 'FAILED', "message": "Wrong Password"})
+
+
+
+        classes = session["classes"]
+
+        PersonalInfo = {
+                "STUDENTS_NAME": {"label": "Student Name", "type": "text", "value":"anas alam", "required":False},
+                "DOB": {"label": "DOB", "type": "date", "value":"", "required":False},
+                "AADHAAR": {"label": "Aadhar", "type": "text",  "maxlength": 14, "required":False},
+                "HEIGHT": {"label": "Height", "type": "text", "value":"", "maxlength": 3},
+                "WEIGHT": {"label": "Weight", "type": "text", "value":"", "maxlength": 3},
+
+                "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,
+                            "options": ["Select Gender", "Male", "Female", "Other"]},
+
+                "CAST": {"label": "Caste", "type": "select", "default": "Select Caste", "required":True,
+                            "options": ["Select Caste", "OBC", "GENERAL", "ST", "SC"]},
+
+                "RELIGION": {"label": "Religion", "type": "select", "default": "Select Religion", "required":True,
+                            "options": ["Select Religion", "Muslim", "Hindu", "Christian","Sikh","Buddhist","Parsi","Jain"]},
+
+                "BLOOD_GROUP": {"label": "Blood Group", "type": "select", "default": "Select Blood Group", "required":False,
+                            "options": ["Select Blood Group", "A+", "A-", "B+","B-","O+","O-","AB+","AB-"]}
+            }
+
+        AcademicInfo = {
+                "ROLL": {"label": "Roll No", "type": "number", "value": "", "required":True},
+                "ADMISSION_NO": {"label": "Admission No.", "type": "number", "value": "", "required":True},
+                "PEN": {"label": "PEN No.", "type": "number", "value": "", "required":False},
+                "SR": {"label": "SR No.", "type": "number", "value": "", "required":True},
+                "APAAR": {"label": "APAAR No.", "type": "number", "value": "", "required":False},
+                "CLASS": {
+                    "label": "Class",
+                    "type": "select",
+                    "options": classes,
+                    "default": "5",
+                    "required":True
+                },
+                "SECTION": {
+                    "label": "Section",
+                    "type": "select",
+                    "options": ["A", "B", "C", "D"],
+                    "default": "A",
+                    "required":True
+                }
+            }
+
+
+        GuardianInfo = {
+                "FATHERS_NAME": {"label": "Father Name", "type": "text", "value": "", "required":True},
+                "MOTHERS_NAME": {"label": "Mother Name", "type": "text", "value": "", "required":True},
+                "FATHERS_AADHAR": {"label": "Father Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
+                "MOTHERS_AADHAR": {"label": "Mother Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
+                "FATHERS_EDUCATION": {
+                    "label": "Father Qualification",
+                    "type": "select",
+                    "options": ["High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
+                    "default": "Graduate",
+                    "required":True
+                },
+                "MOTHERS_EDUCATION": {
+                    "label": "Mother Qualification",
+                    "type": "select",
+                    "options": ["High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
+                    "default": "Graduate", 
+                    "required":True
+                },
+                "FATHERS_OCCUPATION": {
+                    "label": "Father Occupation",
+                    "type": "select",
+                    "options": ["Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
+                    "default": "Business", 
+                    "required":True
+                },
+                "MOTHERS_OCCUPATION": {
+                    "label": "Mother Occupation",
+                    "type": "select",
+                    "options": ["Homemaker", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
+                    "default": "Homemaker", 
+                    "required":True
+                }
+}
+
+        ContactInfo = {
+                "ADDRESS": {"label": "Address", "type": "text", "value": "", "required":True},
+                "PIN": {"label": "PIN Code", "type": "number", "value": "", "maxlength": 6, "required":True},
+                "EMAIL": {"label": "Email ID", "type": "email", "value": "", "required":False},
+                "MOBILE": {"label": "Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":True},
+                "ALT_MOBILE": {"label": "Alternate Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":False}
+            }
+
+        AdditionalInfo = {
+                "Previous_Class_Marks": {"label": "Previous Class Marks", "type": "number", "value": "", "maxlength": 3, "required":False},
+                "Previous_Class_Attendance": {"label": "Previous Class Attendance (%)", "type": "number", "value": "", "maxlength": 3, "required":False},
+                "Previous_School": {"label": "Previous School Name", "type": "text", "value": ""},
+                "Home_Distance": {
+                    "label": "School to Home Distance (km)",
+                    "type": "select",
+                    "options": ["Less than 1 km", "1-3 km", "3-5 km", "More than 5 km"],
+                    "default": "1-3 km",
+                    "required":True
+                }
+            }
+        
+        return render_template('addStudent.html',PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo, 
+                               GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
+    else:
+        return redirect(url_for('login'))
 
 @app.route('/updatemarks', methods=["GET", "POST"])
 def updatemarks():
@@ -532,7 +657,7 @@ def report_card():
 def aapar():
 
     if "email" in session:
-        data = StudentData("id","STUDENTS_NAME","ROLL", "FATHERS_NAME","MOTHERS_NAME","Parents_Aadhar","CLASS")
+        data = StudentData("id","STUDENTS_NAME","ROLL", "FATHERS_NAME","MOTHERS_NAME", "FATHERS_AADHAR", "MOTHERS_AADHAR","CLASS")
 
         if request.method == "POST":
             payload = request.json
@@ -541,7 +666,7 @@ def aapar():
 
                 CLASS = payload.get('class')
 
-                data = StudentData("id","STUDENTS_NAME","ROLL", "FATHERS_NAME","MOTHERS_NAME","Parents_Aadhar",class_filter_json = {"CLASS": [CLASS]})
+                data = StudentData("id","STUDENTS_NAME","ROLL", "FATHERS_NAME","MOTHERS_NAME","FATHERS_AADHAR", "MOTHERS_AADHAR",class_filter_json = {"CLASS": [CLASS]})
     
                 html = render_template('aapar.html', data=data)
                 soup=BeautifulSoup(html,"lxml")
@@ -551,24 +676,23 @@ def aapar():
             
             elif payload.get('task')=='aadhar':
                 id=payload.get('id')
-                mother=payload.get('Mother_Aadhar').replace("-","")
-                father=payload.get('Father_Aadhar').replace("-","")
-                data={}
-
-                
-                if (father=='' or len(father)==12):
-                    data["Father"]=father
-                else:
-                    return {"STATUS": 'FAILED'}
+                motherID = payload.get('Mother_Aadhar').replace("-","")
+                fatherID =  payload.get('Father_Aadhar').replace("-","")
+            
+                if fatherID and not Verhoeff(fatherID):
+                    return {"STATUS": "FAILED"}
                     
-                if (mother=='' or len(mother)==12):
-                    data["Mother"]=mother
-                else:
+                if motherID and not Verhoeff(motherID):
+                    return {"STATUS": "FAILED"}
+                
+                fatherIDResult = updateCell(id, "FATHERS_AADHAR", fatherID)
+                motherIDResult = updateCell(id, "MOTHERS_AADHAR", motherID)
+
+                if fatherIDResult == "FAILED" or motherIDResult == "FAILED":
                     return {"STATUS": 'FAILED'}
                 
                 
-                result = updateParentsAdhar(id, data)
-                return{"STATUS": result}
+                return{"STATUS": 'SUCCESS'}
             
         return render_template('aapar.html', data=data)
 
