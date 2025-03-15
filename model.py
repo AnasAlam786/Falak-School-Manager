@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.attributes import flag_modified
+
 db = SQLAlchemy()
 
 class Schools(db.Model):
@@ -18,6 +19,7 @@ class Schools(db.Model):
     IP = db.Column(db.JSON)
     Logo = db.Column(db.Text)
     Manager = db.Column(db.Text, nullable=False)
+    session_id = db.Column(db.Text, nullable=False)
     
 class FeesDB(db.Model):
     __tablename__ = 'FeesDB'
@@ -70,6 +72,11 @@ class StudentsDB(db.Model):
     Free_Scheme = db.Column(db.JSON)
     school_id = db.Column(db.Text, nullable=False)
     Attendance = db.Column(db.Text)
+    BLOOD_GROUP = db.Column(db.Text)
+    FATHERS_AADHAR = db.Column(db.Text)
+    MOTHERS_AADHAR = db.Column(db.Text)
+    Previous_School = db.Column(db.Text)
+    OCCUPATION = db.Column(db.Text)
 
     __table_args__ = (
         db.Index('idx_class_roll', 'CLASS', 'ROLL'),
@@ -162,11 +169,71 @@ def StudentData(*args, class_filter_json=None):
 
     return results_json
 
-def updateParentsAdhar(id, data):
+def updateCell(id, colum, value):
     student = StudentsDB.query.filter_by(id=id).first()
     if student:
-        student.Parents_Aadhar = data
+
+        setattr(student, colum, value)
+        flag_modified(student, colum)
         
-        flag_modified(student, 'Parents_Aadhar')
         db.session.commit()
         return 'SUCCESS'
+    else:
+        return 'FAILED'
+
+
+def Verhoeff(aadhar_number: str) -> bool:
+    """
+    Validates the Aadhaar number using the Verhoeff algorithm.
+    
+    Parameters:
+        aadhar_number (str): The Aadhaar number as a string (it can include hyphens or spaces).
+    
+    Returns:
+        bool: True if the Aadhaar number is valid, False otherwise.
+    """
+    # Clean the input: remove hyphens and spaces.
+    aadhar_number = aadhar_number.replace("-", "").replace(" ", "")
+    
+    # Ensure the number consists of exactly 12 digits.
+    if not aadhar_number.isdigit() or len(aadhar_number) != 12:
+        return False
+
+    # The multiplication table d
+    d = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 2, 3, 4, 0, 6, 7, 8, 9, 5],
+        [2, 3, 4, 0, 1, 7, 8, 9, 5, 6],
+        [3, 4, 0, 1, 2, 8, 9, 5, 6, 7],
+        [4, 0, 1, 2, 3, 9, 5, 6, 7, 8],
+        [5, 9, 8, 7, 6, 0, 4, 3, 2, 1],
+        [6, 5, 9, 8, 7, 1, 0, 4, 3, 2],
+        [7, 6, 5, 9, 8, 2, 1, 0, 4, 3],
+        [8, 7, 6, 5, 9, 3, 2, 1, 0, 4],
+        [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+    ]
+    
+    # The permutation table p
+    p = [
+        [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        [1, 5, 7, 6, 2, 8, 3, 0, 9, 4],
+        [5, 8, 0, 3, 7, 9, 6, 1, 4, 2],
+        [8, 9, 1, 6, 0, 4, 3, 5, 2, 7],
+        [9, 4, 5, 3, 1, 2, 6, 8, 7, 0],
+        [4, 2, 8, 6, 5, 7, 3, 9, 0, 1],
+        [2, 7, 9, 3, 8, 0, 6, 4, 1, 5],
+        [7, 0, 4, 6, 9, 1, 3, 2, 5, 8]
+    ]
+    
+    # Initialize checksum to 0.
+    c = 0
+
+    # Process each digit, starting from the rightmost digit.
+    for i, digit in enumerate(reversed(aadhar_number)):
+        c = d[c][p[i % 8][int(digit)]]
+    
+    # Return True if the final checksum is 0, otherwise False.
+    if c == 0:
+        return True
+    else:
+        return False
