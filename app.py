@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, session, url_for, re
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, FeesDB ,updateCell, Schools, Verhoeff
+from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, SchoolData ,updateCell, Schools, Verhoeff, StudentsMarks
 from bs4 import BeautifulSoup
 import datetime
 from threading import Thread
@@ -70,7 +70,7 @@ def login():
                 session["classes"] = school.Classes
                 session["logo"] = school.Logo
                 session["email"] = school.Email
-                session["school_id"] = school.User
+                session["school_id"] = school.id
                 session["session_id"] = school.session_id
 
                 return redirect(url_for('studentsData'))
@@ -150,7 +150,7 @@ def getfees():
 
             for sibling in data:
                 
-                Fee=FeesDB.query.filter_by(CLASS=sibling["CLASS"]).first().Fee
+                Fee=SchoolData.query.filter_by(CLASS=sibling["CLASS"]).first().Fee
                 sibling["Fee"]=Fee
                 sibling["CLASS"] = sibling["CLASS"].split("/")[0]
                             
@@ -256,9 +256,9 @@ def addStudent():
         PersonalInfo = {
                 "STUDENTS_NAME": {"label": "Student Name", "type": "text", "value":"anas alam", "required":False},
                 "DOB": {"label": "DOB", "type": "date", "value":"", "required":False},
-                "AADHAAR": {"label": "Aadhar", "type": "text",  "maxlength": 14, "required":False},
-                "HEIGHT": {"label": "Height", "type": "text", "value":"", "maxlength": 3},
-                "WEIGHT": {"label": "Weight", "type": "text", "value":"", "maxlength": 3},
+                "AADHAAR": {"label": "Aadhar", "type": "number",  "maxlength": 14, "required":False},
+                "HEIGHT": {"label": "Height", "type": "number", "value":"", "maxlength": 3},
+                "WEIGHT": {"label": "Weight", "type": "number", "value":"", "maxlength": 3},
 
                 "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,
                             "options": ["Select Gender", "Male", "Female", "Other"]},
@@ -283,14 +283,14 @@ def addStudent():
                     "label": "Class",
                     "type": "select",
                     "options": classes,
-                    "default": "5",
+                    "default": "Select class",
                     "required":True
                 },
                 "SECTION": {
                     "label": "Section",
                     "type": "select",
                     "options": ["A", "B", "C", "D"],
-                    "default": "A",
+                    "default": "Select Section",
                     "required":True
                 }
             }
@@ -408,7 +408,6 @@ def studentsData():
                                               StudentsDB.ROLL, StudentsDB.CLASS, StudentsDB.Fees,
                                               StudentsDB.id, StudentsDB.IMAGE,StudentsDB.FATHERS_NAME).all()"""
         for student in data:
-            print(student['AADHAAR'])
             student['DOB'] = student['DOB'].strftime('%d %B %Y')
 
         
@@ -608,9 +607,10 @@ def report_card():
         "GTotal": 93,
     },
 }
-    Data = [StudentData("STUDENTS_NAME","ROLL","DOB","MOTHERS_NAME","FATHERS_NAME", "FA1", "PEN","IMAGE","ADDRESS","SR","FA2", "SA1", "SA2", class_filter_json = {"CLASS": ['8th']})[0]]
 
-    for student in Data:
+    
+
+    """for student in Data:
         # Add 'Total' to each FA1, FA2, SA1, and SA2
         for key in ['FA1', 'FA2', 'SA1', 'SA2']:
             scores = student[key]
@@ -648,8 +648,25 @@ def report_card():
                 grand_total[subject] = str(total_value)
         grand_total['Total'] = sum(int(value) for value in grand_total.values() if value.isdigit())
         student['Grand_Total'] = grand_total
+"""
+    #return render_template('pdf-components/tall result.html',Data=Data)
+    exams = ["FA1","FA2","SA1","SA2"]
+    #student_ids = db.session.query(StudentsDB.id).filter(StudentsDB.CLASS == '8th').all()
+    #id_list = [student_id[0] for student_id in student_ids]
+    ids = [7744, 7691, 7725]
 
-    return render_template('components/result2.html',Data=Data)
+    schoolID = session["school_id"]
+
+    Data = StudentsMarks.query.filter(StudentsMarks.student_id.in_(ids),
+                                      StudentsMarks.school_id == schoolID).all()
+
+    jsonData = [data.to_dict() for data in Data]
+
+    for student in jsonData:
+        for key,value in student.items():
+            print(key,value)
+
+    return jsonify(jsonData)
 
 
 
