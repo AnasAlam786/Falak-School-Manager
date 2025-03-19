@@ -5,10 +5,9 @@ db = SQLAlchemy()
 
 class Schools(db.Model):
     __tablename__ = 'Schools'
-    id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.Date, nullable=False)
     School_Name = db.Column(db.Text, nullable=False)
-    User = db.Column(db.Text, unique=True, nullable=False)
+    id = db.Column(db.Text, unique=True, nullable=False, primary_key=True)
     Address = db.Column(db.Text, nullable=False)
     UDISE = db.Column(db.Text, unique=True, nullable=False)
     Phone = db.Column(db.Text, nullable=False)
@@ -21,7 +20,7 @@ class Schools(db.Model):
     Manager = db.Column(db.Text, nullable=False)
     session_id = db.Column(db.Text, nullable=False)
     
-class FeesDB(db.Model):
+class SchoolData(db.Model):
     __tablename__ = 'FeesDB'
     id = db.Column(db.Integer, primary_key=True)
     CLASS = db.Column(db.Text, nullable=False)
@@ -68,14 +67,13 @@ class StudentsDB(db.Model):
     FA2 = db.Column(db.JSON)
     SA2 = db.Column(db.JSON)
     Fees = db.Column(db.JSON)
-    Parents_Aadhar = db.Column(db.JSON)
     Free_Scheme = db.Column(db.JSON)
     school_id = db.Column(db.Text, nullable=False)
     Attendance = db.Column(db.Text)
     BLOOD_GROUP = db.Column(db.Text)
     FATHERS_AADHAR = db.Column(db.Text)
     MOTHERS_AADHAR = db.Column(db.Text)
-    Previous_School = db.Column(db.Text)
+    Previous_School_Name = db.Column(db.Text)
     OCCUPATION = db.Column(db.Text)
 
     __table_args__ = (
@@ -84,6 +82,24 @@ class StudentsDB(db.Model):
     def to_dict(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
     
+
+
+class StudentsMarks(db.Model):
+    __tablename__ = 'StudentsMarks'
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('StudentsDB.id'), nullable=False)
+    school_id = db.Column(db.Text, db.ForeignKey('Schools.User'), nullable=False)
+    Subject = db.Column(db.Text, nullable=False)
+    Exam = db.Column(db.Text, nullable=False)
+    Marks = db.Column(db.Text, nullable=False)
+
+        # Convert object to dictionary for JSON response
+    def to_dict(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+    
+
+
+
 def updateFees(id, months=None, date=None, extra=None):
     student = StudentsDB.query.filter_by(id=id).first()
 
