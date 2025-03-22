@@ -1,13 +1,21 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.attributes import flag_modified
+from sqlalchemy import case, func, literal, cast, Numeric, String, null, Integer, ForeignKey
+from sqlalchemy.sql.expression import over
+from sqlalchemy.orm import relationship
+
+from itertools import groupby
+from operator import itemgetter
+from collections import defaultdict
+
 
 db = SQLAlchemy()
 
 class Schools(db.Model):
     __tablename__ = 'Schools'
+    
     created_at = db.Column(db.Date, nullable=False)
     School_Name = db.Column(db.Text, nullable=False)
-    id = db.Column(db.Text, unique=True, nullable=False, primary_key=True)
     Address = db.Column(db.Text, nullable=False)
     UDISE = db.Column(db.Text, unique=True, nullable=False)
     Phone = db.Column(db.Text, nullable=False)
@@ -19,31 +27,39 @@ class Schools(db.Model):
     Logo = db.Column(db.Text)
     Manager = db.Column(db.Text, nullable=False)
     session_id = db.Column(db.Text, nullable=False)
-    
-class SchoolData(db.Model):
-    __tablename__ = 'FeesDB'
-    id = db.Column(db.Integer, primary_key=True)
-    CLASS = db.Column(db.Text, nullable=False)
-    Fee = db.Column(db.Integer, nullable=False)
-    school_id = db.Column(db.Text, nullable=False)
+    id = db.Column(db.Text, primary_key=True)
 
-class TeachersLogin(db.Model):
-    __tablename__ = 'TeachersLogin'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False)
-    email = db.Column(db.Text, unique=True, nullable=False)
-    password = db.Column(db.Text, nullable=False)
-    Classes = db.Column(db.JSON, nullable=False)
-    ip = db.Column(db.JSON)
-    role = db.Column(db.Text, nullable=False)
-    school_id = db.Column(db.Text, nullable=False)
+    # One-to-Many Relationship
+    students = db.relationship("StudentsDB", back_populates="school")
+    classData = db.relationship("ClassData", back_populates="school")
+    studentMarks = db.relationship("StudentsMarks", back_populates="school")
+
+    
+class ClassData(db.Model):
+    __tablename__ = 'ClassData'
+    CLASS = db.Column(db.Text, primary_key=True)
+    Fee = db.Column(db.Integer, nullable=False)
+    Numeric_Subjects = db.Column(db.JSON, nullable=False)
+    Grading_Subjects = db.Column(db.JSON)
+    exam_format = db.Column(db.JSON, nullable=False)
+
+    school_id = db.Column(db.Text, db.ForeignKey('Schools.id'))
+    school = db.relationship("Schools", back_populates="classData")
+
+    # Relationships
+    #Going
+    students = db.relationship("StudentsDB", back_populates="class_data")
+    
+
+
 
 class StudentsDB(db.Model):
     __tablename__ = 'StudentsDB'
     id = db.Column(db.Integer, primary_key=True)
+    
     STUDENTS_NAME = db.Column(db.Text, nullable=False)
     DOB = db.Column(db.Date)
-    CLASS = db.Column(db.Text, nullable=False)
+    
     ROLL = db.Column(db.Integer, nullable=False)
     PHONE = db.Column(db.Text)
     PEN = db.Column(db.Text)
@@ -68,13 +84,24 @@ class StudentsDB(db.Model):
     SA2 = db.Column(db.JSON)
     Fees = db.Column(db.JSON)
     Free_Scheme = db.Column(db.JSON)
-    school_id = db.Column(db.Text, nullable=False)
     Attendance = db.Column(db.Text)
     BLOOD_GROUP = db.Column(db.Text)
     FATHERS_AADHAR = db.Column(db.Text)
     MOTHERS_AADHAR = db.Column(db.Text)
     Previous_School_Name = db.Column(db.Text)
     OCCUPATION = db.Column(db.Text)
+
+    
+
+    school_id = db.Column(db.Text, db.ForeignKey('Schools.id'))     # StudentsDB.school_id <----  Schools.id
+    CLASS = db.Column(db.Text, db.ForeignKey('ClassData.CLASS'))  # StudentsDB.CLASS     <----- ClassData.CLASS
+
+    #comming
+    school = db.relationship("Schools", back_populates="students")
+    class_data = db.relationship("ClassData", back_populates="students")
+
+    #Going
+    studentsMarks = db.relationship("StudentsMarks", back_populates="students")  # StudentsDB.id ----> StudentsMarks.id``
 
     __table_args__ = (
         db.Index('idx_class_roll', 'CLASS', 'ROLL'),
@@ -87,16 +114,33 @@ class StudentsDB(db.Model):
 class StudentsMarks(db.Model):
     __tablename__ = 'StudentsMarks'
     id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('StudentsDB.id'), nullable=False)
-    school_id = db.Column(db.Text, db.ForeignKey('Schools.User'), nullable=False)
-    Subject = db.Column(db.Text, nullable=False)
-    Exam = db.Column(db.Text, nullable=False)
-    Marks = db.Column(db.Text, nullable=False)
+    #student_id = db.Column(db.Integer)
+    Subject = db.Column(db.Text)  # Might be 'subject' instead of 'Subject'
+    FA1 = db.Column(db.Text)     # Might be 'fa1' instead of 'FA1'
+    FA2 = db.Column(db.Text)
+    SA1 = db.Column(db.Text)
+    SA2 = db.Column(db.Text)
 
-        # Convert object to dictionary for JSON response
-    def to_dict(self):
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-    
+    school_id = db.Column(db.Text, db.ForeignKey('Schools.id'))
+    student_id = db.Column(db.Integer, db.ForeignKey('StudentsDB.id'))
+
+    # Relationships
+    school = db.relationship("Schools", back_populates="studentMarks")
+    students = db.relationship("StudentsDB", back_populates="studentsMarks")
+
+
+class TeachersLogin(db.Model):
+    __tablename__ = 'TeachersLogin'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.Text, nullable=False)
+    email = db.Column(db.Text, unique=True, nullable=False)
+    password = db.Column(db.Text, nullable=False)
+    Classes = db.Column(db.JSON, nullable=False)
+    ip = db.Column(db.JSON)
+    role = db.Column(db.Text, nullable=False)
+    school_id = db.Column(db.Text, nullable=False)
+
+
 
 
 
@@ -122,26 +166,6 @@ def updateFees(id, months=None, date=None, extra=None):
 
         return "SUCCESS"
 
-
-def updateScore(id, exam, subject, score):
-    student = StudentsDB.query.filter_by(id=id).first()
-    
-
-    try:
-        if exam=="Attendance":
-            
-            student.Attendance = score
-
-        else:
-            student_data = getattr(student, exam)  # Retrieve the JSON object
-            student_data[subject] = score  # Modify the JSON object with the new score
-            setattr(student, exam, student_data)  # Reassign the modified JSON back to the column
-            flag_modified(student, exam)  # Flag the JSON column as modified
-
-        db.session.commit()
-        return "SUCCESS"
-    except:
-        return "FAILED"
 
 def StudentData(*args, class_filter_json=None):
     # Class order mapping for post-query sorting
@@ -185,8 +209,8 @@ def StudentData(*args, class_filter_json=None):
 
     return results_json
 
-def updateCell(id, colum, value):
-    student = StudentsDB.query.filter_by(id=id).first()
+def updateCell(db_name, id, colum, value):
+    student = db_name.query.filter_by(id=id).first()
     if student:
 
         setattr(student, colum, value)
@@ -253,3 +277,130 @@ def Verhoeff(aadhar_number: str) -> bool:
         return True
     else:
         return False
+    
+
+def handleMarks(exam, replace_by):
+    return case(
+          # If FA1 consists solely of digits, cast it to Integer.
+        (exam.op('~')(r'^[0-9]+(\.[0-9]+)?$'), cast(exam, Numeric)),
+    
+    else_=replace_by  # Otherwise, return None (SQL NULL), so SUM will ignore it.
+)
+
+def GetGrade(number):
+    if number >= 80:
+        return "A"
+    elif number >= 60:
+        return "B"
+    elif number >= 45:
+        return "C"
+    elif number >= 33:
+        return "D"
+    else:
+        return "E"
+
+
+
+def ResultData(students_ids=None):
+    if not students_ids:
+        return []
+
+    # Cast marks to Numeric in subject_query
+    subject_query = db.session.query(
+        StudentsMarks.student_id,
+        cast(StudentsMarks.Subject, String).label('Subject'),
+        # Use handleMarks on individual columns to sanitize values
+        cast(handleMarks(StudentsMarks.FA1, 0), Numeric).label('FA1'),  # Handle empty strings
+        cast(handleMarks(StudentsMarks.SA1, 0), Numeric).label('SA1'),
+        cast(handleMarks(StudentsMarks.FA2, 0), Numeric).label('FA2'),
+        cast(handleMarks(StudentsMarks.SA2, 0), Numeric).label('SA2'),
+        (handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0)).label('FA1_SA1_Total'),
+        (handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('FA2_SA2_Total'),
+        (handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0) + 
+         handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('Grand_Total'),
+        # Cast ranks to Integer (instead of Numeric) to match summary_query's rank()
+        cast(literal(None), Integer).label('SA1_Rank'),
+        cast(literal(None), Integer).label('SA2_Rank'),
+        cast(literal(None), Integer).label('Grand_Rank')
+    ).join(StudentsDB, StudentsMarks.student_id == StudentsDB.id
+    ).filter(StudentsMarks.student_id.in_(students_ids))
+
+    # Summary query remains mostly the same
+    summary_query = db.session.query(
+        StudentsMarks.student_id,
+        cast(literal('Total'), String).label('Subject'),
+        func.sum(handleMarks(StudentsMarks.FA1, 0)).label('FA1'),
+        func.sum(handleMarks(StudentsMarks.SA1, 0)).label('SA1'),
+        func.sum(handleMarks(StudentsMarks.FA2, 0)).label('FA2'),
+        func.sum(handleMarks(StudentsMarks.SA2, 0)).label('SA2'),
+        func.sum(handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0)).label('FA1_SA1_Total'),
+        func.sum(handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('FA2_SA2_Total'),
+        func.sum(handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0) +
+        handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('Grand_Total'),
+        # Use Integer for ranks to match subject_query's cast
+        func.rank().over(
+            partition_by=StudentsDB.CLASS,
+            order_by=func.sum(handleMarks(StudentsMarks.SA1, 0)).desc()
+        ).label('SA1_Rank'),
+        func.rank().over(
+            partition_by=StudentsDB.CLASS,
+            order_by=func.sum(handleMarks(StudentsMarks.SA2, 0)).desc()
+        ).label('SA2_Rank'),
+        func.rank().over(
+            partition_by=StudentsDB.CLASS,
+            order_by=func.sum(
+                handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0) +
+                handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)
+            ).desc()
+        ).label('Grand_Rank')
+    ).join(StudentsDB, StudentsMarks.student_id == StudentsDB.id
+    ).filter(StudentsMarks.student_id.in_(students_ids)
+    ).group_by(StudentsMarks.student_id, StudentsDB.CLASS)
+
+    combined_query = subject_query.union_all(summary_query)
+    results = combined_query.all()
+
+    sorted_results = sorted(results, key=itemgetter(0))  # Sorting by student_id
+
+    grouped_data = defaultdict(dict)
+    for student_id, data in groupby(sorted_results, key=itemgetter(0)):  # Group by student ID
+        grouped_data[student_id] = {
+            row[1]: {  # Subject name as key
+                "FA1": row[2], "SA1": row[3], "FA2": row[4], "SA2": row[5],
+                "FA1_SA1_Total": row[6], "FA2_SA2_Total": row[7], "Grand_Total": row[8],
+                "SA1_Rank": row[9], "SA2_Rank": row[10], "Grand_Rank": row[11]
+            }
+            for row in data
+        }
+
+    return grouped_data
+
+
+def GetStudentDataByID(ids, columns=None):
+    if not ids:
+        return {}  # Return empty dictionary for consistency
+    
+    query = db.session.query(StudentsDB)
+
+    # if columns is not None, select only that specified columns
+    if columns:
+
+        #if id not in columns, add it to the list
+        columns = ["id"] + [col for col in columns if col != "id"]
+
+        #this will get the columns from the StudentsDB class based on the columns list we provided
+        selected_columns = [getattr(StudentsDB, col) for col in columns if hasattr(StudentsDB, col)]
+        query = query.with_entities(*selected_columns)
+    else:
+
+        # Fetch all columns if we don't specify any columns
+        selected_columns = StudentsDB.__table__.columns.keys()  
+    
+    students = query.filter(StudentsDB.id.in_(ids)).all()
+
+    if students:
+        student_dict = {s.id: dict(s._asdict()) for s in students}
+        return student_dict
+
+
+    return {}
