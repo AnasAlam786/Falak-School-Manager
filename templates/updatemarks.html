@@ -67,8 +67,8 @@
         <option selected value="">Exam</option>
         <option value="FA1">FA1</option>
         <option value="SA1">SA1</option>
-        <option value="FA2">FA2</option>
-        <option value="SA2">SA2</option>
+        <option disabled value="FA2">FA2</option>
+        <option disabled value="SA2">SA2</option>
         <option value="Attendance">Attendance</option>
         
       </select>
@@ -77,7 +77,7 @@
   <div class="text-center d-grid gap-2 col-6 mx-auto">
     <button type="button" class="btn btn-primary btn-lg mb-3" 
             onclick="submitData()" 
-            id="submitButton">Submit</button>
+            id="submitButton">Get Marks</button>
   </div>
 </div>
 
@@ -102,18 +102,18 @@
         
         <td>
           <div class="input-group">
-            <input type="{{ 'text' if SUBJECT == 'Drawing' else 'number' }}" 
-                inputmode="{{ 'text' if SUBJECT == 'Drawing' else 'numeric' }}" 
-                placeholder = "{{ 'Attendance' if EXAM == 'Attendance' else SUBJECT + ' ' + EXAM + ' Marks' }}" 
+            <input type="{{ 'text' if row.Subject in ['Drawing','Craft'] else 'number' }}" 
+                inputmode="{{ 'text' if row.Subject in ['Drawing','Craft'] else 'numeric' }}" 
+                placeholder = "{{ 'Attendance' if EXAM == 'Attendance' else row.Subject + ' ' + EXAM + ' Marks' }}" 
                 class="form-control" 
-                oninput="{{ 'this.value = this.value.toUpperCase();' if SUBJECT == 'Drawing' else '' }}"
+                oninput="{{ 'this.value = this.value.toUpperCase();' if row.Subject in ['Drawing','Craft'] else '' }}"
                 onfocus="this.select()" 
-                value="{{ row[EXAM][SUBJECT] }}" 
+                value="{{ getattr(row, EXAM) }}"
                 student_id="{{ row.id }}" 
                 exam="{{ EXAM }}" 
-                subject="{{ SUBJECT }}">
+                subject="{{ row.Subject }}">
             <button type="submit" class="btn btn-primary" 
-              onclick="submit(this.previousElementSibling)">SUBMIT</button>
+              onclick="submit(this.previousElementSibling, id = '{{ row.id }}', exam = '{{ EXAM }}', subject = '{{ row.Subject }}')">SUBMIT</button>
           </div>
         </td>
       </tr>
