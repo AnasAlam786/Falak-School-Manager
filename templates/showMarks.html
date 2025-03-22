@@ -51,10 +51,10 @@
           </table>
         </div>
 
-        <div class="table-responsive">
+        <div class="table-responsive" >
           <table class="table table-hover table-striped align-middle">
             <thead class="text-center">
-              <tr style="border: 1px solid #ffffff; border-bottom: 1px solid #ffffff; font-weight: bold;" >
+              <tr style="border: 1px solid #ffffff; font-weight: bold;" >
                 <th class="fs-5">Sub.</th>
                 <th class="fs-5 lh-1">FA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th>
                 <th class="fs-5 lh-1">SA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
@@ -63,27 +63,45 @@
                 <th class="fs-5 lh-1">SA2 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
                 <th class="fs-5 lh-1">Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(100)</span></th>
                 <th class="fs-5 lh-1">G. Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(200)</span></th>
+                <th class="fs-5 lh-1">Grades <span class="text-secondary small d-block" style="font-size: 0.9rem;">(A,B,C,D,E)</span></th>
               </tr>
             </thead>
             <tbody>
-              {% for subject, fa1_score in data['FA1'].items() %}
-              <tr class="text-center fs-5" 
-                  {% if subject == 'Total' %}
-                    style="border: 2px solid #ffffff; font-weight: bold;"
-                  {% endif %}>
-                <th class="text-start {% if subject == 'Total' %} text-danger {% endif %}" style="border-left: 1px solid #ffffff;">{{ subject }}</th>
-                <td class="text-center {% if subject == 'Total' %} text-danger {% endif %}">{{ fa1_score if fa1_score != '' else '0' }}</td>
-                <td class="text-center {% if subject == 'Total' %} text-danger {% endif %}">{{ data['SA1'][subject] if data['SA1'][subject] != '' else '0' }}</td>
-                <td class="text-center text-danger">{{ data['FA1_SA1'][subject] if data['FA1_SA1'][subject] != '' else '0' }}</td>
-                <td class="text-center {% if subject == 'Total' %} text-danger {% endif %}">{{ data['FA2'][subject] if data['FA2'][subject] != '' else '0' }}</td>
-                <td class="text-center {% if subject == 'Total' %} text-danger {% endif %}">{{ data['SA2'][subject] if data['SA2'][subject] != '' else '0' }}</td>
-                <td class="text-center text-danger">{{ data['FA2_SA2'][subject] if data['FA2_SA2'][subject] != '' else '0' }}</td>
-                <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data['Grand_Total'][subject] if data['Grand_Total'][subject] != '' else '0' }}</td>
-              </tr>
+              {% for subject in data["Subjects"] %}
+
+                {% if data[subject] %}
+
+                  <tr class="text-center fs-5" 
+                      {% if subject in ['Total','Percentage']  %}
+                        style="border: 2px solid #ffffff; font-weight: bold;"
+                      {% endif %}>
+                    <th class="text-start " style="border-left: 1px solid #ffffff;">{{ subject }}</th>
+                    <td class="text-center ">{{ data[subject]["FA1"] if data[subject]["FA1"] != '' else '0' }}</td>
+                    <td class="text-center ">{{ data[subject]["SA1"] if data[subject]["SA1"] != '' else '0' }}</td>
+                    <td class="text-center text-danger">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] != '' else '0' }}</td>
+                    <td class="text-center ">{{ data[subject]["FA2"] if  data[subject]["FA2"] != '' else '0' }}</td>
+                    <td class="text-center ">{{ data[subject]['SA2'] if data[subject]['SA2'] != '' else '0' }}</td>
+                    <td class="text-center text-danger">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] != '' else '0' }}</td>
+                    <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] != '' else '0' }}</td>
+                    <td class="text-center text-danger">{{ data[subject]['Grade'] if data[subject]['Grade'] }}</td>
+                  </tr>
+                {% endif %}
               {% endfor %}
             </tbody>
           </table>
         </div>
+        <div>
+
+          <button 
+              class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2"
+              onclick='getResult("{{ data["id"] }}")'>
+
+        <i class="bi bi-printer-fill"></i>
+        Print Result
+    </button>
+
+        </div>
+        
       </div>
     </div>
     {% endfor %}
@@ -91,6 +109,25 @@
 </div>
 </div>
 <script>
+
+  async function getResult(id) {
+
+    const response = await fetch('/marks', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({"id":id, 'task':'report_card'}),
+      });
+
+      const responseData = await response.json();
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(responseData.html)
+      printWindow.document.close();
+      printWindow.onload = () => printWindow.print();
+
+
+  }
   function searchFunction() {
     var input, filter, table, rows, td, i, txtValue;
     input = document.getElementById('search-input');
@@ -103,7 +140,6 @@
       
       for (j = 0; j < td.length; j++) {
         if (td[j]) {
-          console.log(td[j].innerText)
           txtValue = td[j].textContent || td[j].innerText;
           // Search in any column (Name, Father's Name, Class, Roll)
           if (txtValue.toLowerCase().indexOf(filter) > -1) {
