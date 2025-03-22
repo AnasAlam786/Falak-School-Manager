@@ -1,19 +1,21 @@
-from flask import Flask, render_template, jsonify, request, session, url_for, redirect, after_this_request
+from flask import Flask, render_template, jsonify, request, session, url_for, redirect
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from model import db, TeachersLogin, StudentData, updateScore, updateFees, StudentsDB, SchoolData ,updateCell, Schools, Verhoeff, StudentsMarks
+from model import *
 from bs4 import BeautifulSoup
 import datetime
 from threading import Thread
 from flask_mail import Message, Mail
 import json
+from sqlalchemy import func
 
 
 
 load_dotenv()
 
 app = Flask(__name__)
+app.jinja_env.globals['getattr'] = getattr
 app.config['SECRET_KEY'] = os.getenv('SESSION_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -150,7 +152,7 @@ def getfees():
 
             for sibling in data:
                 
-                Fee=SchoolData.query.filter_by(CLASS=sibling["CLASS"]).first().Fee
+                Fee = ClassData.query.filter_by(CLASS=sibling["CLASS"]).first().Fee
                 sibling["Fee"]=Fee
                 sibling["CLASS"] = sibling["CLASS"].split("/")[0]
                             
@@ -362,6 +364,8 @@ def updatemarks():
 
     if "email" in session:
         classes = session['classes']
+        school_id = session["school_id"]
+        
         data = None
 
         if request.method == "POST":
@@ -371,9 +375,39 @@ def updatemarks():
             CLASS = payload.get('class')
             EXAM = payload.get('exam')
 
-            data = StudentData("id","STUDENTS_NAME","ROLL",EXAM, class_filter_json = {"CLASS": [CLASS]})
- 
-            html = render_template('updatemarks.html', data=data, SUBJECT=SUBJECT, EXAM=EXAM)
+
+            if EXAM == "Attendance":
+                data = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME,
+                                                        StudentsDB.ROLL,
+                                                        StudentsDB.CLASS,
+                                                        StudentsDB.id,
+                                                        StudentsDB.Attendance
+                                                    ).filter(
+                                                        StudentsDB.CLASS == CLASS,
+                                                        StudentsDB.school_id == school_id
+                                                    ).order_by(
+                                                        StudentsDB.ROLL
+                                                    ).all()
+            else:
+                data = StudentsMarks.query.with_entities(
+                                                    StudentsMarks.student_id,
+                                                    StudentsMarks.id,
+                                                    StudentsMarks.Subject,
+                                                    getattr(StudentsMarks, EXAM),
+                                                    StudentsDB.STUDENTS_NAME,
+                                                    StudentsDB.ROLL,
+                                                    StudentsDB.CLASS
+                                                ).join(
+                                                    StudentsDB, StudentsMarks.student_id == StudentsDB.id
+                                                ).filter(
+                                                    StudentsMarks.Subject == SUBJECT,
+                                                    StudentsMarks.school_id == school_id,
+                                                    StudentsDB.CLASS == CLASS  # Changed from StudentsMarks.student_id.CLASS to StudentsDB.CLASS
+                                                ).order_by(
+                                                    StudentsDB.ROLL
+                                                ).all()
+
+            html = render_template('updatemarks.html', data=data, EXAM=EXAM)
             soup=BeautifulSoup(html,"lxml")
             content=soup.body.find('div',{'id':'marksTable'}).decode_contents()
 
@@ -389,21 +423,25 @@ def updatemarks():
 def update():
 
     data = request.json
-    
-    
-    subject = data.get('subject')
+
+    #subject = data.get('subject')
     exam = data.get('exam')
     score = data.get('value')
     id = data.get('id')
 
-    resp = updateScore(id, exam, subject, score)
+    if exam == "Attandance":
+        resp = updateCell(StudentsDB, id, exam, score)
+    if exam in ["FA1","FA2","SA1","SA2"]:
+        resp = updateCell(StudentsMarks, id, exam, score)
+    else:
+        return jsonify({"STATUS": "FAILED"})
 
     return jsonify({"STATUS": resp})
 
 @app.route('/students', methods=['GET', 'POST'])
 def studentsData():
     if "email" in session:
-        data = StudentData("id","STUDENTS_NAME","DOB","CLASS","ROLL","PHONE","IMAGE","FATHERS_NAME","Fees", "AADHAAR")
+        data = StudentData("id","STUDENTS_NAME","DOB","CLASS","ROLL","PHONE","IMAGE","FATHERS_NAME", "AADHAAR")
         """data = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME, StudentsDB.DOB, StudentsDB.PHONE, 
                                               StudentsDB.ROLL, StudentsDB.CLASS, StudentsDB.Fees,
                                               StudentsDB.id, StudentsDB.IMAGE,StudentsDB.FATHERS_NAME).all()"""
@@ -468,7 +506,7 @@ def seatChits():
         return redirect(url_for('login'))
 
 
-@app.route('/marks', methods=["GET","POST"])
+"""@app.route('/marks', methods=["GET","POST"])
 def marks():
     if "email" in session:
         Data = None
@@ -536,137 +574,144 @@ def marks():
         return render_template('showMarks.html', Data=Data)
     
     else:
-        return redirect(url_for('login'))
+        return redirect(url_for('login'))"""
 
-@app.route('/report_card')
+@app.route('/marks', methods=["GET","POST"])
 def report_card():
-    Data = {
-        "Urdu": {
-        "FA1": 15,
-        "SA1": 35,
-        "Total": 63,
-        "FA2": 20,
-        "SA2": 60,
-        "GTotal": 133,
-    },
-    "Urdu": {
-        "FA1": 15,
-        "SA1": 35,
-        "Total": 63,
-        "FA2": 20,
-        "SA2": 60,
-        "GTotal": 133,
-    },
-    "Urdu": {
-        "FA1": 15,
-        "SA1": 35,
-        "Total": 63,
-        "FA2": 20,
-        "SA2": 60,
-        "GTotal": 133,
-    },
-    "Urdu": {
-        "FA1": 15,
-        "SA1": 35,
-        "Total": 63,
-        "FA2": 20,
-        "SA2": 60,
-        "GTotal": 133,
-    },
-    
-    "Math": {
-        "FA1": 18,
-        "SA1": 35,
-        "Total": 53,
-        "FA2": 20,
-        "SA2": 40,
-        "GTotal": 113,
-    },
-    "English": {
-        "FA1": 17,
-        "SA1": 30,
-        "Total": 47,
-        "FA2": 19,
-        "SA2": 38,
-        "GTotal": 104,
-    },
-    "Science": {
-        "FA1": 20,
-        "SA1": 40,
-        "Total": 60,
-        "FA2": 22,
-        "SA2": 45,
-        "GTotal": 127,
-    },
-    "History": {
-        "FA1": 15,
-        "SA1": 25,
-        "Total": 40,
-        "FA2": 18,
-        "SA2": 35,
-        "GTotal": 93,
-    },
-}
+    if "email" in session:
+        Data = None
+        school_id = session["school_id"]
 
-    
+        if request.method == "POST":
 
-    """for student in Data:
-        # Add 'Total' to each FA1, FA2, SA1, and SA2
-        for key in ['FA1', 'FA2', 'SA1', 'SA2']:
-            scores = student[key]
-            total = sum(int(value) for value in scores.values() if value.isdigit())
-            scores['Total'] = total
+            task = request.json.get('task')
 
-        # Calculate FA1_SA1 (Sum of FA1 and SA1)
-        fa1_sa1 = {}
-        for subject in student['FA1']:
-            if subject != 'Total':
-                fa1_value = int(student['FA1'].get(subject, 0)) if student['FA1'].get(subject, '').isdigit() else 0
-                sa1_value = int(student['SA1'].get(subject, 0)) if student['SA1'].get(subject, '').isdigit() else 0
-                fa1_sa1[subject] = str(fa1_value + sa1_value)
-        fa1_sa1['Total'] = sum(int(value) for value in fa1_sa1.values() if value.isdigit())
-        student['FA1_SA1'] = fa1_sa1
+            if task == 'report_card':
+                id = request.json.get('id')
+                students_obj = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME,
+                                                        StudentsDB.ROLL,StudentsDB.PHONE,StudentsDB.id,
+                                                        StudentsDB.CLASS,StudentsDB.FATHERS_NAME,StudentsDB.IMAGE,
+                                                        StudentsDB.MOTHERS_NAME,StudentsDB.ADDRESS,
+                                                        func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
+                                                        StudentsDB.GENDER,StudentsDB.PEN, StudentsDB.Attendance
+                                                        
+                                                    ).filter(
+                                                        StudentsDB.id == id
+                                                    ).all()
+            else:
+                CLASS = request.json.get('class')
 
-        # Calculate FA2_SA2 (Sum of FA2 and SA2)
-        fa2_sa2 = {}
-        for subject in student['FA2']:
-            if subject != 'Total':
-                fa2_value = int(student['FA2'].get(subject, 0)) if student['FA2'].get(subject, '').isdigit() else 0
-                sa2_value = int(student['SA2'].get(subject, 0)) if student['SA2'].get(subject, '').isdigit() else 0
-                fa2_sa2[subject] = str(fa2_value + sa2_value)
-        fa2_sa2['Total'] = sum(int(value) for value in fa2_sa2.values() if value.isdigit())
-        student['FA2_SA2'] = fa2_sa2
+                students_obj = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME,
+                                                        StudentsDB.ROLL,
+                                                         StudentsDB.PHONE,
+                                                        StudentsDB.CLASS,
+                                                        StudentsDB.FATHERS_NAME,
+                                                        StudentsDB.id,
+                                                    ).filter(
+                                                        StudentsDB.CLASS == CLASS,
+                                                        StudentsDB.school_id == school_id
+                                                    ).order_by(
+                                                        StudentsDB.ROLL
+                                                    ).all()
+            
 
-        # Calculate Grand_Total (Sum of all scores across FA1, FA2, SA1, and SA2)
-        grand_total = {}
-        for subject in student['FA1']:
-            if subject != 'Total':
-                total_value = sum(
-                    int(student[key].get(subject, 0)) if student[key].get(subject, '').isdigit() else 0
-                    for key in ['FA1', 'FA2', 'SA1', 'SA2']
-                )
-                grand_total[subject] = str(total_value)
-        grand_total['Total'] = sum(int(value) for value in grand_total.values() if value.isdigit())
-        student['Grand_Total'] = grand_total
-"""
-    #return render_template('pdf-components/tall result.html',Data=Data)
-    exams = ["FA1","FA2","SA1","SA2"]
-    #student_ids = db.session.query(StudentsDB.id).filter(StudentsDB.CLASS == '8th').all()
-    #id_list = [student_id[0] for student_id in student_ids]
-    ids = [7744, 7691, 7725]
+            subjects_data = ClassData.query.with_entities(ClassData.CLASS, ClassData.Numeric_Subjects, 
+                                                        ClassData.Grading_Subjects, ClassData.exam_format).filter_by(school_id = school_id).all()
+            
+            Numeric_Subjects = dict((data.CLASS, data.Numeric_Subjects) for data in subjects_data)
+            Grading_Subjects = dict((data.CLASS, data.Grading_Subjects) for data in subjects_data)
+            exam_format = subjects_data[0].exam_format
 
-    schoolID = session["school_id"]
+            FA1_Outof = int(exam_format["FA1"])
+            SA1_Outof = int(exam_format["SA1"]) 
+            FA1_SA1_Outof = FA1_Outof + SA1_Outof
 
-    Data = StudentsMarks.query.filter(StudentsMarks.student_id.in_(ids),
-                                      StudentsMarks.school_id == schoolID).all()
+            FA2_Outof = int(exam_format["FA2"])
+            SA2_Outof = int(exam_format["SA2"])
+            FA2_SA2_Outof = FA2_Outof + SA2_Outof
 
-    jsonData = [data.to_dict() for data in Data]
+            Grand_Total_Outof = FA1_SA1_Outof + FA2_SA2_Outof
 
-    for student in jsonData:
-        for key,value in student.items():
-            print(key,value)
+            students_ids = [row.id for row in students_obj]
+            results = ResultData(students_ids=students_ids)
 
-    return jsonify(jsonData)
+            Data=[]
+
+            students_dict = {s.id: dict(s._asdict()) for s in students_obj}
+            for student_id, student_data in students_dict.items():
+
+                Class = student_data["CLASS"]
+
+                numeric_subjects = Numeric_Subjects.get(Class, []).copy()
+                grades_subjects = Grading_Subjects.get(Class, [])
+
+                no_of_numeric_subjects = len(numeric_subjects)
+
+                numeric_subjects.append("Total")
+                numeric_subjects.append("Percentage")
+                Subjects = numeric_subjects + grades_subjects
+
+                student_data["Subjects"] = Subjects
+
+                #Mering Result and Student Data
+                #{'id': 7744, 'STUDENTS_NAME': 'Mohd Ahad Khan', 'CLASS': '2nd', 'ROLL': 263, 'FATHERS_NAME': 'Mohd Maksood Khan', ''
+                #'Subjects': ['English', 'Hindi', 'Math', 'Urdu', 'SST/EVS', 'Computer', 'GK', 'Deeniyat', 'Total', 'Percentage', 'Drawing', 'Craft'], 
+                #'GK': {'FA1': Decimal('19'), 'SA1': ....
+
+                student_data.update(results[student_id])
+
+
+                student_data["Percentage"] = {}
+
+                student_data["Percentage"]["FA1"] = round((float(student_data["Total"]["FA1"]) / (FA1_Outof * no_of_numeric_subjects))  * 100, 2)
+                student_data["Percentage"]["FA2"] = round((int(student_data["Total"]["FA2"]) / (FA2_Outof * no_of_numeric_subjects))  * 100, 2)
+                student_data["Percentage"]["FA1_SA1_Total"] = round((int(student_data["Total"]["FA1_SA1_Total"]) / (FA1_SA1_Outof * no_of_numeric_subjects))  * 100, 2)
+                
+                
+                student_data["Percentage"]["SA1"] = round((int(student_data["Total"]["SA1"]) / (SA1_Outof * no_of_numeric_subjects)) * 100, 2)
+                student_data["Percentage"]["SA2"] = round((int(student_data["Total"]["SA2"]) / (SA2_Outof * no_of_numeric_subjects)) * 100, 2)
+                student_data["Percentage"]["FA2_SA2_Total"] = round((int(student_data["Total"]["FA2_SA2_Total"]) / (FA2_SA2_Outof * no_of_numeric_subjects)) * 100, 2)
+                                                            
+                student_data["Percentage"]["Grand_Total"] = round((int(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_numeric_subjects)) * 100, 2)
+
+                for subject in numeric_subjects:
+
+                    if subject == 'Percentage':
+                        continue
+
+                    if subject == 'Total':
+                        percentage = int(student_data[subject]["Grand_Total"]) / (Grand_Total_Outof * no_of_numeric_subjects) * 100
+                        student_data[subject]["Percentage"] = round(percentage, 1)
+                        student_data[subject]["Grade"] = GetGrade(percentage)
+                        student_data['Percentage']["Grade"] = GetGrade(percentage)
+                        
+                        continue
+
+
+                    percentage = int(student_data[subject]["Grand_Total"]) / (Grand_Total_Outof) * 100
+                    student_data[subject]["Percentage"] = round(percentage, 1)  #subject wise percentage
+                    student_data[subject]["Grade"] = GetGrade(percentage) # Calculate grade of numerical subjects only based on percentage
+
+                Data.append(student_data)
+
+            if task == "report_card":
+                html = render_template('pdf-components/tall_result.html', data=Data[0])
+                return jsonify({"html":str(html)})
+
+
+            html = render_template('showMarks.html', Data=Data)
+            soup=BeautifulSoup(html,"lxml")
+            content=soup.body.find('div',{'id':'results'}).decode_contents()
+
+            return jsonify({"html":str(content)})
+        
+            
+
+        else:
+            return render_template('showMarks.html', Data=Data)
+            
+    else:
+        return redirect(url_for('login'))
 
 
 
@@ -702,8 +747,8 @@ def aapar():
                 if motherID and not Verhoeff(motherID):
                     return {"STATUS": "FAILED"}
                 
-                fatherIDResult = updateCell(id, "FATHERS_AADHAR", fatherID)
-                motherIDResult = updateCell(id, "MOTHERS_AADHAR", motherID)
+                fatherIDResult = updateCell(StudentsDB, id, "FATHERS_AADHAR", fatherID)
+                motherIDResult = updateCell(StudentsDB, id, "MOTHERS_AADHAR", motherID)
 
                 if fatherIDResult == "FAILED" or motherIDResult == "FAILED":
                     return {"STATUS": 'FAILED'}
