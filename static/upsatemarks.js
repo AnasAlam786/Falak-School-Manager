@@ -44,12 +44,9 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-function submit(input) {
+function submit(input, id, exam, subject) {
 
-    const exam = input.getAttribute("exam");
-    const subject = input.getAttribute("subject");
-    const id = input.getAttribute("student_id");
-    
+
     if (
         ((exam === "FA1" || exam === "FA2") && input.value >= 0 && input.value <= 20) ||
         ((exam === "SA1" || exam === "SA2") && input.value >= 0 && input.value <= 80) || 
