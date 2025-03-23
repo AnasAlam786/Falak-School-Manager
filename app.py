@@ -437,8 +437,6 @@ def update():
     else:
         return jsonify({"STATUS": "FAILED"})
     
-    print(resp)
-
     return jsonify({"STATUS": resp})
 
 @app.route('/students', methods=['GET', 'POST'])
