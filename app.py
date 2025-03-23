@@ -429,12 +429,15 @@ def update():
     score = data.get('value')
     id = data.get('id')
 
-    if exam == "Attandance":
+
+    if exam == "Attendance":
         resp = updateCell(StudentsDB, id, exam, score)
-    if exam in ["FA1","FA2","SA1","SA2"]:
+    elif exam in ["FA1","FA2","SA1","SA2"]:
         resp = updateCell(StudentsMarks, id, exam, score)
     else:
         return jsonify({"STATUS": "FAILED"})
+    
+    print(resp)
 
     return jsonify({"STATUS": resp})
 
