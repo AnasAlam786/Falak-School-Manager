@@ -289,15 +289,15 @@ def handleMarks(exam, replace_by):
 
 def GetGrade(number):
     if number >= 80:
-        return "A"
+        return "A", "Excellent"
     elif number >= 60:
-        return "B"
+        return "B", "Very Good"
     elif number >= 45:
-        return "C"
+        return "C", "Good"
     elif number >= 33:
-        return "D"
+        return "D", "Satisfactory"
     else:
-        return "E"
+        return "E", "Needs Improvement"
 
 
 
@@ -309,35 +309,32 @@ def ResultData(students_ids=None):
     subject_query = db.session.query(
         StudentsMarks.student_id,
         cast(StudentsMarks.Subject, String).label('Subject'),
-        # Use handleMarks on individual columns to sanitize values
-        cast(handleMarks(StudentsMarks.FA1, 0), Numeric).label('FA1'),  # Handle empty strings
-        cast(handleMarks(StudentsMarks.SA1, 0), Numeric).label('SA1'),
-        cast(handleMarks(StudentsMarks.FA2, 0), Numeric).label('FA2'),
-        cast(handleMarks(StudentsMarks.SA2, 0), Numeric).label('SA2'),
+        StudentsMarks.FA1.label('FA1'),
+        StudentsMarks.SA1.label('SA1'),
+        StudentsMarks.FA2.label('FA2'),
+        StudentsMarks.SA2.label('SA2'),
         (handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0)).label('FA1_SA1_Total'),
         (handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('FA2_SA2_Total'),
         (handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0) + 
          handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('Grand_Total'),
-        # Cast ranks to Integer (instead of Numeric) to match summary_query's rank()
         cast(literal(None), Integer).label('SA1_Rank'),
         cast(literal(None), Integer).label('SA2_Rank'),
         cast(literal(None), Integer).label('Grand_Rank')
     ).join(StudentsDB, StudentsMarks.student_id == StudentsDB.id
     ).filter(StudentsMarks.student_id.in_(students_ids))
 
-    # Summary query remains mostly the same
+    # Summary query without filtering by student_ids to compute ranks across all students in the class
     summary_query = db.session.query(
         StudentsMarks.student_id,
         cast(literal('Total'), String).label('Subject'),
-        func.sum(handleMarks(StudentsMarks.FA1, 0)).label('FA1'),
-        func.sum(handleMarks(StudentsMarks.SA1, 0)).label('SA1'),
-        func.sum(handleMarks(StudentsMarks.FA2, 0)).label('FA2'),
-        func.sum(handleMarks(StudentsMarks.SA2, 0)).label('SA2'),
+        cast(func.sum(handleMarks(StudentsMarks.FA1, 0)), String).label('FA1'),
+        cast(func.sum(handleMarks(StudentsMarks.SA1, 0)), String).label('SA1'),
+        cast(func.sum(handleMarks(StudentsMarks.FA2, 0)), String).label('FA2'),
+        cast(func.sum(handleMarks(StudentsMarks.SA2, 0)), String).label('SA2'),
         func.sum(handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0)).label('FA1_SA1_Total'),
         func.sum(handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('FA2_SA2_Total'),
         func.sum(handleMarks(StudentsMarks.FA1, 0) + handleMarks(StudentsMarks.SA1, 0) +
         handleMarks(StudentsMarks.FA2, 0) + handleMarks(StudentsMarks.SA2, 0)).label('Grand_Total'),
-        # Use Integer for ranks to match subject_query's cast
         func.rank().over(
             partition_by=StudentsDB.CLASS,
             order_by=func.sum(handleMarks(StudentsMarks.SA1, 0)).desc()
@@ -354,18 +351,21 @@ def ResultData(students_ids=None):
             ).desc()
         ).label('Grand_Rank')
     ).join(StudentsDB, StudentsMarks.student_id == StudentsDB.id
-    ).filter(StudentsMarks.student_id.in_(students_ids)
-    ).group_by(StudentsMarks.student_id, StudentsDB.CLASS)
+    ).group_by(StudentsMarks.student_id, StudentsDB.CLASS)  # Removed the student filter here
 
     combined_query = subject_query.union_all(summary_query)
     results = combined_query.all()
 
-    sorted_results = sorted(results, key=itemgetter(0))  # Sorting by student_id
+    # Filter results to include only the specified student_ids
+    student_ids_set = set(students_ids)
+    filtered_results = [row for row in results if row[0] in student_ids_set]
+
+    sorted_results = sorted(filtered_results, key=itemgetter(0))  # Sorting by student_id
 
     grouped_data = defaultdict(dict)
-    for student_id, data in groupby(sorted_results, key=itemgetter(0)):  # Group by student ID
+    for student_id, data in groupby(sorted_results, key=itemgetter(0)):
         grouped_data[student_id] = {
-            row[1]: {  # Subject name as key
+            row[1]: {
                 "FA1": row[2], "SA1": row[3], "FA2": row[4], "SA2": row[5],
                 "FA1_SA1_Total": row[6], "FA2_SA2_Total": row[7], "Grand_Total": row[8],
                 "SA1_Rank": row[9], "SA2_Rank": row[10], "Grand_Rank": row[11]
