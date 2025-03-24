@@ -588,6 +588,8 @@ def report_card():
             task = request.json.get('task')
 
             if task == 'report_card':
+                paper_height = '290mm'
+                paper_weight = '210mm'
                 id = request.json.get('id')
                 students_obj = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME,
                                                         StudentsDB.ROLL,StudentsDB.PHONE,StudentsDB.id,
@@ -664,16 +666,16 @@ def report_card():
 
                 student_data["Percentage"] = {}
 
-                student_data["Percentage"]["FA1"] = round((float(student_data["Total"]["FA1"]) / (FA1_Outof * no_of_numeric_subjects))  * 100, 2)
-                student_data["Percentage"]["FA2"] = round((int(student_data["Total"]["FA2"]) / (FA2_Outof * no_of_numeric_subjects))  * 100, 2)
-                student_data["Percentage"]["FA1_SA1_Total"] = round((int(student_data["Total"]["FA1_SA1_Total"]) / (FA1_SA1_Outof * no_of_numeric_subjects))  * 100, 2)
+                student_data["Percentage"]["FA1"] = round((float(student_data["Total"]["FA1"]) / (FA1_Outof * no_of_numeric_subjects))  * 100, 1)
+                student_data["Percentage"]["FA2"] = round((int(student_data["Total"]["FA2"]) / (FA2_Outof * no_of_numeric_subjects))  * 100, 1)
+                student_data["Percentage"]["FA1_SA1_Total"] = round((int(student_data["Total"]["FA1_SA1_Total"]) / (FA1_SA1_Outof * no_of_numeric_subjects))  * 100, 1)
                 
                 
-                student_data["Percentage"]["SA1"] = round((int(student_data["Total"]["SA1"]) / (SA1_Outof * no_of_numeric_subjects)) * 100, 2)
-                student_data["Percentage"]["SA2"] = round((int(student_data["Total"]["SA2"]) / (SA2_Outof * no_of_numeric_subjects)) * 100, 2)
-                student_data["Percentage"]["FA2_SA2_Total"] = round((int(student_data["Total"]["FA2_SA2_Total"]) / (FA2_SA2_Outof * no_of_numeric_subjects)) * 100, 2)
+                student_data["Percentage"]["SA1"] = round((int(student_data["Total"]["SA1"]) / (SA1_Outof * no_of_numeric_subjects)) * 100, 1)
+                student_data["Percentage"]["SA2"] = round((int(student_data["Total"]["SA2"]) / (SA2_Outof * no_of_numeric_subjects)) * 100, 1)
+                student_data["Percentage"]["FA2_SA2_Total"] = round((int(student_data["Total"]["FA2_SA2_Total"]) / (FA2_SA2_Outof * no_of_numeric_subjects)) * 100, 1)
                                                             
-                student_data["Percentage"]["Grand_Total"] = round((int(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_numeric_subjects)) * 100, 2)
+                student_data["Percentage"]["Grand_Total"] = round((int(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_numeric_subjects)) * 100, 1)
 
                 for subject in numeric_subjects:
 
@@ -683,26 +685,38 @@ def report_card():
                     if subject == 'Total':
                         percentage = int(student_data[subject]["Grand_Total"]) / (Grand_Total_Outof * no_of_numeric_subjects) * 100
                         student_data[subject]["Percentage"] = round(percentage, 1)
-                        student_data[subject]["Grade"] = GetGrade(percentage)
-                        student_data['Percentage']["Grade"] = GetGrade(percentage)
+                        grade, remark = GetGrade(percentage)
+
+                        student_data[subject]["Grade"] = grade
+                        student_data[subject]["Remark"] = remark
+
+                        student_data['Percentage']["Grade"] = grade
+                        student_data['Percentage']["Remark"] = remark
                         
                         continue
 
 
                     percentage = int(student_data[subject]["Grand_Total"]) / (Grand_Total_Outof) * 100
                     student_data[subject]["Percentage"] = round(percentage, 1)  #subject wise percentage
-                    student_data[subject]["Grade"] = GetGrade(percentage) # Calculate grade of numerical subjects only based on percentage
+
+
+                    grade, remark = GetGrade(percentage)    # Calculate grade and remark of numerical subjects only based on percentage
+                    student_data[subject]["Grade"] = grade
+                    student_data[subject]["Remark"] = remark
 
                 Data.append(student_data)
 
             if task == "report_card":
-                html = render_template('pdf-components/tall_result.html', data=Data[0])
+                html = render_template('pdf-components/tall_result.html', data=Data[0], 
+                                       paper_height = paper_height, paper_weight = paper_weight,
+                                       attandance_out_of = '214')
                 return jsonify({"html":str(html)})
 
 
             html = render_template('showMarks.html', Data=Data)
             soup=BeautifulSoup(html,"lxml")
             content=soup.body.find('div',{'id':'results'}).decode_contents()
+
 
             return jsonify({"html":str(content)})
         
