@@ -38,6 +38,7 @@
                 <th class="fs-5">F's Name</th>
                 <th class="fs-5">Class</th>
                 <th class="fs-5">Roll</th>
+                <th class="fs-5">Rank</th>
               </tr>
             </thead>
             <tbody>
@@ -46,6 +47,7 @@
                 <td class="fs-5" style="border: none;">{{ data["FATHERS_NAME"] }}</td>
                 <td class="fs-5" style="border: none;">{{ data["CLASS"] }}</td>
                 <td class="fs-5" style="border: none;">{{ data["ROLL"] }}</td>
+                <td class="fs-5" style="border: none;"> {{ data["Total"]["Grand_Rank"] }}</td>
               </tr>
             </tbody>
           </table>
@@ -76,14 +78,14 @@
                         style="border: 2px solid #ffffff; font-weight: bold;"
                       {% endif %}>
                     <th class="text-start " style="border-left: 1px solid #ffffff;">{{ subject }}</th>
-                    <td class="text-center ">{{ data[subject]["FA1"] if data[subject]["FA1"] != '' else '0' }}</td>
-                    <td class="text-center ">{{ data[subject]["SA1"] if data[subject]["SA1"] != '' else '0' }}</td>
-                    <td class="text-center text-danger">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] != '' else '0' }}</td>
-                    <td class="text-center ">{{ data[subject]["FA2"] if  data[subject]["FA2"] != '' else '0' }}</td>
-                    <td class="text-center ">{{ data[subject]['SA2'] if data[subject]['SA2'] != '' else '0' }}</td>
-                    <td class="text-center text-danger">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] != '' else '0' }}</td>
-                    <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] != '' else '0' }}</td>
-                    <td class="text-center text-danger">{{ data[subject]['Grade'] if data[subject]['Grade'] }}</td>
+                    <td class="text-center ">{{ data[subject]["FA1"] }}</td>
+                    <td class="text-center ">{{ data[subject]["SA1"] }}</td>
+                    <td class="text-center text-danger">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] else '' }}</td>
+                    <td class="text-center ">{{ data[subject]["FA2"] }}</td>
+                    <td class="text-center ">{{ data[subject]['SA2'] }}</td>
+                    <td class="text-center text-danger">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] else '' }}</td>
+                    <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] else '' }}</td>
+                    <td class="text-center text-danger">{{ data[subject]['Grade'] }}</td>
                   </tr>
                 {% endif %}
               {% endfor %}
