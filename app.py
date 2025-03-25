@@ -588,19 +588,29 @@ def report_card():
             task = request.json.get('task')
 
             if task == 'report_card':
-                paper_height = '290mm'
-                paper_weight = '210mm'
+
                 id = request.json.get('id')
-                students_obj = StudentsDB.query.with_entities(StudentsDB.STUDENTS_NAME,
-                                                        StudentsDB.ROLL,StudentsDB.PHONE,StudentsDB.id,
-                                                        StudentsDB.CLASS,StudentsDB.FATHERS_NAME,StudentsDB.IMAGE,
-                                                        StudentsDB.MOTHERS_NAME,StudentsDB.ADDRESS,
-                                                        func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
-                                                        StudentsDB.GENDER,StudentsDB.PEN, StudentsDB.Attendance
-                                                        
-                                                    ).filter(
-                                                        StudentsDB.id == id
-                                                    ).all()
+
+                students_obj = StudentsDB.query.with_entities(
+                                StudentsDB.STUDENTS_NAME,
+                                StudentsDB.ROLL,
+                                StudentsDB.PHONE,
+                                StudentsDB.id,
+                                StudentsDB.CLASS,
+                                StudentsDB.FATHERS_NAME,
+                                StudentsDB.IMAGE,
+                                StudentsDB.MOTHERS_NAME,
+                                StudentsDB.ADDRESS,
+                                func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
+                                StudentsDB.GENDER,
+                                StudentsDB.PEN,
+                                StudentsDB.Attendance,
+                                TeachersLogin.Sign  # Include the Sign column from TeachersLogin
+                            ).join(
+                                TeachersLogin, StudentsDB.CLASS == TeachersLogin.Classes
+                            ).filter(
+                                StudentsDB.id == id
+                            ).all()
             else:
                 CLASS = request.json.get('class')
 
@@ -707,9 +717,9 @@ def report_card():
                 Data.append(student_data)
 
             if task == "report_card":
+                principle_sign = '14A_2bL47AwZ9ZZyhxsEpCcB1sfInjhe4'
                 html = render_template('pdf-components/tall_result.html', data=Data[0], 
-                                       paper_height = paper_height, paper_weight = paper_weight,
-                                       attandance_out_of = '214')
+                                       attandance_out_of = '214', principle_sign = principle_sign)
                 return jsonify({"html":str(html)})
 
 
