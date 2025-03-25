@@ -48,12 +48,11 @@ function submit(input, id, exam, subject) {
 
 
     if (
-        ((exam === "FA1" || exam === "FA2") && input.value >= 0 && input.value <= 20) ||
-        ((exam === "SA1" || exam === "SA2") && input.value >= 0 && input.value <= 80) || 
-        (subject==="Drawing" && ["A", "B", "C","D","E"].includes(input.value)) ||
-        (exam==="Attendance" && input.value >= 0 && input.value <= 250)
-        
-      ) {
+  ((exam === "FA1" || exam === "FA2") && input.value >= 0 && input.value <= 20) ||
+  ((exam === "SA1" || exam === "SA2") && input.value >= 0 && input.value <= 80) || 
+  ((subject === "Drawing" || subject === "Craft") && ["A", "B", "C", "D", "E"].includes(input.value)) ||
+  (exam === "Attendance" && input.value >= 0 && input.value <= 250)
+) {
         submitBTN = input.nextElementSibling
         submitBTN.disabled = true
 
