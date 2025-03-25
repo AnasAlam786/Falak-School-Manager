@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Define mappings for mutual exclusions
     const restrictedClasses = ["Nursery/KG/PP3", "LKG/KG1/PP2", "UKG/KG2/PP1"];
-    const restrictedSubjects = ["Science", "Computer", "SST"];
+    const restrictedSubjects = ["Science", "Computer", "SST/EVS", "Craft"];
 
     classDropdown.addEventListener("change", function () {
       const selectedClass = classDropdown.value;
