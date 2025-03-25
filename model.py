@@ -132,12 +132,13 @@ class StudentsMarks(db.Model):
 class TeachersLogin(db.Model):
     __tablename__ = 'TeachersLogin'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text, nullable=False)
-    email = db.Column(db.Text, unique=True, nullable=False)
-    password = db.Column(db.Text, nullable=False)
+    Name = db.Column(db.Text, nullable=False)
+    Email = db.Column(db.Text)
+    Password = db.Column(db.Text, nullable=False)
     Classes = db.Column(db.JSON, nullable=False)
-    ip = db.Column(db.JSON)
-    role = db.Column(db.Text, nullable=False)
+    IP = db.Column(db.JSON)
+    Role = db.Column(db.Text, nullable=False)
+    Sign = db.Column(db.Text, nullable=False)
     school_id = db.Column(db.Text, nullable=False)
 
 
