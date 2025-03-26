@@ -88,7 +88,7 @@
     }
 
     .text-bold{
-      font-weight: bold;
+      font-weight: 800;
     }
   </style>
 </head>
@@ -120,7 +120,7 @@
           <tr>
             <td><strong>Class:</strong></td>
             <td>{{data["CLASS"]}}</td>
-            <td><strong>Roll:</strong></td>
+            <td><strong>Roll no:</strong></td>
             <td>{{data["ROLL"]}}</td>
           </tr>
           
@@ -186,10 +186,12 @@
 
                 {% if data[subject] %}
 
-                  <tr class="text-center" style="font-size: 21px; font-weight: 500;
-                                                {% if subject in ['Total','Percentage']  %}
+                <tr class="text-center" style="font-size: 21px; font-weight: 500;
+                                              {% if subject == 'Total' %}
                                                   font-weight: 800; color: red;
-                                                {% endif %}">
+                                              {% elif subject == 'Percentage' %}
+                                                  color: red;
+                                              {% endif %}">
                     <th class="light-border text-start" style="font-size: 22px; color: black">{{ subject }}</th>
                     <td class="light-border text-center ">{{ data[subject]["FA1"] }}</td>
                     <td class="light-border text-center ">{{ data[subject]["SA1"] }}</td>
@@ -244,7 +246,7 @@
 
     <div style="text-align: center">
       <div style="font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Attendance"] }}/<span style="color: red;">214</span></div>
-      <div style="font-size: 14px;letter-spacing: 0.5px;">ATTANDANCE</div>
+      <div style="font-size: 14px;letter-spacing: 0.5px;">ATTENDANCE</div>
     </div>
 
     <div style="text-align: center;">
@@ -264,18 +266,18 @@
   <div style="border-top: 2px solid #000000; font-size: 30px; text-align: center; display: flex;" class="bottom">
 
     <div class="XYcenter" style="flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1);">
-        Parents Sign
+        Parent's Sign
     </div>
 
     <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
-      Teachers Sign
+      Teacher's Sign
       <img src="https://lh3.googleusercontent.com/d/{{ data['Sign']}}"
           style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 max-width: 100%; max-height: 100%; object-fit: contain;">
     </div>
 
     <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
-      Principal Sign
+      Principal's Sign
       <img src="https://lh3.googleusercontent.com/d/{{ principle_sign }}"
           style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 max-width: 100%; max-height: 100%; object-fit: contain;">
