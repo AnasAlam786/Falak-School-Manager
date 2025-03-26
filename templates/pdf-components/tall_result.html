@@ -31,7 +31,7 @@
 
     .container {
         display: grid;
-        grid-template-rows: 11% 20% 51% 8% 10%;
+        grid-template-rows: 11% 20% 51% 8.5% 9.5%;
         width: 210mm;  /* A4 horizontal width */
         height: 297mm; /* A4 horizontal height */
         border: 3px solid black;  /* Optional: border to show container size */
@@ -232,10 +232,10 @@
     <div style="padding: 0 10px; text-align: center; position: relative;">
       {% if data["Total"]["Grand_Rank"] <= 3 %} 
       <div>
-        <img src="{{ url_for('static', filename=rank_image) }}" style="width: 70px; margin-bottom: -7px; margin-top: -7px;">
+        <img src="{{ url_for('static', filename=rank_image) }}" style="width: 70px; margin-bottom: -5px; margin-top: -5px;">
       </div>
       {% else %}
-      <div style="color:rgb(0, 162, 211); font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Grand_Rank"] }}<sup>th</sup></div>
+      <div style="color:rgb(0, 159, 207); font-size: 36px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Grand_Rank"] }}<sup>th</sup></div>
       {% endif %}
 
       <div style="font-size: 14px; letter-spacing: 0.5px;">RANK</div>
