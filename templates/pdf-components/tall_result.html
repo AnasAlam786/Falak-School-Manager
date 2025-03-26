@@ -216,11 +216,11 @@
   {% endif %}
 
   {% if data["Total"]["Grand_Rank"] == 1 %}
-    {% set rank_image = 'first_rank.png' %}
+    {% set rank_image = '1st-badge.png' %}
   {% elif data["Total"]["Grand_Rank"] == 2 %}
-    {% set rank_image = 'second_rank.png' %}
+    {% set rank_image = '2nd-badge.png' %}
   {% elif data["Total"]["Grand_Rank"] == 3 %}
-    {% set rank_image = 'third_rank.png' %}
+    {% set rank_image = '3rd-badge.png' %}
   {% endif %}
 
 
@@ -232,7 +232,7 @@
     <div style="padding: 0 10px; text-align: center; position: relative;">
       {% if data["Total"]["Grand_Rank"] <= 3 %} 
       <div style="margin-bottom: 4px;">
-        <img src="{{ url_for('static', filename=rank_image) }}" alt="1st Badge" style="width: 40px; height: auto;">
+        <img src="{{ url_for('static', filename=rank_image) }}" style="width: 40px; height: auto;">
       </div>
       {% else %}
       <div style="color:rgb(0, 162, 211); font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Grand_Rank"] }}<sup>th</sup></div>
