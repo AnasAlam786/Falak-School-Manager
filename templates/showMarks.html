@@ -44,13 +44,20 @@
             <tbody>
               <tr id="studentDetails">
                 <td class="fs-5" style="border: none;">{{ data["STUDENTS_NAME"] }}</td>
-                <td class="fs-5" style="border: none;">{{ data["FATHERS_NAME"] }}</td>
-                <td class="fs-5" style="border: none;">{{ data["CLASS"] }}</td>
                 <td class="fs-5" style="border: none;">{{ data["ROLL"] }}</td>
+                <td class="fs-5" style="border: none;">{{ data["CLASS"] }}</td>
+                <td class="fs-5" style="border: none;">{{ data["FATHERS_NAME"] }}</td>
                 <td class="fs-5" style="border: none;"> {{ data["Total"]["Grand_Rank"] }}</td>
               </tr>
             </tbody>
           </table>
+          <button 
+              class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2" style="margin: 5px;"
+              onclick='getResult("{{ data["id"] }}")'>
+
+              <i class="bi bi-printer-fill"></i>
+              Print Result
+          </button>
         </div>
 
         <div class="table-responsive" >
@@ -94,13 +101,7 @@
         </div>
         <div>
 
-          <button 
-              class="btn btn-primary btn-lg d-inline-flex align-items-center gap-2"
-              onclick='getResult("{{ data["id"] }}")'>
-
-        <i class="bi bi-printer-fill"></i>
-        Print Result
-    </button>
+    
 
         </div>
         
