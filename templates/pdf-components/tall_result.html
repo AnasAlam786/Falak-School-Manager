@@ -48,7 +48,7 @@
 
     .main { font-size: 25px; position: relative;}
 
-    .exam-base-text{ font-size: 0.80rem; color: red;}
+    .exam-base-text{ font-size: 0.80rem;}
 
     .bottom {
       display: grid;
@@ -170,28 +170,28 @@
           <thead>
             <tr >
               <th class="light-border" style="padding: 10px; font-size: 25px; font-weight: 800;">Subjects</th>
-              <th class="light-border">Test 1 <div class="exam-base-text">Out of 20</div></th>
+              <th class="red light-border">Test 1<div class="exam-base-text">Out of 20</div></th>
 
-              <th class="light-border">
+              <th class="red light-border">
                 <span style="display: inline-block; line-height: 1;">Half<br>Yearly</span>
                 <div class="exam-base-text">Out of 80</div>
               </th>
 
-              <th class="light-border">Total <div class="exam-base-text">Out of 100</div></th>
-              <th class="light-border">Test 2<div  class="exam-base-text">Out of 20</div></th>
+              <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
+              <th class="red light-border">Test 2<div  class="exam-base-text">Out of 20</div></th>
 
-              <th class="light-border">
+              <th class="red light-border">
                 <span style="display: inline-block; line-height: 1;">Annual<br>Exam</span>
                 <div class="exam-base-text">Out of 80</div>
               </th>
 
-              <th class="light-border">Total <div class="exam-base-text">Out of 100</div></th>
+              <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
               
-              <th class="light-border">
+              <th class="red light-border">
                 <span style="display: inline-block; line-height: 1;">Grand<br>Total</span>
                 <div class="exam-base-text">Out of 200</div>
               </th>
-              <th class="light-border">Grade<div class="exam-base-text">(A,B,C,D)</div></th>
+              <th class="red light-border">Grade<div class="exam-base-text">(A,B,C,D)</div></th>
             </tr>
           </thead>
           <tbody>
@@ -247,7 +247,7 @@
                       {% endif %}
                   </td>
 
-                  <td class="red light-border text-center ">
+                  <td class="red light-border text-center">
                     {% if subject in ["Craft", "Drawing"] %}
 
                     {% else %}
@@ -255,7 +255,7 @@
                     {% endif %}
                   </td>
 
-                  <td class="red light-border text-center ">
+                  <td class="red light-border text-center text-bold">
                     {% if subject in ["Craft", "Drawing"] %}
                         
                     {% else %}
@@ -311,7 +311,7 @@
     {% endif %}
 
     <div style="text-align: center">
-      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Attendance"] }}/<span style="color: black">214</span>
+      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Attendance"] }}<span style="color: black">/214</span>
       </div>
       <div style="font-size: 14px;letter-spacing: 0.5px;">ATTENDANCE</div>
     </div>
