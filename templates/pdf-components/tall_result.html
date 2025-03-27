@@ -170,14 +170,28 @@
           <thead>
             <tr >
               <th class="light-border" style="padding: 10px; font-size: 25px; font-weight: 800;">Subjects</th>
-              <th class="red light-border">FA1 <div class="exam-base-text">Out of 20</div></th>
-              <th class="red light-border">SA1 <div  class="exam-base-text">Out of  80</div></th>
+              <th class="red light-border">Test 1 <div class="exam-base-text">Out of 20</div></th>
+
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Half<br>Yearly</span>
+                <div class="exam-base-text">Out of 80</div>
+              </th>
+
               <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
-              <th class="red light-border">FA2 <div  class="exam-base-text">Out of 20</div></th>
-              <th class="red light-border">SA2 <div class="exam-base-text">Out of 80</div></th>
+              <th class="red light-border">Test 2<div  class="exam-base-text">Out of 20</div></th>
+
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Annual<br>Exam</span>
+                <div class="exam-base-text">Out of 80</div>
+              </th>
+
               <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
-              <th class="red light-border">G.Total <div class="exam-base-text">Out of 200</div></th>
-              <th class="red light-border">Grade <div class="exam-base-text">(A,B,C,D)</div></th>
+              
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Grand<br>Total</span>
+                <div class="exam-base-text">Out of 80</div>
+              </th>
+              <th class="red light-border">Grade<div class="exam-base-text">(A,B,C,D)</div></th>
             </tr>
           </thead>
           <tbody>
@@ -192,15 +206,40 @@
                                               {% elif subject == 'Percentage' %}
                                                   color: red;
                                               {% endif %}">
-                    <th class="light-border text-start" style="font-size: 22px; color: black">{{ subject }}</th>
-                    <td class="light-border text-center ">{{ data[subject]["FA1"] }}</td>
-                    <td class="light-border text-center ">{{ data[subject]["SA1"] }}</td>
-                    <td class="light-border text-center red">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] else '' }}</td>
-                    <td class="light-border text-center ">{{ data[subject]["FA2"] }}</td>
-                    <td class="light-border text-center ">{{ data[subject]['SA2'] }}</td>
-                    <td class="light-border text-center red">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] else '' }}</td>
-                    <td class="light-border text-center red text-bold">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] else '' }}</td>
-                    <td class="light-border text-center red">{{ data[subject]['Grade'] if data[subject]['Grade'] else ""}}</td>
+                  <th class="light-border text-start" style="font-size: 22px; color: black">{{ subject }}</th>
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["FA1"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["FA1"] }}
+                      {% endif %}
+                  </td>
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["SA1"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["SA1"] }}
+                      {% endif %}
+                  </td>
+                  <td class="light-border text-center red">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] else '' }}</td>
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["FA2"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["FA2"] }}
+                      {% endif %}
+                  </td>
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["SA2"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["SA2"] }}
+                      {% endif %}
+                  </td>
+                  <td class="light-border text-center red">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] else '0' }}</td>
+                  <td class="light-border text-center red text-bold">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] else '0' }}</td>
+                  <td class="light-border text-center red">{{ data[subject]['Grade'] if data[subject]['Grade'] else "0" }}</td>
+
                   </tr>
                 {% endif %}
               {% endfor %}
