@@ -1,1 +1,49 @@
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore virtual environments
+env/
+venv/
+
+# Ignore environment variables file (.env)
 .env
+
+# Ignore IDE/editor files (e.g., VSCode, PyCharm)
+.vscode/
+.idea/
+
+# Ignore logs
+*.log
+
+# Ignore database files (e.g., SQLite, .db files)
+*.sqlite3
+*.db
+
+# Ignore coverage reports (from test coverage tools)
+.coverage
+coverage.xml
+nosetests.xml
+tox.ini
+
+# Ignore Flask instance folder (used for production environments)
+instance/
+
+# Ignore backup files (.bak)
+*.bak
+
+# Ignore test output (pytest, nose)
+test_results/
+*.orig
+
+# Ignore Docker files (if using Docker)
+Dockerfile
+.dockerignore
+
+# Ignore other generated files
+*.pkl
+*.sqlite
+
+# Ignore configuration files (if specific to your local environment)
+*.config
