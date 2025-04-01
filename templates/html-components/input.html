@@ -1,0 +1,72 @@
+<div class="mb-2">
+    {% if InputDetailsDict.type == "select" %}
+      <div class="relative">
+        <select 
+          id="{{ id}}" 
+          name="{{ id}}"
+          data-label = "{{ InputDetailsDict.label }}"
+          {% if InputDetailsDict.required %} required {% endif %}
+          class="w-full px-4 py-3 text-gray-300 bg-neutral-800 border border-neutral-600 rounded-lg
+                focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30
+                transition-all duration-200 ease-out appearance-none
+                hover:border-neutral-500 cursor-pointer"
+        >
+          {% for option in InputDetailsDict.options %}
+            <option 
+              value="{{ option }}" 
+              class="bg-neutral-800 text-gray-300"
+              {% if InputDetailsDict.default == option %}selected{% endif %}
+            >
+              {{ option }}
+            </option>
+          {% endfor %}
+        </select>
+        <div class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 pointer-events-none">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </div>
+      </div>
+
+    {% else %}
+      <div class="relative">
+        <input 
+          oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
+          type="text" 
+          id="{{ id}}" 
+          name="{{ id}}" 
+          placeholder=" "
+          data-label = "{{ InputDetailsDict.label }}"
+
+          {% if InputDetailsDict.required %} required {% endif %}
+
+          {% if 'maxlength' in InputDetailsDict %} 
+                maxlength="{{ InputDetailsDict.maxlength }}" 
+                
+                
+          {% endif %}
+
+          {% if  InputDetailsDict.type == "number" %}
+                inputmode="numeric"
+                maxlength="{{ InputDetailsDict.maxlength }}"
+          {% endif %}
+
+          {% if InputDetailsDict.value %}value="{{ InputDetailsDict.value }}"{% endif %}
+
+          class="w-full px-4 py-3 text-gray-300 bg-neutral-800 border border-neutral-600 rounded-lg
+                focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30
+                transition-all duration-200 ease-out peer
+                hover:border-neutral-500 placeholder-transparent"/>
+        <label 
+          for="{{ id }}" 
+          class="absolute left-4 top-3 px-1 text-neutral-400 transition-all duration-200 ease-out
+                peer-placeholder-shown:translate-y-0 peer-focus:-translate-y-6 peer-focus:text-sm
+                peer-focus:text-blue-400 peer-[:not(:placeholder-shown)]:-translate-y-6 
+                peer-[:not(:placeholder-shown)]:text-sm bg-neutral-800 pointer-events-none
+                origin-left">
+
+          {{ InputDetailsDict.label }}
+        </label>
+      </div>
+    {% endif %}
+  </div>
