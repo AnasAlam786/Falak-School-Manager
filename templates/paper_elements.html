@@ -120,11 +120,16 @@
         </div>
 
         <div style="margin-bottom: 5px; white-space: pre-wrap; padding-left: 15px;">
+<<<<<<< HEAD
 
             {% for subQuestion in question.subQuestion %}
                 {% if subQuestion %}
                 <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
                 {% endif %}
+=======
+            {% for subQuestion in question.subQuestion %}
+            <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
             {% endfor %}
         </div>
         {% endif %}
@@ -167,4 +172,8 @@
         {% endfor %}
         {% endif %}
     </div>
+<<<<<<< HEAD
 </div>
+=======
+</div>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7

@@ -33,7 +33,11 @@
   <div class="row mb-3">
 
     <div class="col-12 col-md-5 mb-2">
+<<<<<<< HEAD
       <select class="form-select form-select-lg" id="classView" onchange="applyFilters()">
+=======
+      <select class="form-select form-select-lg" id="classView" name="selectClass" required>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
         <option selected value="All">Class</option>
         <option value="Nursery">Nursery/KG/PP3</option>
         <option value="LKG">LKG/KG1/PP2</option>
@@ -50,9 +54,24 @@
     </div>
 
     <div class="col-12 col-md-5 mb-2">
+<<<<<<< HEAD
       <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg" placeholder="Search by Name, Class or Roll Number">
     </div>
 
+=======
+      <input type="text" id="search-input" class="form-control form-control-lg" placeholder="Search by Name, Class or Roll Number">
+    </div>
+
+    <div class="col-12 col-md-2 mb-2">
+      <select class="form-select form-select-lg" id="items-per-page" name="itemsPerPage">
+        <option selected value="20">20 items per page</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+        <option value="500">500</option>
+        <option value="1000">1000</option>
+      </select>
+    </div>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
 
   </div>
 
@@ -60,20 +79,31 @@
   {% if data %}
     <div class="row" id="StudentData">
       {% for row in data %}
+<<<<<<< HEAD
       <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
         <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
             {% if row.AADHAAR == None %}
+=======
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
+            {% if row["AADHAAR"]==None %}
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
               <span class="badge bg-danger position-absolute top-0 end-0 m-1">
                 No Aadhar
               </span>
               {% endif %}
             <div class="d-flex align-items-center p-3">
               
+<<<<<<< HEAD
               <img src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
+=======
+              <img src="{{ 'https://lh3.googleusercontent.com/d/' + row['IMAGE'] + '=s200' if row['IMAGE'] else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
                    alt="Student Image"
                    class="img-fluid rounded-circle"
                    style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
               <div class="ms-3 text-start">
+<<<<<<< HEAD
                 <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{ row.STUDENTS_NAME }}</a><br>
                 <p class="student-father text-muted mb-0" ><small>{{ row.FATHERS_NAME }}</small></p>
                 <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
@@ -82,6 +112,16 @@
                 <div class="mt-2">
                   <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
                     <i class="fa fa-phone"></i> <strong>{{ row.PHONE }}</strong>
+=======
+                <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row["id"] }}')">{{ row["STUDENTS_NAME"] }}</a><br>
+                <p class="student-father text-muted mb-0" ><small>{{ row["FATHERS_NAME"] }}</small></p>
+                <p class="student-class-roll fw-bold mt-3">{{ row["CLASS"] }} - {{ row["ROLL"] }}</p>
+                <!--<p class="text-muted">{{ row.ADMISSION_NO }}</p>-->
+                <span class="badge bg-success">{{ row["DOB"] }}</span>
+                <div class="mt-2">
+                  <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
+                    <i class="fa fa-phone"></i> <strong>{{ row["PHONE"] }}</strong>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
                   </a>
                 </div>
               </div>
@@ -89,12 +129,20 @@
             </div>
             <div class="d-flex border-top border-secondary" style="height: 50px;">
               <div class="w-50 border-end border-secondary">
+<<<<<<< HEAD
                 <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"  onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')" style="border-radius: 0;">
+=======
+                <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"  onclick="viewStudentDetails('{{ row["id"] }}')" style="border-radius: 0;">
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
                   Student Details
                 </button>
               </div>
               <div class="w-50 border-start">
+<<<<<<< HEAD
                 <button class="btn btn-outline-success fw-bold w-100 h-100 border-0" onclick="getFees('{{ row.student_id }}')" style="border-radius: 0;">
+=======
+                <button class="btn btn-outline-success fw-bold w-100 h-100 border-0" onclick="getFees('{{ row["id"] }}')" style="border-radius: 0;">
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
                   Pay Fee
                 </button>
               </div>
@@ -106,6 +154,14 @@
   {% endif %}
 </div>
 
+<<<<<<< HEAD
+=======
+<div class="row">
+  <div class="d-grid gap-2 col-4 mx-auto">
+    <button id="load-more" class="btn btn-primary btn-lg mt-4 mb-5" style="display: none;">Load More</button>
+  </div>
+</div>
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
 
 
 <div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsLabel" aria-hidden="true">
@@ -121,8 +177,11 @@
       </div>
       <div id="modalBody" class="modal-body">
 
+<<<<<<< HEAD
         
 
+=======
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">Close</button>
@@ -174,4 +233,8 @@
 
 <script src="{{ url_for('static', filename='students.js') }}"></script>
 
+<<<<<<< HEAD
 {% endblock %}
+=======
+{% endblock %}
+>>>>>>> 0d4c9443e06b4f1cb04ad59d6592c262ec9c22f7
