@@ -1,0 +1,170 @@
+<div id="Question" class="d-flex flex-column align-items-end mb-4">
+    <div class="d-flex flex-column align-items-end mb-4" id="Question-{{ index }}">
+        <div class="question input-group mb-2">
+            <select  class="form-select fw-bold " rows="1" style="overflow: hidden; resize: none;" onchange="addQuestion(this)">
+                <option selected>Select Question Type</option>
+                <option value="mcq">Multiple Choice Questions</option>
+                <option value="fillUp">Fill In The Blanks</option>
+                <option value="T-F">True or False</option>
+                <option value="match">Matching</option>
+                <option value="QnA">Question & Answers</option>
+                <option value="singleWord">Single Word Questions</option>
+            </select>
+            
+            <button class="btn btn-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 40px;">+</button>
+            <button class="btn btn-danger ms-1" onclick="remove(this)" style="width: 35px; height: 40px;">-</button>
+        </div>
+    </div>
+</div>
+
+<div id="mcq" class="mcq input-group mb-4" style="width: 98%;"> 
+
+    <!-- Textarea and Buttons on the same line with spacing -->
+    <textarea class="sub-question form-control me-1 mb-2" placeholder="MCQ Question" rows="1" style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+
+    <!-- Option Inputs shifted to the right with margin -->
+    <div class="input-group mb-1 ms-auto" style="width: 98%;">
+        <input type="text" class="option rounded-pill form-control" placeholder="Option 1" required>
+        <input type="text" class="option rounded-pill form-control ms-2" placeholder="Option 2" required>
+    </div>
+    <div class="input-group ms-auto" style="width: 98%;">
+        <input type="text" class="option rounded-pill form-control" placeholder="Option 3" required>
+        <input type="text" class="option rounded-pill form-control ms-2" placeholder="Option 4" required>
+    </div>
+</div>
+
+<div id="match" class="match input-group mb-1" style="width: 98%;">
+    <input type="text" class="sub-question rounded-pill form-control" placeholder="Match 1" required>
+    <input type="text" class="option rounded-pill form-control" placeholder="Match 2" required>
+    
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+</div>
+
+
+<div id="singleWord" class="singleWord input-group mb-1" style="width: 98%;"> 
+
+    <input type="text" class="sub-question rounded-pill form-control" placeholder="Enter the word" required>
+    <input type="text" class="sub-question rounded-pill form-control" placeholder="Enter the word" required>
+    
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+</div>
+
+<div id="fillUp" class="fillUp input-group mb-1" style="width: 98%;"> 
+
+    <textarea class="sub-question form-control mb-1" placeholder="Fill Up Question" rows="1" style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+</div>
+
+<div id="QnA" class="QnA input-group mb-1" style="width: 98%;"> 
+    <textarea class="sub-question form-control mb-1" placeholder="Question and Answers" rows="1" style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+</div>
+
+<div id="T-F" class="T-F input-group mb-1" style="width: 98%;"> 
+    <textarea class="sub-question form-control mb-1" placeholder="True/False Question" rows="1" style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
+    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)" style="width: 35px; height: 38px;">+</button>
+    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
+</div>
+
+
+<div id="a4PDF">
+    <div style="text-align: center; border-bottom: 1px solid #464646;">
+        <p style="font-size: 1.5em; font-weight: bold; margin: 0;">{{ school }}</p>
+        <p style="font-size: 1.25em; font-weight: bold; margin: 0;">{{ event }}</p>
+        <p style="font-size: 1em; font-weight: bold; margin: 0;">Subject - {{ subject }}</p>
+        <div style="display: flex; justify-content: space-between; margin: 0;">
+            <p style="font-weight: bold; margin: 0;">Time: {{ hrs }} Hrs</p>
+            <p style="font-size: 1em; font-weight: bold; margin: 0;">Class - {{ std }}</p>
+            <p style="font-weight: bold; margin: 0;">M.M: {{ MM }}</p>
+        </div>
+    </div>
+    
+
+    <div class = "content" style="width: 100%;">
+        {% if questions %}
+        {% for question in questions %}
+        {% if question.type == "match" and question.subQuestion|default([])|length != 0 %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
+            <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
+            <span style="font-weight: bold;">{{ question.marks }}</span>
+        </div>
+
+        <div style="display: flex; justify-content: flex-start; padding-left: 20px; margin-bottom: 5;">
+            <ul style="list-style-type: none; padding-right: 100px; margin: 0;">
+                {% for subQuestion in question.subQuestion %}
+                <li>
+                    {{ "abcdefghijklmnopqrstuvwxyz"[loop.index-1] }}.) {{ subQuestion }}
+                </li>
+                {% endfor %}
+            </ul>
+            <ul style="list-style-type: none; margin: 0;">
+                {% for option in question.options %}
+                <li>
+                    {{ option }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if question.type in ["QnA", "fillUp", "T-F"] and question.subQuestion|length != 0 %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
+            <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
+            <span style="font-weight: bold;">{{ question.marks }}</span>
+        </div>
+
+        <div style="margin-bottom: 5px; white-space: pre-wrap; padding-left: 15px;">
+
+            {% for subQuestion in question.subQuestion %}
+                {% if subQuestion %}
+                <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if question.type == "singleWord" and question.subQuestion|length != 0 %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
+            <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
+            <span style="font-weight: bold;">{{ question.marks }}</span>
+        </div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+            {% for subQuestion in question.subQuestion %}
+                {% if subQuestion %}
+                <p style="margin-right: 20px; margin-bottom: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if question.type == "mcq" and question.subQuestion|length != 0 %}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
+            <p style="margin: 0;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
+            <span style="font-weight: bold;">{{ question.marks }}</span>
+        </div>
+
+        <div style="padding-left: 15px; margin-bottom: 5px;">
+            {% for subQuestion in question.subQuestion %}
+            <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion.text }}</p>
+            
+            <div style="padding-left: 30px; line-height: 1; display: flex; flex-wrap: wrap">
+                {% for option in subQuestion.options %}
+                <div style="width: calc(50% - 10px);">
+                    <p style="margin: 2px 0;">{{ "abcdefghijklmnopqrstuvwxyz"[loop.index-1] }}. {{ option }}</p>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endif %}
+    </div>
+</div>

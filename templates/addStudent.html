@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+{% block title %}Add Students{% endblock %}
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<style>
+
+
+.card {
+ background-color: #1a1a1a;
+ border-radius:5px;
+ transition: all .3s;
+
+}
+
+.card:hover {
+ transform: scale(1.005);
+ border-radius: 5px;
+}
+
+</style>
+
+    <!-- Hidden Success Alert -->
+    <div id="successAlert" class="hidden fixed z-[9999] top-4 right-4 flex items-center p-4 pr-6 rounded-lg bg-green-50 border border-green-200 text-green-700">
+      <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span class="font-medium" id="successMessage"></span>
+    </div>
+
+     <!-- Hidden Error Alert -->
+    <div id="errorAlert" class="hidden fixed z-[9999] top-4 right-4 flex items-center p-4 pr-6 rounded-lg bg-red-50 border border-red-200 text-red-700">
+      <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <span class="font-medium" id="errorMessage"></span>
+    </div>
+
+    <h1 class="text-2xl font-bold mb-6 text-center">Student Registration Form</h1>
+    <div class="card m-8 p-6 ">
+        <form class="rounded shadow-md" id = "DataForm">
+      <!-- Personal Information -->
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {% for id, InputDetailsDict in PersonalInfo.items() %}
+            {% include 'html-components/input.html' with context %}
+          {% endfor %}
+
+          <!-- Image -->
+          
+          {% include 'html-components/image-uploader.html' with context %}
+          
+          
+
+        </div>
+      </div>
+      
+      <!-- Academic Details -->
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4">Academic Details</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {% for id, InputDetailsDict in PersonalInfo.items() %}
+            <!--{% include 'html-components/input.html' with context %}-->
+          {% endfor %}
+ 
+        </div>
+      </div>
+      
+      <!-- Guardian Information -->
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4">Guardian Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {% for id, InputDetailsDict in PersonalInfo.items() %}
+            <!--{% include 'html-components/input.html' with context %}-->
+          {% endfor %}
+        </div>
+      </div>
+      
+      <!-- Additional/Logistical Information -->
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4">Additional/Logistical Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- School to Home Distance -->
+          {% for id, InputDetailsDict in PersonalInfo.items() %}
+            <!--{% include 'html-components/input.html' with context %}-->
+          {% endfor %}
+          <!-- Total Due -->
+        </div>
+      </div>
+      
+      <div class="text-center">
+        <button id="FormSubmit" type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Submit</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+  <div id="verificationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-3 overflow-y-auto">
+    <!-- Modal Container -->
+  <div class="w-full max-w-2xl bg-[#1e1e2f] rounded-2xl shadow-2xl overflow-hidden">
+      <!-- Modal Header -->
+      <div class="w-full bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] p-4 flex justify-between items-center">
+          <div class="flex-1 text-center">
+              <h2 class="text-white text-xl font-semibold">
+                  <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
+              </h2>
+          </div>
+          <button onclick="toggleModal()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6">
+          <div class="text-center mb-6">
+              <img id="StudentImageInModal" src="{{ student_image_url }}" 
+                   alt="Student Image"
+                   class="w-[150px] h-[150px] rounded-full object-cover border-[3px] border-[#8f94fb] mx-auto">
+          </div>
+
+          <h3 id = "StudentNameInModal" class=" mb-2 text-2xl text-center font-bold text-white"></h3>
+
+
+          <div class="bg-[#2a2a3d] rounded-xl p-4 shadow-lg">
+              <table class="w-full">
+                  <tbody id = "ModalDataTable" class="text-white">
+                      <!-- Table Rows (Same content structure as original) -->
+
+                      
+
+                      <!-- Add all other table rows following the same pattern -->
+                      <!-- ... -->
+                  </tbody>
+              </table>
+          </div>
+          <!-- Password Icon -->
+          <div class="p-4">
+
+            <div class="relative">
+              <!-- Password Icon -->
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <!-- Input Field -->
+              <input
+
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                autocomplete="new-password"
+                class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <!-- Show Password Button -->
+              <button
+                type="button"
+                id="togglePassword"
+                class="absolute inset-y-0 right-0 pr-3 flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+              </button>
+              
+            </div>
+            <!-- End Password Input -->
+
+            <!-- Confirm Checkbox -->
+            <div class="flex items-center p-2">
+              <input
+                type="checkbox"
+                id="confirmCheckbox"
+                
+                class="h-4 w-4 focus:ring-blue-100 rounded"/>
+
+              <label for="confirmCheckbox" class="ml-2 text-sm text-gray-200">
+                I agree to the terms and conditions
+              </label>
+            </div>
+            <!-- End Confirm Checkbox -->
+          </div>
+
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-[#2a2a3d] p-4 flex justify-end">
+          <button id="cancelModle" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+              Close
+          </button>
+          <button id = "finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
+            Submit
+        </button>
+      </div>
+  </div>
+</div>
+
+
+<script>
+
+function showAlert(alertID, messageElementID, message) {
+            const alert = document.getElementById(alertID);
+            const messageElement = document.getElementById(messageElementID);
+            
+            messageElement.textContent = message;
+            alert.classList.remove('hidden');
+            alert.classList.add('animate-slide-in');
+            
+            setTimeout(() => {
+                alert.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+                setTimeout(() => {
+                    alert.classList.add('hidden');
+                    alert.classList.remove('opacity-0');
+                }, 300);
+            }, 5000);
+      }
+
+
+  document.getElementById('DataForm').addEventListener('submit', function(event) {
+        event.preventDefault(); // Prevent the form from submitting and reloading the page
+        openVerificationModal(); // Open the verification modal
+  });
+
+
+
+
+
+  async function getFormData(id) {
+        const form = document.getElementById(id);
+        let formData = new FormData(form);    
+        return formData;
+  }
+
+
+
+
+
+  // Final submit to add student
+  document.getElementById('finalSubmit').addEventListener('click', async function() {
+        if (!document.getElementById('confirmCheckbox').checked) {
+          showAlert("errorAlert", "errorMessage", "Please confirm the details by checking the box.")
+          return;
+        }
+
+        const formData = await getFormData("DataForm");
+        const password = document.getElementById("password").value;
+        formData.append("password", password);
+        formData.append('IMAGE', croppedBlob, 'profile.jpg');
+
+        
+
+        try {
+            // Send a POST request to the Flask backend
+            const response = await fetch('/addstudent', {
+              method: 'POST',
+              body: formData,
+            });
+
+            // Parse the JSON response
+            const data = await response.json();
+            console.log('Success:', data);
+
+            // Optionally update the page content based on the response
+            if(data.status=="SUCCESS"){
+              showAlert("successAlert", "successMessage", data.message)
+            }
+            else{
+              showAlert("errorAlert", "errorMessage", data.message)
+            }
+
+        } catch (error) {
+          console.error('Error:', error);
+        }
+  });
+
+
+
+  async function openVerificationModal() {
+
+        const formData = await getFormData("DataForm");
+
+        let modalContent = '';
+
+        document.getElementById('StudentNameInModal').innerText = formData.get("STUDENTS_NAME")
+        
+        const imageURL = URL.createObjectURL(croppedBlob);
+        document.getElementById('StudentImageInModal').src = imageURL;
+
+        // Loop through each form entry and build HTML content
+        for (const [key, value] of formData.entries()) {
+          if (["IMAGE", "STUDENTS_NAME"].includes(key)) continue;
+
+          let inputElement = document.querySelector(`[id="${key}"]`);
+          let label = inputElement ? inputElement.getAttribute("data-label") || key : key; 
+          modalContent += `<tr class="bg-[#34354a]">
+                              <th class="bg-[#2a2a3d] p-3 text-left">${label}</th>
+                              <td class="p-3">${value}</td>
+                          </tr>`;
+        }
+        // Update modal content with the form data
+        document.getElementById("ModalDataTable").innerHTML = modalContent;
+        // Show the modal
+        document.getElementById('verificationModal').classList.remove('hidden');
+  }
+
+
+
+
+  
+    // Show password and hide password 
+    const togglePassword = document.querySelector('#togglePassword');
+    const passwordInput = document.querySelector('#password');
+
+    togglePassword.addEventListener('click', () => {
+          const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+          passwordInput.setAttribute('type', type);
+          // Toggle eye icon
+          togglePassword.innerHTML = type === 'password' ?
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>` :
+            `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+            </svg>`;
+    });
+
+
+
+
+  document.getElementById('cancelModle').addEventListener('click', function() {
+        document.getElementById('verificationModal').classList.add('hidden');
+  });
+</script>
+
+{% endblock %}

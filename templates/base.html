@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="icon" href= "{{ session['logo'] }}">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <title>{% block title %}{{ session['school_name'] }}{% endblock %}</title>
+
+    <style>
+      body {
+        background-color: #121212;
+        color: #ffffff;
+      }
+
+      .input-group input {
+        margin-right: 10px;
+        flex: 1;
+      }
+
+      .offcanvas {
+        background-color: #1f1f1f;
+      }
+
+      .offcanvas-header {
+        border-bottom: 1px solid #343a40;
+      }
+
+      .offcanvas-body a {
+        display: block;
+        padding: 0.5rem 1rem;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      .offcanvas-body a:hover {
+        background-color: #343a40;
+      }
+    </style>
+
+  </head>
+
+  <body data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg bg-dark py-0">
+      <div class="container-fluid">
+
+        <!-- Group Toggle Button and Logo -->
+        <div class="d-flex align-items-center">
+          <!-- Sidebar Toggle Button -->
+          <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
+            ☰
+          </button>
+          <!-- Logo and Brand -->
+          <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="/">
+            <img src="{{ session['logo'] }}" alt="Logo" width="40" height="35" class="me-2"/>
+
+            {{ session['school_name'] }}
+          </a>
+        </div>
+      </div>
+    </nav>
+    
+    
+        <!-- Sidebar (Offcanvas) -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas- fw-bold" id="sidebarLabel">Falak Public School</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          <a href="/"><i class="fas fa-home"></i> Home</a>
+          <a href="/students"><i class="fas fa-user-graduate"></i> Students Data</a>
+          <a href="/updatemarks"><i class="fas fa-pencil-alt"></i> Update Marks</a>
+          <a href="/marks"><i class="fas fa-book-open"></i> Show Marks</a>
+          <a class="mt-3" href="/paper"><i class="fas fa-pencil-alt"></i> Create Paper</a>
+          <a href="/entrycard"><i class="fas fa-id-card"></i> Entry Card</a>
+          <a href="/seatChits"><i class="fas fa-chalkboard-teacher"></i> Seat Chits</a>
+        </div>        
+      </div>
+    
+
+    <div class="container-fluid mt-4">
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <script>
+  async function updatePage(endpoint, id, payload, append = null) {
+    const url = endpoint;
+
+    try {
+      const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+      });
+
+
+      const data = await response.json();
+      if(id){
+        element= document.getElementById(id)
+
+        if (append){
+          element.insertAdjacentHTML(append, data.html)}  //"beforebegin", "afterbegin", "beforeend", "afterend"
+        
+        else{element.innerHTML = data.html}
+      }
+      return data.html;
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+
+  </script>
+  </body>
+</html>
