@@ -1,7 +1,7 @@
 from flask import Flask, render_template_string
 import os
 from dotenv import load_dotenv
-from model import db, StudentData
+from model import db
 
 load_dotenv()
 
@@ -163,53 +163,7 @@ th {
 </body>
 </html>
 """
-
-
-    data = StudentData("STUDENTS_NAME","ROLL","SR","DOB","GENDER","FATHERS_NAME","MOTHERS_NAME","PHONE","ADDRESS","ADMISSION_DATE","ADMISSION_NO","Free_Scheme","ADMISSION_SESSION","CLASS")
-    #data = sorted(data, key=lambda x: x['ADMISSION_DATE'] or datetime.date.max)
-    classes = {
-        "Nursery/KG/PP3": 0,
-        "LKG/KG1/PP2": 1,
-        "UKG/KG2/PP1": 2,
-        "1st": 3,
-        "2nd": 4,
-        "3rd": 5,
-        "4th": 6,
-        "5th": 7,
-        "6th": 8,
-        "7th": 9,
-        "8th": 10,
-    }
-    for entry in data:
-        if entry['DOB']:
-            entry['DOB'] = entry['DOB'].strftime('%d-%m-%y')
-        if entry['ADMISSION_DATE']:
-            entry['ADMISSION_DATE'] = entry['ADMISSION_DATE'].strftime('%d-%m-%Y')
-        if entry['GENDER']:
-            entry['GENDER'] = entry['GENDER'].split("-")[1]
-        
-        
-
-        
-
-
-
-
-
-            
-    students = [entry for entry in data if entry['Free_Scheme'] != None and entry['Free_Scheme']["Scheme"] == 'RTE']
-    for entry in students:
-        admission_year = int(entry["ADMISSION_SESSION"].split("-")[0])
-        current_year=2024
-        admission_class_value = classes[entry["CLASS"]]-(current_year - admission_year)
-        entry["ADMISSION_CLASS"] =  [k for k, v in classes.items() if v == admission_class_value]
-
-        if(admission_class_value==-1):
-            entry["ADMISSION_CLASS"]=["UKG/KG2/PP1"]
-
-
-
-    return render_template_string(page,students=students)
+    return render_template_string(page)
 
 if __name__ == '__main__':
     app.run(debug=True)
