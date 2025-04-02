@@ -1,7 +1,7 @@
-from flask import Flask, render_template_string
+from flask import Flask
 import os
 from dotenv import load_dotenv
-from model import db, StudentData
+from model import db
 
 load_dotenv()
 
@@ -74,21 +74,3 @@ def home():
 
 
     """
-
-    data = StudentData("STUDENTS_NAME","ROLL","SR","DOB","FATHERS_NAME","ADMISSION_DATE","ADMISSION_NO","Free_Scheme","AADHAAR","ADDRESS","CAST","PEN","CLASS")
-    #data = sorted(data, key=lambda x: x['ADMISSION_DATE'] or datetime.date.max)
-
-    for entry in data:
-        if entry['DOB']:
-            entry['DOB'] = entry['DOB'].strftime('%d-%m-%Y')
-        if entry['ADMISSION_DATE']:
-            entry['ADMISSION_DATE'] = entry['ADMISSION_DATE'].strftime('%d-%m-%Y')
-            
-    students = [entry for entry in data if entry['Free_Scheme'] != None and entry['Free_Scheme']["Scheme"] == 'RTE']
-    print(students)
-
-
-    return render_template_string(page,students=students)
-
-if __name__ == '__main__':
-    app.run(debug=True)

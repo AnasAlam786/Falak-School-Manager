@@ -594,27 +594,38 @@ def report_card():
                                 StudentSessions.ROLL
                             ).all()
 
-            numeric_subjects = students_obj[0].Numeric_Subjects
-            grades_subjects = students_obj[0].Grading_Subjects
-            exam_format = students_obj[0].exam_format
-
-            FA1_Outof = int(exam_format["FA1"])
-            SA1_Outof = int(exam_format["SA1"]) 
-            FA1_SA1_Outof = FA1_Outof + SA1_Outof
-
-            FA2_Outof = int(exam_format["FA2"])
-            SA2_Outof = int(exam_format["SA2"])
-            FA2_SA2_Outof = FA2_Outof + SA2_Outof
-
-            Grand_Total_Outof = FA1_SA1_Outof + FA2_SA2_Outof
-
             students_ids = [row.id for row in students_obj]
             results = ResultData(students_ids=students_ids)
 
             Data=[]
 
             students_dict = {s.id: dict(s._asdict()) for s in students_obj}
+            print(students_dict)
+
+
             for student_id, student_data in students_dict.items():
+
+                #student_id = 7682
+                #student_data ={'STUDENTS_NAME': 'Faiz Raza', 'PHONE': '7866952', 'FATHERS_NAME': 'Ham Raza', 'id': 782, 
+                #               'Numeric_Subjects': ['English', 'Hindi', 'Math', 'Urdu', 'SST/EVS', 'Computer', 'GK', 'Deeniyat'], 
+                #               'Grading_Subjects': ['Drawing', 'Craft'], 'exam_format': {'FA1': '20', 'SA1': '80', 'FA2': '20', 'SA2': '80'}, 
+                #               'CLASS': '2nd', 'ROLL': 201}
+
+
+
+                numeric_subjects = student_data['Numeric_Subjects']
+                grades_subjects = student_data['Grading_Subjects']
+                exam_format = student_data['exam_format']
+
+                FA1_Outof = int(exam_format["FA1"])
+                SA1_Outof = int(exam_format["SA1"]) 
+                FA1_SA1_Outof = FA1_Outof + SA1_Outof
+
+                FA2_Outof = int(exam_format["FA2"])
+                SA2_Outof = int(exam_format["SA2"])
+                FA2_SA2_Outof = FA2_Outof + SA2_Outof
+
+                Grand_Total_Outof = FA1_SA1_Outof + FA2_SA2_Outof
 
                 no_of_numeric_subjects = len(numeric_subjects)
 
@@ -625,9 +636,6 @@ def report_card():
                 student_data["Subjects"] = Subjects
 
                 #Mering Result and Student Data
-                #{'id': 7744, 'STUDENTS_NAME': 'Mohd Ahad Khan', 'CLASS': '2nd', 'ROLL': 263, 'FATHERS_NAME': 'Mohd Maksood Khan', ''
-                #'Subjects': ['English', 'Hindi', 'Math', 'Urdu', 'SST/EVS', 'Computer', 'GK', 'Deeniyat', 'Total', 'Percentage', 'Drawing', 'Craft'], 
-                #'GK': {'FA1': Decimal('19'), 'SA1': ....
                 student_data.update(results[student_id])
 
 
@@ -671,6 +679,8 @@ def report_card():
                     student_data[subject]["Grade"] = grade
                     student_data[subject]["Remark"] = remark
 
+                #print(student_data)
+
                 Data.append(student_data)
 
             if task == "report_card":
@@ -683,7 +693,6 @@ def report_card():
             html = render_template('showMarks.html', Data=Data)
             soup=BeautifulSoup(html,"lxml")
             content=soup.body.find('div',{'id':'results'}).decode_contents()
-
 
             return jsonify({"html":str(content)})
         
