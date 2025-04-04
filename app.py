@@ -9,6 +9,7 @@ from threading import Thread
 from flask_mail import Message, Mail
 import json
 from sqlalchemy import func, case
+import time
 
 
 
@@ -105,6 +106,96 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('login'))
+
+
+@app.route('/tempPagePost', methods=["POST"])
+def tempPagePost():
+
+        data = request.form
+
+        id = data.get('student_id')
+        SR = data.get('SR')
+        ADMISSION_DATE = data.get('ADMISSION_DATE')
+        Admission_Class = data.get('Admission_Class')
+
+        try:
+
+            record = db.session.query(StudentsDB).filter_by(id=id).first()
+            if record:
+                if SR:
+                    record.SR = SR
+                if ADMISSION_DATE:
+                    record.ADMISSION_DATE = ADMISSION_DATE
+                if Admission_Class:
+                    record.Admission_Class = Admission_Class
+
+                db.session.commit() 
+                return jsonify({"message": "Data submitted successfully"}), 200
+                
+
+            else:
+                return jsonify({"message": "Record not found"}), 404
+        except Exception as e:
+            return jsonify({"message": "Error while fetching the student"}), 400 
+
+        
+        
+        
+
+
+@app.route('/tempPage', methods=["POST","GET"])
+def tempPage():
+
+    if "email" not in session:
+        return redirect(url_for('login'))
+    
+    school_id = session["school_id"]
+    current_session = session["session_id"]
+    ordered_classes = session["classes"]
+
+    class_order_case = case(
+                {class_name: index for index, class_name in enumerate(ordered_classes)},
+                value = ClassData.CLASS
+            )
+
+    current_session_students = db.session.query(StudentsDB) \
+            .filter(StudentsDB.school_id == school_id, StudentsDB.session_id == current_session) \
+            .subquery()
+     
+    data = db.session.query(
+                current_session_students.c.id,
+                current_session_students.c.STUDENTS_NAME,
+                current_session_students.c.FATHERS_NAME,
+                current_session_students.c.IMAGE,
+                current_session_students.c.ADMISSION_NO,
+                current_session_students.c.SR,
+                current_session_students.c.ADMISSION_DATE,
+                current_session_students.c.Admission_Class,
+
+                StudentSessions.ROLL,
+                
+                ClassData.CLASS,
+                ClassData.Section,
+            ).outerjoin(
+                StudentSessions, StudentSessions.student_id == current_session_students.c.id
+            ).outerjoin(
+                ClassData, current_session_students.c.class_data_id == ClassData.id
+            ).filter(db.or_(
+                        current_session_students.c.Admission_Class == None,
+                        current_session_students.c.ADMISSION_DATE == None,
+                        current_session_students.c.SR == None)
+            ).order_by(
+                current_session_students.c.ADMISSION_NO.asc(),  # Sort by student name
+            ).all()
+    
+    classes = db.session.query(ClassData.id, ClassData.CLASS)\
+        .filter_by(school_id=school_id
+        ).order_by(class_order_case).all()
+
+
+    return render_template('temp_update_colum.html',data=data, classes=classes)
+    
+    
 
 
 @app.route('/students', methods=['GET', 'POST'])
