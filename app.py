@@ -100,6 +100,13 @@ def login():
 
     return render_template('login.html', error=error)
 
+
+@app.route('/logout', methods=["GET", "POST"])
+def logout():
+    session.clear()
+    return redirect(url_for('login'))
+
+
 @app.route('/students', methods=['GET', 'POST'])
 def studentsData():
     if "email" in session:
@@ -303,7 +310,7 @@ def addStudent():
             image = request.files['IMAGE'].read()
             data.pop('password', None)
             data.pop('image', None)
-            print(image)
+
             school_id=session["school_id"]
 
             school = Schools.query.filter_by(User=school_id).first()
@@ -507,6 +514,49 @@ def update():
     return jsonify({"STATUS": resp})
 
 
+@app.route('/TransferCertificate', methods=['POST', 'GET'])
+def TransferCertificate():
+
+    if "email" in session:
+
+        #data = request.json
+        #student_id = data.get('student_id')
+        student_id = 7400
+
+        student = db.session.query(
+            StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,StudentsDB.SR,
+            StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
+            StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
+            StudentsDB.WEIGHT, StudentsDB.CAST, StudentsDB.RELIGION,
+            StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
+            StudentsDB.GENDER, StudentsDB.PEN, StudentsDB.HEIGHT,StudentsDB.WEIGHT,
+            StudentsDB.APAAR, StudentsDB.Previous_School_Name, StudentsDB.OCCUPATION,
+            func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('DOB'),
+            ClassData.CLASS,  # Get the class name from the ClassData table
+            StudentSessions.ROLL
+        ).join(
+            ClassData, StudentsDB.class_data_id == ClassData.id 
+        ).join(
+            StudentSessions, StudentSessions.student_id == StudentsDB.id
+        ).join(
+            StudentsMarks, StudentsMarks.student_id == StudentsDB.id
+        ).filter(
+            StudentsDB.id == student_id,
+        ).all()
+
+        student_data = [s._asdict() for s in student]  # or create a serializer
+        return jsonify(student_data)
+
+
+
+
+
+    
+    else:
+        return redirect(url_for('login'))
+
+
+
 @app.route('/entrycard')
 def entryCard():
     if "email" in session:
@@ -600,7 +650,6 @@ def report_card():
             Data=[]
 
             students_dict = {s.id: dict(s._asdict()) for s in students_obj}
-            print(students_dict)
 
 
             for student_id, student_data in students_dict.items():
