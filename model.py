@@ -133,6 +133,9 @@ class StudentsDB(db.Model):
     OCCUPATION = Column(Text, nullable=True)
     Previous_School_Name = Column(Text, nullable=True)
     APAAR = Column(Text, nullable=True)
+
+    Admission_Class = Column(Numeric, nullable=True)
+
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=True)
     session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     

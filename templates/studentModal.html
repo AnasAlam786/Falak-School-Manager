@@ -60,7 +60,7 @@
           <th>Siblings</th>
           <td>
             {% for sib in student[1:] %}
-              <a class="link-style" onclick="viewStudentDetails('{{ sib.id }}', '{{ sib.PHONE }}')">{{ sib.STUDENTS_NAME }}</a>&nbsp;&nbsp;{{ student[0].CLASS }} - {{ student[0].ROLL }}<br>
+              <a class="link-style" onclick="viewStudentDetails('{{ sib.id }}', '{{ sib.PHONE }}')">{{ sib.STUDENTS_NAME }}</a>&nbsp;&nbsp;{{ sib.CLASS }} - {{ sib.ROLL }}<br>
             {% endfor %}
           </td>
         </tr>
