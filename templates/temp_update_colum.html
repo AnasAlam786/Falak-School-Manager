@@ -125,6 +125,7 @@
                 <div class="mb-3">
                       <label for="ADMISSION_DATE" class="form-label">Admission Date:</label>
                       <input type="date" 
+                      inputmode="numeric"
                              class="form-control" 
                              name="ADMISSION_DATE" 
                              id="ADMISSION_DATE" >
@@ -213,6 +214,10 @@ document.querySelectorAll(".dataForm").forEach(function(form) {
       });
 
     });
+  });
+
+  flatpickr("#ADMISSION_DATE", {
+    dateFormat: "d/m/Y" // DD/MM/YYYY format
   });
 </script>
 
