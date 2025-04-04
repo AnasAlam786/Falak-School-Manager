@@ -2,31 +2,33 @@
 {% block title %}Students Data{% endblock %}
 {% block content %}
 <style>
-  .modal-content, .accordion-body
-          { background: #1e1e2f; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
-  .modal-header 
-          { background: linear-gradient(90deg, #4e54c8, #8f94fb); }
-  .student-card-body 
-          { background: #2a2a3d; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); }
-  .student-image 
-          { border: 3px solid #8f94fb; border-radius: 50%; object-fit: cover; width: 150px; height: 150px; }
-  .table th, .table td 
-          { background-color: #34354a; }
-  .table th 
-          { background-color: #2a2a3d; }
-  .modal-footer 
-          { background: #2a2a3d; }
 
-  .accordion-button 
-          { box-shadow: 0 0 10px rgba(0, 0, 255, 0.5); transition: box-shadow 0.3s ease;  }
-       
-  .accordion-button:not(.collapsed) 
-         { box-shadow: 0 0 15px rgba(0, 0, 255, 0.7); }
-  .card:hover 
-          { transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-            transition: all 0.3s ease-in-out;
-                }
+  .table thead {
+    display: none;
+  }
+  .table, .table tbody, .table tr, .table td {
+    display: block;
+    width: 100%;
+  }
+  .table tr {
+    margin-bottom: 15px;
+    border-bottom: 2px solid #dee2e6;
+  }
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+    text-align: right;
+  }
+  .table td::before {
+    content: attr(data-label);
+    flex: 1;
+    font-weight: bold;
+    text-align: left;
+    padding-right: 0.75rem;
+  }
 </style>
 
 <div class="container" id="student-container">
@@ -62,34 +64,48 @@
       {% for row in data %}
       <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
         <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
-            {% if row.AADHAAR == None %}
-              <span class="badge bg-danger position-absolute top-0 end-0 m-1">
-                No Aadhar
-              </span>
-              {% endif %}
-            <div class="d-flex align-items-center p-3">
+
+            <div class="d-flex flex-column align-items-center justify-content-center">
               
               <img src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
                    alt="Student Image"
-                   class="img-fluid rounded-circle"
-                   style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
-              <div class="ms-3 text-start">
-                <a class="student-name fw-bold mb-0">{{ row.STUDENTS_NAME }}</a><br>
-                <p class="student-father text-muted mb-0" ><small>{{ row.FATHERS_NAME }}</small></p>
-                <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
-                <p class="student-class-roll fw-bold mt-3">Adm. No - {{ row.ADMISSION_NO }}</p>
+                   class="img-fluid rounded-circle mt-3"
+                   style="width: 100px; height: 110px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
+              <div class="d-flex flex-column align-items-center justify-content-cente w-100 ">
+                <a class="student-name fw-bold" style="line-height: 1.5;">{{ row.STUDENTS_NAME }}</a>
+                <p class="student-father text-muted" style="line-height: 1;"><small>{{ row.FATHERS_NAME }}</small></p>
 
-                {% if row.SR %}
-                <p class="student-class-roll fw-bold mt-3">SR - {{ row.SR }}</p>
-                {% endif %}
+                <table class="table table-bordered table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th scope="col">Class</th>
+                        <th scope="col">Admission No</th>
+                        {% if row.SR %}
+                            <th scope="col">S.R No.</th>
+                        {% endif %}
+                        {% if row.SR %}
+                            <th scope="col">Admission Date</th>
+                        {% endif %}
+                      </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td data-label="Class">{{ row.CLASS }} - {{ row.ROLL }}</td>
+                            <td data-label="Admission No">{{ row.ADMISSION_NO }}</td>
+                            {% if row.SR %}
+                                <td data-label="S.R No.">{{ row.SR }}</td>
+                            {% endif %}
 
-                {% if row.ADMISSION_DATE %}
-                <p class="student-class-roll fw-bold mt-3">Adm. Date - {{ row.ADMISSION_DATE }}</p>
-                {% endif %}
+                            {% if row.ADMISSION_DATE %}
+                                <td data-label="Admission Date">{{ row.ADMISSION_DATE }}</td>
+                            {% endif %}
+                        </tr>
+                    </tbody>
+                </table>
 
 
 
-                <form method="POST" class="dataForm">
+                <form method="POST" class="dataForm align-items-center justify-content-cente" style="width: 90%;">
 
                 <input type="hidden" name="student_id" value="{{ row.id }}">
 
@@ -109,6 +125,7 @@
                 <div class="mb-3">
                       <label for="ADMISSION_DATE" class="form-label">Admission Date:</label>
                       <input type="date" 
+                             inputmode="numeric"
                              class="form-control" 
                              name="ADMISSION_DATE" 
                              id="ADMISSION_DATE" 
@@ -120,6 +137,7 @@
                   <div class="mb-3">
                       <label for="SR" class="form-label">SR Number:</label>
                       <input type="number" 
+                             inputmode="numeric"
                              class="form-control" 
                              name="SR" 
                              id="SR" 
@@ -127,7 +145,7 @@
                   </div>
                   {% endif %}
               
-                  <div class="mb-3">
+                  <div class="mb-3 text-center">
                       <button type="submit" class="btn btn-primary">Submit</button>
                   </div>
                   <p class="successMessage" style="color: green; display: none;"></p>
