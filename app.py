@@ -143,8 +143,8 @@ def tempPagePost():
         
 
 
-@app.route('/tempPage', methods=["POST","GET"])
-def tempPage():
+@app.route('/temp_page', methods=["POST","GET"])
+def temp_page():
 
     if "email" not in session:
         return redirect(url_for('login'))
@@ -637,11 +637,6 @@ def TransferCertificate():
 
         student_data = [s._asdict() for s in student]  # or create a serializer
         return jsonify(student_data)
-
-
-
-
-
     
     else:
         return redirect(url_for('login'))
