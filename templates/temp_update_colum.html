@@ -128,7 +128,7 @@
                       inputmode="numeric"
                              class="form-control" 
                              name="ADMISSION_DATE" 
-                             id="ADMISSION_DATE" >
+                             id="ADMISSION_DATE"  placeholder="DD/MM/YYYY" readonly>
                 </div>
                   {% endif %}
 
@@ -216,8 +216,11 @@ document.querySelectorAll(".dataForm").forEach(function(form) {
     });
   });
 
+
   flatpickr("#ADMISSION_DATE", {
-    dateFormat: "d/m/Y" // DD/MM/YYYY format
+    dateFormat: "d/m/Y", // Enforce DD/MM/YYYY format
+    disableMobile: true, // Prevents native mobile calendar popup
+    allowInput: false,   // Prevents manual typing (optional)
   });
 </script>
 
