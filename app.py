@@ -115,17 +115,30 @@ def tempPagePost():
 
         id = data.get('student_id')
         SR = data.get('SR')
-        ADMISSION_DATE = data.get('ADMISSION_DATE')
+        
         Admission_Class = data.get('Admission_Class')
+        admission_date_str = data.get('ADMISSION_DATE')
+
+        
+        
+       
 
         try:
 
             record = db.session.query(StudentsDB).filter_by(id=id).first()
+            print(record)
             if record:
                 if SR:
                     record.SR = SR
-                if ADMISSION_DATE:
+
+                if admission_date_str:
+                    try:
+                        ADMISSION_DATE = datetime.datetime.strptime(admission_date_str, "%d-%m-%Y").date()
+                    except:
+                        return jsonify({"message": "Enter a valid admission date"}), 404 
+                    
                     record.ADMISSION_DATE = ADMISSION_DATE
+
                 if Admission_Class:
                     record.Admission_Class = Admission_Class
 
@@ -135,8 +148,8 @@ def tempPagePost():
 
             else:
                 return jsonify({"message": "Record not found"}), 404
-        except Exception as e:
-            return jsonify({"message": "Error while fetching the student"}), 400 
+        except:
+            return jsonify({"message": "Error while fetching the student"}), 404 
 
         
         
