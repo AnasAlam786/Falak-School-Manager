@@ -119,14 +119,9 @@ def tempPagePost():
         Admission_Class = data.get('Admission_Class')
         admission_date_str = data.get('ADMISSION_DATE')
 
-        
-        
-       
-
         try:
 
             record = db.session.query(StudentsDB).filter_by(id=id).first()
-            print(record)
             if record:
                 if SR:
                     record.SR = SR
@@ -150,10 +145,6 @@ def tempPagePost():
                 return jsonify({"message": "Record not found"}), 404
         except:
             return jsonify({"message": "Error while fetching the student"}), 404 
-
-        
-        
-        
 
 
 @app.route('/temp_page', methods=["POST","GET"])
@@ -207,9 +198,7 @@ def temp_page():
 
 
     return render_template('temp_update_colum.html',data=data, classes=classes)
-    
-    
-
+      
 
 @app.route('/students', methods=['GET', 'POST'])
 def studentsData():
@@ -259,7 +248,6 @@ def studentsData():
         return render_template('students.html',data=data)
     else:
         return redirect(url_for('login'))
-
 
 
 @app.route('/studentModal', methods=["POST"])
@@ -618,14 +606,109 @@ def update():
     return jsonify({"STATUS": resp})
 
 
-@app.route('/TransferCertificate', methods=['POST', 'GET'])
+@app.route('/transfer_certificate', methods=['POST', 'GET'])
 def TransferCertificate():
+    
+    if "email" in session:
+        data = None
+
+        if request.method == "POST":
+            data = request.json
+
+            CLASS = data.get('class')
+            school_id = session["school_id"]
+            current_session_id = session["session_id"]
+
+
+            data = db.session.query(
+                                    StudentsDB.STUDENTS_NAME, StudentsDB.id,
+                                    StudentsDB.FATHERS_NAME, StudentsDB.IMAGE, StudentsDB.ADMISSION_NO,
+
+                                    ClassData.CLASS, 
+                                    StudentSessions.ROLL,
+                                    func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
+                                ).join(
+                                    ClassData, StudentsDB.class_data_id == ClassData.id
+                                ).join(
+                                    StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                ).filter(
+                                    StudentsDB.class_data_id == CLASS,
+                                    StudentsDB.school_id == school_id,
+                                    StudentsDB.session_id == current_session_id
+                                ).order_by(
+                                    StudentSessions.ROLL
+                                ).all()
+
+            html = render_template('transfer_certificate.html', data=data)
+            soup=BeautifulSoup(html,"lxml")
+            content=soup.body.find('div',{'id':'StudentData'}).decode_contents()
+
+            return jsonify({"html":str(content)})
+        
+        else:
+            school_id = session["school_id"]
+            current_session_id = session["session_id"]
+
+            classes = db.session.query(ClassData.id, ClassData.CLASS)\
+                .filter_by(school_id=school_id
+                ).order_by(ClassData.CLASS).all()
+
+            return render_template('transfer_certificate.html', classes=classes)
+        
+    else:
+        return redirect(url_for('login'))
+
+
+
+@app.route('/tcform', methods=['POST'])
+def tcform():
 
     if "email" in session:
 
-        #data = request.json
-        #student_id = data.get('student_id')
-        student_id = 7400
+        data = request.json
+
+        student_id = data.get('student_id')
+        leaving_reason = data.get('leaving_reason')
+        classes = session["classes"]
+
+        student_marks = db.session.query(
+            StudentsMarks.Subject,
+            StudentsMarks.FA1,
+            StudentsMarks.SA1,
+            StudentsMarks.FA2,
+            StudentsMarks.SA2
+        ).filter(
+            StudentsMarks.student_id == student_id
+        ).all()
+
+        results = []
+        grading_subjects = []
+
+        for subject, fa1, sa1, fa2, sa2 in student_marks:
+            if subject == "Craft":
+                continue
+
+            total = 0
+            is_grading = False
+
+            for mark in [fa1, sa1, fa2, sa2]:
+                try:
+                    total += int(mark)
+                except:
+                    total = mark  # save grade value (e.g., 'A')
+                    is_grading = True
+                    break
+
+            entry = {'subject': subject, 'total': total}
+
+            if is_grading:
+                grading_subjects.append(entry)
+            else:
+                results.append(entry)
+
+        results.extend(grading_subjects)
+
+
 
         student = db.session.query(
             StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,StudentsDB.SR,
@@ -634,22 +717,37 @@ def TransferCertificate():
             StudentsDB.WEIGHT, StudentsDB.CAST, StudentsDB.RELIGION,
             StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
             StudentsDB.GENDER, StudentsDB.PEN, StudentsDB.HEIGHT,StudentsDB.WEIGHT,
-            StudentsDB.APAAR, StudentsDB.Previous_School_Name, StudentsDB.OCCUPATION,
+            StudentsDB.APAAR, StudentsDB.Attendance,
             func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('DOB'),
-            ClassData.CLASS,  # Get the class name from the ClassData table
+
+            ClassData.CLASS,
             StudentSessions.ROLL
+
         ).join(
             ClassData, StudentsDB.class_data_id == ClassData.id 
         ).join(
             StudentSessions, StudentSessions.student_id == StudentsDB.id
-        ).join(
-            StudentsMarks, StudentsMarks.student_id == StudentsDB.id
         ).filter(
             StudentsDB.id == student_id,
-        ).all()
+        ).first()
 
-        student_data = [s._asdict() for s in student]  # or create a serializer
-        return jsonify(student_data)
+        class_index = classes.index(student.CLASS)
+        promoted_class = classes[class_index+1] if class_index+1 < len(classes) else "9th"
+
+
+        working_days = 214
+        general_conduct = "Very Good"
+        school_logo = '1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w'
+        current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+        print(results)
+
+        html = render_template('pdf-components/tcform.html', 
+                               working_days = working_days, student=student, results=results,
+                               general_conduct = general_conduct, school_logo = school_logo,
+                               current_date = current_date, leaving_reason=leaving_reason,
+                               promoted_class = promoted_class)
+        
+        return jsonify({"html":str(html)})
     
     else:
         return redirect(url_for('login'))
