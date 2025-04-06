@@ -10,9 +10,16 @@
         margin: 0;
         padding: 0;
       }
+
       @page {
         size: A4 portrait;
-        margin: 10mm;
+        margin: 10px; /* 20px margin on all sides */
+      }
+
+      .container {
+        width: calc(210mm - 40px);  /* A4 width minus 2×20px margins */
+        height: calc(297mm - 40px); /* A4 height minus 2×20px margins */
+        margin: auto;               /* Center it */
       }
     }
     .container {
@@ -20,6 +27,8 @@
       height: 297mm;  /* A4 horizontal width */
       border: 3px solid black;  /* Optional: border to show container size */
       font-family: Arial, sans-serif;
+      position: relative; /* <-- Add this */
+
     }
     .header {
       margin-top: 8px;
@@ -33,9 +42,8 @@
 
     .details{
       position: relative;
-      margin-top: 20px;
-      margin-right: 15px;
-      margin-left: 15px;
+      padding: 20px;
+      padding-bottom: 175px;
     }
 
     .center-logo {
@@ -64,11 +72,12 @@
 
   .exam-base-text{ font-size: 0.60rem; margin-top: 2px;}
   .exam-header {
+    font-family: 13px;
     align-items: center;
     justify-content: center;
     text-align: center;
     word-wrap: break-word;
-    padding: 3px;
+    padding: 1px;
     border: 1px solid #c7c7c7;
   }
 
@@ -82,10 +91,10 @@
       <div style="display: flex; justify-content: space-between;">
 
         <!-- First Image (Left) -->
-        <img style= "margin-top: 5px; margin-left: 15px;width: 110px; height: 110px; " src="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s200">
+        <img style= "margin-top: 5px; margin-left: 15px;width: 110px; height: 110px; " src="https://lh3.googleusercontent.com/d/{{ school_logo }}=s400">
     
         <!-- Middle Text (Centered) -->
-        <img style="height: 120px; width: 525px;" src="C:\Users\lenovo\OneDrive\Desktop\Python Projects\Falak School Manager\static\falak_heading.PNG" alt="Falak Public School">
+        <img style="height: 120px; width: 525px;" src="{{ url_for('static', filename='falak_heading.PNG') }}" alt="Falak Public School">
     
         <!-- Last Image (Right) -->
         <img 
@@ -98,13 +107,13 @@
             object-position: top; 
             border: 1px solid #808080; 
             border-radius: 50%;" 
-        src="https://lh3.googleusercontent.com/d/1hHErJNVHL-UozTRh65Ly1WqzR_PwT6C5=s200">
+        src="https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s500">
       </div>
     </div>
 
     <div class="details">
 
-      <img class="center-logo" src="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s500" alt="School Logo">
+      <img class="center-logo" src="https://lh3.googleusercontent.com/d/{{ school_logo }}=s500" alt="School Logo">
 
 
         <div style="display: flex; align-items: center; justify-content: center; width: 100%; position: relative;">
@@ -117,81 +126,68 @@
 
         <div class="detail-block">
             <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0; ">
-
               
               <tr>
                 <td><strong>SR No:</strong></td>
-                <td>100</td>
+                <td>{{ student.SR }}</td>
                 <td><strong>PEN No:</strong></td>
-                <td>999999999999</td>
-                
-                
+                <td>{{ student.PEN }}</td>
               </tr>
 
               <tr>
                 <td><strong>Student Name:</strong></td>
-                <td>Mohd Arshyan</td>
+                <td>{{ student.STUDENTS_NAME }}</td>
                 <td><strong>Gender:</strong></td>
-                <td>Male</td>
-
+                <td>{{ student.GENDER }}</td>
               </tr>
 
-              
               <tr>
                 <td><strong>Father's Name:</strong> </td>
-                <td>Laye</td>
+                <td>{{ student.FATHERS_NAME }}</td>
                 <td><strong>Mother's Name:</strong></td>
-                <td>Sh</td>
-                
+                <td>{{ student.MOTHERS_NAME }}</td>      
               </tr>
 
               <tr>
                 <td><strong>Date of Birth:</strong></td>
-                <td>14/01/2090</td>
+                <td>{{ student.DOB }}</td>
                 <td><strong>Aadhaar No:</strong></td>
-                <td>999999999999</td>
+                <td>{{ student.AADHAAR }}</td>
               </tr>
 
               <tr>
                 <td><strong>Admission No:</strong></td>
-                <td>25001</td>
+                <td>{{ student.ADMISSION_NO }}</td>
                 <td><strong>Admission Date:</strong></td>
-                <td>23/4/2025</td>
+                <td>{{ student.ADMISSION_DATE }}</td>
               </tr>
-
               
               <tr>
                 <td><strong>Previous Class:</strong></td>
-                <td>Nursery</td>
+                <td>{{ student.CLASS }}</td>
                 <td><strong>Promoted Class:</strong></td>
-                <td>LKG</td>
+                <td>{{ promoted_class }}</td>
               </tr>
 
-              
-    
-
               <tr>
-                
-                
                 <td><strong>APAAR No:</strong></td>
-                <td>888888888888</td>
+                <td>{{ student.APAAR }}</td>
                 <td><strong>Nationality:</strong></td>
                 <td>Indian</td>
-
               </tr>
 
               <tr>
                 <td><strong>Caste:</strong></td>
-                <td>OBC</td>
+                <td>{{ student.CAST }}</td>
                 <td><strong>Religion:</strong></td>
-                <td>Islam</td>
-
+                <td>{{ student.RELIGION }}</td>
               </tr>
+
               <tr>
                 <td><strong>Height:</strong></td>
-                <td>155 cm</td>
+                <td>{{ student.HEIGHT }} cm</td>
                 <td><strong>Weight:</strong></td>
-                <td>50 kg</td>
+                <td>{{ student.WEIGHT }} kg</td>
               </tr>
 
             </table>
@@ -199,14 +195,12 @@
             <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
                 <tr>
                     <td style="text-align: left; vertical-align: top; width: 25%;"><strong>Address:</strong></td>
-                    <td style="text-align: left; vertical-align: top;">Meena Nagar Near Tikoniya masjid karula</td>
+                    <td style="text-align: left; vertical-align: top;">{{ student.ADDRESS }}</td>
                 </tr>
             </table>
 
             
           </div>
-
-          
 
         <div class="detail-block">
 
@@ -215,32 +209,32 @@
 
                 <tr>
                   <td><strong>Total No. of working days in the academic session:</strong> </td>
-                  <td>214</td>
+                  <td>{{ working_days }}</td>
 
                 </tr>
                 <tr>
                   <td><strong>Total number of working days the student was present in class:</strong></td>
-                  <td>198</td>
+                  <td>{{ student.Attendance }}</td>
                 </tr>
 
                 <tr>
                   <td><strong>Issue Date of Transfer Certificate:</strong> </td>
-                  <td>214</td>
+                  <td>{{ current_date }}</td>
                 </tr>
 
                 <tr>
                   <td><strong>Reason for leaving the school:</strong></td>
-                  <td>198</td>
+                  <td>{{ leaving_reason }}</td>
                 </tr>
 
                 <tr>
                   <td><strong>Any Other Remark:</strong></td>
-                  <td>None</td>
+                  <td></td>
                 </tr>
 
                 <tr>
                   <td><strong>General Conduct:</strong></td>
-                  <td>Very Good</td>
+                  <td>{{ general_conduct }}</td>
                 </tr>
             </table>
 
@@ -248,34 +242,24 @@
 
         <div class="detail-block">
 
-            <table style="width: 100%; font-size: 15px; table-layout: fixed; border-collapse: collapse; text-align: center; border: 1px solid #c7c7c7;">
+            <table style="width: 100%; font-size: 14px; table-layout: fixed; border-collapse: collapse; text-align: center; border: 1px solid #c7c7c7;">
                 <caption style="font-weight: bold; font-size: 1.5em; margin-bottom: 10px;">Subject-Wise Marks Performance</caption>
                 <thead>
                   <tr>
-                    <th class = "exam-header">English <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Hindi <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Math <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Urdu <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Science <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">SST <br><span class="exam-base-text">Out of 200</span></th>
-                    <th style="font-size: 14px;" class = "exam-header">Computer<br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">GK <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Deeniyat <br><span class="exam-base-text">Out of 200</span></th>
-                    <th class = "exam-header">Art <br><span class="exam-base-text">Out of 200</span></th>
+
+                    {% for exam in results %}
+                      <th class = "exam-header">{{ exam["subject"] }} <br><span class="exam-base-text">Out of 200</span></th>
+                    {% endfor %}
+                    
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">90</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">90</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">85</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">95</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">88</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">92</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">80</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">80</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">80</td>
-                    <td style="padding: 10px; border: 1px solid #c7c7c7;">A</td>
+                    {% for exam in results %}
+                      <td style="padding: 10px; border: 1px solid #c7c7c7;">{{ exam["total"] }}</td>
+                    {% endfor %}  
+                  </td>
+                    
                   </tr>
                 </tbody>
               </table>
@@ -283,10 +267,10 @@
 
         </div>
 
-        <div style="width: 100%; margin: 20px 10px;">
+        <div style="position: absolute; left:0; right:0; bottom:0px;">
             
 
-            <table style="margin-top: 80px; width: 100%;">
+            <table style="width: 100%;">
               <tr>
                 <td style="text-align: center; padding: 5px;">
                   <strong>_______________________</strong>
