@@ -70,11 +70,10 @@
               id="reason-{{ row.id }}" 
               name="reason" 
               placeholder="Reason for Leaving">
-            <label for="reason-{{ row.id }}" class="text-light">Leaving Reason: </label>
+            <label for="reason-{{ row.id }}" class="text-secondary">Leaving Reason: </label>
             <datalist id="reasons-{{ row.id }}">
               <option value="Completed the School">
               <option value="Parents Wish">
-              <option value="Switching Course/Stream">
             </datalist>
           </div>
         </div>
@@ -98,6 +97,42 @@
 
 
 </div>
+
+
+<script>
+  // Called on every keystroke in the search box
+  function applyFilters() {
+    const term = document
+      .getElementById('search-input')
+      .value
+      .trim()
+      .toLowerCase();
+
+    // Grab all student cards
+    const cards = document.querySelectorAll('.student-card');
+
+    cards.forEach(card => {
+      // Read the relevant data attributes
+      const name  = card.getAttribute('data-name').toLowerCase();
+      const roll  = card.getAttribute('data-roll').toLowerCase();
+
+      // Check if any field contains the search term
+      const matches = 
+        name.includes(term) ||
+        roll.includes(term);
+
+      // Show/hide card
+      card.style.display = matches ? '' : 'none';
+    });
+  }
+
+  // Optionally, clear filters when class dropdown changes
+  document.getElementById('classView').addEventListener('change', () => {
+    document.getElementById('search-input').value = '';
+    applyFilters();
+  });
+</script>
+
 
 <script>
     async function generateTC(studentId, leaving_reason) {
