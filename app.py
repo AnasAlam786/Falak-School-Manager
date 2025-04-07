@@ -621,8 +621,9 @@ def TransferCertificate():
 
 
             data = db.session.query(
-                                    StudentsDB.STUDENTS_NAME, StudentsDB.id,
+                                    StudentsDB.STUDENTS_NAME, StudentsDB.id, StudentsDB.ADMISSION_DATE,
                                     StudentsDB.FATHERS_NAME, StudentsDB.IMAGE, StudentsDB.ADMISSION_NO,
+                                    StudentsDB.Admission_Class, StudentsDB.SR,
 
                                     ClassData.CLASS, 
                                     StudentSessions.ROLL,
