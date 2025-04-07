@@ -6,30 +6,32 @@
   <title>Admission Form</title>
   <style>
     @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
       body {
         margin: 0;
         padding: 0;
       }
-
-      @page {
-        size: A4 portrait;
-        margin: 10px; /* 20px margin on all sides */
-      }
-
       .container {
-        width: calc(210mm - 40px);  /* A4 width minus 2×20px margins */
-        height: calc(297mm - 40px); /* A4 height minus 2×20px margins */
-        margin: auto;               /* Center it */
+        page-break-inside: avoid;
+        page-break-after: auto;
+        page-break-before: auto;
+        max-height: calc(297mm - 20mm); /* A4 minus top+bottom margins */
+        width: calc(210mm - 20mm);      /* A4 minus left+right margins */
+        margin: auto;
       }
     }
     .container {
-      width: 210mm;  /* A4 horizontal width */
-      height: 297mm;  /* A4 horizontal width */
-      border: 3px solid black;  /* Optional: border to show container size */
+      /* Remove the fixed height */
+      width: 210mm;
+      max-height: 297mm;
+      border: 3px solid black;
       font-family: Arial, sans-serif;
-      position: relative; /* <-- Add this */
-
+      position: relative;
     }
+
     .header {
       margin-top: 8px;
       text-align: center;
