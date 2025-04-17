@@ -8,16 +8,16 @@
 
 
 .card {
- background-color: #1a1a1a;
+  background-color: #1e1e1e;
  border-radius:5px;
- transition: all .3s;
-
 }
 
-.card:hover {
- transform: scale(1.005);
- border-radius: 5px;
-}
+.form-control:focus,
+.form-select:focus {
+      border-color: #2892e9;
+      box-shadow: 0 0 0 .25rem rgba(19, 82, 255, 0.5);
+      color: #fff;
+    }
 
 </style>
 
@@ -39,7 +39,12 @@
 
     <h1 class="text-2xl font-bold mb-6 text-center">Student Registration Form</h1>
     <div class="card m-8 p-6 ">
-        <form class="rounded shadow-md" id = "DataForm">
+      <form class="rounded shadow-md" id = "DataForm">
+
+          
+        
+          
+          
       <!-- Personal Information -->
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
@@ -49,21 +54,17 @@
             {% include 'html-components/input.html' with context %}
           {% endfor %}
 
-          <!-- Image -->
-          
-          {% include 'html-components/image-uploader.html' with context %}
-          
-          
-
         </div>
       </div>
+
+      {% include 'html-components/image-uploader.html' with context %}
       
       <!-- Academic Details -->
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Academic Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {% for id, InputDetailsDict in PersonalInfo.items() %}
-            <!--{% include 'html-components/input.html' with context %}-->
+          {% for id, InputDetailsDict in AcademicInfo.items() %}
+            {% include 'html-components/input.html' with context %}
           {% endfor %}
  
         </div>
@@ -73,8 +74,18 @@
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Guardian Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {% for id, InputDetailsDict in PersonalInfo.items() %}
-            <!--{% include 'html-components/input.html' with context %}-->
+          {% for id, InputDetailsDict in GuardianInfo.items() %}
+            {% include 'html-components/input.html' with context %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="mb-6">
+        <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {% for id, InputDetailsDict in ContactInfo.items() %}
+            {% include 'html-components/input.html' with context %}
           {% endfor %}
         </div>
       </div>
@@ -84,8 +95,8 @@
         <h2 class="text-xl font-semibold mb-4">Additional/Logistical Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- School to Home Distance -->
-          {% for id, InputDetailsDict in PersonalInfo.items() %}
-            <!--{% include 'html-components/input.html' with context %}-->
+          {% for id, InputDetailsDict in AdditionalInfo.items() %}
+            {% include 'html-components/input.html' with context %}
           {% endfor %}
           <!-- Total Due -->
         </div>
@@ -264,7 +275,7 @@ function showAlert(alertID, messageElementID, message) {
             console.log('Success:', data);
 
             // Optionally update the page content based on the response
-            if(data.status=="SUCCESS"){
+            if (response.ok) {
               showAlert("successAlert", "successMessage", data.message)
             }
             else{
@@ -272,6 +283,7 @@ function showAlert(alertID, messageElementID, message) {
             }
 
         } catch (error) {
+          showAlert("errorAlert", "errorMessage", "An error occurred while submitting the form.")
           console.error('Error:', error);
         }
   });
@@ -285,9 +297,30 @@ function showAlert(alertID, messageElementID, message) {
         let modalContent = '';
 
         document.getElementById('StudentNameInModal').innerText = formData.get("STUDENTS_NAME")
+        const StudentImageInModal = document.getElementById('StudentImageInModal')
+
+        // 1) Detect missing image
+        let imageURL;
+        if (croppedBlob instanceof Blob && croppedBlob.size > 0) {
+          try {
+            imageURL = URL.createObjectURL(croppedBlob);
+          } catch (e) {
+            alert('There was an error processing the image. Please try again.');
+            // fall through to placeholder
+          }
+        }
+
+        // 4) If we got a URL, use it; otherwise use the placeholder
+        if (imageURL) {
+          StudentImageInModal.src = imageURL;
+          // revoke after it’s loaded to free memory
+          StudentImageInModal.onload = () => URL.revokeObjectURL(imageURL);
+        } else {
+          StudentImageInModal.src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
+        }
         
-        const imageURL = URL.createObjectURL(croppedBlob);
-        document.getElementById('StudentImageInModal').src = imageURL;
+
+
 
         // Loop through each form entry and build HTML content
         for (const [key, value] of formData.entries()) {

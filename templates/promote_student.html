@@ -1,0 +1,392 @@
+{% extends "base.html" %} {% block title %}Students Data{% endblock %} {% block
+content %}
+
+<style>
+    .form-control.focus-green:focus {
+        border-color: #198754 !important;
+        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25) !important;
+    }
+
+
+    .modal-content,
+    .accordion-body {
+        background: #1e1e2f;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-header {
+        background: linear-gradient(90deg, #4e54c8, #8f94fb);
+    }
+
+    .student-card-body {
+        background: #2a2a3d;
+        border-radius: 15px;
+        padding: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+
+    .student-image {
+        border: 3px solid #8f94fb;
+        border-radius: 50%;
+        object-fit: cover;
+        width: 150px;
+        height: 150px;
+    }
+
+    .table th,
+    .table td {
+        background-color: #34354a;
+    }
+
+    .table th {
+        background-color: #2a2a3d;
+    }
+
+    .modal-footer {
+        background: #2a2a3d;
+    }
+</style>
+
+<!-- Success Alert -->
+<div id="successAlert"
+    class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 d-flex align-items-center d-none"
+    role="alert" style="z-index: 9999">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi me-2 text-success"
+        viewBox="0 0 16 16">
+        <path
+            d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08 0l3.992-3.992a.75.75 0 1 0-1.08-1.06L7.5 9.439 5.53 7.47a.75.75 0 0 0-1.06 1.06l2.5 2.5z" />
+    </svg>
+    <div id="successMessage" class="fw-bold"></div>
+    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<!-- Error Alert -->
+<div id="errorAlert"
+    class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 d-flex align-items-center d-none"
+    role="alert" style="z-index: 9999">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi me-2 text-danger"
+        viewBox="0 0 16 16">
+        <path
+            d="M8.982 1.566a1.13 1.13 0 0 0-1.964 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.707c.89 0 1.438-.99.982-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1-2.002 0 1 1 0 0 1 2.002 0z" />
+    </svg>
+    <div id="errorMessage" class="fw-bold"></div>
+    <button type="button" class="btn-close ms-2" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+<div class="container" id="student-container">
+    <div class="row mb-3">
+        <div class="col-12 col-md-5 mb-2">
+            <select class="form-select form-select-lg" id="classView"
+                onchange="updatePage('/get_prv_year_students', 'StudentData', { 'class_id': event.target.value});">
+                <option selected hidden value="">Class</option>
+
+                {% if classes %} {% for class in classes %}
+                <option value="{{ class.id }}">{{ class.CLASS }}</option>
+                {% endfor %} {% endif %}
+            </select>
+        </div>
+
+        <div class="col-12 col-md-5 mb-2">
+            <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg"
+                placeholder="Search by Name, Class or Roll Number" />
+        </div>
+
+        <div class="row" id="StudentData">
+
+            {% if not data %}
+            <div class="alert alert-info text-center" role="alert" style="margin-top: 50px;">
+                <strong>Please Select the class!</strong>
+            </div>
+            {% endif %}
+
+            {% for row in data %}
+            <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}"
+                data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}"
+                data-roll="{{ row.ROLL }}">
+                <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
+                    <div class="card-body d-flex">
+                        <img src="{{ 
+                            'https://lh3.googleusercontent.com/d/' ~ row.IMAGE ~ '=s200' 
+                            if row.IMAGE 
+                            else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' 
+                            }}" alt="Student Image" class="rounded-circle border border-light shadow-sm" 
+                            style="width: 120px;
+                                height: 160px;
+                                object-fit: cover;
+                                object-position: top;
+                            " />
+
+                        <div class="ms-3 mt-3 flex-grow-1">
+                            <h5 class="card-title mb-0 fw-bold">
+                                <a href="javascript:void(0);" class="text-decoration-none text-success">
+                                    {{ row.STUDENTS_NAME }}
+                                </a>
+                            </h5>
+
+                            <p class="mb-2 text-secondary small">
+                                <span class="fw-semibold">Child of:</span>
+                                <i>{{ row.FATHERS_NAME }}</i>
+                            </p>
+
+                            <p class="mb-2 text-muted small">
+                                <span class="fw-semibold">Class:</span> <i>{{ row.CLASS }}</i>
+                                <br />
+                                <span class="fw-semibold">Roll No: </span> {{ row.ROLL }}
+                            </p>
+
+                            <p class="mb-2 text-muted small">
+                                <span class="fw-semibold">Next Class:</span> <i>{{ row.next_class }}</i>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-dark border-0 pt-0">
+                        <form class="row g-2 align-items-center">
+                            <div class="col-12">
+                                <div class="form-floating mb-2">
+                                    <input class="form-control text-light border-2 rounded-3 focus-green"
+                                        value="{{ current_date }}" id="promotion_date-{{ row.id }}"
+                                        name="promotion_date" placeholder="Promotion Date" />
+                                    <label for="promotion_date-{{ row.id }}" class="text-secondary">Promotion
+                                        Date:</label>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <button type="button" class="btn btn-outline-success w-100 fw-bold"
+                                    onclick="verifyData('{{ row.id }}', '{{ row.class_id }}')">
+                                    <i class="bi bi-file-earmark-text-fill me-1"></i> Promote
+                                    Student
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Student Details Modal -->
+<div class="modal fade" id="studentPromotionModal" tabindex="-1" aria-labelledby="studentPromotionModal" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header d-flex justify-content-center align-items-center w-100">
+          <h5 class="modal-title">
+            <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+  
+        <!-- Modal-Body -->
+        <div class="modal-body text-center">
+            <img id="studentImage"
+                 src="https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png"
+                 alt="Student Image"
+                 class="student-image mb-3"
+                 style="width:150px; height:150px; object-fit:cover; object-position:top; border-radius:50%;">
+          
+            <h3 id="studentName" data-id = "" class="mb-4"></h3>
+          
+            <table class="table table-hover align-middle text-start">
+              <tbody>
+                <tr>
+                    <th scope="row">Father</th>
+                    <td id="father"></td>
+                  </tr>
+                <tr>
+                  <th scope="row">Old Class</th>
+                  <td id="oldClass"></td>
+                </tr>
+                <tr>
+                  <th scope="row">New Class</th>
+                  <td id="newClass"></td>
+                </tr>
+              </tbody>
+            </table>
+          
+            <!-- Modern Input Boxes -->
+            <div class="form-floating mb-3">
+                <input type="text" id="newRoll" placeholder="New Roll No"
+                  class="form-control text-white"
+                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
+                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
+                <label for="newRoll" style="color: #bbb;">New Roll No</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <input type="number" id="due" placeholder="Due Amount"
+                  class="form-control text-white"
+                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
+                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
+                <label for="due" style="color: #bbb;">Due Amount</label>
+              </div>
+              
+              <div class="form-floating">
+                <input type="text" id="promotion_date" placeholder="Promotion Date"
+                  class="form-control text-white"
+                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
+                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
+                <label for="promotion_date" style="color: #bbb;">Promotion Date</label>
+              </div>
+            <!-- Modern Input Boxes End -->
+        </div>
+        <!-- Modal-Body End-->
+        
+  
+        <!-- Modal Footer -->
+        <div class="modal-footer px-4 py-3 border-0 justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-success px-4"
+                onclick="promote_student()">
+                <i class="bi bi-check-circle me-1"></i> Promote
+            </button>
+        </div>
+        <!-- Modal Footer End -->
+      </div>
+    </div>
+  </div>
+
+
+
+
+
+
+
+<script>
+    async function verifyData(id, class_id) {
+        
+
+        promotion_date = document.getElementById("promotion_date-" + id).value;
+
+        if (!promotion_date) {
+            showAlert(400, "Please enter the promotion date.");
+            return;
+        }
+
+        const response = await fetch("/single_student_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                studentId: id,
+                class_id: class_id,
+            }),
+        });
+
+        const data = await response.json();
+        console.log("Response Data:", data);
+
+        if (response.ok) {
+            
+
+            //Verify the data before sending the request
+            document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
+            document.getElementById("studentName").dataset.id = data.id;   // setting data-id attribute 
+            document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
+            document.getElementById("newClass").innerHTML = data.promoted_class;
+            document.getElementById("newRoll").value = data.promoted_roll;
+            document.getElementById("promotion_date").value = promotion_date;
+            document.getElementById("father").innerHTML = data.FATHERS_NAME;
+
+            if(data.IMAGE){
+                document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
+            }
+            else{
+                document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
+            }
+            
+            var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
+            modal.show();
+        } else {
+            showAlert(response.status, data.message);
+        }  
+        
+    }
+
+    async function promote_student(studentId) {
+
+        promotion_date = document.getElementById("promotion_date").value
+        promoted_roll = document.getElementById("newRoll").value;
+        due_amount = document.getElementById("due").value;
+        studentId = document.getElementById("studentName").dataset.id;   // setting data-id attribute
+
+        if (!promotion_date || !newRoll) {
+            showAlert(400, "Please type all the fields.");
+            return;
+        }
+
+        try {
+            // 1. Send the request
+            const response = await fetch("/promote_student_in_DB", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    studentId: studentId,
+                    promotion_date: promotion_date,
+                    promoted_roll: promoted_roll,
+                    due_amount: due_amount,
+                }),
+            });
+            const data = await response.json();
+
+            
+
+            if (!response.ok) {
+                showAlert(response.status, data.message);
+                return 0;
+            }
+
+            showAlert(response.status, data.message);
+            console.log("Student promoted successfully:");
+            modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
+            modal.hide();
+
+            
+        } catch (err) {
+            console.error("Promotion Error:", err);
+            showAlert(400, "There is an unexpected error occuring, please Try again.");
+        }
+    }
+</script>
+
+
+<script>
+
+    // Called on every keystroke in the search box
+    function applyFilters() {
+        const term = document
+            .getElementById("search-input")
+            .value.trim()
+            .toLowerCase();
+
+        // Grab all student cards
+        const cards = document.querySelectorAll(".student-card");
+
+        cards.forEach((card) => {
+            // Read the relevant data attributes
+            const name = card.getAttribute("data-name").toLowerCase();
+            const roll = card.getAttribute("data-roll").toLowerCase();
+
+            // Check if any field contains the search term
+            const matches = name.includes(term) || roll.includes(term);
+
+            // Show/hide card
+            card.style.display = matches ? "" : "none";
+        });
+    }
+
+    // Optionally, clear filters when class dropdown changes
+    document.getElementById("classView").addEventListener("change", () => {
+        document.getElementById("search-input").value = "";
+        applyFilters();
+    });
+</script>
+
+{% endblock %}
+</div>

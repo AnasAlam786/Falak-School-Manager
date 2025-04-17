@@ -1,17 +1,17 @@
 from flask import Flask, render_template, jsonify, request, session, url_for, redirect
-import os
-from dotenv import load_dotenv
-from werkzeug.security import check_password_hash
-from model import *
-from bs4 import BeautifulSoup
-import datetime
-from threading import Thread
+from sqlalchemy import func, case, select
 from flask_mail import Message, Mail
+
+from werkzeug.security import check_password_hash
+from bs4 import BeautifulSoup
+
+import datetime
+from dotenv import load_dotenv
 import json
-from sqlalchemy import func, case
-import time
+import os
+from threading import Thread
 
-
+from model import *
 
 load_dotenv()
 
@@ -20,7 +20,6 @@ app.jinja_env.globals['getattr'] = getattr
 app.config['SECRET_KEY'] = os.getenv('SESSION_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('URI')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['PERMANENT_SESSION_LIFETIME'] = datetime.timedelta(days=50)
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # SMTP server (e.g., Gmail)
 app.config['MAIL_PORT'] = 587  # Port for sending emails
@@ -49,10 +48,40 @@ def send_email(subject, std, event, questions):
 def home():
     return render_template('home.html')
 
+@app.route('/change_session', methods=["POST"])
+def change_session():
+    data = request.json
+    current_session = data.get('year')
+
+    # Validate input
+    if not current_session or not str(current_session).isdigit():
+        return jsonify({"message": "Invalid session ID"}), 400
+
+    current_session = int(current_session)
+
+    # Fetch all sessions from DB
+    sessions = Sessions.query.with_entities(
+        Sessions.id, Sessions.session, Sessions.current_session
+    ).order_by(Sessions.session.asc()).all()
+
+    # Store all session years in the session
+    session["all_sessions"] = [s.session for s in sessions]
+
+    # Find and set the requested session
+    for s in sessions:
+        if current_session == s.session:
+            session["current_session"] = s.session
+            session["session_id"] = s.id
+            return jsonify({"message": "Session Updated"}), 200
+
+    return jsonify({"message": "Session not found"}), 404
+
+    
 
 @app.route('/login', methods=["GET", "POST"])
 def login():
     error=None
+    
     
     if "email" in session:
         return redirect(url_for('studentsData'))
@@ -69,13 +98,24 @@ def login():
 
             if school and check_password_hash(school.Password, password):
 
+                sessions = Sessions.query.with_entities(Sessions.id, Sessions.session, Sessions.current_session
+                                                        ).order_by(Sessions.session.asc()).all()
+
+                session["all_sessions"] = [sessi.session for sessi in sessions]
                 session["school_name"] = school.School_Name
                 session["classes"] = school.Classes
                 session["logo"] = school.Logo
                 session["email"] = school.Email
                 session["school_id"] = school.id
 
-                session["session_id"] = 1   #current session id from Sessions table
+                # pick out the one where current_session==True (or None if none)
+                session_id, current_session = next(
+                    ((s.id, s.session) for s in sessions if s.current_session),
+                    (None, None)
+                )
+
+                session["session_id"]      = session_id
+                session["current_session"] = current_session
 
                 return redirect(url_for('studentsData'))
             
@@ -183,7 +223,7 @@ def temp_page():
             ).outerjoin(
                 StudentSessions, StudentSessions.student_id == current_session_students.c.id
             ).outerjoin(
-                ClassData, current_session_students.c.class_data_id == ClassData.id
+                StudentSessions, StudentSessions.class_id == ClassData.id
             ).filter(db.or_(
                         current_session_students.c.Admission_Class == None,
                         current_session_students.c.ADMISSION_DATE == None,
@@ -202,52 +242,45 @@ def temp_page():
 
 @app.route('/students', methods=['GET', 'POST'])
 def studentsData():
-    if "email" in session:
-
-        school_id = session["school_id"]
-        current_session = session["session_id"]
-        ordered_classes = session["classes"]
-
-        # Join the StudentsDB table with the ClassData based on the foreign key
-        class_order_case = case(
-                {class_name: index for index, class_name in enumerate(ordered_classes)},
-                value = ClassData.CLASS
-            )
-
-
-        # First, filter StudentsDB (by school_id and session_id)
-        current_session_students = db.session.query(StudentsDB) \
-            .filter(StudentsDB.school_id == school_id, StudentsDB.session_id == current_session) \
-            .subquery()
-
-        data = db.session.query(
-                            current_session_students.c.id,
-                            current_session_students.c.STUDENTS_NAME,
-                            func.to_char(current_session_students.c.DOB, 'Dy, DD Month YYYY'),  # Format DOB for PostgreSQL
-                            current_session_students.c.AADHAAR,
-                            current_session_students.c.FATHERS_NAME,
-                            current_session_students.c.PEN,
-                            current_session_students.c.IMAGE,
-                            current_session_students.c.PHONE,
-
-                            StudentSessions.ROLL,
-                            
-                            ClassData.CLASS,
-                            ClassData.Section,
-                        ).outerjoin(
-                            StudentSessions, StudentSessions.student_id == current_session_students.c.id
-                        ).outerjoin(
-                            ClassData, current_session_students.c.class_data_id == ClassData.id
-                        ).order_by(
-                            class_order_case,   # Sort by class
-                            ClassData.Section.asc(),  # Sort by section
-                            StudentSessions.ROLL.asc()  # Sort by roll number
-                        ).all()
-
-
-        return render_template('students.html',data=data)
-    else:
+    if not "email" in session:
         return redirect(url_for('login'))
+
+    school_id = session["school_id"]
+    current_session = session["session_id"]
+    ordered_classes = session["classes"]
+
+    # Join the StudentsDB table with the ClassData based on the foreign key
+    class_order_case = case(
+            {class_name: index for index, class_name in enumerate(ordered_classes)},
+            value = ClassData.CLASS
+        )
+
+    print("Current Session:", current_session)
+
+    data = db.session.query(
+                        StudentsDB.id, StudentsDB.STUDENTS_NAME,
+                        func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY'),  # Format DOB for PostgreSQL
+                        StudentsDB.AADHAAR, StudentsDB.FATHERS_NAME,
+                        StudentsDB.PEN, StudentsDB.IMAGE, StudentsDB.PHONE,
+
+                        StudentSessions.ROLL,
+                        
+                        ClassData.CLASS, ClassData.Section,
+                    ).join(
+                        StudentSessions, StudentSessions.student_id == StudentsDB.id
+                    ).join(
+                        ClassData, StudentSessions.class_id == ClassData.id
+                    ).filter(
+                        StudentsDB.school_id == school_id, 
+                        StudentSessions.session_id == current_session
+                    ).order_by(
+                        class_order_case,   # Sort by class
+                        ClassData.Section.asc(),  # Sort by section
+                        StudentSessions.ROLL.asc()  # Sort by roll number
+                    ).all()
+
+    return render_template('students.html',data=data)
+    
 
 
 @app.route('/studentModal', methods=["POST"])
@@ -270,11 +303,12 @@ def studentModal():
             ClassData.CLASS,  # Get the class name from the ClassData table
             StudentSessions.ROLL
         ).join(
-            ClassData, StudentsDB.class_data_id == ClassData.id  # Join using the foreign key
-        ).join(
             StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
+        ).join(
+            ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
         ).filter(
             StudentsDB.PHONE == phone,
+            StudentSessions.session_id == session["session_id"],
         ).order_by(
         case(
             (StudentsDB.id == student_id, 0),  # Place the matched student_id at the top
@@ -282,10 +316,10 @@ def studentModal():
         )
     ).all()
 
-    content = render_template('studentModal.html', student=student)
+    if not student:
+        return jsonify({"message": "Student not found"}), 404
     
-
-
+    content = render_template('studentModal.html', student=student)
     return jsonify({"html":str(content)})
 
 @app.route('/getfees', methods=["GET", "POST"])
@@ -405,30 +439,45 @@ def addStudent():
 
             school_id=session["school_id"]
 
-            school = Schools.query.filter_by(User=school_id).first()
-            if school and check_password_hash(school.Password, password):
-                return jsonify({'status': 'SUCCESS', "message": "Student Added Succesfully"})
-            else:
-                return jsonify({'status': 'FAILED', "message": "Wrong Password"})
+            school = Schools.query.filter_by(id=school_id).first()
 
+            if not school_id or not password:
+                return jsonify({"message": "Missing school_id or password"}), 400
+
+            # 2) Lookup school
+            school = Schools.query.filter_by(id=school_id).first()
+            if not school:
+                return jsonify({"message": "School not found"}), 404
+
+            # 3) Verify password
+            if not check_password_hash(school.Password, password):
+                return jsonify({"message": "Wrong password"}), 401
+
+            # 4) Success
+            print(image)
+            if image:
+                folder_id = school.students_image_folder_id
+                drive_id = upload_image(image, data["ADMISSION_NO"], folder_id)
+                print('Uploaded image Drive ID:', drive_id)
+            return jsonify({"message": "Data submitted successfully"}), 200
 
 
         classes = session["classes"]
 
         PersonalInfo = {
-                "STUDENTS_NAME": {"label": "Student Name", "type": "text", "value":"anas alam", "required":False},
-                "DOB": {"label": "DOB", "type": "date", "value":"", "required":False},
-                "AADHAAR": {"label": "Aadhar", "type": "number",  "maxlength": 14, "required":False},
-                "HEIGHT": {"label": "Height", "type": "number", "value":"", "maxlength": 3},
-                "WEIGHT": {"label": "Weight", "type": "number", "value":"", "maxlength": 3},
+                "STUDENTS_NAME": {"label": "Student Name", "type": "text", "value":"", "required":False},  #True
+                "DOB": {"label": "DOB", "type": "date", "value":"", "required":False},  #True
+                "AADHAAR": {"label": "Aadhar", "type": "number",  "maxlength": 14, "required":False},   #True
+                "HEIGHT": {"label": "Height", "type": "number", "value":"", "maxlength": 3, "required":False},   #True
+                "WEIGHT": {"label": "Weight", "type": "number", "value":"", "maxlength": 3, "required":False},  #True
 
-                "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,
+                "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,    #True
                             "options": ["Select Gender", "Male", "Female", "Other"]},
 
-                "CAST": {"label": "Caste", "type": "select", "default": "Select Caste", "required":True,
+                "CAST": {"label": "Caste", "type": "select", "default": "Select Caste", "required":False,    #True
                             "options": ["Select Caste", "OBC", "GENERAL", "ST", "SC"]},
 
-                "RELIGION": {"label": "Religion", "type": "select", "default": "Select Religion", "required":True,
+                "RELIGION": {"label": "Religion", "type": "select", "default": "Select Religion", "required":False,   #True
                             "options": ["Select Religion", "Muslim", "Hindu", "Christian","Sikh","Buddhist","Parsi","Jain"]},
 
                 "BLOOD_GROUP": {"label": "Blood Group", "type": "select", "default": "Select Blood Group", "required":False,
@@ -436,88 +485,346 @@ def addStudent():
             }
 
         AcademicInfo = {
-                "ROLL": {"label": "Roll No", "type": "number", "value": "", "required":True},
-                "ADMISSION_NO": {"label": "Admission No.", "type": "number", "value": "", "required":True},
-                "PEN": {"label": "PEN No.", "type": "number", "value": "", "required":False},
-                "SR": {"label": "SR No.", "type": "number", "value": "", "required":True},
-                "APAAR": {"label": "APAAR No.", "type": "number", "value": "", "required":False},
                 "CLASS": {
-                    "label": "Class",
-                    "type": "select",
-                    "options": classes,
-                    "default": "Select class",
-                    "required":True
-                },
+                        "label": "Class",
+                        "type": "select",
+                        "options": ["Select Class"] + classes,
+                        "default": "Select Class",
+                        "required": False
+                    },
+                "ROLL": {"label": "Roll No", "type": "number", "value": "", "required":False},   #True
+                "ADMISSION_NO": {"label": "Admission No.", "type": "number", "value": "", "required":False},    #True
+                "ADMISSION_DATE": {"label": "Admission Date", "type": "date", "value": "", "required":False},    #True
+                "PEN": {"label": "PEN No.", "type": "number", "value": "", "required":False},
+                "SR": {"label": "SR No.", "type": "number", "value": "", "required":False},   #True
+                "APAAR": {"label": "APAAR No.", "type": "number", "value": "", "required":False},
+                
                 "SECTION": {
                     "label": "Section",
                     "type": "select",
                     "options": ["A", "B", "C", "D"],
                     "default": "Select Section",
-                    "required":True
+                    "required":False    #True
                 }
             }
 
 
         GuardianInfo = {
-                "FATHERS_NAME": {"label": "Father Name", "type": "text", "value": "", "required":True},
-                "MOTHERS_NAME": {"label": "Mother Name", "type": "text", "value": "", "required":True},
+                "FATHERS_NAME": {"label": "Father Name", "type": "text", "value": "", "required":False},   #True
+                "MOTHERS_NAME": {"label": "Mother Name", "type": "text", "value": "", "required":False},   #True
                 "FATHERS_AADHAR": {"label": "Father Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
                 "MOTHERS_AADHAR": {"label": "Mother Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
                 "FATHERS_EDUCATION": {
                     "label": "Father Qualification",
                     "type": "select",
-                    "options": ["High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
-                    "default": "Graduate",
-                    "required":True
+                    "options": ["Father Qualification", "High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
+                    "default": "Father Qualification",
+                    "required":False   #True
                 },
                 "MOTHERS_EDUCATION": {
                     "label": "Mother Qualification",
                     "type": "select",
-                    "options": ["High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
-                    "default": "Graduate", 
-                    "required":True
+                    "options": ["Mother Qualification", "High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
+                    "default": "Mother Qualification", 
+                    "required":False   #True
                 },
                 "FATHERS_OCCUPATION": {
                     "label": "Father Occupation",
                     "type": "select",
-                    "options": ["Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
-                    "default": "Business", 
-                    "required":True
+                    "options": ["Father Occupation", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job", "Other"],
+                    "default": "Father Occupation", 
+                    "required":False   #True
                 },
                 "MOTHERS_OCCUPATION": {
                     "label": "Mother Occupation",
                     "type": "select",
-                    "options": ["Homemaker", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
-                    "default": "Homemaker", 
-                    "required":True
+                    "options": ["Mother Occupation", "Homemaker", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
+                    "default": "Mother Occupation", 
+                    "required":False   #True
                 }
 }
 
         ContactInfo = {
-                "ADDRESS": {"label": "Address", "type": "text", "value": "", "required":True},
-                "PIN": {"label": "PIN Code", "type": "number", "value": "", "maxlength": 6, "required":True},
+                "ADDRESS": {"label": "Address", "type": "text", "value": "", "required":False},   #True
+                "PIN": {"label": "PIN Code", "type": "number", "value": "", "maxlength": 6, "required":False},   #True
                 "EMAIL": {"label": "Email ID", "type": "email", "value": "", "required":False},
-                "MOBILE": {"label": "Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":True},
-                "ALT_MOBILE": {"label": "Alternate Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":False}
+                "MOBILE": {"label": "Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":False},   #True
+                "ALT_MOBILE": {"label": "Alternate Mobile Number", "short_label":"2nd Phone No.", "type": "number", "value": "", "maxlength": 10, "required":False}
             }
 
         AdditionalInfo = {
-                "Previous_Class_Marks": {"label": "Previous Class Marks", "type": "number", "value": "", "maxlength": 3, "required":False},
-                "Previous_Class_Attendance": {"label": "Previous Class Attendance (%)", "type": "number", "value": "", "maxlength": 3, "required":False},
-                "Previous_School": {"label": "Previous School Name", "type": "text", "value": ""},
+                "Previous_Class_Marks": {"label": "Previous Class Marks", "short_label":"Prv. Class Marks", "type": "number", "value": "", "maxlength": 3, "required":False},
+                "Previous_Class_Attendance": {"label": "Previous Class Attendance(%)", "short_label":"Prv. Class Attendance", "type": "number", "value": "", "maxlength": 3, "required":False},
+                "Previous_School": {"label": "Previous School Name", "short_label":"Prv. School", "type": "text", "value": "", "required":False},
                 "Home_Distance": {
                     "label": "School to Home Distance (km)",
+                    "short_label": "Home Distance",
                     "type": "select",
-                    "options": ["Less than 1 km", "1-3 km", "3-5 km", "More than 5 km"],
-                    "default": "1-3 km",
-                    "required":True
+                    "options": ["Select Distance", "Less than 1 km", "1-3 km", "3-5 km", "More than 5 km"],
+                    "default": "Select Distance",
+                    "required":False
                 }
             }
+
+        #get current date
+        current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+        AcademicInfo["ADMISSION_DATE"]["value"] = current_date
+        
+
         
         return render_template('addStudent.html',PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo, 
                                GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
     else:
         return redirect(url_for('login'))
+
+
+@app.route('/single_student_data', methods=["POST"])
+def single_student_data():
+    """
+    Fetch a single student's data including promotion details based on
+    the previous session data.
+    
+    Expected JSON payload:
+    {
+        "studentId": <student_id>,
+        "class_id": <current_class_id>
+    }
+    """
+    data = request.get_json()
+
+    # Validate input: ensure required keys exist
+    if not data or "studentId" not in data or "class_id" not in data:
+        return jsonify({"message": "Missing required parameters."}), 400
+    
+    try:
+        student_id = int(data.get('studentId'))
+        current_class_data_id = int(data.get('class_id'))
+    except (TypeError, ValueError):
+        return jsonify({"message": "Invalid parameter format."}), 400
+
+    # Validate session values exist and are valid integers
+    try:
+        school_id = session["school_id"]
+        current_session_id = int(session["session_id"])
+        previous_session = current_session_id - 1
+    except (KeyError, ValueError):
+        return jsonify({"message": "Session data is missing or corrupted. Please logout and login again!"}), 500
+
+    # Calculate the next class id (assumes sequential class ids)
+    next_class_id = current_class_data_id + 1
+
+    # Build subquery to get the next class name
+    next_class_subquery = (
+        select(ClassData.CLASS)
+        .where(ClassData.id == next_class_id)
+        .scalar_subquery()
+    )
+
+    # Build subquery to calculate the next available roll number in the next class
+    next_roll_subquery = (
+        select(func.coalesce(func.max(StudentSessions.ROLL), 0) + 1)
+        .select_from(StudentsDB)
+        .join(StudentSessions)
+        .where(
+            StudentSessions.class_id == next_class_id,
+            StudentsDB.school_id == school_id,
+            StudentsDB.session_id == previous_session
+        )
+        .scalar_subquery()
+    )
+
+    try:
+        # Main query to retrieve student's data for the previous session
+        student_query = db.session.query(
+            StudentsDB.id,
+            StudentsDB.STUDENTS_NAME,
+            StudentsDB.IMAGE,
+            StudentsDB.FATHERS_NAME,
+            ClassData.CLASS,
+            StudentSessions.ROLL,
+            next_class_subquery.label("promoted_class"),
+            next_roll_subquery.label("promoted_roll")
+        ).join(
+            StudentSessions, StudentSessions.student_id == StudentsDB.id
+        ).join(
+            ClassData, StudentSessions.class_id == ClassData.id
+        ).filter(
+            StudentsDB.id == student_id,
+            StudentSessions.session_id == previous_session
+        )
+        
+        student_row = student_query.first()
+    except Exception as error:
+        # Log error here if you have a logger configured
+        return jsonify({"message": "An error occurred while fetching student data."}), 500
+
+    if student_row is None:
+        return jsonify({"message": "Student not found"}), 404
+
+    # Convert SQLAlchemy row object to dictionary and return JSON response
+    return jsonify(student_row._asdict()), 200
+
+@app.route('/promote_student_in_DB', methods=["POST"])
+def promote_student_in_DB():
+    try:
+        current_session = int(session["session_id"])
+        classes = session["classes"]
+    except (KeyError, ValueError):
+        return jsonify({"message": "Session data is missing or corrupted. Please logout and login again!"}), 500
+        
+    data = request.get_json()
+    if not data:
+        return jsonify({"message": "Missing JSON payload"}), 400
+
+    required_fields = ["studentId", "promoted_roll"]
+    for field in required_fields:
+        if field not in data:
+            return jsonify({"message": f"Missing required parameter: {field}"}), 400
+        
+    try:
+        studentId = int(data.get('studentId'))
+        promoted_roll = int(data.get('promoted_roll'))
+    except (TypeError, ValueError):
+        return jsonify({"message": "Student or the promoted roll no is not valid!"}), 404
+    
+
+    
+    promotion_date = data.get('promotion_date')
+    if promotion_date:
+        try:
+            promotion_date = datetime.datetime.strptime(promotion_date, "%d-%m-%Y")
+        except ValueError:
+            return jsonify({"message": "Invalid promotion date format. Use 'day-month-year'."}), 400
+    else:
+        promotion_date = datetime.datetime.now()
+
+
+
+    due_amount_input = data.get('due_amount')
+    due_amount = None
+    if due_amount_input:
+        try:
+            due_amount = float(due_amount_input)  # Using float to handle decimal values
+        except ValueError:
+            return jsonify({"message": "Invalid due amount."}), 400
+        
+
+        
+    #check if the student exist in previous session.
+    student = StudentSessions.query.filter_by(student_id = studentId,
+                                              session_id = current_session-1).first()
+    if not student:
+        return jsonify({"message": "Student not found"}), 404
+    
+    class_to_promote = student.class_id + 1
+
+    if class_to_promote > len(classes):
+        return jsonify({"message": "Student cannot be promoted; maximum class reached."}), 400
+
+
+
+    # If an entry exists, reject the request immediately
+    already_promoted  = StudentSessions.query.filter_by(
+        student_id=studentId,
+        session_id=current_session
+    ).first()
+    if already_promoted:
+        return jsonify({"message": "Student already has an entry in this session. Promotion not allowed."}), 400
+
+
+
+    # Check for existing roll number in the target class and session
+    existing_roll = StudentSessions.query.filter_by(
+        session_id=current_session,
+        class_id=class_to_promote,
+        ROLL=promoted_roll
+    ).first()
+
+    if existing_roll:
+        return jsonify({"message": "This roll number is already in use in the target class and session."}), 400
+
+
+    new_session = StudentSessions(
+        student_id=studentId,
+        session_id=current_session,
+        ROLL=promoted_roll,
+        class_id=class_to_promote,
+        due_amount=due_amount,
+        created_at=promotion_date
+    )
+    
+    try:
+        db.session.add(new_session)
+        db.session.commit()
+    except Exception as error:
+        db.session.rollback()
+        return jsonify({"message": "Failed to promote student due to a database error."}), 500
+
+    return jsonify({"message": "Student Promoted successfully"}), 200
+
+
+
+@app.route('/promote_student', methods=["GET", "POST"])
+def promoteStudent():
+    if not "email" in session:
+        return redirect(url_for('login'))
+
+    school_id = session["school_id"]
+    classes = db.session.query(
+        ClassData.id, ClassData.CLASS
+    ).filter_by(
+        school_id=school_id
+    ).order_by(
+        ClassData.id
+    ).all()
+    return render_template('promote_student.html', classes=classes)
+
+
+@app.route('/get_prv_year_students', methods=["POST"])
+def get_prv_year_students():
+    data = request.json
+    class_id = data.get('class_id')
+    next_class_id = int(data.get('class_id'))+1
+
+    school_id = session["school_id"]
+    current_session = session["session_id"]
+    current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+
+    data = db.session.query(
+        StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.ADMISSION_NO,
+        StudentsDB.IMAGE, StudentsDB.FATHERS_NAME, StudentsDB.ADMISSION_DATE,
+        ClassData.CLASS, StudentSessions.ROLL, StudentSessions.class_id,
+
+        select(ClassData.CLASS)
+            .where(ClassData.id == next_class_id)
+            .label("next_class"),
+    ).join(
+        StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
+    ).join(
+        ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
+    ).filter(
+        ClassData.id == class_id,
+        StudentsDB.school_id == school_id,
+        StudentSessions.session_id == current_session - 1
+    ).order_by(
+        StudentSessions.ROLL
+    ).all()
+
+    if not data:
+        return jsonify({
+            "html": """
+            <div class="alert alert-warning text-center" role="alert" style="margin-top: 50px;">
+                <h5 class="mb-0">No Students Found</h5>
+            </div>
+            """
+        })
+    
+    html = render_template('promote_student.html', data=data, current_date=current_date)
+    soup=BeautifulSoup(html,"lxml")
+    content=soup.body.find('div',{'id':'StudentData'}).decode_contents()
+
+    return jsonify({"html":str(content)})
+
 
 @app.route('/updatemarks', methods=["GET", "POST"])
 def updatemarks():
@@ -542,13 +849,13 @@ def updatemarks():
                                     StudentSessions.id, StudentsDB.STUDENTS_NAME, ClassData.CLASS, 
                                     StudentSessions.ROLL, StudentSessions.Attendance
                                 ).join(
-                                    ClassData, StudentsDB.class_data_id == ClassData.id
+                                    StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
                                 ).join(
-                                    StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                    ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                                 ).filter(
                                     ClassData.CLASS == CLASS,
                                     StudentsDB.school_id == school_id,
-                                    StudentsDB.session_id == current_session_id
+                                    StudentSessions.session_id == current_session_id
                                 ).order_by(
                                     StudentSessions.ROLL
                                 ).all()
@@ -558,16 +865,16 @@ def updatemarks():
                                     ClassData.CLASS, StudentSessions.ROLL, 
                                     getattr(StudentsMarks, EXAM), StudentsMarks.Subject
                                 ).join(
-                                    ClassData, StudentsDB.class_data_id == ClassData.id
+                                    StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
                                 ).join(
-                                    StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                    ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                                 ).join(
                                     StudentsMarks, StudentsMarks.student_id == StudentsDB.id
                                 ).filter(
                                     StudentsMarks.Subject == SUBJECT,
                                     ClassData.CLASS == CLASS,
                                     StudentsDB.school_id == school_id,
-                                    StudentsDB.session_id == current_session_id
+                                    StudentSessions.session_id == current_session_id
                                 ).order_by(
                                     StudentSessions.ROLL
                                 ).all()
@@ -629,13 +936,13 @@ def TransferCertificate():
                                     StudentSessions.ROLL,
                                     func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
                                 ).join(
-                                    ClassData, StudentsDB.class_data_id == ClassData.id
+                                    StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
                                 ).join(
-                                    StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                    ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                                 ).filter(
-                                    StudentsDB.class_data_id == CLASS,
+                                    StudentSessions.class_id == CLASS,
                                     StudentsDB.school_id == school_id,
-                                    StudentsDB.session_id == current_session_id
+                                    StudentSessions.session_id == current_session_id
                                 ).order_by(
                                     StudentSessions.ROLL
                                 ).all()
@@ -659,8 +966,6 @@ def TransferCertificate():
     else:
         return redirect(url_for('login'))
 
-
-
 @app.route('/tcform', methods=['POST'])
 def tcform():
 
@@ -671,6 +976,8 @@ def tcform():
         student_id = data.get('student_id')
         leaving_reason = data.get('leaving_reason')
         classes = session["classes"]
+        current_session_id = session["session_id"]
+
 
         student_marks = db.session.query(
             StudentsMarks.Subject,
@@ -725,11 +1032,12 @@ def tcform():
             StudentSessions.ROLL
 
         ).join(
-            ClassData, StudentsDB.class_data_id == ClassData.id 
+            StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
         ).join(
-            StudentSessions, StudentSessions.student_id == StudentsDB.id
+            ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
         ).filter(
             StudentsDB.id == student_id,
+            StudentSessions.session_id == current_session_id
         ).first()
 
         class_index = classes.index(student.CLASS)
@@ -752,7 +1060,6 @@ def tcform():
     
     else:
         return redirect(url_for('login'))
-
 
 
 @app.route('/entrycard')
@@ -813,13 +1120,14 @@ def report_card():
                                 TeachersLogin.Sign,
                                 func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
                             ).join(
-                                ClassData, StudentsDB.class_data_id == ClassData.id
+                                StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
                             ).join(
-                                StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                             ).join(
                                 TeachersLogin, ClassData.id == TeachersLogin.class_id
                             ).filter(
-                                StudentsDB.id == student_id
+                                StudentsDB.id == student_id,
+                                StudentSessions.session_id == current_session_id
                             ).all()
             else:
                 CLASS = request.json.get('class')
@@ -831,13 +1139,13 @@ def report_card():
                                 ClassData.exam_format, ClassData.CLASS, 
                                 StudentSessions.ROLL, 
                             ).join(
-                                ClassData, StudentsDB.class_data_id == ClassData.id
+                                StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
                             ).join(
-                                StudentSessions, StudentSessions.student_id == StudentsDB.id
+                                ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                             ).filter(
                                 ClassData.CLASS == CLASS,
                                 StudentsDB.school_id == school_id,
-                                StudentsDB.session_id == current_session_id
+                                StudentSessions.session_id == current_session_id
                             ).order_by(
                                 StudentSessions.ROLL
                             ).all()

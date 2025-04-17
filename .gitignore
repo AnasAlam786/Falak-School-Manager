@@ -9,6 +9,7 @@ venv/
 
 # Ignore environment variables file (.env)
 .env
+falak-drive-api.json
 
 # Ignore IDE/editor files (e.g., VSCode, PyCharm)
 .vscode/

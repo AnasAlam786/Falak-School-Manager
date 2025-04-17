@@ -144,7 +144,7 @@ function openFeesModal(){
   }
 
   function verifyModal() {
-    console.log(grandTotal.textContent.trim())
+
     if (grandTotal.textContent.trim() === '₹0'){
       showAlert(message="You need to select a month in order to pay the fees.", type='danger', timeout=4000,element='feesModalBody'); return
     } else {
