@@ -5,10 +5,20 @@ from sqlalchemy import (
     ForeignKey, func, case, literal, cast, String
 )
 
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from googleapiclient.http import MediaIoBaseUpload
+
 
 from itertools import groupby
+import io
 from operator import itemgetter
 from collections import defaultdict
+
+
+
+SCOPES = ['https://www.googleapis.com/auth/drive']
+SERVICE_ACCOUNT_FILE = 'falak-drive-api.json'
 
 db = SQLAlchemy()
 
@@ -28,6 +38,7 @@ class Schools(db.Model):
     Manager = Column(Text, nullable=False)
     Classes = Column(JSON, nullable=False)              # Not null in DB
     IP = Column(JSON, nullable=True)
+    students_image_folder_id = Column(Text, nullable=True)  # Added students_image_folder_id as per DB
     session_id = Column(Text, nullable=False)
     
     # Relationships
@@ -158,6 +169,8 @@ class StudentSessions(db.Model):
     Weight = Column(Integer, nullable=True)
     session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     Attendance = Column(Integer, nullable=True)
+    created_at = Column(DateTime)
+    due_amount = Column(Numeric, nullable=True)
 
 
     class_data = db.relationship("ClassData", back_populates="student_sessions")
@@ -368,3 +381,32 @@ def ResultData(students_ids=None):
 
     return grouped_data
 
+
+def upload_image(
+    image_bytes: bytes,
+    file_name: str,
+    folder_id: str,
+    mimetype: str = 'image/jpeg'
+) -> str:
+    """
+    Upload raw image bytes to Google Drive and return the file ID.
+    """
+    # 1) Load creds & build service
+    creds = service_account.Credentials.from_service_account_file(
+        SERVICE_ACCOUNT_FILE, scopes=SCOPES
+    )
+    service = build('drive', 'v3', credentials=creds)
+
+    # 2) Prepare metadata & media
+    metadata = {'name': file_name, 'parents': [folder_id]}
+    media = MediaIoBaseUpload(io.BytesIO(image_bytes), mimetype=mimetype, resumable=True)
+
+    # 3) Execute upload
+    created = service.files().create(
+        body=metadata,
+        media_body=media,
+        fields='id'
+    ).execute()
+
+    # 4) Return the new file’s ID
+    return created['id']
