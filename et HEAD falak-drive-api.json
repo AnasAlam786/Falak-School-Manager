@@ -1,0 +1,22 @@
+[33mf2d92e8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Added promote student and session features.
+.gitignore
+[33m6ad5da2[m Added promote student and session features.
+.gitignore
+[33m8ceedd0[m Added promote student and session features.
+falak-drive-api.json
+[33mb6d5192[m Added promote student and session features.
+.gitignore
+app.py
+falak-drive-api.json
+model.py
+requirements.txt
+static/students.js
+templates/addStudent.html
+templates/base.html
+templates/feesModal.html
+templates/html-components/image-uploader.html
+templates/html-components/input.html
+templates/login.html
+templates/promote_student.html
+templates/students.html
+templates/transfer_certificate.html
