@@ -1,5 +1,9 @@
 from flask import Flask, render_template, jsonify, request, session, url_for, redirect
+
 from sqlalchemy import func, case, select
+from sqlalchemy.orm import aliased
+from sqlalchemy import true
+
 from flask_mail import Message, Mail
 
 from werkzeug.security import check_password_hash
@@ -8,12 +12,15 @@ from bs4 import BeautifulSoup
 import datetime
 from dotenv import load_dotenv
 import json
+import logging
 import os
 from threading import Thread
 
 from model import *
 
 load_dotenv()
+logger = logging.getLogger(__name__)
+
 
 app = Flask(__name__)
 app.jinja_env.globals['getattr'] = getattr
@@ -577,6 +584,77 @@ def addStudent():
     else:
         return redirect(url_for('login'))
 
+@app.route('/already_promoted_student_data', methods=["POST"])
+def promoted_single_student_data():
+    """
+    Fetch a single student's data including promotion details based on
+    the previous session data.
+    
+    Expected JSON payload:
+    {
+        "studentId": <student_id>,
+        "promoted_session_id": <id of record in StudentSessions table>
+    }
+    """
+
+    data = request.get_json()
+
+    # Validate input: ensure required keys exist
+    if not data or "studentId" not in data or "IDToInEndpoint" not in data:
+        return jsonify({"message": "Missing required parameters."}), 400
+    
+    try:
+        promoted_session_id = int(data.get('IDToInEndpoint'))
+    except Exception as e:
+        print("Invalid parameter format:", data)
+        return jsonify({"message": "Invalid parameter format."}), 400
+    
+    try:
+        # Create aliases for self-join
+        PromotedSession = aliased(StudentSessions)
+        PreviousSession = aliased(StudentSessions)
+        PreviousClass = aliased(ClassData)
+
+        student_row = db.session.query(
+            StudentsDB.STUDENTS_NAME,
+            StudentsDB.IMAGE,
+            StudentsDB.FATHERS_NAME,
+
+            # Promoted (current) session
+            ClassData.CLASS.label("promoted_class"),
+            PromotedSession.ROLL.label("promoted_roll"),
+            PromotedSession.id.label("promoted_session_id"),
+            func.to_char(PromotedSession.created_at, 'YYYY-MM-DD').label("promoted_date"),
+
+            # Previous session
+            PreviousClass.CLASS.label("CLASS"),
+            PreviousSession.ROLL.label("ROLL"),
+            func.to_char(PreviousSession.created_at, 'YYYY-MM-DD').label("previous_date"),
+
+        ).join(
+            PromotedSession, PromotedSession.student_id == StudentsDB.id
+        ).join(
+            ClassData, PromotedSession.class_id == ClassData.id
+        ).join(
+            PreviousSession, PreviousSession.student_id == StudentsDB.id
+        ).join(
+            PreviousClass, PreviousSession.class_id == PreviousClass.id
+        ).filter(
+            PromotedSession.id == promoted_session_id,
+            PreviousSession.id != promoted_session_id  # exclude the current session
+        ).order_by(
+            PreviousSession.created_at.desc()
+        ).limit(1).first()  # get the most recent previous session only
+        
+    except Exception as error:
+        # Log error here if you have a logger configured
+        print("Error fetching student data:", error)
+        return jsonify({"message": "An error occurred while fetching student data."}), 500
+
+    if student_row is None:
+        return jsonify({"message": "Student not found"}), 404
+
+    return jsonify(student_row._asdict()), 200
 
 @app.route('/single_student_data', methods=["POST"])
 def single_student_data():
@@ -593,13 +671,14 @@ def single_student_data():
     data = request.get_json()
 
     # Validate input: ensure required keys exist
-    if not data or "studentId" not in data or "class_id" not in data:
+    if not data or "studentId" not in data or "IDToInEndpoint" not in data:
         return jsonify({"message": "Missing required parameters."}), 400
     
     try:
         student_id = int(data.get('studentId'))
-        current_class_data_id = int(data.get('class_id'))
-    except (TypeError, ValueError):
+        current_class_data_id = int(data.get('IDToInEndpoint'))
+    except Exception as e:
+        print("Invalid parameter format:", data)
         return jsonify({"message": "Invalid parameter format."}), 400
 
     # Validate session values exist and are valid integers
@@ -622,13 +701,13 @@ def single_student_data():
 
     # Build subquery to calculate the next available roll number in the next class
     next_roll_subquery = (
-        select(func.coalesce(func.max(StudentSessions.ROLL), 0) + 1)
+        select(func.coalesce(func.max(StudentSessions.ROLL), 999) + 1)
         .select_from(StudentsDB)
         .join(StudentSessions)
         .where(
             StudentSessions.class_id == next_class_id,
             StudentsDB.school_id == school_id,
-            StudentsDB.session_id == previous_session
+            StudentSessions.session_id == int(current_session_id)
         )
         .scalar_subquery()
     )
@@ -664,6 +743,80 @@ def single_student_data():
     # Convert SQLAlchemy row object to dictionary and return JSON response
     return jsonify(student_row._asdict()), 200
 
+
+
+@app.route('/update_promoted_student', methods=["POST"])
+def update_promoted_student():
+
+    current_session = session.get("session_id")
+
+    data = request.json
+    sessionDBid = data.get('IDToPassInEndpoint')
+    promoted_roll = data.get('promoted_roll')
+    promoted_date = data.get('promoted_date')
+
+    due_amount_input = data.get('due_amount')
+    due_amount = None
+    if due_amount_input:
+        try:
+            due_amount = int(due_amount_input)  # Using float to handle decimal values
+        except ValueError:
+            return jsonify({"message": "Invalid due amount."}), 400
+
+
+    if not sessionDBid or not promoted_roll or not promoted_date:
+        return jsonify({"message": "Missing required parameters."}), 400
+
+    student_session = StudentSessions.query.filter_by(id = sessionDBid).first()
+    if not student_session:
+        return jsonify({"message": "Student not promoted, Try promoting again!"}), 404
+
+    # Check for existing roll number in the target class and session
+    conflict = db.session.query(
+        StudentsDB.STUDENTS_NAME,
+        ClassData.CLASS
+        ).join(
+            StudentSessions, StudentSessions.student_id == StudentsDB.id
+        ).join(
+            ClassData, StudentSessions.class_id == ClassData.id
+        ).filter(
+            StudentSessions.session_id == current_session,
+            StudentSessions.class_id == student_session.class_id,
+            StudentSessions.ROLL == promoted_roll,
+            StudentSessions.id != student_session.id
+        ).first()
+
+    if conflict:
+        logger.error("This roll number is already in use: %s", conflict)
+        return jsonify({
+            "message": f"This roll number is already in use in the target class and session, by {conflict.STUDENTS_NAME} in class {conflict.CLASS}"
+        }), 400
+
+
+    try:
+        sessionDBid = int(sessionDBid)
+        promoted_roll = int(promoted_roll)
+        promoted_date = datetime.datetime.strptime(promoted_date, "%Y-%m-%d").date()
+        print(promoted_date)
+        print("Hello")
+    except (ValueError, TypeError):
+        return jsonify({"message": "Invalid parameter format."}), 400
+
+    # Update the StudentSessions table with the new roll number and date
+    try:
+        if student_session:
+            student_session.ROLL = promoted_roll
+            student_session.created_at = promoted_date
+            student_session.due_amount = due_amount  # Optional field
+            db.session.commit()
+            return jsonify({"message": "Student record updated successfully."}), 200
+        else:
+            return jsonify({"message": "Student session not found."}), 404
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"message": "Error updating student record."}), 500
+
+
 @app.route('/promote_student_in_DB', methods=["POST"])
 def promote_student_in_DB():
     try:
@@ -676,27 +829,29 @@ def promote_student_in_DB():
     if not data:
         return jsonify({"message": "Missing JSON payload"}), 400
 
-    required_fields = ["studentId", "promoted_roll"]
+    required_fields = ["IDToPassInEndpoint", "promoted_roll", "promoted_date"]
     for field in required_fields:
         if field not in data:
             return jsonify({"message": f"Missing required parameter: {field}"}), 400
+
+    print("Data received:", data)
         
     try:
-        studentId = int(data.get('studentId'))
+        studentId = int(data.get('IDToPassInEndpoint'))
         promoted_roll = int(data.get('promoted_roll'))
     except (TypeError, ValueError):
         return jsonify({"message": "Student or the promoted roll no is not valid!"}), 404
     
 
     
-    promotion_date = data.get('promotion_date')
-    if promotion_date:
+    promoted_date = data.get('promoted_date')
+    if promoted_date:
         try:
-            promotion_date = datetime.datetime.strptime(promotion_date, "%d-%m-%Y")
+            promoted_date = datetime.datetime.strptime(promoted_date, "%Y-%m-%d").date()
         except ValueError:
-            return jsonify({"message": "Invalid promotion date format. Use 'day-month-year'."}), 400
+            return jsonify({"message": "Invalid promotion date format. Use 'year-month-day'."}), 400
     else:
-        promotion_date = datetime.datetime.now()
+        return jsonify({"message": "Please enter promotion date."}), 400
 
 
 
@@ -750,7 +905,7 @@ def promote_student_in_DB():
         ROLL=promoted_roll,
         class_id=class_to_promote,
         due_amount=due_amount,
-        created_at=promotion_date
+        created_at=promoted_date
     )
     
     try:
@@ -761,7 +916,6 @@ def promote_student_in_DB():
         return jsonify({"message": "Failed to promote student due to a database error."}), 500
 
     return jsonify({"message": "Student Promoted successfully"}), 200
-
 
 
 @app.route('/promote_student', methods=["GET", "POST"])
@@ -784,28 +938,61 @@ def promoteStudent():
 def get_prv_year_students():
     data = request.json
     class_id = data.get('class_id')
-    next_class_id = int(data.get('class_id'))+1
+    next_class_id = int(class_id)+1
 
     school_id = session["school_id"]
     current_session = session["session_id"]
-    current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
+
+    PromotedSession = aliased(StudentSessions)
+    promoted_subq = (
+        select(
+            PromotedSession.student_id,
+            PromotedSession.id.label("promoted_session_id"),
+            PromotedSession.ROLL.label("promoted_roll"),
+            PromotedSession.created_at.label("promoted_date")
+        )
+        .where(
+            PromotedSession.session_id == current_session
+        )
+        .subquery()
+    )
+
+
+    # Main query with LEFT JOIN to promoted_subq
     data = db.session.query(
-        StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.ADMISSION_NO,
-        StudentsDB.IMAGE, StudentsDB.FATHERS_NAME, StudentsDB.ADMISSION_DATE,
-        ClassData.CLASS, StudentSessions.ROLL, StudentSessions.class_id,
+        StudentsDB.id,
+        StudentsDB.STUDENTS_NAME,
+        StudentsDB.ADMISSION_NO,
+        StudentsDB.IMAGE,
+        StudentsDB.FATHERS_NAME,
+        StudentsDB.ADMISSION_DATE,
+        ClassData.CLASS.label("previous_class"),
+        StudentSessions.ROLL.label("previous_roll"),
+        StudentSessions.class_id,
+
+        promoted_subq.c.promoted_roll,
+        promoted_subq.c.promoted_date,
+        promoted_subq.c.promoted_session_id,
 
         select(ClassData.CLASS)
             .where(ClassData.id == next_class_id)
-            .label("next_class"),
+            .scalar_subquery()
+            .label("next_class")
     ).join(
-        StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
+        StudentSessions, 
+        StudentSessions.student_id == StudentsDB.id
     ).join(
-        ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
+        ClassData, 
+        StudentSessions.class_id == ClassData.id
+    ).outerjoin(  # LEFT JOIN promoted details
+        promoted_subq,
+        promoted_subq.c.student_id == StudentsDB.id
     ).filter(
         ClassData.id == class_id,
         StudentsDB.school_id == school_id,
-        StudentSessions.session_id == current_session - 1
+        StudentSessions.session_id == current_session - 1  # Previous session
     ).order_by(
         StudentSessions.ROLL
     ).all()
