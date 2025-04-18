@@ -75,180 +75,210 @@ content %}
 </div>
 
 <div class="container" id="student-container">
-    <div class="row mb-3">
-        <div class="col-12 col-md-5 mb-2">
-            <select class="form-select form-select-lg" id="classView"
-                onchange="updatePage('/get_prv_year_students', 'StudentData', { 'class_id': event.target.value});">
-                <option selected hidden value="">Class</option>
+    <h3 class="mb-0 fw-bold text-center text-success">
+        Promote Students
+      </h3>
+      <small class="d-block text-center text-muted lh-1 mt-0 mb-4">
+        Student records from the previous academic session will be displayed here.
+      </small>
 
-                {% if classes %} {% for class in classes %}
-                <option value="{{ class.id }}">{{ class.CLASS }}</option>
-                {% endfor %} {% endif %}
-            </select>
+<!--
+  gx-2 = small horizontal gutter (between cols on md+)
+  gy-3 = larger vertical gutter (between rows on mobile)
+  remove your old mb-3 on the row
+-->
+<div class="row justify-content-center gx-2 gy-3">
+    <!-- Select Box -->
+    <div class="col-12 col-md-6">
+      <div class="input-group" >
+        <span class="input-group-text bg-secondary text-white border-secondary">
+          <i class="bi bi-easel-fill"></i>
+        </span>
+        <select
+          class="form-select bg-dark text-light border-secondary"
+          id="classView"
+          onchange="updatePage('/get_prv_year_students', 'StudentData', { 'class_id': event.target.value });"
+        >
+          <option selected hidden value="">Select Class</option>
+          {% if classes %}{% for class in classes %}
+          <option value="{{ class.id }}">{{ class.CLASS }}</option>
+          {% endfor %}{% endif %}
+        </select>
+      </div>
+    </div>
+  
+    <!-- Search Box -->
+    <div class="col-12 col-md-6">
+      <div class="input-group w-100">
+        <span class="input-group-text bg-secondary text-white border-secondary">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          id="search-input"
+          oninput="applyFilters()"
+          class="form-control bg-dark text-light border-secondary"
+          placeholder="Search by Name, Class, Roll No."
+        />
+      </div>
+    </div>
+  </div>
+  
+    <div class="row" id="StudentData">
+
+        {% if not data %}
+        <div class="alert alert-info text-center" role="alert" style="margin-top: 50px;">
+            <strong>Please Select the class!</strong>
         </div>
+        {% endif %}
 
-        <div class="col-12 col-md-5 mb-2">
-            <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg"
-                placeholder="Search by Name, Class or Roll Number" />
-        </div>
+        {% for row in data %}
+        <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}"
+            data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}"
+            data-roll="{{ row.ROLL }}">
+            <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
+                <div class="card-body d-flex">
+                    <img src="{{ 
+                        'https://lh3.googleusercontent.com/d/' ~ row.IMAGE ~ '=s200' 
+                        if row.IMAGE 
+                        else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' 
+                        }}" alt="Student Image" class="rounded-circle border border-light shadow-sm" 
+                        style="width: 120px;
+                            height: 160px;
+                            object-fit: cover;
+                            object-position: top;
+                        " />
 
-        <div class="row" id="StudentData">
+                    <div class="ms-3 mt-3 flex-grow-1">
+                        <h5 class="card-title mb-0 fw-bold">
+                            <a href="javascript:void(0);" class="text-decoration-none text-success">
+                                {{ row.STUDENTS_NAME }}
+                            </a>
+                        </h5>
 
-            {% if not data %}
-            <div class="alert alert-info text-center" role="alert" style="margin-top: 50px;">
-                <strong>Please Select the class!</strong>
-            </div>
-            {% endif %}
+                        <p class="mb-2 text-secondary small">
+                            <span class="fw-semibold">Child of:</span>
+                            <i>{{ row.FATHERS_NAME }}</i>
+                        </p>
 
-            {% for row in data %}
-            <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}"
-                data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}"
-                data-roll="{{ row.ROLL }}">
-                <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
-                    <div class="card-body d-flex">
-                        <img src="{{ 
-                            'https://lh3.googleusercontent.com/d/' ~ row.IMAGE ~ '=s200' 
-                            if row.IMAGE 
-                            else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' 
-                            }}" alt="Student Image" class="rounded-circle border border-light shadow-sm" 
-                            style="width: 120px;
-                                height: 160px;
-                                object-fit: cover;
-                                object-position: top;
-                            " />
+                        <p class="mb-2 text-muted small">
+                            <span class="fw-semibold">Class:</span> <i>{{ row.CLASS }}</i>
+                            <br />
+                            <span class="fw-semibold">Roll No: </span> {{ row.ROLL }}
+                        </p>
 
-                        <div class="ms-3 mt-3 flex-grow-1">
-                            <h5 class="card-title mb-0 fw-bold">
-                                <a href="javascript:void(0);" class="text-decoration-none text-success">
-                                    {{ row.STUDENTS_NAME }}
-                                </a>
-                            </h5>
-
-                            <p class="mb-2 text-secondary small">
-                                <span class="fw-semibold">Child of:</span>
-                                <i>{{ row.FATHERS_NAME }}</i>
-                            </p>
-
-                            <p class="mb-2 text-muted small">
-                                <span class="fw-semibold">Class:</span> <i>{{ row.CLASS }}</i>
-                                <br />
-                                <span class="fw-semibold">Roll No: </span> {{ row.ROLL }}
-                            </p>
-
-                            <p class="mb-2 text-muted small">
-                                <span class="fw-semibold">Next Class:</span> <i>{{ row.next_class }}</i>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="card-footer bg-dark border-0 pt-0">
-                        <form class="row g-2 align-items-center">
-                            <div class="col-12">
-                                <div class="form-floating mb-2">
-                                    <input class="form-control text-light border-2 rounded-3 focus-green"
-                                        value="{{ current_date }}" id="promotion_date-{{ row.id }}"
-                                        name="promotion_date" placeholder="Promotion Date" />
-                                    <label for="promotion_date-{{ row.id }}" class="text-secondary">Promotion
-                                        Date:</label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <button type="button" class="btn btn-outline-success w-100 fw-bold"
-                                    onclick="verifyData('{{ row.id }}', '{{ row.class_id }}')">
-                                    <i class="bi bi-file-earmark-text-fill me-1"></i> Promote
-                                    Student
-                                </button>
-                            </div>
-                        </form>
+                        <p class="mb-2 text-muted small">
+                            <span class="fw-semibold">Next Class:</span> <i>{{ row.next_class }}</i>
+                        </p>
                     </div>
                 </div>
-            </div>
 
-            {% endfor %}
+                <div class="card-footer bg-dark border-0 pt-0">
+                    <form class="row g-2 align-items-center">
+                        <div class="col-12">
+                            <div class="form-floating mb-2">
+                                <input class="form-control text-light border-2 rounded-3 focus-green"
+                                    value="{{ current_date }}" id="promotion_date-{{ row.id }}"
+                                    name="promotion_date" placeholder="Promotion Date" />
+                                <label for="promotion_date-{{ row.id }}" class="text-secondary">Promotion
+                                    Date:</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button type="button" class="btn btn-outline-success w-100 fw-bold"
+                                onclick="verifyData('{{ row.id }}', '{{ row.class_id }}')">
+                                <i class="bi bi-file-earmark-text-fill me-1"></i> Promote
+                                Student
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
+
+        {% endfor %}
     </div>
 </div>
-
-<!-- Student Details Modal -->
-<div class="modal fade" id="studentPromotionModal" tabindex="-1" aria-labelledby="studentPromotionModal" aria-hidden="true">
+<!-- Student Promotion Modal -->
+<div class="modal fade" id="studentPromotionModal" tabindex="-1" aria-labelledby="studentPromotionModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
+        <!-- Modal Header -->
         <div class="modal-header d-flex justify-content-center align-items-center w-100">
-          <h5 class="modal-title">
+          <h5 class="modal-title" id="studentPromotionModalLabel">
             <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
   
-        <!-- Modal-Body -->
-        <div class="modal-body text-center">
-            <img id="studentImage"
-                 src="https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png"
-                 alt="Student Image"
-                 class="student-image mb-3"
-                 style="width:150px; height:150px; object-fit:cover; object-position:top; border-radius:50%;">
+        <!-- Promotion Form -->
+        <form id="promotionForm" class="modal-body text-center">
+          <!-- Student Image -->
+          <img id="studentImage"
+               src="https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png"
+               alt="Graduation Cap Icon"
+               class="student-image mb-3"
+               style="width:150px; height:150px; object-fit:cover; object-position:top; border-radius:50%;">
           
-            <h3 id="studentName" data-id = "" class="mb-4"></h3>
-          
-            <table class="table table-hover align-middle text-start">
-              <tbody>
-                <tr>
-                    <th scope="row">Father</th>
-                    <td id="father"></td>
-                  </tr>
-                <tr>
-                  <th scope="row">Old Class</th>
-                  <td id="oldClass"></td>
-                </tr>
-                <tr>
-                  <th scope="row">New Class</th>
-                  <td id="newClass"></td>
-                </tr>
-              </tbody>
-            </table>
-          
-            <!-- Modern Input Boxes -->
-            <div class="form-floating mb-3">
-                <input type="text" id="newRoll" placeholder="New Roll No"
-                  class="form-control text-white"
-                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
-                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
-                <label for="newRoll" style="color: #bbb;">New Roll No</label>
-              </div>
-
-              <div class="form-floating mb-3">
-                <input type="number" id="due" placeholder="Due Amount"
-                  class="form-control text-white"
-                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
-                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
-                <label for="due" style="color: #bbb;">Due Amount</label>
-              </div>
-              
-              <div class="form-floating">
-                <input type="text" id="promotion_date" placeholder="Promotion Date"
-                  class="form-control text-white"
-                  style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; 
-                         box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);">
-                <label for="promotion_date" style="color: #bbb;">Promotion Date</label>
-              </div>
-            <!-- Modern Input Boxes End -->
-        </div>
-        <!-- Modal-Body End-->
-        
+          <!-- Student Name (data-id carries the student ID) -->
+          <h3 id="studentName" data-id="" class="mb-4"></h3>
+  
+          <!-- Details Table -->
+          <table class="table table-hover align-middle text-start mb-4">
+            <tbody>
+              <tr>
+                <th scope="row">Father</th>
+                <td id="father"></td>
+              </tr>
+              <tr>
+                <th scope="row">Old Class</th>
+                <td id="oldClass"></td>
+              </tr>
+              <tr>
+                <th scope="row">New Class</th>
+                <td id="newClass"></td>
+              </tr>
+            </tbody>
+          </table>
+  
+          <!-- Input Fields -->
+          <div class="form-floating mb-3">
+            <input required type="number" inputmode="numeric" id="newRoll" name="newRoll" placeholder="New Roll No"
+                   class="form-control text-white"
+                   style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
+            <label for="newRoll" style="color: #bbb;">New Roll No</label>
+            <div class="invalid-feedback">Please enter a valid roll number.</div>
+          </div>
+  
+          <div class="form-floating mb-3">
+            <input type="number" inputmode="numeric" id="due" name="due" min="0" step="0.01" placeholder="Due Amount"
+                   class="form-control text-white"
+                   style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
+            <label for="due" style="color: #bbb;">Due Amount</label>
+            <div class="invalid-feedback">Please enter a non-negative amount.</div>
+          </div>
+  
+          <div class="form-floating mb-3">
+            <input required inputmode="numeric" id="promotion_date" name="promotion_date" placeholder="Promotion Date"
+                   class="form-control text-white"
+                   style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
+            <label for="promotion_date" style="color: #bbb;">Promotion Date</label>
+            <div class="invalid-feedback">Please select a valid date.</div>
+          </div>
+        </form>
   
         <!-- Modal Footer -->
         <div class="modal-footer px-4 py-3 border-0 justify-content-between">
-            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-success px-4"
-                onclick="promote_student()">
-                <i class="bi bi-check-circle me-1"></i> Promote
-            </button>
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+          <button onclick="handlePromoteClick()" id="promoteButton" class="btn btn-success px-4">
+            <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true"></span>
+            <i class="bi bi-check-circle me-1"></i>
+            Promote
+          </button>
         </div>
-        <!-- Modal Footer End -->
       </div>
     </div>
   </div>
-
 
 
 
@@ -307,56 +337,60 @@ content %}
         
     }
 
-    async function promote_student(studentId) {
 
-        promotion_date = document.getElementById("promotion_date").value
-        promoted_roll = document.getElementById("newRoll").value;
-        due_amount = document.getElementById("due").value;
-        studentId = document.getElementById("studentName").dataset.id;   // setting data-id attribute
+async function handlePromoteClick() {
+  const form = document.getElementById("promotionForm");
+  
+  // 1) Run built‑in HTML5 validation
+  if (!form.checkValidity()) {
+    form.classList.add("was-validated");  // Bootstrap will show the invalid-feedback
+    return;
+  }
 
-        if (!promotion_date || !newRoll) {
-            showAlert(400, "Please type all the fields.");
-            return;
-        }
+  // 2) Get form values
+  const formData = new FormData(form);
 
-        try {
-            // 1. Send the request
-            const response = await fetch("/promote_student_in_DB", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    studentId: studentId,
-                    promotion_date: promotion_date,
-                    promoted_roll: promoted_roll,
-                    due_amount: due_amount,
-                }),
-            });
-            const data = await response.json();
+  const btn = document.getElementById("promoteButton");
+  const spinner = document.getElementById("promoteSpinner");
 
-            
+  btn.disabled = true;
+  spinner.classList.remove("d-none");
 
-            if (!response.ok) {
-                showAlert(response.status, data.message);
-                return 0;
-            }
+  const studentId      = document.getElementById("studentName").dataset.id;
+  const promotion_date = formData.get("promotion_date");
+  const promoted_roll  = formData.get("newRoll");
+  const due_amount     = formData.get("due");
 
-            showAlert(response.status, data.message);
-            console.log("Student promoted successfully:");
-            modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
-            modal.hide();
 
-            
-        } catch (err) {
-            console.error("Promotion Error:", err);
-            showAlert(400, "There is an unexpected error occuring, please Try again.");
-        }
+
+  try {
+    const res = await fetch("/promote_student_in_DB", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ studentId, promotion_date, promoted_roll, due_amount }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+
+      showAlert(res.status, data.message);
+      const modal = bootstrap.Modal.getInstance(document.getElementById("studentPromotionModal"));
+      modal.hide();
+
+    } else {
+      showAlert(res.status, data.message);
     }
-</script>
 
 
-<script>
+  } catch (err) {
+    console.error(err);
+    showAlert(400, "An unexpected error occurred. Please try again.");
+  } finally {
+    spinner.classList.add("d-none");
+    btn.disabled = false;
+  }
+}
 
     // Called on every keystroke in the search box
     function applyFilters() {
@@ -389,4 +423,3 @@ content %}
 </script>
 
 {% endblock %}
-</div>
