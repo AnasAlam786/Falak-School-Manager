@@ -1108,6 +1108,7 @@ def TransferCertificate():
 
         if request.method == "POST":
             data = request.json
+            print(data)
 
             CLASS = data.get('class')
             school_id = session["school_id"]
@@ -1146,7 +1147,7 @@ def TransferCertificate():
 
             classes = db.session.query(ClassData.id, ClassData.CLASS)\
                 .filter_by(school_id=school_id
-                ).order_by(ClassData.CLASS).all()
+                ).order_by(ClassData.id).all()
 
             return render_template('transfer_certificate.html', classes=classes)
         
