@@ -204,40 +204,49 @@ def temp_page():
     current_session = session["session_id"]
     ordered_classes = session["classes"]
 
+    StudentRollSession = aliased(StudentSessions)
+
+
     class_order_case = case(
-                {class_name: index for index, class_name in enumerate(ordered_classes)},
-                value = ClassData.CLASS
-            )
+        {class_name: index for index, class_name in enumerate(ordered_classes)},
+        value=ClassData.CLASS
+    )
 
     current_session_students = db.session.query(StudentsDB) \
-            .filter(StudentsDB.school_id == school_id, StudentsDB.session_id == current_session) \
-            .subquery()
-     
-    data = db.session.query(
-                current_session_students.c.id,
-                current_session_students.c.STUDENTS_NAME,
-                current_session_students.c.FATHERS_NAME,
-                current_session_students.c.IMAGE,
-                current_session_students.c.ADMISSION_NO,
-                current_session_students.c.SR,
-                current_session_students.c.ADMISSION_DATE,
-                current_session_students.c.Admission_Class,
+        .filter(
+            StudentsDB.school_id == school_id,
+            StudentsDB.session_id == current_session
+        ).subquery()
 
-                StudentSessions.ROLL,
-                
-                ClassData.CLASS,
-                ClassData.Section,
-            ).outerjoin(
-                StudentSessions, StudentSessions.student_id == current_session_students.c.id
-            ).outerjoin(
-                StudentSessions, StudentSessions.class_id == ClassData.id
-            ).filter(db.or_(
-                        current_session_students.c.Admission_Class == None,
-                        current_session_students.c.ADMISSION_DATE == None,
-                        current_session_students.c.SR == None)
-            ).order_by(
-                current_session_students.c.ADMISSION_NO.asc(),  # Sort by student name
-            ).all()
+    data = db.session.query(
+        current_session_students.c.id,
+        current_session_students.c.STUDENTS_NAME,
+        current_session_students.c.FATHERS_NAME,
+        current_session_students.c.IMAGE,
+        current_session_students.c.ADMISSION_NO,
+        current_session_students.c.SR,
+        current_session_students.c.ADMISSION_DATE,
+        current_session_students.c.Admission_Class,
+
+        StudentRollSession.ROLL,
+        ClassData.CLASS,
+        ClassData.Section,
+    ).outerjoin(
+        StudentRollSession, StudentRollSession.student_id == current_session_students.c.id
+    ).outerjoin(
+        ClassData, StudentRollSession.class_id == ClassData.id
+    ).filter(
+        db.or_(
+            current_session_students.c.Admission_Class == None,
+            current_session_students.c.ADMISSION_DATE == None,
+            current_session_students.c.SR == None
+        )
+    ).order_by(
+        class_order_case,
+        current_session_students.c.STUDENTS_NAME.asc()  # Or use ADMISSION_NO if desired
+    ).all()
+
+
     
     classes = db.session.query(ClassData.id, ClassData.CLASS)\
         .filter_by(school_id=school_id
@@ -616,9 +625,8 @@ def promoted_single_student_data():
         PreviousClass = aliased(ClassData)
 
         student_row = db.session.query(
-            StudentsDB.STUDENTS_NAME,
-            StudentsDB.IMAGE,
-            StudentsDB.FATHERS_NAME,
+            StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.IMAGE, 
+            StudentsDB.FATHERS_NAME, StudentsDB.PHONE,
 
             # Promoted (current) session
             ClassData.CLASS.label("promoted_class"),
@@ -715,10 +723,8 @@ def single_student_data():
     try:
         # Main query to retrieve student's data for the previous session
         student_query = db.session.query(
-            StudentsDB.id,
-            StudentsDB.STUDENTS_NAME,
-            StudentsDB.IMAGE,
-            StudentsDB.FATHERS_NAME,
+            StudentsDB.id, StudentsDB.STUDENTS_NAME, 
+            StudentsDB.IMAGE, StudentsDB.FATHERS_NAME, StudentsDB.PHONE,
             ClassData.CLASS,
             StudentSessions.ROLL,
             next_class_subquery.label("promoted_class"),
@@ -744,13 +750,13 @@ def single_student_data():
     return jsonify(student_row._asdict()), 200
 
 
-
 @app.route('/update_promoted_student', methods=["POST"])
 def update_promoted_student():
 
     current_session = session.get("session_id")
 
     data = request.json
+    print("Data received:", data)
     sessionDBid = data.get('IDToPassInEndpoint')
     promoted_roll = data.get('promoted_roll')
     promoted_date = data.get('promoted_date')
@@ -797,8 +803,7 @@ def update_promoted_student():
         sessionDBid = int(sessionDBid)
         promoted_roll = int(promoted_roll)
         promoted_date = datetime.datetime.strptime(promoted_date, "%Y-%m-%d").date()
-        print(promoted_date)
-        print("Hello")
+
     except (ValueError, TypeError):
         return jsonify({"message": "Invalid parameter format."}), 400
 
@@ -834,7 +839,6 @@ def promote_student_in_DB():
         if field not in data:
             return jsonify({"message": f"Missing required parameter: {field}"}), 400
 
-    print("Data received:", data)
         
     try:
         studentId = int(data.get('IDToPassInEndpoint'))
@@ -884,7 +888,7 @@ def promote_student_in_DB():
         session_id=current_session
     ).first()
     if already_promoted:
-        return jsonify({"message": "Student already has an entry in this session. Promotion not allowed."}), 400
+        return jsonify({"message": "Student already has an entry in this session, promotion not allowed!"}), 400
 
 
 
@@ -915,7 +919,7 @@ def promote_student_in_DB():
         db.session.rollback()
         return jsonify({"message": "Failed to promote student due to a database error."}), 500
 
-    return jsonify({"message": "Student Promoted successfully"}), 200
+    return jsonify({"message" : "Student Promoted successfully"}), 200
 
 
 @app.route('/promote_student', methods=["GET", "POST"])
@@ -932,6 +936,68 @@ def promoteStudent():
         ClassData.id
     ).all()
     return render_template('promote_student.html', classes=classes)
+
+@app.route('/generate_message', methods=["POST"])
+def generate_message():
+    data = request.json
+    student_id = data.get('studentID')
+    print("Student ID:", student_id)
+    session_id = session["session_id"]
+
+    if not student_id:
+        return jsonify({"message": "Missing student ID"}), 400
+
+    PromotedSession = aliased(StudentSessions)
+    PromotedClass = aliased(ClassData)
+    PreviousSession = aliased(StudentSessions)
+    PreviousClass = aliased(ClassData)
+
+    student_data = db.session.query(
+        StudentsDB.STUDENTS_NAME,
+        StudentsDB.PHONE,
+        PromotedClass.CLASS.label("promoted_class"),
+        PromotedSession.ROLL.label("promoted_roll"),
+        PromotedSession.due_amount.label("due_amount"),
+
+        func.to_char(PromotedSession.created_at, 'FMDay, DD Mon YYYY').label("promoted_date"),
+        PreviousClass.CLASS.label("previous_class"),
+    ).join(
+        PromotedSession,
+        (StudentsDB.id == PromotedSession.student_id) &
+        (PromotedSession.session_id == session_id)
+    ).join(
+        PromotedClass,
+        PromotedSession.class_id == PromotedClass.id
+    ).outerjoin(
+        PreviousSession,
+        (StudentsDB.id == PreviousSession.student_id) &
+        (PreviousSession.session_id == session_id - 1)
+    ).outerjoin(
+        PreviousClass,
+        PreviousSession.class_id == PreviousClass.id
+    ).filter(
+        StudentsDB.id == student_id
+    ).first()
+
+    print(student_data)
+
+    message = f'''🎉 हमें ये बताते हुए बहुत‑बहुत खुशी हो रही है कि *{student_data.STUDENTS_NAME}* का प्रमोशन  Class, *{student_data.previous_class}* से Class, *{student_data.promoted_class}* में हो गया हैं! 🥳
+    
+    🎓 नया रोल नंबर: *{student_data.promoted_roll}*
+    📅 तारीख: *{student_data.promoted_date}*
+    
+    आपकी मेहनत ने रंग लाया — बढ़ते रहो, चमकते रहो और हमें गर्व महसूस कराओ! 🌟
+    '''
+
+    if student_data.due_amount:
+        message += f"💰 शेष बकाया राशि: *{student_data.due_amount}* रुपये कृपया यथासंभव शीघ्र भुगतान करने की कृपा करें। 🙏"
+
+    message += "ढेरों बधाइयाँ! 🙌🎉"
+
+    print("Generated Message:", message)
+        
+    return jsonify({"whatsappMessage": message, "PHONE": student_data.PHONE}), 200
+
 
 
 @app.route('/get_prv_year_students', methods=["POST"])

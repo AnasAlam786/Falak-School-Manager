@@ -135,7 +135,7 @@ content %}
         {% for row in data %}
         <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}"
             data-class="{{ row.previous_class }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}"
-            data-roll="{{ row.previous_roll }}">
+            data-roll="{{ row.previous_roll }}" data-phone = "{{ row.PHONE }}">
             <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
                 <div class="card-body d-flex">
                     <img src="{{ 
@@ -193,19 +193,25 @@ content %}
                         </div>
                         <div class="col-12">
                             {% if row.promoted_session_id %}
-                            <button type="button" class="btn btn-outline-secondary w-100 fw-bold"
-                                    onclick="verifyData('{{ row.id }}','{{ row.promoted_session_id }}', '/already_promoted_student_data')">
-                                <i class="bi bi-file-earmark-check-fill me-1"></i> Already Promoted, Update
-                            </button>    
-                            
+                                <div class="d-flex gap-2">
+                                    <button type="button" class="btn btn-outline-secondary w-100 fw-bold"
+                                            onclick="verifyData('{{ row.id }}','{{ row.promoted_session_id }}', '/already_promoted_student_data')">
+                                        <i class="bi bi-file-earmark-check-fill me-1"></i> Update Student
+                                    </button>    
+                                    
+                                    <button type="button" class="btn btn-outline-danger w-100 fw-bold"
+                                            onclick="verifyData('{{ row.id }}','{{ row.promoted_session_id }}', '/depromote_student')">
+                                        <i class="bi bi-file-earmark-x-fill me-1"></i> Depromote
+                                    </button>
+                                </div>
                             {% else %}
-                            <button type="button" class="btn btn-outline-success w-100 fw-bold"
-                                    onclick="verifyData('{{ row.id }}', '{{ row.class_id }}', '/single_student_data')">
-                                <i class="bi bi-file-earmark-text-fill me-1"></i> Promote Student
-                            </button>
-                                
+                                <button type="button" class="btn btn-outline-success w-100 fw-bold"
+                                        onclick="verifyData('{{ row.id }}', '{{ row.class_id }}', '/single_student_data')">
+                                    <i class="bi bi-file-earmark-text-fill me-1"></i> Promote Student
+                                </button>
                             {% endif %}
                         </div>
+                        
                     </form>
                 </div>
             </div>
@@ -286,6 +292,28 @@ content %}
   
         <!-- Modal Footer -->
         <div class="modal-footer px-4 py-3 border-0 justify-content-between" id="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+
+            <button type="button" class="btn btn-success px-4 d-none" id="promoteButton" displayed="false">
+                <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true"></span>
+                <i class="bi bi-check-circle me-1"></i>
+                Promote
+            </button>
+
+
+
+            <button onclick="handlePromoteClick('${data.promoted_session_id}', '/update_promoted_student')" id="UpdateButton" class="btn btn-success d-none px-4">
+                <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true" ></span>
+                <i class="bi bi-check-circle me-1"></i>
+                Update
+            </button>
+
+
+
+            <button id = "messageButton" class="btn btn-success px-4">
+                <i class="bi bi-whatsapp me-1"></i>
+                Send WhatsApp
+            </button>
 
 
         </div>
@@ -321,12 +349,12 @@ content %}
         });
 
         const data = await response.json();
-        console.log("Response Data:", data);
 
         if (response.ok) {
 
             //Verify the data before sending the request
             document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
+            document.getElementById("studentName").setAttribute("data-id", data.id);
             document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
             document.getElementById("newClass").innerHTML = data.promoted_class;
             document.getElementById("newRoll").value = data.promoted_roll;
@@ -335,31 +363,27 @@ content %}
 
             if(data.IMAGE){
                 document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
-            }
-            else{
+            }else{
                 document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
             }
 
-            console.log("Promoted Session ID:", data);
+            const footer = document.getElementById("modal-footer");
+            document.getElementById("messageButton").classList.add("d-none");
 
             if (data.promoted_session_id) {
-
-                document.getElementById("modal-footer").innerHTML = `
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button onclick="handlePromoteClick('${ data.promoted_session_id }', '/update_promoted_student')" id="promoteButton" class="btn btn-success px-4">
-                    <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true"></span>
-                    <i class="bi bi-check-circle me-1"></i>
-                    Update
-                </button>`;
+                footer.querySelector('#promoteButton')?.classList.add("d-none");
+                const UpdateButton = footer.querySelector("#UpdateButton");
+                UpdateButton.setAttribute("onclick", `handlePromoteClick('${data.promoted_session_id}', '/update_promoted_student')`);
+                UpdateButton.classList.remove("d-none");
+                UpdateButton.disabled = false;
                 
             } else {
-                document.getElementById("modal-footer").innerHTML = `
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button onclick="handlePromoteClick('${ data.id }', '/promote_student_in_DB')" id="promoteButton" class="btn btn-success px-4">
-                    <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true"></span>
-                    <i class="bi bi-check-circle me-1"></i>
-                    Promote
-                </button>`;
+
+                footer.querySelector('#UpdateButton')?.classList.add("d-none");
+                promoteButton = footer.querySelector("#promoteButton");
+                promoteButton.setAttribute("onclick", `handlePromoteClick('${data.id}', '/promote_student_in_DB')`);
+                promoteButton.classList.remove("d-none");
+                promoteButton.disabled = false;
             }
             
             var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
@@ -372,14 +396,7 @@ content %}
 
     async function handlePromoteClick(IDToPassInEndpoint, endpoint) {
         const form = document.getElementById("promotionForm");
-        
-        // 1) Run built‑in HTML5 validation
-        if (!form.checkValidity()) {
-            form.classList.add("was-validated");  // Bootstrap will show the invalid-feedback
-            return;
-        }
 
-        // 2) Get form values
         const formData = new FormData(form);
 
         const btn = document.getElementById("promoteButton");
@@ -389,28 +406,50 @@ content %}
         spinner.classList.remove("d-none");
 
         const promoted_date = formData.get("promotion_date");
-        const promoted_roll  = formData.get("newRoll");
-        const due_amount     = formData.get("due");
+        const promoted_roll = formData.get("newRoll");
+        const due_amount = formData.get("due");
 
         try {
             const res = await fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ IDToPassInEndpoint, promoted_date, promoted_roll, due_amount }),
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'IDToPassInEndpoint': IDToPassInEndpoint, 'promoted_date' : promoted_date, 
+                                        'promoted_roll' : promoted_roll, 'due_amount' : due_amount }),
             });
 
             const data = await res.json();
 
             if (res.ok) {
+                const studentID = document.getElementById("studentName").getAttribute("data-id");
+                
 
-            showAlert(res.status, data.message);
-            const modal = bootstrap.Modal.getInstance(document.getElementById("studentPromotionModal"));
-            modal.hide();
+                const response = await fetch('/generate_message', {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 'studentID' : studentID }),
+                });
 
-            } else {
-            showAlert(res.status, data.message);
+                const generate_message = await response.json();
+                
+                if (generate_message.PHONE && generate_message.whatsappMessage && response.ok) {
+
+                    const footer = document.getElementById("modal-footer");
+                    const messageButton = document.getElementById("messageButton");
+                    const phone = document.getElementById("messageButton").getAttribute("data-phone");
+                    
+                    footer.querySelector('#promoteButton')?.classList.add("d-none");
+                    footer.querySelector('#UpdateButton')?.classList.add("d-none");
+
+                    messageButton.setAttribute("onclick", `sendWhatsAppMessage('${generate_message.PHONE}', \`${generate_message.whatsappMessage}\`)`);
+                    messageButton.classList.remove("d-none");   
+                }
+                else {
+                    console.log("WhatsApp message not generated successfully.");
+                    modal = bootstrap.Modal.getInstance(document.getElementById('studentPromotionModal'));
+                    modal.hide();
+                }
             }
-
+            showAlert(res.status, data.message);
 
         } catch (err) {
             console.error(err);
@@ -418,6 +457,24 @@ content %}
         } finally {
             spinner.classList.add("d-none");
             btn.disabled = false;
+        }
+    }
+
+
+
+
+
+    function sendWhatsAppMessage(phone, message) {
+        const formattedPhone = phone.replace(/\D/g, '');
+        const encodedMessage = encodeURIComponent(message);
+        const url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+        if (isMobile) {
+            window.location.href = url; // Mobile: redirect to WhatsApp app
+        } else {
+            window.open(url, '_blank'); // Desktop: open WhatsApp Web in new tab
         }
     }
 

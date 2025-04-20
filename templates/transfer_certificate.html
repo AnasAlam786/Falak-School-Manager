@@ -30,14 +30,6 @@ content %}
              oninput="applyFilters();" />
     </div>
     <!-- End Search Input -->
-
-    <!-- Start Reset Button -->
-    <div class="col-md-2 text-end">
-      <button type="button" class="btn btn-secondary" onclick="resetFilters();">
-        Reset
-      </button>
-    </div>
-    <!-- End Reset Button -->
   </div>
   <!-- End Filter & Search Row -->
 
@@ -129,7 +121,7 @@ content %}
     {% else %}
       <!-- Start No Data Message -->
       <div class="col-12">
-        <p class="text-center text-muted">No students found.</p>
+        <p class="text-center text-muted">Select a class to get the data.</p>
       </div>
       <!-- End No Data Message -->
     {% endif %}
