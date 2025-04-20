@@ -124,7 +124,7 @@ class StudentsDB(db.Model):
     RELIGION = Column(Text, nullable=True)
     PIN = Column(Text, nullable=True)
     ADMISSION_DATE = Column(Date, nullable=True)
-    SR = Column(Integer, nullable=True)
+    SR = Column(Integer, nullable=True, unique=True)
     IMAGE = Column(Text, nullable=True)
     FA1 = Column(JSON, nullable=True)
     SA1 = Column(JSON, nullable=True)
