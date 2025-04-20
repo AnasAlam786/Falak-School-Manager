@@ -980,18 +980,12 @@ def generate_message():
     ).first()
 
 
-    message = f'''हमें ये बताते हुए बहुत‑बहुत खुशी हो रही है कि *{student_data.STUDENTS_NAME}* का प्रमोशन  Class, *{student_data.previous_class}* से Class, *{student_data.promoted_class}* में हो गया हैं!
-    
-    नया रोल नंबर: *{student_data.promoted_roll}*
-    तारीख: *{student_data.promoted_date}*
-    
-    आपकी मेहनत ने रंग लाया — बढ़ते रहो, चमकते रहो और हमें गर्व महसूस कराओ!
-    '''
+    message = f'''हमें ये बताते हुए बहुत‑बहुत खुशी हो रही है कि *{student_data.STUDENTS_NAME}* का प्रमोशन  Class, *{student_data.previous_class}* से Class, *{student_data.promoted_class}* में हो गया हैं!\n\nनया रोल नंबर: *{student_data.promoted_roll}*\nतारीख: *{student_data.promoted_date}*\n\nआपकी मेहनत ने रंग लाया — बढ़ते रहो, चमकते रहो और हमें गर्व महसूस कराओ!'''
 
     if student_data.due_amount:
-        message += f"शेष बकाया राशि: *{student_data.due_amount}* रुपये कृपया यथासंभव शीघ्र भुगतान करने की कृपा करें।"
+        message += f"\n\nशेष बकाया राशि: *{student_data.due_amount}* रुपये कृपया यथासंभव शीघ्र भुगतान करने की कृपा करें।"
 
-    message += "ढेरों बधाइयाँ!"
+    message += "\nढेरों बधाइयाँ!"
         
     return jsonify({"whatsappMessage": message, "PHONE": student_data.PHONE}), 200
 
