@@ -602,7 +602,6 @@ def promoted_single_student_data():
     
     Expected JSON payload:
     {
-        "studentId": <student_id>,
         "promoted_session_id": <id of record in StudentSessions table>
     }
     """
@@ -610,16 +609,18 @@ def promoted_single_student_data():
     data = request.get_json()
 
     # Validate input: ensure required keys exist
-    if not data or "studentId" not in data or "IDToInEndpoint" not in data:
+    if not data or "studentSessionID" not in data:
         return jsonify({"message": "Missing required parameters."}), 400
     
     try:
-        promoted_session_id = int(data.get('IDToInEndpoint'))
+        promoted_session_id = int(data.get('studentSessionID'))
     except Exception as e:
         print("Invalid parameter format:", data)
         return jsonify({"message": "Invalid parameter format."}), 400
     
     try:
+        #session_data = db.session.query(StudentSessions.student_id).filter_by(id=promoted_session_id).scalar()
+
         # Create aliases for self-join
         PromotedSession = aliased(StudentSessions)
         PreviousSession = aliased(StudentSessions)
@@ -639,7 +640,6 @@ def promoted_single_student_data():
             # Previous session
             PreviousClass.CLASS.label("CLASS"),
             PreviousSession.ROLL.label("ROLL"),
-            func.to_char(PreviousSession.created_at, 'YYYY-MM-DD').label("previous_date"),
 
         ).join(
             PromotedSession, PromotedSession.student_id == StudentsDB.id
@@ -652,8 +652,6 @@ def promoted_single_student_data():
         ).filter(
             PromotedSession.id == promoted_session_id,
             PreviousSession.id != promoted_session_id  # exclude the current session
-        ).order_by(
-            PreviousSession.created_at.desc()
         ).limit(1).first()  # get the most recent previous session only
         
     except Exception as error:
@@ -674,19 +672,17 @@ def single_student_data():
     
     Expected JSON payload:
     {
-        "studentId": <student_id>,
-        "class_id": <current_class_id>
+        "studentID": <student_id>,
     }
     """
     data = request.get_json()
 
     # Validate input: ensure required keys exist
-    if not data or "studentId" not in data or "IDToInEndpoint" not in data:
+    if not data or "studentID" not in data:
         return jsonify({"message": "Missing required parameters."}), 400
     
     try:
-        student_id = int(data.get('studentId'))
-        current_class_data_id = int(data.get('IDToInEndpoint'))
+        student_id = int(data.get('studentID'))
     except Exception as e:
         print("Invalid parameter format:", data)
         return jsonify({"message": "Invalid parameter format."}), 400
@@ -699,8 +695,11 @@ def single_student_data():
     except (KeyError, ValueError):
         return jsonify({"message": "Session data is missing or corrupted. Please logout and login again!"}), 500
 
+
+    current_class_id = db.session.query(StudentsDB.class_data_id).filter_by(id=student_id).scalar()
+
     # Calculate the next class id (assumes sequential class ids)
-    next_class_id = current_class_data_id + 1
+    next_class_id = current_class_id + 1
 
     # Build subquery to get the next class name
     next_class_subquery = (
@@ -730,7 +729,9 @@ def single_student_data():
             ClassData.CLASS,
             StudentSessions.ROLL,
             next_class_subquery.label("promoted_class"),
-            next_roll_subquery.label("promoted_roll")
+            next_roll_subquery.label("promoted_roll"),
+
+            literal(datetime.date.today().strftime('%Y-%m-%d')).label("promoted_date")
         ).join(
             StudentSessions, StudentSessions.student_id == StudentsDB.id
         ).join(
@@ -741,8 +742,10 @@ def single_student_data():
         )
         
         student_row = student_query.first()
+        print("Student Row:", student_row)
     except Exception as error:
         # Log error here if you have a logger configured
+        print("Error fetching student data:", error)
         return jsonify({"message": "An error occurred while fetching student data."}), 500
 
     if student_row is None:
@@ -751,6 +754,33 @@ def single_student_data():
     # Convert SQLAlchemy row object to dictionary and return JSON response
     return jsonify(student_row._asdict()), 200
 
+
+@app.route('/depromote_student', methods=["POST"])
+def depromote_student():
+    data = request.json
+
+    if not 'email' in session:
+        return jsonify({"message": "Unauthorized access."}), 400
+
+    if not data or "studentSessionID" not in data:
+        return jsonify({"message": "Missing required parameters."}), 400
+
+    try:
+        student_session_ID = int(data.get('studentSessionID'))
+    except Exception as e:
+        print("Invalid parameter format:", data)
+        return jsonify({"message": "Invalid parameter format."}), 400
+
+    # Check if the student exists in the current session
+    student_sesssion = db.session.query(StudentSessions).filter_by(id=student_session_ID).first()
+    if not student_sesssion:
+        return jsonify({"message": "Student not promoted, cant depromote!"}), 404
+
+    #depromote the student by deleting the record from StudentSessions table
+    db.session.delete(student_sesssion)
+    db.session.commit()
+
+    return jsonify({"message": "Student successfully depromoted"}), 200
 
 @app.route('/update_promoted_student', methods=["POST"])
 def update_promoted_student():
@@ -1010,7 +1040,6 @@ def get_prv_year_students():
 
     school_id = session["school_id"]
     current_session = session["session_id"]
-    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
 
 
     PromotedSession = aliased(StudentSessions)
@@ -1074,7 +1103,7 @@ def get_prv_year_students():
             """
         })
     
-    html = render_template('promote_student.html', data=data, current_date=current_date)
+    html = render_template('promote_student.html', data=data)
     soup=BeautifulSoup(html,"lxml")
     content=soup.body.find('div',{'id':'StudentData'}).decode_contents()
 
