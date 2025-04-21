@@ -278,6 +278,7 @@ def studentsData():
                         func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY'),  # Format DOB for PostgreSQL
                         StudentsDB.AADHAAR, StudentsDB.FATHERS_NAME,
                         StudentsDB.PEN, StudentsDB.IMAGE, StudentsDB.PHONE,
+                        StudentsDB.Free_Scheme,
 
                         StudentSessions.ROLL,
                         
@@ -631,6 +632,7 @@ def promoted_single_student_data():
             # Promoted (current) session
             ClassData.CLASS.label("promoted_class"),
             PromotedSession.ROLL.label("promoted_roll"),
+            PromotedSession.due_amount.label("due_amount"),
             PromotedSession.id.label("promoted_session_id"),
             func.to_char(PromotedSession.created_at, 'YYYY-MM-DD').label("promoted_date"),
 
@@ -941,7 +943,7 @@ def promoteStudent():
 def generate_message():
     data = request.json
     student_id = data.get('studentID')
-    print("Student ID:", student_id)
+
     session_id = session["session_id"]
 
     if not student_id:
@@ -980,12 +982,21 @@ def generate_message():
     ).first()
 
 
-    message = f'''हमें ये बताते हुए बहुत‑बहुत खुशी हो रही है कि *{student_data.STUDENTS_NAME}* का प्रमोशन  Class, *{student_data.previous_class}* से Class, *{student_data.promoted_class}* में हो गया हैं!\n\nनया रोल नंबर: *{student_data.promoted_roll}*\nतारीख: *{student_data.promoted_date}*\n\nआपकी मेहनत ने रंग लाया — बढ़ते रहो, चमकते रहो और हमें गर्व महसूस कराओ!'''
+    message = f'''🎉 हमें ये बताते हुए अत्यंत हर्ष हो रहा है कि *{student_data.STUDENTS_NAME}* का प्रमोशन Class *{student_data.previous_class}* से Class *{student_data.promoted_class}* में सफलतापूर्वक हो चुका है! 🥳
 
+        ✨ नया रोल नंबर: *{student_data.promoted_roll}*
+        📅 तारीख: *{student_data.promoted_date}*
+
+        🙌 आपकी मेहनत ने रंग लाया — ऐसे ही आगे बढ़ते रहो, चमकते रहो और हम सबका नाम रोशन करो! 🌟'''
+            
     if student_data.due_amount:
-        message += f"\n\nशेष बकाया राशि: *{student_data.due_amount}* रुपये कृपया यथासंभव शीघ्र भुगतान करने की कृपा करें।"
+        message += f'''
 
-    message += "\nढेरों बधाइयाँ!"
+    💰 शेष बकाया राशि: *{student_data.due_amount}* रुपये  
+    कृपया यथासंभव शीघ्र भुगतान करने की कृपा करें। 🙏'''
+
+    message += '''🥳🎊 ढेरों बधाइयाँ! 🎊🥳'''
+
         
     return jsonify({"whatsappMessage": message, "PHONE": student_data.PHONE}), 200
 
