@@ -183,30 +183,21 @@ content %}
                 <div class="card-footer bg-dark border-0 pt-0">
                     <form class="row g-2 align-items-center">
                         <div class="col-12">
-                            <div class="form-floating mb-2">
-                                <input class="form-control text-light border-2 rounded-3 focus-green"
-                                    value="{{ row.promoted_date if row.promoted_date else current_date}}" id="promotion_date-{{ row.id }}"
-                                    name="promotion_date" placeholder="Promotion Date" />
-                                <label for="promotion_date-{{ row.id }}" class="text-secondary">Promotion
-                                    Date:</label>
-                            </div>
-                        </div>
-                        <div class="col-12">
                             {% if row.promoted_session_id %}
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-outline-secondary w-100 fw-bold"
-                                            onclick="verifyData('{{ row.id }}','{{ row.promoted_session_id }}', '/already_promoted_student_data')">
-                                        <i class="bi bi-file-earmark-check-fill me-1"></i> Update Student
+                                            onclick="updateStudentModal('{{ row.promoted_session_id }}')">
+                                        <i class="bi bi-file-earmark-check-fill me-1"></i> Update
                                     </button>    
                                     
                                     <button type="button" class="btn btn-outline-danger w-100 fw-bold"
-                                            onclick="verifyData('{{ row.id }}','{{ row.promoted_session_id }}', '/depromote_student')">
+                                            onclick="depromoteStudentModal('{{ row.promoted_session_id }}')">
                                         <i class="bi bi-file-earmark-x-fill me-1"></i> Depromote
                                     </button>
                                 </div>
                             {% else %}
                                 <button type="button" class="btn btn-outline-success w-100 fw-bold"
-                                        onclick="verifyData('{{ row.id }}', '{{ row.class_id }}', '/single_student_data')">
+                                        onclick="promoteStudentModal('{{ row.id }}')">
                                     <i class="bi bi-file-earmark-text-fill me-1"></i> Promote Student
                                 </button>
                             {% endif %}
@@ -288,21 +279,40 @@ content %}
             <label for="promotion_date" style="color: #bbb;">Promotion Date</label>
             <div class="invalid-feedback">Please select a valid date.</div>
           </div>
+
+          <div class="form-check d-none mb-3 ms-4" id="depromoteCheckboxContainer">
+            <input class="form-check-input border-danger" type="checkbox" id="depromoteCheckbox" aria-describedby="depromoteHelp" >
+            <label class="form-check-label fw-semibold" for="depromoteCheckbox">
+              Depromote Student, Due amount will also be cleared.
+            </label>
+            <div id="depromoteHelp" class="form-text text-danger">
+              <strong>This action cannot be undone.</strong>
+            </div>
+          </div>
+          
+          
+
         </form>
   
         <!-- Modal Footer -->
         <div class="modal-footer px-4 py-3 border-0 justify-content-between" id="modal-footer">
             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
 
-            <button type="button" class="btn btn-success px-4 d-none" id="promoteButton" displayed="false">
+            <button type="button" class="btn btn-success px-4 d-none" id="promoteButton">
                 <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true"></span>
                 <i class="bi bi-check-circle me-1"></i>
                 Promote
             </button>
 
+            <button type="button" class="btn btn-danger px-4 d-none" id="depromoteButton">
+                <span class="spinner-border spinner-border-sm d-none me-1" id="depromoteSpinner" role="status" aria-hidden="true"></span>
+                <i class="bi bi-x-circle me-1"></i>
+                Depromote
+            </button>
 
 
-            <button onclick="handlePromoteClick('${data.promoted_session_id}', '/update_promoted_student')" id="UpdateButton" class="btn btn-success d-none px-4">
+
+            <button type="button" id="updateButton" class="btn btn-success d-none px-4">
                 <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status" aria-hidden="true" ></span>
                 <i class="bi bi-check-circle me-1"></i>
                 Update
@@ -310,7 +320,7 @@ content %}
 
 
 
-            <button id = "messageButton" class="btn btn-success px-4">
+            <button type="button" id = "messageButton" class="btn btn-success d-none px-4">
                 <i class="bi bi-whatsapp me-1"></i>
                 Send WhatsApp
             </button>
@@ -327,72 +337,209 @@ content %}
 
 
 <script>
-    async function verifyData(studentID, IDToInEndpoint, endpoint) {
-        
 
-        promotion_date = document.getElementById("promotion_date-" + studentID).value;
+    async function promoteStudentModal(studentID) {
 
-        if (!promotion_date) {
-            showAlert(400, "Please enter the promotion date.");
-            return;
-        }
+        try {
+            const res = await fetch('/single_student_data', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'studentID': studentID }),
+            });
 
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                studentId: studentID,
-                IDToInEndpoint: IDToInEndpoint,
-            }),
-        });
+            const data = await res.json();
 
-        const data = await response.json();
+            if (res.ok) {
+                //Verify the data before sending the request
+                document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
+                document.getElementById("studentName").setAttribute("data-id", data.id);
+                document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
+                document.getElementById("newClass").innerHTML = data.promoted_class;
+                document.getElementById("newRoll").value = data.promoted_roll;
+                document.getElementById("promotion_date").value = data.promoted_date;
+                document.getElementById("father").innerHTML = data.FATHERS_NAME;
+                document.getElementById("due").value = data.due_amount;
 
-        if (response.ok) {
+                if(data.IMAGE){
+                    document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
+                }else{
+                    document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
+                }
 
-            //Verify the data before sending the request
-            document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
-            document.getElementById("studentName").setAttribute("data-id", data.id);
-            document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
-            document.getElementById("newClass").innerHTML = data.promoted_class;
-            document.getElementById("newRoll").value = data.promoted_roll;
-            document.getElementById("promotion_date").value = promotion_date;
-            document.getElementById("father").innerHTML = data.FATHERS_NAME;
-            document.getElementById("due").value = data.due_amount;
+                const footer = document.getElementById("modal-footer");
 
-            if(data.IMAGE){
-                document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
-            }else{
-                document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
-            }
+                footer.querySelector("#messageButton").classList.add("d-none");
+                footer.querySelector('#updateButton')?.classList.add("d-none");
+                footer.querySelector('#depromoteButton')?.classList.add("d-none");
+                document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
 
-            const footer = document.getElementById("modal-footer");
-            document.getElementById("messageButton").classList.add("d-none");
-
-            if (data.promoted_session_id) {
-                footer.querySelector('#promoteButton')?.classList.add("d-none");
-                const UpdateButton = footer.querySelector("#UpdateButton");
-                UpdateButton.setAttribute("onclick", `handlePromoteClick('${data.promoted_session_id}', '/update_promoted_student')`);
-                UpdateButton.classList.remove("d-none");
-                UpdateButton.disabled = false;
-                
-            } else {
-
-                footer.querySelector('#UpdateButton')?.classList.add("d-none");
                 promoteButton = footer.querySelector("#promoteButton");
                 promoteButton.setAttribute("onclick", `handlePromoteClick('${data.id}', '/promote_student_in_DB')`);
                 promoteButton.classList.remove("d-none");
                 promoteButton.disabled = false;
+
+                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
+                modal.show();
+
+                } else {
+                    showAlert(res.status, data.message);
+                }
+
+            } catch (err) {
+                console.error(err);
+                showAlert(400, "An unexpected error occurred. Please try again.");
             }
-            
-            var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
-            modal.show();
-        } else {
-            showAlert(response.status, data.message);
-        }  
+    }
+
+    async function updateStudentModal(studentSessionID) {
+
+        try {
+            const res = await fetch('/already_promoted_student_data', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'studentSessionID': studentSessionID }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+
+                //Verify the data before sending the request
+                document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
+                document.getElementById("studentName").setAttribute("data-id", data.id);
+                document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
+                document.getElementById("newClass").innerHTML = data.promoted_class;
+                document.getElementById("newRoll").value = data.promoted_roll;
+                document.getElementById("promotion_date").value = data.promoted_date;
+                document.getElementById("father").innerHTML = data.FATHERS_NAME;
+                document.getElementById("due").value = data.due_amount;
+
+                if(data.IMAGE){
+                    document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
+                }else{
+                    document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
+                }
+
+                const footer = document.getElementById("modal-footer");
+
+                footer.querySelector("#messageButton").classList.add("d-none");
+                footer.querySelector('#promoteButton')?.classList.add("d-none");
+                footer.querySelector('#depromoteButton')?.classList.add("d-none");
+                document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
+
+                const updateButton = footer.querySelector("#updateButton");
+                updateButton.setAttribute("onclick", `handlePromoteClick('${data.promoted_session_id}', '/update_promoted_student')`);
+                updateButton.classList.remove("d-none");
+                updateButton.disabled = false;
+
+                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
+                modal.show();
+
+
+            } else {
+                showAlert(res.status, data.message);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showAlert(400, "An unexpected error occurred. Please try again.");
+        }
         
+    }
+
+    async function depromoteStudentModal(studentSessionID) {
+
+        try {
+            const res = await fetch('/already_promoted_student_data', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'studentSessionID': studentSessionID }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+
+                //Verify the data before sending the request
+                document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
+                document.getElementById("studentName").setAttribute("data-id", data.id);
+                document.getElementById("oldClass").innerHTML = data.CLASS+" - "+data.ROLL;
+                document.getElementById("newClass").innerHTML = data.promoted_class;
+                document.getElementById("newRoll").value = data.promoted_roll;
+                document.getElementById("promotion_date").value = data.promoted_date;
+                document.getElementById("father").innerHTML = data.FATHERS_NAME;
+                document.getElementById("due").value = data.due_amount;
+
+                if(data.IMAGE){
+                    document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200'  ;
+                }else{
+                    document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png'  ;
+                }
+
+                const footer = document.getElementById("modal-footer");
+                footer.querySelector("#messageButton").classList.add("d-none");
+                footer.querySelector('#promoteButton')?.classList.add("d-none");
+                footer.querySelector('#updateButton')?.classList.add("d-none");
+
+                document.getElementById('depromoteCheckboxContainer').classList.remove('d-none');
+                const depromoteButton = footer.querySelector("#depromoteButton");
+                depromoteButton.setAttribute("onclick", `finalDepromote('${data.promoted_session_id}')`);
+                depromoteButton.classList.remove("d-none");
+                depromoteButton.disabled = false;
+
+                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
+                modal.show();
+
+
+            } else {
+                showAlert(res.status, data.message);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showAlert(400, "An unexpected error occurred. Please try again.");
+        }
+    }
+
+    async function finalDepromote(studentSessionID) {
+
+        const isChecked = document.getElementById('depromoteCheckbox').checked;
+        if (!isChecked) {
+            showAlert(400, "Please check the checkbox to confirm depromotion.");
+            return;
+        }
+
+        const form = document.getElementById("promotionForm");
+        const formData = new FormData(form);
+
+        const btn = document.getElementById("depromoteButton");
+        const spinner = document.getElementById("depromoteSpinner");
+
+        btn.disabled = true;
+        spinner.classList.remove("d-none");
+
+        try {
+            const res = await fetch("/depromote_student", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'studentSessionID': studentSessionID }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                showAlert(res.status, data.message);
+            } else {
+                showAlert(res.status, data.message);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showAlert(400, "An unexpected error occurred. Please try again.");
+        } finally {
+            spinner.classList.add("d-none");
+            btn.disabled = false;
+        }
     }
 
     async function handlePromoteClick(IDToPassInEndpoint, endpoint) {
@@ -439,7 +586,9 @@ content %}
                     const phone = document.getElementById("messageButton").getAttribute("data-phone");
                     
                     footer.querySelector('#promoteButton')?.classList.add("d-none");
-                    footer.querySelector('#UpdateButton')?.classList.add("d-none");
+                    footer.querySelector('#updateButton')?.classList.add("d-none");
+                    footer.querySelector('#depromoteButton')?.classList.add("d-none");
+                    document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
 
                     messageButton.setAttribute("onclick", `sendWhatsAppMessage('${generate_message.PHONE}', \`${generate_message.whatsappMessage}\`)`);
                     messageButton.classList.remove("d-none");   
