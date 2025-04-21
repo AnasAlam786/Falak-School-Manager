@@ -2,31 +2,59 @@
 {% block title %}Students Data{% endblock %}
 {% block content %}
 <style>
-  .modal-content, .accordion-body
-          { background: #1e1e2f; border-radius: 15px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
-  .modal-header 
-          { background: linear-gradient(90deg, #4e54c8, #8f94fb); }
-  .student-card-body 
-          { background: #2a2a3d; border-radius: 15px; padding: 10px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); }
-  .student-image 
-          { border: 3px solid #8f94fb; border-radius: 50%; object-fit: cover; width: 150px; height: 150px; }
-  .table th, .table td 
-          { background-color: #34354a; }
-  .table th 
-          { background-color: #2a2a3d; }
-  .modal-footer 
-          { background: #2a2a3d; }
+  .modal-content,
+  .accordion-body {
+    background: #1e1e2f;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  }
 
-  .accordion-button 
-          { box-shadow: 0 0 10px rgba(0, 0, 255, 0.5); transition: box-shadow 0.3s ease;  }
-       
-  .accordion-button:not(.collapsed) 
-         { box-shadow: 0 0 15px rgba(0, 0, 255, 0.7); }
-  .card:hover 
-          { transform: translateY(-5px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-            transition: all 0.3s ease-in-out;
-                }
+  .modal-header {
+    background: linear-gradient(90deg, #4e54c8, #8f94fb);
+  }
+
+  .student-card-body {
+    background: #2a2a3d;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .student-image {
+    border: 3px solid #8f94fb;
+    border-radius: 50%;
+    object-fit: cover;
+    width: 150px;
+    height: 150px;
+  }
+
+  .table th,
+  .table td {
+    background-color: #34354a;
+  }
+
+  .table th {
+    background-color: #2a2a3d;
+  }
+
+  .modal-footer {
+    background: #2a2a3d;
+  }
+
+  .accordion-button {
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .accordion-button:not(.collapsed) {
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.7);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease-in-out;
+  }
 </style>
 
 <div class="container" id="student-container">
@@ -50,63 +78,74 @@
     </div>
 
     <div class="col-12 col-md-5 mb-2">
-      <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg" placeholder="Search by Name, Class or Roll Number">
+      <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg"
+        placeholder="Search by Name, Class or Roll Number">
     </div>
 
 
   </div>
 
   <!-- Unified Card View for All Screen Sizes -->
-   {% if not data %}
-    <div class="alert alert-warning text-center" role="alert">
-      <strong>No students found!</strong>
-    </div>
+  {% if not data %}
+  <div class="alert alert-warning text-center" role="alert">
+    <strong>No students found!</strong>
+  </div>
   {% endif %}
   <div class="row" id="StudentData">
     {% for row in data %}
-    <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
+    <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}"
+      data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
       <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
-          {% if row.AADHAAR == None %}
-            <span class="badge bg-danger position-absolute top-0 end-0 m-1">
-              No Aadhar
-            </span>
-            {% endif %}
-          <div class="d-flex align-items-center p-3">
-            
-            <img src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
-                  alt="Student Image"
-                  class="img-fluid rounded-circle"
-                  style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
-            <div class="ms-3 text-start">
-              <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{ row.STUDENTS_NAME }}</a><br>
-              <p class="student-father text-muted mb-0" ><small>{{ row.FATHERS_NAME }}</small></p>
-              <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
-              <!--<p class="text-muted">{{ row.ADMISSION_NO }}</p>-->
-              <span class="badge bg-success">{{ row.DOB }}</span>
-              <div class="mt-2">
-                <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
-                  <i class="fa fa-phone"></i> <strong>{{ row.PHONE }}</strong>
-                </a>
-              </div>
-              <p class="student-name fw-bold mb-0" ><small>PEN: {{ row.PEN }}</small></p>
 
+        <!-- Top-right corner badges -->
+        <div class="position-absolute top-0 end-0 p-2 text-end" style="z-index: 10;">
+          {% if not row.AADHAAR %}
+          <span class="badge bg-danger mb-1">No Aadhar</span><br>
+          {% endif %}
+          {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
+          <span class="badge bg-warning text-dark">RTE</span>
+          {% endif %}
+        </div>
+
+        <div class="d-flex align-items-center p-3">
+
+          <img
+            src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
+            alt="Student Image" class="img-fluid rounded-circle"
+            style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
+          <div class="ms-3 text-start">
+            <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{
+              row.STUDENTS_NAME }}</a><br>
+            <p class="student-father text-muted mb-0"><small>{{ row.FATHERS_NAME }}</small></p>
+            <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
+            <!--<p class="text-muted">{{ row.ADMISSION_NO }}</p>-->
+            <span class="badge bg-success">{{ row.DOB }}</span>
+            <div class="mt-2">
+              <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
+                <i class="fa fa-phone"></i> <strong>{{ row.PHONE }}</strong>
+              </a>
             </div>
-            
+            <p class="student-name fw-bold mb-0"><small>PEN: {{ row.PEN }}</small></p>
+
           </div>
-          <div class="d-flex border-top border-secondary" style="height: 50px;">
-            <div class="w-50 border-end border-secondary">
-              <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"  onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')" style="border-radius: 0;">
-                Student Details
-              </button>
-            </div>
-            <div class="w-50 border-start">
-              <button class="btn btn-outline-success fw-bold w-100 h-100 border-0" onclick="getFees('{{ row.student_id }}')" style="border-radius: 0;">
-                Pay Fee
-              </button>
-            </div>
+
+        </div>
+        <div class="d-flex border-top border-secondary" style="height: 50px;">
+          <div class="w-50 border-end border-secondary">
+            <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"
+              onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')" style="border-radius: 0;">
+              Student Details
+            </button>
+          </div>
+          <div class="w-50 border-start">
+            <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
+              onclick="getFees('{{ row.student_id }}')" style="border-radius: 0;">
+              Pay Fee
+            </button>
           </div>
         </div>
       </div>
+    </div>
     {% endfor %}
   </div>
 </div>
@@ -126,7 +165,7 @@
       </div>
       <div id="modalBody" class="modal-body">
 
-        
+
 
       </div>
       <div class="modal-footer">
@@ -168,7 +207,7 @@
           </label>
         </div>
       </div>
-      
+
       <div class="modal-footer">
         <a href="#" data-bs-target="#feesModal" data-bs-toggle="modal" class="btn btn-secondary">Back</a>
         <a href="#" class="btn btn-success" id='finalPay' onclick="Pay()">Final Pay</a>
