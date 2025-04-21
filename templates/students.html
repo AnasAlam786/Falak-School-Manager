@@ -98,12 +98,12 @@
       <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
 
         <!-- Top-right corner badges -->
-        <div class="position-absolute top-0 end-0 p-2 text-end" style="z-index: 10;">
+        <div class="position-absolute top-0 start-0 p-1 text-start" style="z-index: 10;">
           {% if not row.AADHAAR %}
-          <span class="badge bg-danger mb-1">No Aadhar</span><br>
+            <span class="badge bg-danger mb-1">No Aadhar</span><br>
           {% endif %}
           {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
-          <span class="badge bg-warning text-dark">RTE</span>
+            <span class="badge bg-warning text-dark">RTE</span>
           {% endif %}
         </div>
 
