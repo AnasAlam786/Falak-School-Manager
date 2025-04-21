@@ -615,19 +615,35 @@ content %}
 
 
     function sendWhatsAppMessage(phone, message) {
-        const formattedPhone = phone.replace(/\D/g, '');
-        console.log(message)
-        const encodedMessage = encodeURIComponent(message);
-        const url = `https://wa.me/${formattedPhone}?text=${encodedMessage}`;
+        // 1. Strip non‑digits & validate
+        let formattedPhone = phone.replace(/\D/g, '');
+        if (formattedPhone.length !== 10) {
+            showAlert(400, "📞 Invalid phone number. It must be 10 digits.");
+            return;
+        }
+        formattedPhone = '91' + formattedPhone; // add country code
 
+        // 2. Encode message
+        const encodedMessage = encodeURIComponent(message);
+
+        // 3. Detect mobile vs. desktop
         const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
         if (isMobile) {
-            window.location.href = url; // Mobile: redirect to WhatsApp app
+            // Mobile: open WhatsApp app via custom scheme
+            window.location.href = 
+                `whatsapp://send?phone=${formattedPhone}&text=${encodedMessage}`;
         } else {
-            window.open(url, '_blank'); // Desktop: open WhatsApp Web in new tab
+            // Desktop: open WhatsApp Web
+            window.open(
+                `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodedMessage}`,
+                '_blank'
+            );
         }
     }
+
+
+
 
     function applyFilters() {
         const term = document
