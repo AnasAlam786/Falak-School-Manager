@@ -19,6 +19,15 @@
       color: #fff;
     }
 
+  .table th,
+  .table td {
+    background-color: #34354a;
+  }
+
+  .table th {
+    background-color: #2a2a3d;
+  }
+
 </style>
 
     <!-- Hidden Success Alert -->
@@ -38,12 +47,10 @@
     </div>
 
     <h1 class="text-2xl font-bold mb-6 text-center">Student Registration Form</h1>
-    <div class="card m-8 p-6 ">
-      <form class="rounded shadow-md" id = "DataForm">
 
-          
-        
-          
+    <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3 p-3 mb-4">
+
+      <form id = "DataForm">
           
       <!-- Personal Information -->
       <div class="mb-6">
@@ -105,8 +112,8 @@
       <div class="text-center">
         <button id="FormSubmit" type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Submit</button>
       </div>
-    </div>
-  </form>
+
+    </form>
 </div>
 
   <div id="verificationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-3 overflow-y-auto">
@@ -119,7 +126,7 @@
                   <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
               </h2>
           </div>
-          <button onclick="toggleModal()" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+          <button class="cancelModle" class="text-white hover:text-gray-200 text-2xl">&times;</button>
       </div>
 
       <!-- Modal Body -->
@@ -133,8 +140,8 @@
           <h3 id = "StudentNameInModal" class=" mb-2 text-2xl text-center font-bold text-white"></h3>
 
 
-          <div class="bg-[#2a2a3d] rounded-xl p-4 shadow-lg">
-              <table class="w-full">
+          <div class="bg-[#2a2a3d] rounded-xl p-2 shadow-lg">
+              <table class="table table-hover align-middle">
                   <tbody id = "ModalDataTable" class="text-white">
                       <!-- Table Rows (Same content structure as original) -->
 
@@ -199,7 +206,7 @@
 
       <!-- Modal Footer -->
       <div class="bg-[#2a2a3d] p-4 flex justify-end">
-          <button id="cancelModle" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+          <button type="button" class=" cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
               Close
           </button>
           <button id = "finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
@@ -212,134 +219,193 @@
 
 <script>
 
-function showAlert(alertID, messageElementID, message) {
-            const alert = document.getElementById(alertID);
-            const messageElement = document.getElementById(messageElementID);
-            
-            messageElement.textContent = message;
-            alert.classList.remove('hidden');
-            alert.classList.add('animate-slide-in');
-            
-            setTimeout(() => {
-                alert.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                setTimeout(() => {
-                    alert.classList.add('hidden');
-                    alert.classList.remove('opacity-0');
-                }, 300);
-            }, 5000);
-      }
+  const classSelect = document.getElementById('CLASS');
+  const rollInput   = document.getElementById('ROLL');
 
+  classSelect.addEventListener('change', async () => {
+    const classId = classSelect.value;
+    if (!classId) {
+      rollInput.value = '';
+      return;
+    }
 
-  document.getElementById('DataForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent the form from submitting and reloading the page
-        openVerificationModal(); // Open the verification modal
+    try {
+      const resp = await fetch('/get_new_roll', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ class_id: classId })
+      });
+      if (!resp.ok) {throw new Error(`HTTP ${resp.status}`)};
+      
+      const { next_roll } = await resp.json();
+      rollInput.value = next_roll;
+    } catch (err) {
+      console.error('Error fetching next roll:', err);
+      alert('Could not fetch next roll number. Check console for details.');
+    }
   });
 
+
+  document.getElementById('DataForm').addEventListener('submit', async function(event) {
+    event.preventDefault(); // Prevent the form from submitting and reloading the page
+
+    const formData = await getFormData("DataForm"); // ✅ Await the FormData
+
+
+    const result = await verifyFormData(formData); // Assuming this is synchronous
+    console.log("result :",result)
+    if (result === true) {
+        openVerificationModal(formData); // ✅ Now it's safe to use formData.get()
+    }
+});
 
 
 
 
   async function getFormData(id) {
         const form = document.getElementById(id);
-            
-        return formData;
+        const formData = new FormData(form);
+        formDataObject = Object.fromEntries(formData.entries())
+        return formDataObject;
   }
 
 
 
+  async function verifyFormData(formData){
+
+    try {
+      const response = await fetch("/verify_admission", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(formData)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        showAlert(response.status, data.message || "Something went wrong");
+        return false;
+      }
+      return true;
+
+    } catch (err) {
+      console.error("Fetch error:", err);
+      showAlert(404, "An error occurred while verifying the form data.");
+      return false;
+    }
+  }
+
+
+  async function openVerificationModal(formData, croppedBlob) {
+    // --- Student name ---
+    document.getElementById('StudentNameInModal').innerText =
+      formData.STUDENTS_NAME || '—';
+
+    // --- Student image or placeholder ---
+    const imgEl = document.getElementById('StudentImageInModal');
+    let imageURL = null;
+    if (croppedBlob instanceof Blob && croppedBlob.size > 0) {
+      try {
+        imageURL = URL.createObjectURL(croppedBlob);
+      } catch {
+        // fallback
+      }
+    }
+    imgEl.src = imageURL
+      ? imageURL
+      : 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
+    if (imageURL) {
+      imgEl.onload = () => URL.revokeObjectURL(imageURL);
+    }
+
+    // --- Auto-pick required inputs ---
+    const requiredInputs = Array.from(document.querySelectorAll('input[required], select[required], textarea[required]'));
+
+    let html = '';
+    for (const input of requiredInputs) {
+      const key = input.id; // assuming input's id matches the formData key
+      if (!key || !(key in formData)) continue;
+
+      const label = input.dataset.label ?? key;
+      html += `
+        <tr class="bg-[#34354a]">
+          <th class="bg-[#2a2a3d] p-3 text-left">${label}</th>
+          <td class="p-3">${formData[key]}</td>
+        </tr>`;
+    }
+    document.getElementById('ModalDataTable').innerHTML = html;
+
+    // --- Show the modal ---
+    document.getElementById('verificationModal').classList.remove('hidden');
+  }
+
+
+  function formatAadharNumber(input) {
+    // Remove non-numeric chars
+    let value = input.value.replace(/\D/g, '');
+
+    // Insert hyphens after every 4 digits, up to 12 total
+    if (value.length <= 12) {
+      value = value.replace(/(\d{4})(\d{1,4})/, '$1-$2');
+      value = value.replace(/(\d{4})(\d{1,4})/, '$1-$2');
+      value = value.replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+    }
+    input.value = value;
+  }
+  // wire it up once for all inputs with class "aadhar-input"
+  document.addEventListener('DOMContentLoaded', () => {
+    ['MOTHERS_AADHAR', 'AADHAAR', 'FATHERS_AADHAR'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', () => formatAadharNumber(el));
+      }
+    });
+  });
 
 
   // Final submit to add student
   document.getElementById('finalSubmit').addEventListener('click', async function() {
-        if (!document.getElementById('confirmCheckbox').checked) {
-          showAlert("errorAlert", "errorMessage", "Please confirm the details by checking the box.")
-          return;
-        }
+    checkBox = document.getElementById('confirmCheckbox').checked
+    password = document.getElementById("password").value
 
-        const formData = await getFormData("DataForm");
-        const password = document.getElementById("password").value;
-        formData.append("password", password);
-        formData.append('IMAGE', croppedBlob, 'profile.jpg');
+    if (!checkBox) {
+      showAlert(404, "Please confirm the details by checking the box.");
+      return;
+    }
+    if (!password) {
+      showAlert(404, "Please Enter Password Also!");
+      return;
+    }
 
-        
+      const formData = await getFormData("DataForm");
+      formData.password = password;
+      formData.IMAGE = croppedBlob;
 
         try {
             // Send a POST request to the Flask backend
             const response = await fetch('/addstudent', {
+              headers: {"Content-Type": "application/json"},
               method: 'POST',
-              body: formData,
+              body: JSON.stringify(formData)
             });
 
             // Parse the JSON response
             const data = await response.json();
-            console.log('Success:', data);
 
             // Optionally update the page content based on the response
             if (response.ok) {
-              showAlert("successAlert", "successMessage", data.message)
+
+              showAlert(response.status, data.message)
             }
             else{
-              showAlert("errorAlert", "errorMessage", data.message)
+              showAlert(response.status, data.message)
             }
 
         } catch (error) {
-          showAlert("errorAlert", "errorMessage", "An error occurred while submitting the form.")
+          showAlert(400, "An error occurred while submitting the form.")
           console.error('Error:', error);
         }
   });
-
-
-
-  async function openVerificationModal() {
-
-        const formData = await getFormData("DataForm");
-
-        let modalContent = '';
-
-        document.getElementById('StudentNameInModal').innerText = formData.get("STUDENTS_NAME")
-        const StudentImageInModal = document.getElementById('StudentImageInModal')
-
-        // 1) Detect missing image
-        let imageURL;
-        if (croppedBlob instanceof Blob && croppedBlob.size > 0) {
-          try {
-            imageURL = URL.createObjectURL(croppedBlob);
-          } catch (e) {
-            alert('There was an error processing the image. Please try again.');
-            // fall through to placeholder
-          }
-        }
-
-        // 4) If we got a URL, use it; otherwise use the placeholder
-        if (imageURL) {
-          StudentImageInModal.src = imageURL;
-          // revoke after it’s loaded to free memory
-          StudentImageInModal.onload = () => URL.revokeObjectURL(imageURL);
-        } else {
-          StudentImageInModal.src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
-        }
-        
-
-
-
-        // Loop through each form entry and build HTML content
-        for (const [key, value] of formData.entries()) {
-          if (["IMAGE", "STUDENTS_NAME"].includes(key)) continue;
-
-          let inputElement = document.querySelector(`[id="${key}"]`);
-          let label = inputElement ? inputElement.getAttribute("data-label") || key : key; 
-          modalContent += `<tr class="bg-[#34354a]">
-                              <th class="bg-[#2a2a3d] p-3 text-left">${label}</th>
-                              <td class="p-3">${value}</td>
-                          </tr>`;
-        }
-        // Update modal content with the form data
-        document.getElementById("ModalDataTable").innerHTML = modalContent;
-        // Show the modal
-        document.getElementById('verificationModal').classList.remove('hidden');
-  }
-
-
 
 
   
@@ -360,13 +426,37 @@ function showAlert(alertID, messageElementID, message) {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
             </svg>`;
     });
+    // Show password and hide password End
 
 
+    //add DD/MM/YYYY mask to DOB and Admission Date
+    function attachDateMask(selector) {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      el.addEventListener("input", e => {
+        let v = e.target.value.replace(/\D/g, "").slice(0, 8);
+        if (v.length >= 5) {
+          // dd-mm-yyyy
+          e.target.value = `${v.slice(0,2)}-${v.slice(2,4)}-${v.slice(4)}`;
+        } else if (v.length >= 3) {
+          // dd-mm
+          e.target.value = `${v.slice(0,2)}-${v.slice(2)}`;
+        } else {
+          // partial dd
+          e.target.value = v;
+        }
+      });
+    }
+    ["#DOB", "#ADMISSION_DATE"].forEach(attachDateMask);
+    //add DD/MM/YYYY mask to DOB and Admission Date ENDED
 
 
-  document.getElementById('cancelModle').addEventListener('click', function() {
+    document.querySelectorAll('.cancelModle').forEach(function(element) {
+      element.addEventListener('click', function() {
         document.getElementById('verificationModal').classList.add('hidden');
-  });
+      });
+    });
+
 </script>
 
 {% endblock %}

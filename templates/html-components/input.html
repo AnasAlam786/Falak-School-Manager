@@ -1,57 +1,58 @@
 <div class="mb-2">
     {% if InputDetailsDict.type == "select" %}
       <div class="form-floating relative">
-        <select  id="{{ id }}" name="{{ id }}" data-label = "{{ InputDetailsDict.label }}" style="height: auto !important; line-height: 1.3;"
-          class="form-select text-light border-2 rounded-3"
-          {% if InputDetailsDict.required %} required {% endif %}>
+        <select id="{{ id }}"
+                name="{{ id }}"
+                data-label="{{ InputDetailsDict.label }}"
+                class="form-select text-light border-2 rounded-3"
+                style="height: auto !important; line-height: 1.3;"
+                {% if InputDetailsDict.required %}required{% endif %}>
 
-          {% for option in InputDetailsDict.options %}
-            <option 
-              {% if option == InputDetailsDict.default %}
-                value=""
-                selected
-                class="text-secondary"
-                {% if InputDetailsDict.required %}
-                  disabled hidden
-                {% endif %}
-              {% else %}
-                value="{{ option }}"
-              {% endif %}>
-              {{ option }}
-            </option>
+          {% for value, label in InputDetailsDict.options.items() %}
+
+            {% if label == InputDetailsDict.default %}
+
+              <option value = "" selected class="text-secondary" {% if InputDetailsDict.required %} hidden {% endif %} >{{ label }}  </option>
+          
+            {% else %}
+
+              <option value="{{ value }}">{{ label }}</option>
+
+            {% endif %}
+
           {% endfor %}
-
         </select>
         <label for="reason-select-{{ id }}" class="text-secondary">{{ InputDetailsDict.default }} </label>
       </div>
 
     {% else %}
-      <div class="relative form-floating">
-        <input 
-          oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
-          type="text" 
-          id="{{ id }}" 
-          name="{{ id }}" 
-          placeholder=" "
-          data-label = "{{ InputDetailsDict.label }}"
-
-          {% if InputDetailsDict.required %} required {% endif %}
-
-          {% if 'maxlength' in InputDetailsDict %} 
-                maxlength="{{ InputDetailsDict.maxlength }}" 
-                
-                
-          {% endif %}
-
-          {% if  InputDetailsDict.type == "number" %}
-                inputmode="numeric"
-                maxlength="{{ InputDetailsDict.maxlength }}"
-          {% endif %}
-
-          {% if InputDetailsDict.value %}value="{{ InputDetailsDict.value }}"{% endif %}
-
-          class="form-control text-light border-2 rounded-3" />
-          <label for="{{ id }}" class="text-secondary">{{ InputDetailsDict.label }}</label>
-      </div>
+    <div class="relative form-floating">
+      <input
+        oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
+        type="{{ InputDetailsDict.type or 'text' }}"
+        id="{{ id }}"
+        name="{{ id }}"
+        placeholder=" "
+        data-label="{{ InputDetailsDict.label }}"
+    
+        {%- if InputDetailsDict.required %}
+          required
+        {%- endif %}
+    
+        {%- if InputDetailsDict.maxlength is defined %}
+          maxlength="{{ InputDetailsDict.maxlength }}"
+        {%- endif %}
+    
+        {%- if InputDetailsDict.value %}
+          value="{{ InputDetailsDict.value }}"
+        {%- endif %}
+    
+        class="form-control text-light border-2 rounded-3"
+      />
+      <label for="{{ id }}" class="text-secondary">
+        {{ InputDetailsDict.label }}
+      </label>
+    </div>
+    
     {% endif %}
   </div>

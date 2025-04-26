@@ -37,17 +37,11 @@
     <div class="col-12 col-md-5 mb-2">
       <select class="form-select form-select-lg" id="classView" onchange="applyFilters()">
         <option selected value="All">Class</option>
-        <option value="Nursery">Nursery/KG/PP3</option>
-        <option value="LKG">LKG/KG1/PP2</option>
-        <option value="UKG">UKG/KG2/PP1</option>
-        <option value="1st">1st</option>
-        <option value="2nd">2nd</option>
-        <option value="3rd">3rd</option>
-        <option value="4th">4th</option>
-        <option value="5th">5th</option>
-        <option value="6th">6th</option>
-        <option value="7th">7th</option>
-        <option value="8th">8th</option>
+
+        {% for id, class in classes.items() %}
+          <option value="{{ id }}">{{ class }}</option>
+        {% endfor %}
+
       </select>
     </div>
 
@@ -114,8 +108,8 @@
                       <label for="Admission_Class" class="form-label">Select Admission Class:</label>
                       <select class="form-control" name="Admission_Class" id="Admission_Class">
                           <option selected value="">Admission Class</option>
-                          {% for Class in classes %}
-                            <option value="{{ Class.id }}">{{ Class.CLASS }}</option>
+                          {% for id, class in classes.items() %}
+                            <option value="{{ id }}">{{ class }}</option>
                           {% endfor %}
                       </select>
                   </div>
