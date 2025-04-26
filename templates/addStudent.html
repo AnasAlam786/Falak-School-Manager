@@ -205,14 +205,14 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="bg-[#2a2a3d] p-4 flex justify-end">
-          <button type="button" class=" cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
-              Close
-          </button>
-          <button id = "finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
-            Submit
+      <div class="bg-[#2a2a3d] p-4 flex justify-end space-x-2">
+        <button type="button" class="cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+          Close
         </button>
-      </div>
+        <button id="finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
+          Submit
+        </button>
+      </div>      
   </div>
 </div>
 
@@ -394,8 +394,8 @@
 
             // Optionally update the page content based on the response
             if (response.ok) {
-
-              showAlert(response.status, data.message)
+              showAlert(response.status, data.message);
+              setTimeout(() => {location.reload();}, 3000);
             }
             else{
               showAlert(response.status, data.message)
