@@ -2,7 +2,8 @@ const studentData = document.getElementById('StudentData');
 
 // Function to apply both filters (class and search)
 function applyFilters() {
-  const selectedClass = document.getElementById('classView').value.toLowerCase();
+  const selectElement = document.getElementById('classView');
+  const selectedClass = selectElement.options[selectElement.selectedIndex].text.toLowerCase();
   const searchQuery = document.getElementById('search-input').value.toLowerCase();
 
   const studentCards = studentData.getElementsByClassName('student-card');
