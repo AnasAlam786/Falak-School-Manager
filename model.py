@@ -306,7 +306,7 @@ def GetGrade(number):
         return "E", "Needs Improvement"
 
 
-def ResultData(students_ids=None):
+def ResultData(current_session_id, students_ids=None,):
     if not students_ids:
         return []
 
@@ -326,7 +326,7 @@ def ResultData(students_ids=None):
         cast(literal(None), Integer).label('SA2_Rank'),
         cast(literal(None), Integer).label('Grand_Rank')
     ).join(StudentsDB, StudentsMarks.student_id == StudentsDB.id
-    ).filter(StudentsMarks.student_id.in_(students_ids))
+    ).filter(StudentsMarks.student_id.in_(students_ids), StudentsMarks.session_id == current_session_id)
 
     # Summary query without filtering by student_ids to compute ranks across all students in the class
     summary_query = db.session.query(

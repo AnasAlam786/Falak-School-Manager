@@ -60,6 +60,7 @@ def home():
 def change_session():
     data = request.json
     current_session = data.get('year')
+    
 
     # Validate input
     if not current_session or not str(current_session).isdigit():
@@ -68,19 +69,21 @@ def change_session():
     current_session = int(current_session)
 
     # Fetch all sessions from DB
-    sessions = Sessions.query.with_entities(
+    sessions_data = Sessions.query.with_entities(
         Sessions.id, Sessions.session, Sessions.current_session
     ).order_by(Sessions.session.asc()).all()
 
     # Store all session years in the session
-    session["all_sessions"] = [s.session for s in sessions]
+    session["all_sessions"] = [s.session for s in sessions_data]
 
     # Find and set the requested session
-    for s in sessions:
+    for s in sessions_data:
         if current_session == s.session:
             session["current_session"] = s.session
             session["session_id"] = s.id
             return jsonify({"message": "Session Updated"}), 200
+
+    
 
     return jsonify({"message": "Session not found"}), 404
 
@@ -118,6 +121,7 @@ def login():
                 session["logo"] = school.Logo
                 session["email"] = school.Email
                 session["school_id"] = school.id
+
 
                 # pick out the one where current_session==True (or None if none)
                 session_id, current_session = next(
@@ -256,9 +260,7 @@ def studentsData():
     school_id = session["school_id"]
     current_session = session["session_id"]
     classes = session["classes"]
-
-
-
+    
 
     data = db.session.query(
                         StudentsDB.id, StudentsDB.STUDENTS_NAME,
@@ -278,6 +280,7 @@ def studentsData():
                         StudentsDB.school_id == school_id, 
                         StudentSessions.session_id == current_session
                     ).order_by(
+                        ClassData.id.asc(), 
                         ClassData.Section.asc(),  # Sort by section
                         StudentSessions.ROLL.asc()  # Sort by roll number
                     ).all()
@@ -1758,7 +1761,7 @@ def report_card():
                             ).all()
 
             students_ids = [row.id for row in students_obj]
-            results = ResultData(students_ids=students_ids)
+            results = ResultData(students_ids=students_ids, current_session_id = current_session_id)
 
             Data=[]
 
