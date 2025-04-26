@@ -1,6 +1,6 @@
 from flask import Flask, render_template, jsonify, request, session, url_for, redirect
 
-from sqlalchemy import func, case, select
+from sqlalchemy import func, case, select, or_
 from sqlalchemy.orm import aliased
 from sqlalchemy import true
 
@@ -15,6 +15,7 @@ import json
 import logging
 import os
 from threading import Thread
+import re
 
 from model import *
 
@@ -105,12 +106,15 @@ def login():
 
             if school and check_password_hash(school.Password, password):
 
+                class_rows = ClassData.query.filter_by(school_id=school.id).order_by(ClassData.id).all()
+                class_dict = {cls.id: cls.CLASS for cls in class_rows}
+
                 sessions = Sessions.query.with_entities(Sessions.id, Sessions.session, Sessions.current_session
                                                         ).order_by(Sessions.session.asc()).all()
 
                 session["all_sessions"] = [sessi.session for sessi in sessions]
                 session["school_name"] = school.School_Name
-                session["classes"] = school.Classes
+                session["classes"] = class_dict
                 session["logo"] = school.Logo
                 session["email"] = school.Email
                 session["school_id"] = school.id
@@ -202,15 +206,9 @@ def temp_page():
     
     school_id = session["school_id"]
     current_session = session["session_id"]
-    ordered_classes = session["classes"]
+    classes = session["classes"]
 
     StudentRollSession = aliased(StudentSessions)
-
-
-    class_order_case = case(
-        {class_name: index for index, class_name in enumerate(ordered_classes)},
-        value=ClassData.CLASS
-    )
 
     current_session_students = db.session.query(StudentsDB) \
         .filter(
@@ -242,15 +240,9 @@ def temp_page():
             current_session_students.c.SR == None
         )
     ).order_by(
-        class_order_case,
         current_session_students.c.STUDENTS_NAME.asc()  # Or use ADMISSION_NO if desired
     ).all()
 
-
-    
-    classes = db.session.query(ClassData.id, ClassData.CLASS)\
-        .filter_by(school_id=school_id
-        ).order_by(class_order_case).all()
 
 
     return render_template('temp_update_colum.html',data=data, classes=classes)
@@ -263,15 +255,10 @@ def studentsData():
 
     school_id = session["school_id"]
     current_session = session["session_id"]
-    ordered_classes = session["classes"]
+    classes = session["classes"]
 
-    # Join the StudentsDB table with the ClassData based on the foreign key
-    class_order_case = case(
-            {class_name: index for index, class_name in enumerate(ordered_classes)},
-            value = ClassData.CLASS
-        )
 
-    print("Current Session:", current_session)
+
 
     data = db.session.query(
                         StudentsDB.id, StudentsDB.STUDENTS_NAME,
@@ -291,12 +278,11 @@ def studentsData():
                         StudentsDB.school_id == school_id, 
                         StudentSessions.session_id == current_session
                     ).order_by(
-                        class_order_case,   # Sort by class
                         ClassData.Section.asc(),  # Sort by section
                         StudentSessions.ROLL.asc()  # Sort by roll number
                     ).all()
 
-    return render_template('students.html',data=data)
+    return render_template('students.html',data=data, classes=classes)
     
 
 
@@ -309,7 +295,7 @@ def studentModal():
 
 
     student = db.session.query(
-            StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.class_data_id, StudentsDB.AADHAAR,
+            StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
             StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
             StudentsDB.WEIGHT, StudentsDB.CAST, StudentsDB.RELIGION,
@@ -442,157 +428,494 @@ def paper():
 
     else:
         return redirect(url_for('login'))
-        
+
+
+def validate_name(name, field_name):
+    """
+    - Must be non-empty after stripping.
+    - Must only contain letters, spaces, hyphens or apostrophes.
+    - Length between 2 and 50 characters (adjust as you like).
+    """
+
+    if not name or not name.strip():
+        return f"{field_name} is required."
+    name = name.strip()
+    # Regex: start with a letter, then letters/spaces/'/- allowed
+
+    if not re.match(r"^[A-Za-z0-9\s.+-]+$", name):
+        return (f"{field_name} must start and end with a letter, and only contain letters, spaces, hyphens or apostrophes.")
+    return None  # no error
+
+# 2. Loop + 3. unified validate:
+def validate_length( value: any, name: str, *, exact: int | None = None, 
+                     min_len: int | None = None, max_len: int | None = None, 
+                     allow_empty: bool = False ) -> None:    
+    s = (value or "").strip()
+
+
+    if allow_empty and not s:
+        return None
+    if not s:
+        raise Exception(f"{name} is required.")
+
+    L = len(s)
+
+    if exact is not None and L != exact:
+        raise Exception(f"{name} must be exactly {exact} characters (got {L}).")
+    if min_len is not None and L < min_len:
+        raise Exception(f"{name} must be at least {min_len} characters (got {L}).")
+    if max_len is not None and L > max_len:
+        raise Exception(f"{name} must be at most {max_len} characters (got {L}).")
+
+
 @app.route('/addstudent', methods=["GET", "POST"])
 def addStudent():
-    if "email" in session:
+    if not "email" in session:
+        return redirect(url_for('login')) 
 
-        if request.method == "POST":
-            data = request.form.to_dict()
-            password = data["password"]
-            image = request.files['IMAGE'].read()
-            data.pop('password', None)
-            data.pop('image', None)
+    if request.method == "POST":
+        data = request.get_json()
 
-            school_id=session["school_id"]
+        password = data["password"]
+        image = data['IMAGE']
+        data.pop('password', None)
+        data.pop('IMAGE', None)
 
-            school = Schools.query.filter_by(id=school_id).first()
+        school_id=session["school_id"]
 
-            if not school_id or not password:
-                return jsonify({"message": "Missing school_id or password"}), 400
+        if not password:
+            return jsonify({"message": "Missing password"}), 400
 
-            # 2) Lookup school
-            school = Schools.query.filter_by(id=school_id).first()
-            if not school:
-                return jsonify({"message": "School not found"}), 404
+        # 2) Lookup school
+        school = Schools.query.filter_by(id=school_id).first()
+        if not school:
+            return jsonify({"message": "School not found"}), 404
 
-            # 3) Verify password
-            if not check_password_hash(school.Password, password):
-                return jsonify({"message": "Wrong password"}), 401
+        # 3) Verify password
+        if not check_password_hash(school.Password, password):
+            return jsonify({"message": "Wrong password"}), 401
 
-            # 4) Success
-            print(image)
-            if image:
-                folder_id = school.students_image_folder_id
-                drive_id = upload_image(image, data["ADMISSION_NO"], folder_id)
-                print('Uploaded image Drive ID:', drive_id)
+        # 4) Success
+        if image:
+            folder_id = school.students_image_folder_id
+            drive_id = upload_image(image, data["ADMISSION_NO"], folder_id)
+            student_data["IMAGE"] = drive_id
+            print('Uploaded image Drive ID:', drive_id)
+
+        StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
+        StudentDB_data = {key: value for key, value in data.items() if key in StudentDB_colums}
+
+        StudentsSession_colums = {column.name for column in StudentSessions.__table__.columns}
+        StudentsSession_data = {key: value for key, value in data.items() if key in StudentsSession_colums}
+
+        unknown_fields = [key for key in data if key not in StudentDB_colums]
+
+
+        #handling Date fields
+        date_fields = ["DOB", "ADMISSION_DATE"]
+
+        for field in date_fields:
+            try:
+                value = data[field].replace("/", "-")
+                StudentDB_data[field] = datetime.datetime.strptime(value, "%d-%m-%Y").date()
+            except ValueError:
+                return jsonify({"message": f"Invalid date format for {field}. Expected DD-MM-YYYY or DD/MM/YYYY."}), 400
+        #handling Date fields END
+
+        #handling Aadhar fields
+        aadhar_fields = ['MOTHERS_AADHAR', 'AADHAAR', 'FATHERS_AADHAR']
+        for field in aadhar_fields:
+            StudentDB_data[field] = data[field].replace("", "-").replace(""," ")
+        #handling Aadhar fields End
+        
+
+        
+        StudentDB_data["school_id"] = school_id
+        StudentDB_data["Admission_Class"] = data["CLASS"]
+        StudentDB_data["session_id"] = session["session_id"]
+
+
+        StudentsSession_data["class_id"] = data["CLASS"]
+        StudentsSession_data["session_id"] = session["session_id"]
+        StudentsSession_data["created_at"] = StudentDB_data["ADMISSION_DATE"]
+        StudentsSession_data["Section"] = data["Section"]
+        
+
+        for key, value in StudentDB_data.items():
+            if value == "":
+                StudentDB_data[key] = None
+
+        for key, value in StudentsSession_data.items():
+            if value == "":
+                StudentsSession_data[key] = None
+
+        try:
+            # Start transaction
+            
+            new_student = StudentsDB(**StudentDB_data)
+            db.session.add(new_student)
+            db.session.flush()  # Flush to get new_student.id
+
+            student_session = StudentSessions(
+                student_id=new_student.id, 
+                **StudentsSession_data
+            )
+            db.session.add(student_session)
+
+            db.session.commit()  # Commit both together
+
             return jsonify({"message": "Data submitted successfully"}), 200
 
-
-        classes = session["classes"]
-
-        PersonalInfo = {
-                "STUDENTS_NAME": {"label": "Student Name", "type": "text", "value":"", "required":False},  #True
-                "DOB": {"label": "DOB", "type": "date", "value":"", "required":False},  #True
-                "AADHAAR": {"label": "Aadhar", "type": "number",  "maxlength": 14, "required":False},   #True
-                "HEIGHT": {"label": "Height", "type": "number", "value":"", "maxlength": 3, "required":False},   #True
-                "WEIGHT": {"label": "Weight", "type": "number", "value":"", "maxlength": 3, "required":False},  #True
-
-                "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,    #True
-                            "options": ["Select Gender", "Male", "Female", "Other"]},
-
-                "CAST": {"label": "Caste", "type": "select", "default": "Select Caste", "required":False,    #True
-                            "options": ["Select Caste", "OBC", "GENERAL", "ST", "SC"]},
-
-                "RELIGION": {"label": "Religion", "type": "select", "default": "Select Religion", "required":False,   #True
-                            "options": ["Select Religion", "Muslim", "Hindu", "Christian","Sikh","Buddhist","Parsi","Jain"]},
-
-                "BLOOD_GROUP": {"label": "Blood Group", "type": "select", "default": "Select Blood Group", "required":False,
-                            "options": ["Select Blood Group", "A+", "A-", "B+","B-","O+","O-","AB+","AB-"]}
-            }
-
-        AcademicInfo = {
-                "CLASS": {
-                        "label": "Class",
-                        "type": "select",
-                        "options": ["Select Class"] + classes,
-                        "default": "Select Class",
-                        "required": False
-                    },
-                "ROLL": {"label": "Roll No", "type": "number", "value": "", "required":False},   #True
-                "ADMISSION_NO": {"label": "Admission No.", "type": "number", "value": "", "required":False},    #True
-                "ADMISSION_DATE": {"label": "Admission Date", "type": "date", "value": "", "required":False},    #True
-                "PEN": {"label": "PEN No.", "type": "number", "value": "", "required":False},
-                "SR": {"label": "SR No.", "type": "number", "value": "", "required":False},   #True
-                "APAAR": {"label": "APAAR No.", "type": "number", "value": "", "required":False},
-                
-                "SECTION": {
-                    "label": "Section",
-                    "type": "select",
-                    "options": ["A", "B", "C", "D"],
-                    "default": "Select Section",
-                    "required":False    #True
-                }
-            }
-
-
-        GuardianInfo = {
-                "FATHERS_NAME": {"label": "Father Name", "type": "text", "value": "", "required":False},   #True
-                "MOTHERS_NAME": {"label": "Mother Name", "type": "text", "value": "", "required":False},   #True
-                "FATHERS_AADHAR": {"label": "Father Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
-                "MOTHERS_AADHAR": {"label": "Mother Aadhar", "type": "number", "value": "", "maxlength": 14, "required":False},
-                "FATHERS_EDUCATION": {
-                    "label": "Father Qualification",
-                    "type": "select",
-                    "options": ["Father Qualification", "High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
-                    "default": "Father Qualification",
-                    "required":False   #True
-                },
-                "MOTHERS_EDUCATION": {
-                    "label": "Mother Qualification",
-                    "type": "select",
-                    "options": ["Mother Qualification", "High School", "Intermediate", "Graduate", "Post Graduate", "Other"],
-                    "default": "Mother Qualification", 
-                    "required":False   #True
-                },
-                "FATHERS_OCCUPATION": {
-                    "label": "Father Occupation",
-                    "type": "select",
-                    "options": ["Father Occupation", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job", "Other"],
-                    "default": "Father Occupation", 
-                    "required":False   #True
-                },
-                "MOTHERS_OCCUPATION": {
-                    "label": "Mother Occupation",
-                    "type": "select",
-                    "options": ["Mother Occupation", "Homemaker", "Business", "Daily Wage Worker", "Farmer", "Government Job", "Private Job",   "Other"],
-                    "default": "Mother Occupation", 
-                    "required":False   #True
-                }
-}
-
-        ContactInfo = {
-                "ADDRESS": {"label": "Address", "type": "text", "value": "", "required":False},   #True
-                "PIN": {"label": "PIN Code", "type": "number", "value": "", "maxlength": 6, "required":False},   #True
-                "EMAIL": {"label": "Email ID", "type": "email", "value": "", "required":False},
-                "MOBILE": {"label": "Mobile Number", "type": "number", "value": "", "maxlength": 10, "required":False},   #True
-                "ALT_MOBILE": {"label": "Alternate Mobile Number", "short_label":"2nd Phone No.", "type": "number", "value": "", "maxlength": 10, "required":False}
-            }
-
-        AdditionalInfo = {
-                "Previous_Class_Marks": {"label": "Previous Class Marks", "short_label":"Prv. Class Marks", "type": "number", "value": "", "maxlength": 3, "required":False},
-                "Previous_Class_Attendance": {"label": "Previous Class Attendance(%)", "short_label":"Prv. Class Attendance", "type": "number", "value": "", "maxlength": 3, "required":False},
-                "Previous_School": {"label": "Previous School Name", "short_label":"Prv. School", "type": "text", "value": "", "required":False},
-                "Home_Distance": {
-                    "label": "School to Home Distance (km)",
-                    "short_label": "Home Distance",
-                    "type": "select",
-                    "options": ["Select Distance", "Less than 1 km", "1-3 km", "3-5 km", "More than 5 km"],
-                    "default": "Select Distance",
-                    "required":False
-                }
-            }
-
-        #get current date
-        current_date = datetime.datetime.now().strftime("%d-%m-%Y")
-        AcademicInfo["ADMISSION_DATE"]["value"] = current_date
-        
+        except Exception as e:
+            db.session.rollback()  # Undo everything
+            print('Error while adding student:', str(e))
+            return jsonify({"message": "Failed to add student"}), 500
 
         
-        return render_template('addStudent.html',PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo, 
-                               GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
-    else:
-        return redirect(url_for('login'))
+        return jsonify({"message": "Data submitted successfully"}), 200
+
+
+    classes = session["classes"]
+    school_id = session["school_id"]
+
+    PersonalInfo = {
+            "STUDENTS_NAME": {"label": "Student Name","type": "text", "required":True},  #True
+            "DOB": {"label": "DOB", "type": "text", "required":True},  #True
+            "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,    #True
+                        "options": {"" : "Select Gender", "Male" : "Male", "Female" : "Female"}},
+            "AADHAAR": {"label": "Aadhar", "type": "numeric", "maxlength": 14, "required":True},   #True
+
+            "Caste": {"label": "Caste", "type": "text", "required":False},
+
+            "Caste_Type": {"label": "Caste Type", "type": "select", "default": "Select Caste Type", "required":True,    #True
+                        "options": {"" : "Select Caste Type", "OBC" : "OBC", "GENERAL" : "GENERAL", "ST" : "ST", "SC" : "SC"}},
+            
+
+            "RELIGION": {"label": "Religion", "type": "select", "default": "Select Religion", "required": True,   #True
+                        "options": {"" : "Select Religion", "Muslim" : "Muslim", "Hindu" : "Hindu", "Christian" : "Christian",
+                                    "Sikh" : "Sikh","Buddhist" : "Buddhist","Parsi" : "Parsi","Jain" : "Jain"}},
+
+            "Height": {"label": "Height (cm)", "type": "numeric", "maxlength": 3, "required":False},
+            "Weight": {"label": "Weight (kg)", "type": "numeric", "maxlength": 3, "required":False},
+
+            "BLOOD_GROUP": {"label": "Blood Group", "type": "select", "default": "Select Blood Group", "required":False,
+                            "options": {"" : "Select Blood Group", "A+" : "A+", "A-" : "A-", "B+" : "B+","B-" : "B-",
+                                        "O+" : "O+","O-" : "O-","AB+" : "AB+","AB-" : "AB-"}
+                            }
+        }
+
+    AcademicInfo = {
+            "CLASS": {
+                    "label": "Class",
+                    "type": "select",
+                    "options": {"": "Select Class", **classes},
+                    "default": "Select Class",
+                    "required": True   #True
+                },
+            "Section": {
+                "label": "Section",
+                "type": "select",
+                "options": {"" : "Select Section", "A" : "A", "B" : "B", "C" : "C", "D" : "D", "E": "E", "F": "F"},
+                "default": "Select Section",
+                "required" : True    #True
+            },
+            "ROLL": {"label": "Roll No", "type": "numeric", "required":True},   #True
+            "SR": {"label": "SR No.", "type": "numeric", "required":True},   #True
+            "ADMISSION_NO": {"label": "Admission No.", "type": "numeric", "required":True},    #True
+            "ADMISSION_DATE": {"label": "Admission Date", "type": "text", "required":True},    #True
+            "PEN": {"label": "PEN No.", "type": "numeric", "maxlength": 11, "required":False},
+            "APAAR": {"label": "APAAR No.", "type": "numeric", "maxlength": 12, "required":False},
+            
+        }
+
+    GuardianInfo = {
+            "FATHERS_NAME": {"label": "Father Name", "type": "text", "required": True},   #True
+            "MOTHERS_NAME": {"label": "Mother Name", "type": "text", "required": True},   #True
+            "FATHERS_AADHAR": {"label": "Father Aadhar", "type": "numeric", "maxlength": 14, "required":False},
+            "MOTHERS_AADHAR": {"label": "Mother Aadhar", "type": "numeric", "maxlength": 14, "required":False},
+            "FATHERS_EDUCATION": {
+                "label": "Father Qualification",
+                "type": "select",
+                "options": {
+                            "":                "Father Qualification",
+                            "High School":     "High School",
+                            "Intermediate":    "Intermediate",
+                            "Graduate":        "Graduate",
+                            "Post Graduate":   "Post Graduate",
+                            "Other":           "Other",
+                        },
+                "default": "Father Qualification",
+                "required": True   #True
+            },
+            "MOTHERS_EDUCATION": {
+                "label": "Mother Qualification",
+                "type": "select",
+                "options": {
+                        "":                "Mother Qualification",
+                        "High School":     "High School",
+                        "Intermediate":    "Intermediate",
+                        "Graduate":        "Graduate",
+                        "Post Graduate":   "Post Graduate",
+                        "Other":           "Other",
+                        },
+                "default": "Mother Qualification", 
+                "required":True   #True
+            },
+            "FATHERS_OCCUPATION": {
+                "label": "Father Occupation",
+                "type": "select",
+                "options": {
+                                "":                   "Father Occupation",
+                                "Business":           "Business",
+                                "Daily Wage Worker" : "Daily Wage Worker",
+                                "Farmer":             "Farmer",
+                                "Government Job":     "Government Job",
+                                "Private Job":        "Private Job",
+                                "Other":              "Other",
+                            },
+                "default": "Father Occupation", 
+                "required": True   #True
+            },
+            "MOTHERS_OCCUPATION": {
+                "label": "Mother Occupation",
+                "type": "select",
+                "options": {
+                                "":                   "Mother Occupation",
+                                "Homemaker":          "Homemaker",
+                                "Business":           "Business",
+                                "Daily Wage Worker" : "Daily Wage Worker",
+                                "Farmer":             "Farmer",
+                                "Government Job":     "Government Job",
+                                "Private Job":        "Private Job",
+                                "Other":              "Other",
+                            },
+                "default": "Mother Occupation", 
+                "required": True   #True
+            }
+        }
+
+    ContactInfo = {
+            "ADDRESS": {"label": "Address", "type": "text", "value": "anas alam shksf", "required": True},   #True
+            
+            
+            "PHONE": {"label": "Phone", "type": "numeric", "maxlength": 10, "required":False},   #True
+            "ALT_MOBILE": {"label": "Alternate Mobile Number", "type": "numeric", "value": "", "maxlength": 10, "required":False},
+            "PIN": {"label": "PIN Code", "type": "numeric", "value": "244001", "maxlength": 6, "required":True},   #True
+            "Home_Distance": {
+                "label": "School to Home Distance (km)",
+                "short_label": "Home Distance",
+                "type": "select",
+                "options": {"" : "Select Distance", "Less than 1 km" : "Less than 1 km", "1-3 km" : "1-3 km", 
+                            "3-5 km" : "3-5 km", "More than 5 km" : "More than 5 km"},
+                "default": "Select Distance",
+                "required":True
+            },
+            "EMAIL": {"label": "Email ID", "type": "email", "value": "", "required":False},
+        }
+
+    AdditionalInfo = {
+            "Previous_School_Marks": {"label": "Previous School Marks", "short_label":"Prv. School Marks", "type": "numeric", "maxlength": 3, "required":False},
+            "Previous_School_Attendance": {"label": "Previous School Attendance(%)", "short_label":"Prv. School Attendance", "type": "numeric", "maxlength": 3, "required":False},
+            "Previous_School_Name": {"label": "Previous School Name", "short_label":"Prv. School", "type": "text", "required":False},
+            "Due_Amount": {"label": "Due Amount (Rs.)", "short_label":"Due", "type": "numeric", "required":False},
+
+            
+        }
+
+    #get current date
+    current_session_year = str(session["current_session"])[-2:]
+
+    max_sr, max_adm = (
+        StudentsDB.query
+            .with_entities(
+                func.max(StudentsDB.SR).label("max_sr"),
+                func.max(StudentsDB.ADMISSION_NO).label("max_adm")
+            )
+            .filter(
+                StudentsDB.school_id == school_id,
+            )
+            .first()
+    )
+
+    if max_sr is None:
+        max_sr = 0
+    if max_adm is None or str(max_adm)[:2] != current_session_year:
+        max_adm = int(current_session_year + "000")
+    
+    new_adm = max_adm + 1
+    new_sr = max_sr + 1
+
+    current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+    AcademicInfo["ADMISSION_DATE"]["value"] = current_date
+
+    AcademicInfo["SR"]["value"] = new_sr
+    AcademicInfo["ADMISSION_NO"]["value"] = new_adm
+    
+    return render_template('addStudent.html',PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo, 
+                            GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
+    
+
+@app.route('/verify_admission', methods=["POST"])
+def verify_admission():
+    
+    data = request.get_json()
+
+    school_id = session['school_id']
+    current_session_id = session['session_id']
+
+    admission_no = data.get('ADMISSION_NO')
+    SR = data.get('SR')
+
+    PEN = data.get('PEN')
+    APAAR = data.get('APAAR')
+    aadhaar = data.get('AADHAAR').replace("-", "").replace(" ", "")
+
+    faadhar = data.get("FATHERS_AADHAR").replace("-", "").replace(" ", "")
+    maadhar = data.get("MoTHERS_AADHAR").replace("-", "").replace(" ", "")
+    
+    DOB = data.get('DOB')
+    admission_date = data.get('ADMISSION_DATE')
+    
+
+    # Validate input: ensure required keys exist
+    mandatory_names = ["STUDENTS_NAME", "FATHERS_NAME", "MOTHERS_NAME", "Caste_Type", "RELIGION", 
+                        "ADDRESS", "GENDER", "FATHERS_OCCUPATION", "MOTHERS_OCCUPATION", 
+                        "FATHERS_EDUCATION", "MOTHERS_EDUCATION", "Home_Distance", "Section"]
+    
+    for name in mandatory_names:
+        field_name = name.replace("_", " ").title()
+        err = validate_name(data.get(name), field_name)
+        if err:
+            return jsonify({'message': err}), 400
+
+    non_mandatory_names = ["Blood_Group","Previous_School", "Email", "Free_Scheme", "Caste"]
+
+    for name in non_mandatory_names:
+        field_name = name.replace("_", " ").title()
+        field_value = data.get(name)
+
+        if field_value is None or field_value == "":
+            data[name] = None  # Set to None if empty
+            continue
+
+        err = validate_name(field_value, field_name)
+        if err:
+            return jsonify({'message': err}), 400
+
+
+    try:
+        validate_length(aadhaar, "AADHAAR", exact = 12)
+        validate_length(data.get("ADMISSION_NO"), "ADMISSION_NO", exact = 5)
+        validate_length(data.get("PIN"), "PIN", exact = 6)
+        validate_length(data.get("PHONE"), "Phone", exact = 10)
+        
+        validate_length(data.get("SR"), "SR", min_len = 1)
+        validate_length(data.get("CLASS"), "CLASS", min_len = 1, max_len = 2)
+        validate_length(data.get("ROLL"), "ROLL", min_len = 1)
+        validate_length(data.get("Height"), "Height", min_len = 2, max_len = 3)
+        validate_length(data.get("Weight"), "Weight", min_len = 2, max_len = 3)
+
+        validate_length(data.get("APAAR"), "APAAR", exact = 12, allow_empty=True)
+        validate_length(data.get("PEN"), "PEN", exact = 11, allow_empty=True)
+        validate_length(data.get("ALT_MOBILE"), "ALT_MOBILE", exact = 10, allow_empty=True)
+        validate_length(faadhar, "Fathers Aadhar", exact = 12, allow_empty=True)
+        validate_length(maadhar, "Mothers Aadhar", exact = 12, allow_empty=True)
+    except Exception as err:
+        return jsonify({'message': str(err)}), 400
+
+
+    #handling Date fields
+    date_fields = ["DOB", "ADMISSION_DATE"]
+    for date in date_fields:
+        date = date.replace("/", "-")
+        if date not in data:
+            return jsonify({"message": f"Missing required field: {date}"}), 400
+
+        try:
+            datetime.datetime.strptime(data[date], "%d-%m-%Y").date()
+        except ValueError:
+            return jsonify({"message": f"Invalid date format for {date}. Expected DD-MM-YYYY."}), 400
+    #handling Date fields END
+
+
+
+    global_conflict = StudentsDB.query.filter(
+        StudentsDB.school_id == school_id,  # ✅ Only for same school
+        or_(
+            StudentsDB.PEN == PEN,
+            StudentsDB.APAAR == APAAR,
+            StudentsDB.AADHAAR == aadhaar
+        )
+    ).first()
+
+    if global_conflict:
+        return jsonify({
+            'message': 'PEN, AAPAR, or AADHAAR is already in use.'
+        }), 400
+
+
+    school_conflict = StudentsDB.query.filter(
+        StudentsDB.school_id == school_id,
+        or_(
+            StudentsDB.SR == SR,
+            StudentsDB.ADMISSION_NO == admission_no,
+        )).first()
+
+    if school_conflict:
+        return jsonify({
+            'message': 'SR or Admission No. already exists for this school.'
+        }), 400
+
+    session_conflict = (
+        StudentSessions.query
+        .join(StudentsDB, StudentSessions.student_id == StudentsDB.id)
+        .filter(
+            StudentsDB.school_id == school_id,
+            StudentSessions.session_id == current_session_id,
+            StudentSessions.class_id == data.get('class_id'),
+            StudentSessions.Section == data.get('SECTION'),
+            StudentSessions.ROLL == data.get('roll')
+        )
+        .first()
+    )
+
+    if session_conflict:
+        return jsonify({
+            'message': 'This class/section/roll is already assigned in the current session.'
+        }), 400
+
+
+
+
+    return jsonify({'message': 'Admission details are valid.'}), 200
+
+@app.route('/get_new_roll', methods=["POST"])
+def get_new_roll():
+    data = request.json
+    class_id = data.get('class_id')
+    school_id = session["school_id"]
+    current_session = session["session_id"]
+
+    # Build subquery to calculate the next available roll number in the next class
+    next_roll_query = (
+        select(func.coalesce(func.max(StudentSessions.ROLL), 0) + 1)
+        .join(StudentsDB, StudentsDB.id == StudentSessions.student_id)
+        .where(
+            StudentSessions.class_id   == class_id,
+            StudentSessions.session_id == current_session,
+            StudentsDB.school_id       == school_id
+        )
+    )
+    # next_roll now holds the next available roll (1 if none exist)
+    try:
+        next_roll: int = db.session.execute(next_roll_query).scalar_one()
+    except Exception as e:
+        return jsonify({"message": e}), 404
+
+
+    return jsonify({ "next_roll": next_roll })
+
+
 
 @app.route('/already_promoted_student_data', methods=["POST"])
 def promoted_single_student_data():
@@ -633,7 +956,7 @@ def promoted_single_student_data():
             # Promoted (current) session
             ClassData.CLASS.label("promoted_class"),
             PromotedSession.ROLL.label("promoted_roll"),
-            PromotedSession.due_amount.label("due_amount"),
+            PromotedSession.Due_Amount.label("due_amount"),
             PromotedSession.id.label("promoted_session_id"),
             func.to_char(PromotedSession.created_at, 'YYYY-MM-DD').label("promoted_date"),
 
@@ -696,7 +1019,12 @@ def single_student_data():
         return jsonify({"message": "Session data is missing or corrupted. Please logout and login again!"}), 500
 
 
-    current_class_id = db.session.query(StudentsDB.class_data_id).filter_by(id=student_id).scalar()
+    current_class_id = (
+        db.session.query(StudentSessions.class_id)
+        .filter(StudentSessions.student_id == student_id,
+                StudentSessions.session_id == previous_session)
+        .scalar()
+    )
 
     # Calculate the next class id (assumes sequential class ids)
     next_class_id = current_class_id + 1
@@ -844,7 +1172,7 @@ def update_promoted_student():
         if student_session:
             student_session.ROLL = promoted_roll
             student_session.created_at = promoted_date
-            student_session.due_amount = due_amount  # Optional field
+            student_session.Due_Amount = due_amount  # Optional field
             db.session.commit()
             return jsonify({"message": "Student record updated successfully."}), 200
         else:
@@ -940,7 +1268,7 @@ def promote_student_in_DB():
         session_id=current_session,
         ROLL=promoted_roll,
         class_id=class_to_promote,
-        due_amount=due_amount,
+        Due_Amount=due_amount,
         created_at=promoted_date
     )
     
@@ -989,7 +1317,7 @@ def generate_message():
         StudentsDB.PHONE,
         PromotedClass.CLASS.label("promoted_class"),
         PromotedSession.ROLL.label("promoted_roll"),
-        PromotedSession.due_amount.label("due_amount"),
+        PromotedSession.Due_Amount,
 
         func.to_char(PromotedSession.created_at, 'FMDay, DD Mon YYYY').label("promoted_date"),
         PreviousClass.CLASS.label("previous_class"),
@@ -1014,14 +1342,13 @@ def generate_message():
 
     message = f'''🎉 Congratulations,\nहमें ये बताते हुए अत्यंत ख़ुशी हो रही है कि _*{student_data.STUDENTS_NAME}*_ का प्रमोशन Class _*{student_data.previous_class}*_ से Class _*{student_data.promoted_class}*_ में सफलतापूर्वक हो चुका है!\n\n\t✨ नया रोल नंबर: _*{student_data.promoted_roll}*_\n\t⏱️ तारीख: _*{student_data.promoted_date}*_\n\n🙌 आपकी मेहनत रंग लाई! ऐसे ही आगे बढ़ते रहो, चमकते रहो और हम सबका नाम रोशन करते रहो! 🌟'''
             
-    if student_data.due_amount:
-        message += f'''\n\n 💰 शेष बकाया राशि: _*{student_data.due_amount}*_ रुपये, कृपया जल्द से जल्द भुगतान करने की कृपा करें। 🙏'''
+    if student_data.Due_Amount:
+        message += f'''\n\n 💰 शेष बकाया राशि: _*{student_data.Due_Amount}*_ रुपये, कृपया जल्द से जल्द भुगतान करने की कृपा करें। 🙏'''
 
     message += f'''\n🥳🎊 _*{school_name}*_ कि तरफ से ढेरों बधाइयाँ! 🎊🥳'''
 
         
     return jsonify({"whatsappMessage": message, "PHONE": student_data.PHONE}), 200
-
 
 
 @app.route('/get_prv_year_students', methods=["POST"])
@@ -1293,8 +1620,6 @@ def tcform():
 
         results.extend(grading_subjects)
 
-
-
         student = db.session.query(
             StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,StudentsDB.SR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
@@ -1306,6 +1631,7 @@ def tcform():
             func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('DOB'),
 
             ClassData.CLASS,
+            ClassData.id.label("class_id"),
             StudentSessions.ROLL
 
         ).join(
@@ -1317,9 +1643,13 @@ def tcform():
             StudentSessions.session_id == current_session_id
         ).first()
 
-        class_index = classes.index(student.CLASS)
-        promoted_class = classes[class_index+1] if class_index+1 < len(classes) else "9th"
+        class_id = student.class_id
 
+        if class_id + 1 > len(classes):
+            promoted_class = "9th"
+        else:
+            # Get the next class name based on the class_id
+            promoted_class = db.session.query(ClassData.CLASS).filter_by(id=class_id + 1).scalar()
 
         working_days = 214
         general_conduct = "Very Good"
