@@ -512,15 +512,25 @@ def addStudent():
         unknown_fields = [key for key in data if key not in StudentDB_colums]
 
 
-        #handling Date fields
+       # handling Date fields
         date_fields = ["DOB", "ADMISSION_DATE"]
         for field in date_fields:
             try:
                 value = data[field].replace("/", "-")
-                StudentDB_data[field] = datetime.datetime.strptime(value, "%d-%m-%Y").date()
-            except ValueError:
-                return jsonify({"message": f"Invalid date format for {field}. Expected DD-MM-YYYY or DD/MM/YYYY."}), 400
-        #handling Date fields END
+                parsed_date = None
+                for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
+                    try:
+                        parsed_date = datetime.datetime.strptime(value, fmt).date()
+                        break
+                    except ValueError:
+                        continue
+                if not parsed_date:
+                    return jsonify({"message": f"Invalid date format for {field}. Expected DD-MM-YYYY or YYYY-MM-DD."}), 400
+                StudentDB_data[field] = parsed_date
+            except KeyError:
+                return jsonify({"message": f"Missing required field: {field}"}), 400
+        # handling Date fields END
+
 
         # handling Aadhar fields
         aadhar_fields = ['MOTHERS_AADHAR', 'AADHAAR', 'FATHERS_AADHAR']
@@ -714,7 +724,8 @@ def addStudent():
                 "label": "School to Home Distance (km)",
                 "short_label": "Home Distance",
                 "type": "select",
-                "options": {"" : "Select Distance", "Less than 1 km" : "Between 1-3 Kms", "Between 3-5 Kms" : "More than 5 Kms"},
+                "options": {"" : "Select Distance", "Less than 1 km" : "Less than 1 km", "Between 1-3 Kms" : "Between 1-3 Kms" ,
+                            "Between 3-5 Kms" : "Between 3-5 Kms", "More than 5 Kms": "More than 5 Kms"},
                 "default": "Select Distance",
                 "required":True
             },
@@ -753,7 +764,7 @@ def addStudent():
     new_adm = max_adm + 1
     new_sr = max_sr + 1
 
-    current_date = datetime.datetime.now().strftime("%d-%m-%Y")
+    current_date = datetime.datetime.now().strftime("%Y-%m-%d")
     AcademicInfo["ADMISSION_DATE"]["value"] = current_date
 
     AcademicInfo["SR"]["value"] = new_sr
@@ -833,10 +844,16 @@ def verify_admission():
         if not raw:
             return jsonify({'message': f"Missing required field: {key}"}), 400
         normalized = raw.replace('/', '-')
-        try:
-            datetime.datetime.strptime(normalized, "%d-%m-%Y").date()
-        except:
-            return jsonify({'message': f"Invalid date format for {key}. Expected DD-MM-YYYY."}), 400
+        parsed_date = None
+        for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
+            try:
+                parsed_date = datetime.datetime.strptime(normalized, fmt).date()
+                break
+            except ValueError:
+                continue
+        if not parsed_date:
+            return jsonify({'message': f"Invalid date format for {key}. Expected DD-MM-YYYY or YYYY-MM-DD."}), 400
+
 
     # Check global conflicts for unique IDs
     global_conflict = StudentsDB.query.filter(
