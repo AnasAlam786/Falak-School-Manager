@@ -454,24 +454,44 @@
 
 
     //add DD/MM/YYYY mask to DOB and Admission Date
-    function attachDateMask(selector) {
+    function attachDateMask(selector, format) {
       const el = document.querySelector(selector);
       if (!el) return;
+
       el.addEventListener("input", e => {
-        let v = e.target.value.replace(/\D/g, "").slice(0, 8);
-        if (v.length >= 5) {
-          // dd-mm-yyyy
-          e.target.value = `${v.slice(0,2)}-${v.slice(2,4)}-${v.slice(4)}`;
-        } else if (v.length >= 3) {
-          // dd-mm
-          e.target.value = `${v.slice(0,2)}-${v.slice(2)}`;
-        } else {
-          // partial dd
-          e.target.value = v;
+        let value = e.target.value;
+        let numbers = value.replace(/\D/g, "").slice(0, 8);
+        let newValue = "";
+
+        if (format === "DD-MM-YYYY") {
+          if (numbers.length >= 5) {
+            newValue = `${numbers.slice(0,2)}-${numbers.slice(2,4)}-${numbers.slice(4)}`;
+          } else if (numbers.length >= 3) {
+            newValue = `${numbers.slice(0,2)}-${numbers.slice(2)}`;
+          } else {
+            newValue = numbers;
+          }
+        } else if (format === "YYYY-MM-DD") {
+          if (numbers.length >= 7) {
+            newValue = `${numbers.slice(0,4)}-${numbers.slice(4,6)}-${numbers.slice(6)}`;
+          } else if (numbers.length >= 5) {
+            newValue = `${numbers.slice(0,4)}-${numbers.slice(4)}`;
+          } else {
+            newValue = numbers;
+          }
+        }
+
+        // only set value if different to prevent cursor jumping
+        if (newValue !== value) {
+          e.target.value = newValue;
         }
       });
     }
-    ["#DOB", "#ADMISSION_DATE"].forEach(attachDateMask);
+
+    attachDateMask("#DOB", "DD-MM-YYYY");
+    attachDateMask("#ADMISSION_DATE", "YYYY-MM-DD");
+
+
     //add DD/MM/YYYY mask to DOB and Admission Date ENDED
 
 
