@@ -209,8 +209,9 @@
         <button type="button" class="cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
           Close
         </button>
-        <button id="finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
-          Submit
+        <button id="FormSubmit" type="submit" class="flex items-center justify-center bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+          <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+          <span id="btn-text">Submit</span>
         </button>
       </div>      
   </div>
@@ -246,18 +247,39 @@
   });
 
 
-  document.getElementById('DataForm').addEventListener('submit', async function(event) {
-    event.preventDefault(); // Prevent the form from submitting and reloading the page
+  // Handle DataForm Button
+  const form = document.getElementById('DataForm');
+  const submitBtn = document.getElementById('FormSubmit');
+  const spinner   = document.getElementById('btn-spinner');
+  const btnText   = document.getElementById('btn-text');
 
-    const formData = await getFormData("DataForm"); // ✅ Await the FormData
+  form.addEventListener('submit', async function(event) {
+    event.preventDefault();
 
+    // show spinner + disable button
+    submitBtn.disabled = true;
+    spinner.classList.remove('hidden');
+    btnText.textContent = 'Submitting…';
 
-    const result = await verifyFormData(formData); // Assuming this is synchronous
-    console.log("result :",result)
-    if (result === true) {
-        openVerificationModal(formData); // ✅ Now it's safe to use formData.get()
+    try {
+      const formData = await getFormData('DataForm');
+      const result   = await verifyFormData(formData);
+
+      console.log('result:', result);
+      if (result === true) {
+        openVerificationModal(formData);
+      }
+    } catch (err) {
+      console.error(err);
+      // optionally show an error message to the user here
+    } finally {
+      // hide spinner + re-enable button
+      spinner.classList.add('hidden');
+      submitBtn.disabled = false;
+      btnText.textContent = 'Submit';
     }
-});
+  });
+  // Handle DataForm Button END
 
 
 
