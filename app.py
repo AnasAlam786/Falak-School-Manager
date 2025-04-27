@@ -861,11 +861,11 @@ def verify_admission():
         return jsonify({'message': 'SR or Admission No. already exists for this school.'}), 400
 
     # Ensure class_id, Section, ROLL exist in request
-    class_id = data.get('class_id')
+    class_id = data.get('CLASS')
     section = data.get('Section')
     roll = data.get('ROLL')
     if not class_id or not section or not roll:
-        return jsonify({'message': 'Missing class_id, Section, or ROLL for session check.'}), 400
+        return jsonify({'message': 'Missing Class, Section, or ROLL for session check.'}), 400
 
     # Check current-session conflict
     session_conflict = (
