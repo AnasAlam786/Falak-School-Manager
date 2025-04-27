@@ -698,7 +698,7 @@ def addStudent():
         }
 
     ContactInfo = {
-            "ADDRESS": {"label": "Address", "type": "text", "value": "anas alam shksf", "required": True},   #True
+            "ADDRESS": {"label": "Address", "type": "text", "required": True},   #True
             
             
             "PHONE": {"label": "Phone", "type": "numeric", "maxlength": 10, "required":False},   #True
@@ -758,139 +758,134 @@ def addStudent():
                             GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
     
 
+from flask import Flask, request, jsonify, session
+from sqlalchemy import or_
+import datetime
+
 @app.route('/verify_admission', methods=["POST"])
 def verify_admission():
-    
-    data = request.get_json()
+    data = request.get_json() or {}
 
-    school_id = session['school_id']
-    current_session_id = session['session_id']
+    school_id = session.get('school_id')
+    current_session_id = session.get('session_id')
+
+    # Normalize Aadhaar and similar fields safely
+    def handle_aadhar(key):
+        raw = data.get(key) or ""
+        return raw.replace('-', '').replace(' ', '')
 
     admission_no = data.get('ADMISSION_NO')
     SR = data.get('SR')
-
     PEN = data.get('PEN')
     APAAR = data.get('APAAR')
-    aadhaar = data.get('AADHAAR').replace("-", "").replace(" ", "")
+    aadhaar = handle_aadhar('AADHAAR')
+    faadhar = handle_aadhar('FATHERS_AADHAR')
+    maadhar = handle_aadhar('MOTHERS_AADHAR')
 
-    faadhar = data.get("FATHERS_AADHAR").replace("-", "").replace(" ", "")
-    maadhar = data.get("MoTHERS_AADHAR").replace("-", "").replace(" ", "")
-    
-    DOB = data.get('DOB')
-    admission_date = data.get('ADMISSION_DATE')
-    
-
-    # Validate input: ensure required keys exist
-    mandatory_names = ["STUDENTS_NAME", "FATHERS_NAME", "MOTHERS_NAME", "Caste_Type", "RELIGION", 
-                        "ADDRESS", "GENDER", "FATHERS_OCCUPATION", "MOTHERS_OCCUPATION", 
-                        "FATHERS_EDUCATION", "MOTHERS_EDUCATION", "Home_Distance", "Section"]
-    
+    # Mandatory text fields
+    mandatory_names = [
+        "STUDENTS_NAME", "FATHERS_NAME", "MOTHERS_NAME",
+        "Caste_Type", "RELIGION", "ADDRESS", "GENDER",
+        "FATHERS_OCCUPATION", "MOTHERS_OCCUPATION",
+        "FATHERS_EDUCATION", "MOTHERS_EDUCATION",
+        "Home_Distance", "Section"
+    ]
     for name in mandatory_names:
-        field_name = name.replace("_", " ").title()
-        err = validate_name(data.get(name), field_name)
+        val = data.get(name)
+        err = validate_name(val, name.replace('_', ' ').title())
         if err:
             return jsonify({'message': err}), 400
 
-    non_mandatory_names = ["Blood_Group","Previous_School", "Email", "Free_Scheme", "Caste"]
+    # Optional text fields
+    non_mandatory = ["Blood_Group", "Previous_School", "Email", "Free_Scheme", "Caste"]
+    for name in non_mandatory:
+        val = data.get(name)
+        if not val:
+            data[name] = None
+        else:
+            err = validate_name(val, name.replace('_', ' ').title())
+            if err:
+                return jsonify({'message': err}), 400
 
-    for name in non_mandatory_names:
-        field_name = name.replace("_", " ").title()
-        field_value = data.get(name)
-
-        if field_value is None or field_value == "":
-            data[name] = None  # Set to None if empty
-            continue
-
-        err = validate_name(field_value, field_name)
-        if err:
-            return jsonify({'message': err}), 400
-
-
+    # Length validations (only ValueError expected)
     try:
-        validate_length(aadhaar, "AADHAAR", exact = 12)
-        validate_length(data.get("ADMISSION_NO"), "ADMISSION_NO", exact = 5)
-        validate_length(data.get("PIN"), "PIN", exact = 6)
-        validate_length(data.get("PHONE"), "Phone", exact = 10)
-        
-        validate_length(data.get("SR"), "SR", min_len = 1)
-        validate_length(data.get("CLASS"), "CLASS", min_len = 1, max_len = 2)
-        validate_length(data.get("ROLL"), "ROLL", min_len = 1)
-        validate_length(data.get("Height"), "Height", min_len = 2, max_len = 3)
-        validate_length(data.get("Weight"), "Weight", min_len = 2, max_len = 3)
+        validate_length(aadhaar, "AADHAAR", exact=12)
+        validate_length(admission_no, "ADMISSION_NO", exact=5)
+        validate_length(data.get("PIN"), "PIN", exact=6)
+        validate_length(data.get("PHONE"), "Phone", exact=10)
+        validate_length(SR, "SR", min_len=1)
+        validate_length(data.get("CLASS"), "CLASS", min_len=1, max_len=2)
+        validate_length(data.get("ROLL"), "ROLL", min_len=1)
+        validate_length(data.get("Height"), "Height", min_len=2, max_len=3)
+        validate_length(data.get("Weight"), "Weight", min_len=2, max_len=3)
+        validate_length(APAAR or "", "APAAR", exact=12, allow_empty=True)
+        validate_length(PEN or "", "PEN", exact=11, allow_empty=True)
+        validate_length(data.get("ALT_MOBILE") or "", "ALT_MOBILE", exact=10, allow_empty=True)
+        validate_length(faadhar, "Fathers Aadhar", exact=12, allow_empty=True)
+        validate_length(maadhar, "Mothers Aadhar", exact=12, allow_empty=True)
+    except ValueError as ve:
+        return jsonify({'message': str(ve)}), 400
 
-        validate_length(data.get("APAAR"), "APAAR", exact = 12, allow_empty=True)
-        validate_length(data.get("PEN"), "PEN", exact = 11, allow_empty=True)
-        validate_length(data.get("ALT_MOBILE"), "ALT_MOBILE", exact = 10, allow_empty=True)
-        validate_length(faadhar, "Fathers Aadhar", exact = 12, allow_empty=True)
-        validate_length(maadhar, "Mothers Aadhar", exact = 12, allow_empty=True)
-    except Exception as err:
-        return jsonify({'message': str(err)}), 400
-
-
-    #handling Date fields
-    date_fields = ["DOB", "ADMISSION_DATE"]
-    for date in date_fields:
-        date = date.replace("/", "-")
-        if date not in data:
-            return jsonify({"message": f"Missing required field: {date}"}), 400
-
+    # Date-field parsing
+    for key in ["DOB", "ADMISSION_DATE"]:
+        raw = data.get(key)
+        if not raw:
+            return jsonify({'message': f"Missing required field: {key}"}), 400
+        normalized = raw.replace('/', '-')
         try:
-            datetime.datetime.strptime(data[date], "%d-%m-%Y").date()
+            datetime.datetime.strptime(normalized, "%d-%m-%Y").date()
         except ValueError:
-            return jsonify({"message": f"Invalid date format for {date}. Expected DD-MM-YYYY."}), 400
-    #handling Date fields END
+            return jsonify({'message': f"Invalid date format for {key}. Expected DD-MM-YYYY."}), 400
 
-
-
+    # Check global conflicts for unique IDs
     global_conflict = StudentsDB.query.filter(
-        StudentsDB.school_id == school_id,  # ✅ Only for same school
+        StudentsDB.school_id == school_id,
         or_(
             StudentsDB.PEN == PEN,
             StudentsDB.APAAR == APAAR,
             StudentsDB.AADHAAR == aadhaar
         )
     ).first()
-
     if global_conflict:
-        return jsonify({
-            'message': 'PEN, AAPAR, or AADHAAR is already in use.'
-        }), 400
+        return jsonify({'message': 'PEN, APAAR, or AADHAAR is already in use.'}), 400
 
-
+    # Check within this school
     school_conflict = StudentsDB.query.filter(
         StudentsDB.school_id == school_id,
         or_(
             StudentsDB.SR == SR,
-            StudentsDB.ADMISSION_NO == admission_no,
-        )).first()
-
+            StudentsDB.ADMISSION_NO == admission_no
+        )
+    ).first()
     if school_conflict:
-        return jsonify({
-            'message': 'SR or Admission No. already exists for this school.'
-        }), 400
+        return jsonify({'message': 'SR or Admission No. already exists for this school.'}), 400
 
+    # Ensure class_id, Section, ROLL exist in request
+    class_id = data.get('class_id')
+    section = data.get('Section')
+    roll = data.get('ROLL')
+    if not class_id or not section or not roll:
+        return jsonify({'message': 'Missing class_id, Section, or ROLL for session check.'}), 400
+
+    # Check current-session conflict
     session_conflict = (
         StudentSessions.query
         .join(StudentsDB, StudentSessions.student_id == StudentsDB.id)
         .filter(
             StudentsDB.school_id == school_id,
             StudentSessions.session_id == current_session_id,
-            StudentSessions.class_id == data.get('class_id'),
-            StudentSessions.Section == data.get('SECTION'),
-            StudentSessions.ROLL == data.get('roll')
+            StudentSessions.class_id == class_id,
+            StudentSessions.Section == section,
+            StudentSessions.ROLL == roll
         )
         .first()
     )
-
     if session_conflict:
-        return jsonify({
-            'message': 'This class/section/roll is already assigned in the current session.'
-        }), 400
+        return jsonify({'message': 'This class/section/roll is already assigned in the current session.'}), 400
 
-
-
-
+    # If we reach here, all validations passed
     return jsonify({'message': 'Admission details are valid.'}), 200
+
 
 @app.route('/get_new_roll', methods=["POST"])
 def get_new_roll():
