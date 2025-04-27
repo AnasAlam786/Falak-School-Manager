@@ -110,7 +110,10 @@
       </div>
       
       <div class="text-center">
-        <button id="FormSubmit" type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">Submit</button>
+        <button id="FormSubmit" type="submit" class="flex items-center justify-center bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+          <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+          <span id="btn-text">Submit</span>
+        </button>
       </div>
 
     </form>
@@ -209,9 +212,8 @@
         <button type="button" class="cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
           Close
         </button>
-        <button id="FormSubmit" type="submit" class="flex items-center justify-center bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
-          <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-          <span id="btn-text">Submit</span>
+        <button id="finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
+          Submit
         </button>
       </div>      
   </div>
