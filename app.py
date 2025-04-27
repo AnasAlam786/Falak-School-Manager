@@ -816,15 +816,15 @@ def verify_admission():
         validate_length(SR, "SR", min_len=1)
         validate_length(data.get("CLASS"), "CLASS", min_len=1, max_len=2)
         validate_length(data.get("ROLL"), "ROLL", min_len=1)
-        validate_length(data.get("Height"), "Height", min_len=2, max_len=3)
-        validate_length(data.get("Weight"), "Weight", min_len=2, max_len=3)
+        validate_length(data.get("Height"), "Height", min_len=2, max_len=3, allow_empty=True)
+        validate_length(data.get("Weight"), "Weight", min_len=2, max_len=3, allow_empty=True)
         validate_length(APAAR or "", "APAAR", exact=12, allow_empty=True)
         validate_length(PEN or "", "PEN", exact=11, allow_empty=True)
         validate_length(data.get("ALT_MOBILE") or "", "ALT_MOBILE", exact=10, allow_empty=True)
         validate_length(faadhar, "Fathers Aadhar", exact=12, allow_empty=True)
         validate_length(maadhar, "Mothers Aadhar", exact=12, allow_empty=True)
-    except ValueError as ve:
-        return jsonify({'message': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'message': str(e)}), 400
 
     # Date-field parsing
     for key in ["DOB", "ADMISSION_DATE"]:
@@ -834,7 +834,7 @@ def verify_admission():
         normalized = raw.replace('/', '-')
         try:
             datetime.datetime.strptime(normalized, "%d-%m-%Y").date()
-        except ValueError:
+        except:
             return jsonify({'message': f"Invalid date format for {key}. Expected DD-MM-YYYY."}), 400
 
     # Check global conflicts for unique IDs
