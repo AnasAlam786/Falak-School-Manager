@@ -301,10 +301,8 @@ def studentModal():
             StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
             StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
-            StudentsDB.WEIGHT, StudentsDB.CAST, StudentsDB.RELIGION,
-            StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
-            StudentsDB.GENDER, StudentsDB.PEN, StudentsDB.BLOOD_GROUP,
-            StudentsDB.APAAR, StudentsDB.Previous_School_Name, StudentsDB.OCCUPATION,
+            StudentsDB.WEIGHT, StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
+            StudentsDB.GENDER, StudentsDB.PEN,
             func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('DOB'),
             ClassData.CLASS,  # Get the class name from the ClassData table
             StudentSessions.ROLL
@@ -516,7 +514,6 @@ def addStudent():
 
         #handling Date fields
         date_fields = ["DOB", "ADMISSION_DATE"]
-
         for field in date_fields:
             try:
                 value = data[field].replace("/", "-")
@@ -525,11 +522,15 @@ def addStudent():
                 return jsonify({"message": f"Invalid date format for {field}. Expected DD-MM-YYYY or DD/MM/YYYY."}), 400
         #handling Date fields END
 
-        #handling Aadhar fields
+        # handling Aadhar fields
         aadhar_fields = ['MOTHERS_AADHAR', 'AADHAAR', 'FATHERS_AADHAR']
         for field in aadhar_fields:
-            StudentDB_data[field] = data[field].replace("", "-").replace(""," ")
-        #handling Aadhar fields End
+            raw = data.get(field)
+            if raw:
+                StudentDB_data[field] = raw.replace('-', '').replace(' ', '')
+            else:
+                StudentDB_data[field] = None
+        # handling Aadhar fields End
         
 
         
@@ -758,9 +759,6 @@ def addStudent():
                             GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo)
     
 
-from flask import Flask, request, jsonify, session
-from sqlalchemy import or_
-import datetime
 
 @app.route('/verify_admission', methods=["POST"])
 def verify_admission():
@@ -771,8 +769,7 @@ def verify_admission():
 
     # Normalize Aadhaar and similar fields safely
     def handle_aadhar(key):
-        raw = data.get(key) or ""
-        return raw.replace('-', '').replace(' ', '')
+        return data.get(key, '').replace('-', '').replace(' ', '') or None
 
     admission_no = data.get('ADMISSION_NO')
     SR = data.get('SR')
@@ -1622,7 +1619,7 @@ def tcform():
             StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,StudentsDB.SR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
             StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
-            StudentsDB.WEIGHT, StudentsDB.CAST, StudentsDB.RELIGION,
+            StudentsDB.WEIGHT, StudentsDB.Caste_Type, StudentsDB.RELIGION,
             StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
             StudentsDB.GENDER, StudentsDB.PEN, StudentsDB.HEIGHT,StudentsDB.WEIGHT,
             StudentsDB.APAAR, StudentsDB.Attendance,
