@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm.attributes import flag_modified
 from sqlalchemy import (
     Column, Integer, BigInteger, Text, Date, DateTime, Boolean, Numeric, JSON,
-    ForeignKey, func, case, literal, cast, String
+    ForeignKey, func, case, literal, cast, String, Enum
 )
 
 from googleapiclient.discovery import build
@@ -116,30 +116,86 @@ class StudentsDB(db.Model):
     ALT_MOBILE = Column(Text, nullable=True)
     ADMISSION_NO = Column(BigInteger, unique=True, nullable=True)
     PEN = Column(Text, unique=True, nullable=True)
-    GENDER = Column(Text, nullable=True)
+
+    GENDER = Column(
+        Enum('Male', 'Female', name='GENDER'), 
+        nullable=False
+    )
+
     ADMISSION_SESSION = Column(Text, nullable=True)
     ADDRESS = Column(Text, nullable=True)
     HEIGHT = Column(Integer, nullable=True)
     WEIGHT = Column(Integer, nullable=True)
-    Caste_Type = Column(Text, nullable=True)
     Caste = Column(Text, nullable=True)
-    RELIGION = Column(Text, nullable=True)
+
+    Caste_Type = Column(
+        Enum('GENERAL', 'OBC', 'SC', 'ST', name='Caste_Type'),
+        nullable=True
+    )
+    
+    RELIGION = Column(
+        Enum(
+            'Muslim', 'Hindu', 'Christian', 'Sikh',
+            'Buddhist', 'Parsi', 'Jain', name='RELIGION'),
+        nullable=True
+    )
     PIN = Column(Text, nullable=True)
     ADMISSION_DATE = Column(Date, nullable=True)
     SR = Column(Integer, nullable=True, unique=True)
     IMAGE = Column(Text, unique=True, nullable=True)
     Previous_School_Marks = Column(Integer, nullable=True)  # smallint in DB; using Integer here
     Previous_School_Attendance = Column(BigInteger, nullable=True)
-    Home_Distance = Column(Text, nullable=True)
+
+    Home_Distance = Column(
+        Enum(
+            'Less than 1 km', 'Between 1-3 Kms', 'Between 3-5 Kms', 
+            'More than 5 Kms', name='Home_Distance' ),
+        nullable=True
+    )
     Free_Scheme = Column(JSON, nullable=True)
     Attendance = Column(Text, nullable=True)
-    BLOOD_GROUP = Column(Text, nullable=True)
+
+    BLOOD_GROUP = Column(
+        Enum(
+            'A+', 'A-', 'B+', 'B-', 
+            'O+', 'O-', 'AB+', 'AB-',
+            name='BLOOD_GROUP'),
+        nullable=True
+    )
+
     FATHERS_AADHAR = Column(Text, nullable=True)
     MOTHERS_AADHAR = Column(Text, nullable=True)
-    FATHERS_EDUCATION = Column(Text, nullable=True)
-    MOTHERS_EDUCATION = Column(Text, nullable=True)
-    MOTHERS_OCCUPATION = Column(Text, nullable=True)
-    FATHERS_OCCUPATION = Column(Text, nullable=True)
+
+    FATHERS_EDUCATION = Column(
+        Enum(
+            'Primary', 'Upper Primary', 'Secondary or Equivalent',
+            'Higher Secondary or Equivalent', 'More than Higher Secondary',
+            'No Schooling Experience',
+            name='EDUCATION_TYPE'),
+        nullable=True
+    )
+    MOTHERS_EDUCATION = Column(
+        Enum(
+            'Primary', 'Upper Primary', 'Secondary or Equivalent',
+            'Higher Secondary or Equivalent', 'More than Higher Secondary',
+            'No Schooling Experience', name='EDUCATION_TYPE'),
+        nullable=True
+    )
+
+    FATHERS_OCCUPATION = Column(
+        Enum(
+            'Labour', 'Business', 'Shop Owner', 'Private Job', 
+            'Government Job', 'Farmer', 'Other',
+            name='FATHERS_OCCUPATION'),
+        nullable=True
+    )
+    
+    MOTHERS_OCCUPATION = Column(
+        Enum(
+            'Homemaker', 'Labour',  'Business',  'Shop Owner', 
+            'Private Job',  'Government'),
+        nullable=True
+    )
     Previous_School_Name = Column(Text, nullable=True)
     APAAR = Column(Text, unique=True, nullable=True)
     EMAIL = Column(Text, nullable=True)
