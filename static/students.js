@@ -16,7 +16,7 @@ function applyFilters() {
     const studentPEN = card.getAttribute('data-PEN').toLowerCase();
 
     // Check if the class matches
-    const classMatches = selectedClass === 'all' || studentClass.includes(selectedClass);
+    const classMatches = selectedClass === 'all classes' || studentClass.includes(selectedClass);
 
     // Check if the search query matches any student data
     const searchMatches = 
@@ -24,6 +24,10 @@ function applyFilters() {
       studentRoll.includes(searchQuery) ||
       fatherName.includes(searchQuery) ||
       studentPEN.includes(searchQuery);
+
+    console.log("Search Matches", searchMatches)
+    console.log("Class Matches", classMatches)
+
 
     // Only show cards that match both class and search query
     if (classMatches && searchMatches) {
