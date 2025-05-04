@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Update Marks{% endblock %}
+{% block content %}
+<style>
+  @media (max-width: 768px) {
+  .table thead {
+    display: none;
+  }
+  .table, .table tbody, .table tr, .table td {
+    display: block;
+    width: 100%;
+  }
+  .table tr {
+    margin-bottom: 15px;
+    border-bottom: 2px solid #dee2e6;
+  }
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border: none;
+    border-bottom: 1px solid #dee2e6;
+    text-align: right;
+  }
+  .table td::before {
+    content: attr(data-label);
+    flex: 1;
+    font-weight: bold;
+    text-align: left;
+    padding-right: 0.75rem;
+  }
+}
+</style>
+
+<script src="{{ url_for('static', filename='upsatemarks.js') }}"></script>
+
+
+<div class="container">
+  <div class="row mb-3">
+    <div class="col-12 col-md-4 mb-2">
+      <select class="form-select form-select-lg" id="Class" name="selectClass" required>
+        <option selected value="">Class</option>
+        {% for cls in classes %}
+          <option value="{{ cls }}">{{ cls }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-12 col-md-4 mb-2">
+      <select class="form-select form-select-lg" id="Subject" name="selectSubject" required>
+        <option selected value="">Subject</option>
+        <option value="English">English</option>
+        <option value="Hindi">Hindi</option>
+        <option value="Math">Math</option>
+        <option value="Urdu">Urdu</option>
+        <option value="GK">GK</option>
+        <option value="Deeniyat">Deeniyat</option>
+        <option value="Drawing">Drawing</option>
+        <option value="Science">Science</option>
+        <option value="Computer">Computer</option>
+        <option value="SST/EVS">EVS/SST</option>
+        <option value="Craft">Craft</option>
+        
+      </select>
+    </div>
+    <div class="col-12 col-md-4 mb-2">
+      <select class="form-select form-select-lg" id="Exam" name="selectExam" required>
+        <option selected value="">Exam</option>
+        <option disabled value="FA1">FA1</option>
+        <option disabled value="SA1">SA1</option>
+        <option disabled value="FA2">FA2</option>
+        <option disabled value="SA2">SA2</option>
+        
+      </select>
+    </div>
+  </div>
+  <div class="text-center d-grid gap-2 col-6 mx-auto">
+    <button type="button" class="btn btn-primary btn-lg mb-3" 
+            onclick="submitData()" 
+            id="submitButton">Get Marks</button>
+  </div>
+</div>
+
+
+<div class="container-lg table-responsive" id="marksTable">
+  <table class="table table-bordered table-striped table-hover">
+    <thead class="thead-dark">
+      <tr id="tableRow">
+        <th scope="col">Name</th>
+        <th scope="col">Class</th>
+        <th scope="col">Subject</th>
+        <th scope="col">Roll No</th>
+        <th scope="col">Marks</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody">
+      {% if data %}
+      {% for row in data %}
+      <tr>
+        <td data-label="Name">{{ row.STUDENTS_NAME }}</td>
+        <td data-label="Class">{{ row.CLASS }}</td>
+        <td data-label="Subject">{{ row.Subject }}</td>
+        <td data-label="Roll no">{{ row.ROLL }}</td>
+        
+        <td>
+          <div class="input-group">
+            <input type="{{ 'text' if row.Subject in ['Drawing','Craft'] else 'number' }}" 
+                inputmode="{{ 'text' if row.Subject in ['Drawing','Craft'] else 'numeric' }}" 
+                placeholder = "{{ 'Attendance' if EXAM == 'Attendance' else row.Subject + ' ' + EXAM + ' Marks' }}" 
+                class="form-control" 
+                oninput="{{ 'this.value = this.value.toUpperCase();' if row.Subject in ['Drawing','Craft'] else '' }}"
+                onfocus="this.select()" 
+                value="{{ getattr(row, EXAM) }}"
+                student_id="{{ row.id }}" 
+                exam="{{ EXAM }}" 
+                subject="{{ row.Subject }}">
+            <button type="submit" class="btn btn-primary" 
+              onclick="submit(this.previousElementSibling, id = '{{ row.id }}', exam = '{{ EXAM }}', subject = '{{ row.Subject }}')">SUBMIT</button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+  function submitData() {
+    // Get selected values
+    const selectedClass = document.getElementById("Class").value;
+    const selectedSubject = document.getElementById("Subject").value;
+    const selectedExam = document.getElementById("Exam").value;
+
+    if ((selectedClass === "" || selectedSubject === "" || selectedExam === "") && (selectedExam != "Attendance" || selectedClass === "")) {
+      alert("Please select all options before submitting.");
+      return;
+    }
+
+
+    // Call the updateMarks function with the selected values
+    updatePage('/updatemarks', 'marksTable', { subject: selectedSubject, class: selectedClass, exam: selectedExam });
+  }
+</script>
+{% endblock %}
