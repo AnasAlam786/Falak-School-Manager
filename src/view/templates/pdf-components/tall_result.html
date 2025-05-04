@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Result</title>
+  <style>
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 4mm; 
+  }
+
+  body, html {
+    margin: 0;
+    padding: 0;
+    width: 210mm; /* A4 width */
+    height: 297mm; /* A4 height */
+    overflow: hidden; /* Prevents scrolling or extra pages */
+  }
+
+  .container {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box; /* Ensures content stays inside */
+    page-break-inside: avoid; /* Prevents unwanted page breaks */
+    page-break-after: avoid;
+  }
+}
+
+    .container {
+        display: grid;
+        grid-template-rows: 11% 20% 51% 8.5% 9.5%;
+        width: 210mm;  /* A4 horizontal width */
+        height: 297mm; /* A4 horizontal height */
+        border: 3px solid black;  /* Optional: border to show container size */
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .header, .main{
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .header { display: grid;  padding-top: 5px; grid-template-rows: 65% 35%; }
+
+
+    .main { font-size: 25px; position: relative;}
+
+    .exam-base-text{ font-size: 0.80rem;}
+
+    .bottom {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      font-size: 20px;
+      
+    }
+
+    .XYcenter{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .logo-img{
+      padding-left: 5px;
+      padding-right: 5px;
+      width: 110px; 
+      height: 110px;
+    }
+
+    .light-border{ border: 1px solid #c7c7c7; }
+
+    .red{ color: red }
+
+    .detail-block{ padding: 0px 20px;  font-size: 20px; }
+
+    .detail-block td { padding: 5px; }
+    .center-logo {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90%; /* Adjust size as needed */
+      opacity: 0.17; /* Makes it very light */
+      z-index: -1; /* Sends it behind other content */
+    }
+
+    .text-bold{
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  
+
+  <div class="container">
+    <div class="header">
+      <div style="display: flex;">
+
+        <!-- First Image (Left) -->
+        <img class="logo-img" src="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s200">
+    
+        <!-- Middle Text (Centered) -->
+        <img style="height: 110px; width: 550px; z-index: -1;" src="{{ url_for('static', filename='progression_heading.png') }}">
+
+    
+        <!-- Last Image (Right) -->
+        <img class="logo-img student-image" style="object-fit: cover; object-position: top; border-radius: 30%;"
+        src="{{ 'https://lh3.googleusercontent.com/d/' + data['IMAGE'] + '=s600' if data['IMAGE'] else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}">
+      </div>
+    </div>
+    
+
+    <div class="detail-block">
+        <table style="width: 100%; border-collapse: collapse;">
+
+
+          <tr>
+            <td><strong>Class:</strong></td>
+            <td>{{data["CLASS"]}}</td>
+            <td><strong>Roll no:</strong></td>
+            <td>{{data["ROLL"]}}</td>
+          </tr>
+          
+          <tr>
+            <td><strong>Name:</strong></td>
+            <td>{{data["STUDENTS_NAME"]}}</td>
+
+            <td><strong>PEN:</strong></td>
+            <td>{{data["PEN"] }} </td>
+          </tr>
+
+          
+
+          <tr>
+            <td><strong>Gender:</strong></td>
+            <td>{{data["GENDER"]}}</td>
+            <td><strong>DOB:</strong></td>
+            <td>{{data["DOB"]}}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Father:</strong> </td>
+            <td>{{data["FATHERS_NAME"]}}</td>
+            <td><strong>Mother:</strong></td>
+            <td>{{data["MOTHERS_NAME"]}}</td>
+          </tr>
+
+          <tr>
+            <td><strong>Phone:</strong></td>
+            <td>{{data["PHONE"]}}</td>
+          </tr>
+
+        </table>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+              <td style="text-align: left; vertical-align: top; width: 15%;"><strong>Address:</strong></td>
+              <td style="text-align: left; vertical-align: top;">{{data["ADDRESS"]}}</td>
+          </tr>
+      </table>
+    </div>
+    
+
+    <div class="main">
+        <img class="center-logo" src="https://lh3.googleusercontent.com/d/1WGhnlEn8v3Xl1KGaPs2iyyaIWQzKBL3w=s500" alt="School Logo"> 
+        
+        <table style="width: 100%; height: 100%; border-collapse: collapse; text-align: center; border: 1px solid #c7c7c7;">
+          <thead>
+            <tr >
+              <th class="light-border" style="padding: 10px; font-size: 25px; font-weight: 800;">Subjects</th>
+              <th class="red light-border">Test 1<div class="exam-base-text">Out of 20</div></th>
+
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Half<br>Yearly</span>
+                <div class="exam-base-text">Out of 80</div>
+              </th>
+
+              <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
+              <th class="red light-border">Test 2<div  class="exam-base-text">Out of 20</div></th>
+
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Annual<br>Exam</span>
+                <div class="exam-base-text">Out of 80</div>
+              </th>
+
+              <th class="red light-border">Total <div class="exam-base-text">Out of 100</div></th>
+              
+              <th class="red light-border">
+                <span style="display: inline-block; line-height: 1;">Grand<br>Total</span>
+                <div class="exam-base-text">Out of 200</div>
+              </th>
+              <th class="red light-border">Grade<div class="exam-base-text">(A,B,C,D)</div></th>
+            </tr>
+          </thead>
+          <tbody>
+
+            {% for subject in data["Subjects"] %}
+
+                {% if data[subject] %}
+
+                <tr class="text-center" style="font-size: 21px; font-weight: 500;
+                                              {% if subject == 'Total' %}
+                                                  font-weight: 800; color: red;
+                                              {% elif subject == 'Percentage' %}
+                                                  color: red;
+                                              {% endif %}">
+                  <th class="light-border text-start" style="font-size: 22px; color: black">{{ subject }}</th>
+                  <td class="light-border text-center">
+                      {% if not data[subject]["FA1"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["FA1"] }}
+                      {% endif %}
+                  </td>
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["SA1"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["SA1"] }}
+                      {% endif %}
+                  </td>
+
+                  <td class="red light-border text-center ">
+                    {% if subject in ["Craft", "Drawing"] %}
+
+                    {% else %}
+                        {{ data[subject]["FA1_SA1_Total"] }}
+                    {% endif %}
+                </td>
+
+
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["FA2"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["FA2"] }}
+                      {% endif %}
+                  </td>
+
+                  <td class="light-border text-center ">
+                      {% if not data[subject]["SA2"] and subject not in ["Craft", "Drawing"] %}
+                          AB
+                      {% else %}
+                          {{ data[subject]["SA2"] }}
+                      {% endif %}
+                  </td>
+
+                  <td class="red light-border text-center">
+                    {% if subject in ["Craft", "Drawing"] %}
+
+                    {% else %}
+                        {{ data[subject]['FA2_SA2_Total'] }}
+                    {% endif %}
+                  </td>
+
+                  <td class="red light-border text-center text-bold">
+                    {% if subject in ["Craft", "Drawing"] %}
+                        
+                    {% else %}
+                        {{ data[subject]['Grand_Total'] }}
+                    {% endif %}
+                  </td>
+
+
+
+                  <td class="light-border text-center red">{{ data[subject]['Grade'] if data[subject]['Grade'] else "" }}</td>
+
+                  </tr>
+                {% endif %}
+              {% endfor %}
+            
+            <tr>
+          </tbody>
+        </table>
+          
+  </div>
+
+  {% if data["Total"]["Grand_Rank"] <= 10 %}
+    {% set grid_columns = 4 %}
+  {% else %}
+    {% set grid_columns = 3 %}
+  {% endif %}
+
+  {% if data["Total"]["Grand_Rank"] == 1 %}
+    {% set rank_image = '1st-rank-gold-outline.png' %}
+  {% elif data["Total"]["Grand_Rank"] == 2 %}
+    {% set rank_image = '2nd-rank-badge.png' %}
+  {% elif data["Total"]["Grand_Rank"] == 3 %}
+    {% set rank_image = '3rd-rank-badge.png' %}
+  {% endif %}
+
+
+
+
+  <div style="border-top: 1px solid #000000; font-weight: bold; display: grid; grid-template-columns: repeat({{ grid_columns }}, 1fr); font-size: 20px; padding: 10px 0;">
+
+    {% if data["Total"]["Grand_Rank"] <= 10 %}
+    <div style="padding: 0 10px; text-align: center; position: relative;">
+      {% if data["Total"]["Grand_Rank"] <= 3 %} 
+      <div>
+        <img src="{{ url_for('static', filename=rank_image) }}" style="width: 70px; margin-bottom: -5px; margin-top: -5px;">
+      </div>
+      {% else %}
+      <div style="color:rgb(0, 159, 207); font-size: 36px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Grand_Rank"] }}<sup>th</sup></div>
+      {% endif %}
+
+      <div style="font-size: 14px; letter-spacing: 0.5px;">RANK</div>
+    </div>
+    {% endif %}
+
+    <div style="text-align: center">
+      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Attendance"] }}<span style="color: black">/214</span>
+      </div>
+      <div style="font-size: 14px;letter-spacing: 0.5px;">ATTENDANCE</div>
+    </div>
+
+    <div style="text-align: center;">
+      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Remark"] }}</div>
+      <div style="font-size: 14px; letter-spacing: 0.5px;">REMARK</div>
+    </div>
+
+    <div style="text-align: center; position: relative;">
+      <div>
+        <img src="{{ url_for('static', filename='passed_stamp.png') }}" style="width: 70px; margin-bottom: -7px; margin-top: -7px;">
+      </div>
+      <div style="font-size: 14px;letter-spacing: 0.5px;">RESULT</div>
+    </div>
+
+  </div>
+    
+  <div style="border-top: 2px solid #000000; font-size: 30px; text-align: center; display: flex;" class="bottom">
+
+    <div class="XYcenter" style="flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1);">
+        Parent's Sign
+    </div>
+
+    <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
+      Teacher's Sign
+      <img src="https://lh3.googleusercontent.com/d/{{ data['Sign']}}"
+          style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+
+    <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
+      Principal's Sign
+      <img src="https://lh3.googleusercontent.com/d/{{ principle_sign }}"
+          style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                max-width: 100%; max-height: 100%; object-fit: contain;">
+    </div>
+
+</div>
+
+
+  <script>
+    function adjustFontSize() {
+      const container = document.getElementsByClassName("container")[0]
+      const address = document.querySelector('#address');
+      
+      let fontSize = 15; // Initial font size for address
+      
+      // Loop to check if the address text overflows, and reduce font size if needed
+      while (address.offsetWidth > container.offsetWidth || address.offsetHeight > container.offsetHeight) {
+        console.log(fontSize)
+        fontSize -= 1; // Reduce font size
+        address.style.fontSize = fontSize + 'px';
+      }
+    }
+  
+    // Call adjustFontSize initially and on window resize
+    window.addEventListener('load', adjustFontSize);
+  </script>
+
+</body>
+</html>

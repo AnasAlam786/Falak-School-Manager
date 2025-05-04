@@ -1,0 +1,1 @@
+def upload_image(): pass
