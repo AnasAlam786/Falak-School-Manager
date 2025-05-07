@@ -8,7 +8,6 @@ class ClassData(db.Model):
     
     id = Column(BigInteger, primary_key=True)
     CLASS = Column(Text, nullable=False)
-    Fee = Column(Integer, nullable=False)
     Numeric_Subjects = Column(JSON, nullable=False)
     exam_format = Column(JSON, nullable=False)
     Grading_Subjects = Column(JSON, nullable=True)
