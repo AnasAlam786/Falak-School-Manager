@@ -1,6 +1,6 @@
 # src/controller/tools/question_paper_api.py
 
-from flask import session, render_template, redirect, url_for, request, jsonify, Blueprint
+from flask import session, render_template, request, jsonify, Blueprint
 from bs4 import BeautifulSoup
 
 
