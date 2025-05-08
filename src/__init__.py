@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_mail import Mail
 
 
 
@@ -13,7 +12,6 @@ from flask_mail import Mail
 # ——— Instantiate extensions here ———
 load_dotenv()
 db   = SQLAlchemy()
-mail = Mail()
 
 def create_app():
     app = Flask(__name__, template_folder='view/templates', static_folder='view/static')
@@ -26,13 +24,6 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI']   = os.getenv('URI')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Flask-Mail setup
-    app.config['MAIL_SERVER']       = 'smtp.gmail.com'
-    app.config['MAIL_PORT']         = 587
-    app.config['MAIL_USE_TLS']      = True
-    app.config['MAIL_USERNAME']     = os.getenv('EMAIL')
-    app.config['MAIL_PASSWORD']     = os.getenv('PASSWORD')
-    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('EMAIL')
     
     from .controller import register_blueprints
     register_blueprints(app)
