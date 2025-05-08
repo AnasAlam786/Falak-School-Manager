@@ -68,8 +68,6 @@ def login():
     return render_template('login.html', error=error)
 
 
-# FERNET_KEY = '***REMOVED***'
-# cipher_suite = Fernet(FERNET_KEY)
 
 # password = "Ilma@9341"
 # password = "Yasmeen@7110"
