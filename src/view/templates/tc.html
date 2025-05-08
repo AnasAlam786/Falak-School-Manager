@@ -1,0 +1,216 @@
+{% extends "base.html" %} {% block title %}Students Data{% endblock %} {% block
+content %}
+
+<!-- Start Student Container -->
+<div class="container py-4" id="student-container">
+
+  <!-- Start Filter & Search Row -->
+  <div class="row mb-4 align-items-center">
+    <!-- Start Class Filter -->
+    <div class="col-md-5 mb-2">
+      <label for="classView" class="form-label visually-hidden">Filter by Class</label>
+      <select id="classView" class="form-select form-select-lg"
+        onchange="updatePage('/tc_student_list_api','StudentData',{class:this.value});">
+        <option value="" selected hidden disabled>Select Class</option>
+        {% if classes %}
+          {% for class in classes %}
+            <option value="{{ class.id }}">{{ class.CLASS }}</option>
+          {% endfor %}
+        {% endif %}
+      </select>
+    </div>
+    <!-- End Class Filter -->
+
+    <!-- Start Search Input -->
+    <div class="col-md-5 mb-2">
+      <label for="search-input" class="form-label visually-hidden">Search Students</label>
+      <input type="search" id="search-input" class="form-control form-control-lg"
+        placeholder="Search by name, class or roll" oninput="applyFilters();" />
+    </div>
+    <!-- End Search Input -->
+  </div>
+  <!-- End Filter & Search Row -->
+
+  <!-- Start Student Cards Grid -->
+  <div class="row g-4" id="StudentData">
+    {% if data %}
+    {% for student in data %}
+    <!-- Start Student Card -->
+    <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ student.STUDENTS_NAME }}"
+      data-class="{{ student.CLASS }}" data-roll="{{ student.ROLL }}">
+
+      <!-- Start Card -->
+      <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
+
+        <!-- Start Card Body -->
+        <div class="card-body d-flex">
+          <!-- Start Photo -->
+          <img
+            src="{% if student.IMAGE %}https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s200{% else %}https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png{% endif %}"
+            alt="Student Image" class="rounded-circle border border-light shadow-sm"
+            style="width: 120px; height: 160px; object-fit: cover; object-position: top;" />
+          <!-- End Photo -->
+
+          <!-- Start Details -->
+          <div class="ms-3 mt-3 flex-grow-1">
+            <h5 class="card-title mb-1">
+              <a href="javascript:void(0);" class="text-light text-decoration-none">{{ student.STUDENTS_NAME }}</a>
+            </h5>
+            <p class="mb-2 text-secondary">
+              Child of <u>{{ student.FATHERS_NAME }}</u>
+            </p>
+
+            <p class="mb-0 text-secondary">
+              <span class="badge bg-primary">{{ student.CLASS }}</span>
+            </p>
+
+            <p class="mb-2 text-muted">
+              Roll No: {{ student.ROLL }}
+            </p>
+
+
+            <p class="mb-2 text-secondary">
+              Admission No: <u>{{ student.ADMISSION_NO }}</u>
+            </p>
+          </div>
+          <!-- End Details -->
+        </div>
+        <!-- End Card Body -->
+
+        <!-- Start Card Footer -->
+        <div class="card-footer bg-dark border-0 pt-0">
+          <!-- Start TC Form -->
+          <form class="row g-2 align-items-center">
+            <div class="col-12">
+              <div class="form-floating">
+                <input list="reasons-{{ student.id }}" class="form-control text-light border-2 rounded-3"
+                  id="reason-{{ student.id }}" name="reason" placeholder="Reason for Leaving" required />
+                <label for="reason-{{ student.id }}" class="text-secondary">Leaving Reason:</label>
+                <datalist id="reasons-{{ student.id }}">
+                  <option value="Completed the School"></option>
+                  <option value="Parent's Wish"></option>
+                </datalist>
+              </div>
+            </div>
+            <!-- Start Generate TC Button -->
+            <div class="col-12">
+              <button type="button" class="btn btn-outline-primary w-100 fw-bold"
+                onclick="generateTC('{{ student.id }}', document.getElementById('reason-{{ student.id }}').value)">
+                <i class="bi bi-file-earmark-text-fill me-1"></i> Generate TC
+              </button>
+            </div>
+            <!-- END Generate TC Button -->
+          </form>
+          <!-- End TC Form -->
+        </div>
+        <!-- End Card Footer -->
+
+      </div>
+      <!-- End Card -->
+
+    </div>
+    <!-- End Student Card -->
+    {% endfor %}
+    {% else %}
+    <!-- Start No Data Message -->
+    <div class="col-12">
+      <p class="text-center text-muted">Select a class to get the data.</p>
+    </div>
+    <!-- End No Data Message -->
+    {% endif %}
+  </div>
+  <!-- End Student Cards Grid -->
+
+</div>
+<!-- End Student Container -->
+
+
+
+<script>
+  async function generateTC(studentId, leaving_reason) {
+
+    if (!leaving_reason) {
+      showAlert(400, "Please select a reason for leaving.");
+      return;
+    }
+
+    try {
+      // 1. Send the request
+      const resp = await fetch("/generate_tc_form_api", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          student_id: studentId,
+          leaving_reason: leaving_reason,
+        }),
+      });
+
+      // 2. Get the HTML text
+      const content = await resp.json();
+
+      if (!resp.ok) {
+        showAlert(resp.status, content.message);
+        throw new Error(`Server error: ${resp.status}`);
+      }
+
+      // 3. Open a new window/tab
+      const printWindow = window.open("", "_blank");
+
+      if (!printWindow) {
+        showAlert(400, "Unable to open print window");
+        throw new Error("Unable to open print window");
+      }
+
+      // 4. Write the HTML into the new window
+      printWindow.document.open();
+      printWindow.document.write(content.html);
+      printWindow.document.close();
+
+      // 5. Wait for resources (CSS/images) to load, then print
+      printWindow.onload = () => {
+        printWindow.focus();
+        printWindow.print();
+      };
+    } catch (err) {
+      console.error(err);
+      showAlert(400, "Unexpected error occured!");
+    }
+  }
+
+
+
+
+
+  // Called on every keystroke in the search box
+  function applyFilters() {
+    const term = document
+      .getElementById("search-input")
+      .value.trim()
+      .toLowerCase();
+
+    // Grab all student cards
+    const cards = document.querySelectorAll(".student-card");
+
+    cards.forEach((card) => {
+      // Read the relevant data attributes
+      const name = card.getAttribute("data-name").toLowerCase();
+      const roll = card.getAttribute("data-roll").toLowerCase();
+
+      // Check if any field contains the search term
+      const matches = name.includes(term) || roll.includes(term);
+
+      // Show/hide card
+      card.style.display = matches ? "" : "none";
+    });
+  }
+
+  // Optionally, clear filters when class dropdown changes
+  document.getElementById("classView").addEventListener("change", () => {
+    document.getElementById("search-input").value = "";
+    applyFilters();
+  });
+</script>
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- START: Main Container -->
+<div class="container my-5">
+  <div class="row mb-4">
+    <!-- START: Class Selector -->
+    <div class="col-md-6 mb-2">
+      <label for="classView" class="form-label fs-4 fw-bold">Select Class</label>
+      <select class="form-select form-select-lg fs-4" id="classView" name="selectClass"
+              onchange="updatePage('/get_marks_api', 'results', { 'class_id': this.value });">
+        <option value="All" selected disabled hidden>Select Class</option>
+        {% if classes %}
+          {% for class in classes %}
+            <option value="{{ class.id }}">{{ class.CLASS }}</option>
+          {% endfor %}
+        {% endif %}
+      </select>
+    </div>
+    <!-- END: Class Selector -->
+
+    <!-- START: Search Input -->
+    <div class="col-md-6">
+      <label for="search-input" class="form-label fs-4 fw-bold">Search</label>
+      <input type="text" id="search-input" class="form-control form-control-lg fs-4"
+             placeholder="Search by Name, Class, or Roll Number" onkeyup="searchFunction()">
+    </div>
+    <!-- END: Search Input -->
+  </div>
+
+  <!-- START: Results List -->
+  <div id="results">
+    {% if Data %}
+      {% for data in Data %}
+        <!-- START: Single Result Card -->
+        <div class="card shadow-lg mb-4 result-card">
+          <div class="card-body">
+
+            <!-- START: Student Header Table -->
+            <div class="table-responsive mb-3 border rounded">
+              <table class="table table-borderless text-center fs-4" style="border: 1px solid #dee2e6;">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Roll</th>
+                    <th>Class</th>
+                    <th>F's Name</th>
+                    <th>Rank</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="student-summary">
+                    <td>{{ data["STUDENTS_NAME"] }}</td>
+                    <td>{{ data["ROLL"] }}</td>
+                    <td>{{ data["CLASS"] }}</td>
+                    <td>{{ data["FATHERS_NAME"] }}</td>
+                    <td>{{ data["Total"]["Grand_Rank"] }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <button class="btn btn-primary btn-lg fs-4 mt-2" onclick="getResult('{{ data["id"] }}')">
+                <i class="bi bi-printer-fill"></i> Print Result
+              </button>
+            </div>
+            <!-- END: Student Header Table -->
+
+            <!-- START: Subjects Table -->
+            <div class="table-responsive">
+              <table class="table table-hover table-striped align-middle fs-5">
+                <thead class="text-center">
+                  <tr style="border: 1px solid #ffffff; font-weight: bold;" >
+                    <th class="fs-5">Sub.</th>
+                    <th class="fs-5 lh-1">FA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th>
+                    <th class="fs-5 lh-1">SA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
+                    <th class="fs-5 lh-1">Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(100)</span></th>
+                    <th class="fs-5 lh-1">FA2 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th>
+                    <th class="fs-5 lh-1">SA2 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
+                    <th class="fs-5 lh-1">Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(100)</span></th>
+                    <th class="fs-5 lh-1">G. Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(200)</span></th>
+                    <th class="fs-5 lh-1">Grades <span class="text-secondary small d-block" style="font-size: 0.9rem;">(A,B,C,D,E)</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for subject in data["Subjects"] %}
+    
+                    {% if data[subject] %}
+    
+                      <tr class="text-center fs-5" 
+                          {% if subject in ['Total','Percentage']  %}
+                            style="border: 2px solid #ffffff; font-weight: bold;"
+                          {% endif %}>
+                        <th class="text-start " style="border-left: 1px solid #ffffff;">{{ subject }}</th>
+                        <td class="text-center ">{{ data[subject]["FA1"] }}</td>
+                        <td class="text-center ">{{ data[subject]["SA1"] }}</td>
+                        <td class="text-center text-danger">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] else '' }}</td>
+                        <td class="text-center ">{{ data[subject]["FA2"] }}</td>
+                        <td class="text-center ">{{ data[subject]['SA2'] }}</td>
+                        <td class="text-center text-danger">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] else '' }}</td>
+                        <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] else '' }}</td>
+                        <td class="text-center text-danger">{{ data[subject]['Grade'] }}</td>
+                      </tr>
+                    {% endif %}
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            <!-- END: Subjects Table -->
+
+          </div>
+        </div>
+        <!-- END: Single Result Card -->
+      {% endfor %}
+    {% else %}
+      <!-- START: Empty State -->
+      <div class="alert alert-info text-center fs-4">No data available to display.</div>
+      <!-- END: Empty State -->
+    {% endif %}
+  </div>
+  <!-- END: Results List -->
+</div>
+<!-- END: Main Container -->
+
+<script>
+  // START: getResult function
+  async function getResult(id) {
+    try {
+      const response = await fetch('/get_result_api', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: id, task: 'report_card' }),
+      });
+      if (!response.ok) throw new Error('Failed to generate report.');
+      const { html } = await response.json();
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.onload = () => printWindow.print();
+    } catch (err) {
+      alert('Error printing result: ' + err.message);
+    }
+  }
+  // END: getResult function
+
+  // START: searchFunction
+  function searchFunction() {
+    const filter = document.getElementById('search-input').value.toLowerCase();
+    document.querySelectorAll('.result-card').forEach(card => {
+      const cells = card.querySelector('.student-summary').getElementsByTagName('td');
+      const match = Array.from(cells).some(td => td.textContent.toLowerCase().includes(filter));
+      card.style.display = match ? '' : 'none';
+    });
+  }
+  // END: searchFunction
+</script>
+
+{% endblock %}
