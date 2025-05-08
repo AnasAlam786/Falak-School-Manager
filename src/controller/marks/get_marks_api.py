@@ -2,10 +2,10 @@
 
 from flask import session, request, jsonify, Blueprint, render_template 
 
-from src.model import StudentsDB
-from src.model import StudentSessions
-from src.model import ClassData
-from src.model import ClassAccess
+from src.model.StudentsDB import StudentsDB
+from src.model.StudentSessions import StudentSessions
+from src.model.ClassData import ClassData
+from src.model.ClassAccess import ClassAccess
 from src import db
 
 from .utils.calc_grades import get_grade
@@ -28,13 +28,14 @@ def get_marks_api():
     current_session_id = session["session_id"]
     user_id = session["user_id"]
 
+    try:
+        class_id = int(request.json.get("class_id"))
+    except (TypeError, ValueError):
+        return jsonify({"message": "Invalid class selected."}), 400
+
     if not school_id or not current_session_id or not user_id:
         return jsonify({"message": "Unable to get session data, Please try to logout and login again!"}), 403
 
-    class_id = request.json.get('class_id')
-
-    if not isinstance(class_id, int):
-        return jsonify({"message": "Invalid class selected."}), 400
 
     allowed_class_ids = (
         db.session.query(ClassAccess.class_id)

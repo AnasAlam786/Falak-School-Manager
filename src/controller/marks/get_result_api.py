@@ -3,7 +3,11 @@
 from flask import session, request, jsonify, Blueprint, render_template 
 from sqlalchemy import func
 
-from src.model import StudentsDB, TeachersLogin, StudentSessions, ClassData, ClassAccess
+from src.model.StudentsDB import StudentsDB
+from src.model.StudentSessions import StudentSessions
+from src.model.ClassData import ClassData
+from src.model.ClassAccess import ClassAccess
+from src.model.TeachersLogin import TeachersLogin
 from src import db
 
 from .utils.calc_grades import get_grade
@@ -23,7 +27,7 @@ def get_result_api():
     user_id = session["user_id"]
 
     try:
-        student_id = int(request.json.get("id", 0))
+        student_id = int(request.json.get("id"))
     except (TypeError, ValueError):
         return jsonify({"message": "Invalid student ID."}), 400
 
