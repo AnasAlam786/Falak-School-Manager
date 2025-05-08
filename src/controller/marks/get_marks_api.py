@@ -5,7 +5,8 @@ from flask import session, request, jsonify, Blueprint, render_template
 from src.model import StudentsDB
 from src.model import StudentSessions
 from src.model import ClassData
-
+from src.model import ClassAccess
+from src import db
 
 from .utils.calc_grades import get_grade
 from .utils.marks_processing import result_data
@@ -20,14 +21,30 @@ get_marks_api_bp = Blueprint('get_marks_api_bp',   __name__)
 def get_marks_api():
     
     if "email" not in session:
-        return jsonify({"message": "Unauthorized access. Login requires!"}), 400
+        return jsonify({"message": "Unauthorized access. Login requires!"}), 403
     
 
     school_id = session["school_id"]
     current_session_id = session["session_id"]
+    user_id = session["user_id"]
 
+    if not school_id or not current_session_id or not user_id:
+        return jsonify({"message": "Unable to get session data, Please try to logout and login again!"}), 403
 
-    CLASS = request.json.get('class')
+    class_id = request.json.get('class_id')
+
+    if not isinstance(class_id, int):
+        return jsonify({"message": "Invalid class selected."}), 400
+
+    allowed_class_ids = (
+        db.session.query(ClassAccess.class_id)
+        .filter(ClassAccess.staff_id == user_id)
+        .all()
+    )
+    allowed_class_ids = {c.class_id for c in allowed_class_ids}
+
+    if class_id not in allowed_class_ids:
+        return jsonify({"message": "You are not authorized to access this class."}), 403
 
     students_obj = StudentsDB.query.with_entities(
                     StudentsDB.STUDENTS_NAME, StudentsDB.PHONE,
@@ -40,7 +57,7 @@ def get_marks_api():
                 ).join(
                     ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                 ).filter(
-                    ClassData.CLASS == CLASS,
+                    ClassData.id == class_id,
                     StudentsDB.school_id == school_id,
                     StudentSessions.session_id == current_session_id
                 ).order_by(

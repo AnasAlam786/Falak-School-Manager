@@ -2,13 +2,17 @@
 
 from flask import render_template, session, url_for, redirect, Blueprint, request
 
-from werkzeug.security import check_password_hash
+from cryptography.fernet import Fernet
 
 from src.model import Schools
 from src.model import Sessions
 from src.model import ClassData
+from src.model import TeachersLogin
+
+import os
 
 login_bp = Blueprint( 'login_bp',   __name__)
+FERNET_KEY = os.environ.get('FERNET_KEY')
 
 @login_bp.route('/login', methods=["GET", "POST"])
 def login():
@@ -21,9 +25,16 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        school = Schools.query.filter_by(Email=email).first()
+        cipher_suite = Fernet(FERNET_KEY)
+        
 
-        if school and check_password_hash(school.Password, password):
+        user = TeachersLogin.query.filter_by(Email=email).first()
+
+        decrypted_password = cipher_suite.decrypt(user.Password).decode()
+
+        if user and (decrypted_password == password):
+
+            school = Schools.query.filter_by(id=user.school_id).first()
 
             class_rows = ClassData.query.filter_by(school_id=school.id).order_by(ClassData.id).all()
             class_dict = {cls.id: cls.CLASS for cls in class_rows}
@@ -33,10 +44,11 @@ def login():
 
             session["all_sessions"] = [sessi.session for sessi in sessions]
             session["school_name"] = school.School_Name
+            session["user_id"] = user.id
             session["classes"] = class_dict
             session["logo"] = school.Logo
-            session["email"] = school.Email
-            session["school_id"] = school.id
+            session["email"] = user.Email
+            session["school_id"] = user.school_id
 
 
             # pick out the one where current_session==True (or None if none)
@@ -55,4 +67,20 @@ def login():
 
     return render_template('login.html', error=error)
 
+
+# FERNET_KEY = '***REMOVED***'
+# cipher_suite = Fernet(FERNET_KEY)
+
+# password = "Ilma@9341"
+# password = "Yasmeen@7110"
+# password = "Saiba@4536"
+# password = "Fouziya@5689"
+# password = "Farheen@8745"
+# password = "Mantasha@3231"
+# password = "Mehak@8790"
+# password = "Saba@8743"
+# password = "Husna@5645"
+# password = "Mehjabi@6745"
+# password = "Luba@7548"
+# password = "Fouziya@5689"
 

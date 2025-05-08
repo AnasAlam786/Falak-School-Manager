@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Integer, BigInteger, Text, JSON, ForeignKey
+    Column, BigInteger, Text, JSON, ForeignKey
 )
 from src import db
 
@@ -15,9 +15,12 @@ class ClassData(db.Model):
     
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=False)
     school = db.relationship("Schools", back_populates="class_data")
+
+    class_teacher_id = Column(BigInteger, ForeignKey('TeachersLogin.id', onupdate="CASCADE"), nullable=False)
+    class_teacher_data = db.relationship("TeachersLogin", back_populates="class_data")
     
     # Relationships
     student_sessions =  db.relationship("StudentSessions", back_populates="class_data")
     students = db.relationship("StudentsDB", back_populates="class_data")
     fees_data = db.relationship("FeesData", back_populates="class_data")
-    teachers = db.relationship("TeachersLogin", back_populates="class_data")
+    class_access = db.relationship("ClassAccess", back_populates="class_data")

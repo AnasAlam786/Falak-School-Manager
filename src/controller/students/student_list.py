@@ -3,9 +3,11 @@
 from flask import render_template, session, url_for, redirect, Blueprint
 from sqlalchemy import func
 
-from src.model import StudentsDB
-from src.model import StudentSessions
-from src.model import ClassData
+from src.model.StudentsDB import StudentsDB
+from src.model.StudentSessions import StudentSessions
+from src.model.ClassData import ClassData
+from src.model.ClassAccess import ClassAccess
+from src.model.TeachersLogin import TeachersLogin
 
 from src import db
 
@@ -19,7 +21,18 @@ def student_list():
 
     school_id = session['school_id']
     current_session = session['session_id']
-    classes = session.get('classes', [])
+    user_id = session["user_id"]
+
+    classes_query = (
+        db.session.query(ClassData)
+        .join(ClassAccess, ClassAccess.class_id == ClassData.id)
+        .filter(ClassAccess.staff_id == user_id)
+        .order_by(ClassData.id.asc())
+    )
+
+    classes = classes_query.all()
+    class_ids = [cls.id for cls in classes]
+
 
     # build your query
     data = db.session.query(
@@ -41,7 +54,8 @@ def student_list():
         ClassData,    StudentSessions.class_id == ClassData.id
     ).filter(
         StudentsDB.school_id    == school_id,
-        StudentSessions.session_id == current_session
+        StudentSessions.session_id == current_session,
+        ClassData.id.in_(class_ids)
     ).order_by(
         ClassData.id.asc(),
         ClassData.Section.asc(),

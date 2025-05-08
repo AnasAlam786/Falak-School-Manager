@@ -3,9 +3,7 @@
 from flask import session,  request, jsonify, Blueprint
 
 from src import db
-from src.model import StudentsDB
 from src.model import StudentSessions
-from src.model import ClassData
 
 
 final_depromotion_api_bp = Blueprint('final_depromotion_api_bp',   __name__)

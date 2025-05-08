@@ -11,25 +11,6 @@ from datetime import datetime
 admission_bp = Blueprint( 'admission_bp',   __name__)
 
 
-def test():
-    from cryptography.fernet import Fernet
-    from src import db
-
-    # 1. Your key must be bytes; keep it out of source (e.g. env var or vault)
-    key = b'***REMOVED***'
-    cipher = Fernet(key)
-
-    # 2. Fetch all students
-    students = StudentsDB.query.all()
-
-    print("Started")
-
-    for student in students:
-        # for each field you want encrypted:
-        if student.AADHAAR:
-            print(cipher.decrypt(student.AADHAAR))
-
-
 
 @admission_bp.route('/admission', methods=["GET", "POST"])
 def admission():
@@ -38,7 +19,6 @@ def admission():
         return redirect(url_for('login_bp.login')) 
 
     
-    test()
     classes = session["classes"]
     school_id = session["school_id"]
 

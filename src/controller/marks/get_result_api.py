@@ -3,8 +3,8 @@
 from flask import session, request, jsonify, Blueprint, render_template 
 from sqlalchemy import func
 
-from src.model import StudentsDB, TeachersLogin, StudentSessions, ClassData
-
+from src.model import StudentsDB, TeachersLogin, StudentSessions, ClassData, ClassAccess
+from src import db
 
 from .utils.calc_grades import get_grade
 from .utils.marks_processing import result_data
@@ -20,8 +20,34 @@ def get_result_api():
     
 
     current_session_id = session["session_id"]
-    student_id = int(request.json["id"])
+    user_id = session["user_id"]
 
+    try:
+        student_id = int(request.json.get("id", 0))
+    except (TypeError, ValueError):
+        return jsonify({"message": "Invalid student ID."}), 400
+
+    # Session checks
+    if not student_id or not current_session_id or not user_id:
+        return jsonify({"message": "Session data missing. Please logout and login again!"}), 403
+
+    # Authorization: find student's class
+    student_session = db.session.query(StudentSessions).filter_by(
+        student_id=student_id,
+        session_id=current_session_id
+    ).first()
+    if not student_session:
+        return jsonify({"message": "Student not found in current session."}), 404
+
+    class_id = student_session.class_id
+    allowed = (
+        db.session.query(ClassAccess.class_id)
+        .filter(ClassAccess.staff_id == user_id)
+        .all()
+    )
+    allowed_class_ids = {c.class_id for c in allowed}
+    if class_id not in allowed_class_ids:
+        return jsonify({"message": "You are not authorized to access this class."}), 403
 
     students_obj = StudentsDB.query.with_entities(
                         StudentsDB.STUDENTS_NAME, StudentsDB.PHONE, StudentsDB.id,
@@ -39,7 +65,7 @@ def get_result_api():
                     ).join(
                         ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
                     ).join(
-                        TeachersLogin, ClassData.id == TeachersLogin.class_id
+                        TeachersLogin, ClassData.class_teacher_id == TeachersLogin.id
                     ).filter(
                         StudentsDB.id == student_id,
                         StudentSessions.session_id == current_session_id

@@ -14,7 +14,6 @@ update_marks_api_bp = Blueprint('update_marks_api_bp',   __name__)
 def update_marks_api():
 
     data = request.json
-    print(data)
 
     #subject = data.get('subject')
     exam = data.get('exam')

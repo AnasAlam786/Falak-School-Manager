@@ -3,7 +3,8 @@
 from flask import render_template, session, url_for, redirect, request, jsonify, Blueprint
 
 
-from src.model import StudentsDB, StudentSessions, ClassData, StudentsMarks
+from src.model import StudentsDB, StudentSessions, ClassData, StudentsMarks, TeachersLogin
+from src.model.ClassAccess import ClassAccess
 from src import db
 
 from bs4 import BeautifulSoup
@@ -18,8 +19,17 @@ def fill_marks():
     if "email" not in session:
         return redirect(url_for('login_bp.login'))
     
-    classes = session['classes']
+    user_id = session["user_id"]
     school_id = session["school_id"]
+
+    classes = (
+        db.session.query(ClassData.id, ClassData.CLASS)
+        .join(ClassAccess, ClassAccess.class_id == ClassData.id)
+        .join(TeachersLogin, TeachersLogin.id == ClassAccess.staff_id)
+        .filter(TeachersLogin.id == user_id)
+        .order_by(ClassData.id.asc())
+        .all()
+    )
     
     data = None
 
