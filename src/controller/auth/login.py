@@ -66,19 +66,3 @@ def login():
                 
 
     return render_template('login.html', error=error)
-
-
-
-# password = "Ilma@9341"
-# password = "Yasmeen@7110"
-# password = "Saiba@4536"
-# password = "Fouziya@5689"
-# password = "Farheen@8745"
-# password = "Mantasha@3231"
-# password = "Mehak@8790"
-# password = "Saba@8743"
-# password = "Husna@5645"
-# password = "Mehjabi@6745"
-# password = "Luba@7548"
-# password = "Fouziya@5689"
-
