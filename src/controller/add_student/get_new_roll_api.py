@@ -7,10 +7,15 @@ from src.model import StudentsDB
 from src.model import StudentSessions
 from src import db
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 get_new_roll_api_bp = Blueprint( 'get_new_roll_api_bp',   __name__)
 
 
 @get_new_roll_api_bp.route('/get_new_roll_api', methods=["POST"])
+@login_required
+@permission_required('admission')
 def get_new_roll_api():
     data = request.json
     class_id = data.get('class_id')

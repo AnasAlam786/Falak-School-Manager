@@ -9,6 +9,9 @@ from .StudentsDB import StudentsDB
 from .StudentSessions import StudentSessions
 from .StudentsMarks import StudentsMarks
 from .TeachersLogin import TeachersLogin
+from .Roles import Roles
+from .Permissions import Permissions
+from .RolePermissions import RolePermissions
 
 # Optional: control what `from src.model import *` brings in
 __all__ = [
@@ -20,4 +23,7 @@ __all__ = [
     "StudentSessions",
     "StudentsMarks",
     "TeachersLogin",
+    "Roles",
+    "Permissions",
+    "RolePermissions",
 ]

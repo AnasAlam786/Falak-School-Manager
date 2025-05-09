@@ -2,15 +2,14 @@
 
 from flask import session, render_template, request, jsonify, Blueprint
 from bs4 import BeautifulSoup
-
+from ..auth.login_required import login_required
 
 question_paper_api_bp = Blueprint( 'question_paper_api_bp',   __name__)
 
 
 @question_paper_api_bp.route('/question_paper_api', methods=["POST"])
+@login_required
 def question_paper_api():
-    if 'email' not in session:
-        return jsonify({'message': "Not Authorised!"}), 400
 
        
     payload = request.json

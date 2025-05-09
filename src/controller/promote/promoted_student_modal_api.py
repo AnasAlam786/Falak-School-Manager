@@ -10,11 +10,16 @@ from src.model import StudentsDB
 from src.model import StudentSessions
 from src.model import ClassData
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 
 promoted_student_modal_api_bp = Blueprint('promoted_student_modal_api_bp',   __name__)
 
 
 @promoted_student_modal_api_bp.route('/promoted_student_modal_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def promoted_student_modal_api():
     """
     Fetch a single student's data including promotion details based on

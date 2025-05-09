@@ -9,11 +9,16 @@ from src.model import ClassData
 
 import datetime
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 
 final_update_api_bp = Blueprint('final_update_api_bp',   __name__)
 
 
 @final_update_api_bp.route('/final_update_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def final_update_api():
 
     current_session = session.get("session_id")

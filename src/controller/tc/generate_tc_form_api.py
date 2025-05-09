@@ -11,9 +11,14 @@ from src import db
 
 from datetime import datetime
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 generate_tc_form_api_bp = Blueprint( 'generate_tc_form_api_bp',   __name__)
 
 @generate_tc_form_api_bp.route('/generate_tc_form_api', methods=['POST'])
+@login_required
+@permission_required('tc')
 def generate_tc_form_api():
 
     if "email" not in session:

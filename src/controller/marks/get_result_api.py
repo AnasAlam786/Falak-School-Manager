@@ -12,12 +12,15 @@ from src import db
 
 from .utils.calc_grades import get_grade
 from .utils.marks_processing import result_data
-
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 
 get_result_api_bp = Blueprint('get_result_api_bp',   __name__)
 
 
 @get_result_api_bp.route('/get_result_api', methods=["POST"])
+@login_required
+@permission_required('get_result')
 def get_result_api():
     if "email" not in session:
         return jsonify({"message": "Unauthorized access. Login required"}), 401

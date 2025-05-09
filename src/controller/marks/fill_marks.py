@@ -8,16 +8,14 @@ from src.model.ClassAccess import ClassAccess
 from src import db
 
 from bs4 import BeautifulSoup
+from ..auth.login_required import login_required
 
 fill_marks_bp = Blueprint( 'fill_marks_bp',   __name__)
 
 
-
 @fill_marks_bp.route('/fill_marks', methods=["GET", "POST"])
+@login_required
 def fill_marks():
-
-    if "email" not in session:
-        return redirect(url_for('login_bp.login'))
     
     user_id = session["user_id"]
     school_id = session["school_id"]

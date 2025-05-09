@@ -10,12 +10,18 @@ from src.model import StudentsDB
 from src.model import StudentSessions
 from src.model import ClassData
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
+
 
 generate_watsapp_message_api_bp = Blueprint('generate_watsapp_message_api_bp',   __name__)
 
 
 
 @generate_watsapp_message_api_bp.route('/generate_watsapp_message_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def generate_message():
     data = request.json
     student_id = data.get('student_id')

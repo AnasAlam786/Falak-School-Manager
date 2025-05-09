@@ -5,7 +5,8 @@ from sqlalchemy import func
 
 from src.model import StudentsDB
 
-
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 from datetime import datetime
 
 admission_bp = Blueprint( 'admission_bp',   __name__)
@@ -13,6 +14,8 @@ admission_bp = Blueprint( 'admission_bp',   __name__)
 
 
 @admission_bp.route('/admission', methods=["GET", "POST"])
+@login_required
+@permission_required('admission')
 def admission():
     
     if "email" not in session:

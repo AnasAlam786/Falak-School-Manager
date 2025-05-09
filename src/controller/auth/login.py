@@ -1,15 +1,18 @@
 # src/controller/auth.py
 
-from flask import render_template, session, url_for, redirect, Blueprint, request
+from flask import render_template, session, url_for, redirect, Blueprint, request, make_response
 
 from cryptography.fernet import Fernet
 
-from src.model import Schools
-from src.model import Sessions
-from src.model import ClassData
-from src.model import TeachersLogin
+from src.model.Schools import Schools
+from src.model.Sessions import Sessions
+from src.model.TeachersLogin import TeachersLogin
+from src.model.Roles import Roles
+
+from ..permissions.get_permissions import get_permissions
 
 import os
+
 
 login_bp = Blueprint( 'login_bp',   __name__)
 FERNET_KEY = os.environ.get('FERNET_KEY')
@@ -18,7 +21,7 @@ FERNET_KEY = os.environ.get('FERNET_KEY')
 def login():
     error=None
     
-    if "email" in session:
+    if "user_id" in session:
         return redirect(url_for('student_list_bp.student_list'))
 
     if request.method == "POST":
@@ -28,27 +31,35 @@ def login():
         cipher_suite = Fernet(FERNET_KEY)
         
 
-        user = TeachersLogin.query.filter_by(Email=email).first()
+        user = (
+            TeachersLogin.query
+                .join(Roles, Roles.id == TeachersLogin.role_id)
+                .filter(TeachersLogin.email == email)
+                .first()
+        )
 
         decrypted_password = cipher_suite.decrypt(user.Password).decode()
 
         if user and (decrypted_password == password):
 
+
             school = Schools.query.filter_by(id=user.school_id).first()
-
-            class_rows = ClassData.query.filter_by(school_id=school.id).order_by(ClassData.id).all()
-            class_dict = {cls.id: cls.CLASS for cls in class_rows}
-
             sessions = Sessions.query.with_entities(Sessions.id, Sessions.session, Sessions.current_session
                                                     ).order_by(Sessions.session.asc()).all()
-
+            
+            session.permanent = True
+        
+            
+            session["role"] = user.role_data.role_name
             session["all_sessions"] = [sessi.session for sessi in sessions]
             session["school_name"] = school.School_Name
             session["user_id"] = user.id
-            session["classes"] = class_dict
             session["logo"] = school.Logo
-            session["email"] = user.Email
+            session["email"] = user.email
             session["school_id"] = user.school_id
+
+            permissions = get_permissions(user.id)
+            session["permissions"] = permissions
 
 
             # pick out the one where current_session==True (or None if none)
@@ -61,7 +72,7 @@ def login():
             session["current_session"] = current_session
 
             return redirect(url_for('student_list_bp.student_list'))
-        
+               
         else: error="Wrong email or password"
                 
 

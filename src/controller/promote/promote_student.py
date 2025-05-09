@@ -7,13 +7,17 @@ from src.model.ClassAccess import ClassAccess
 from src.model.TeachersLogin import TeachersLogin
 from src import db
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
+
 promote_student_bp = Blueprint( 'promote_student_bp',   __name__)
 
 
 @promote_student_bp.route('/promote_student', methods=["GET", "POST"])
+@login_required
+@permission_required('promote_student')
 def promoteStudent():
-    if not "email" in session:
-        return redirect(url_for('login_bp.login'))
 
     user_id = session["user_id"]
 

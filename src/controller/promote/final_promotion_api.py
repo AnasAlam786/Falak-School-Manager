@@ -7,10 +7,14 @@ from src.model import StudentSessions
 
 import datetime
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 
 final_promotion_api_bp = Blueprint('final_promotion_api_bp',   __name__)
 
 @final_promotion_api_bp.route('/final_promotion_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def final_promotion_api():
     try:
         current_session = int(session["session_id"])

@@ -7,13 +7,14 @@ from src.model.ClassAccess import ClassAccess
 from src.model.TeachersLogin import TeachersLogin
 from src import db
 
+from ..auth.login_required import login_required
+
 
 show_marks_bp = Blueprint('show_marks_bp',   __name__)
 
 @show_marks_bp.route('/marks', methods=["GET"])
+@login_required
 def show_marks():
-    if "email" not in session:
-        return redirect(url_for('login_bp.login')) 
     
 
     user_id = session["user_id"]

@@ -12,10 +12,15 @@ from .utils.validate_name import validate_name
 from .utils.validate_length import validate_length
 from .utils.validate_aadhaar import is_valid_aadhaar
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 verify_admission_api_bp = Blueprint( 'verify_admission_api_bp',   __name__)
 
 
 @verify_admission_api_bp.route('/verify_admission', methods=["POST"])
+@login_required
+@permission_required('admission')
 def verify_admission():
     data = request.get_json() or {}
 

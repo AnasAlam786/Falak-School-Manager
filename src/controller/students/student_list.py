@@ -1,23 +1,24 @@
 # src/controller/student_list.py
 
-from flask import render_template, session, url_for, redirect, Blueprint
+from flask import render_template, session, Blueprint
 from sqlalchemy import func
 
 from src.model.StudentsDB import StudentsDB
 from src.model.StudentSessions import StudentSessions
 from src.model.ClassData import ClassData
 from src.model.ClassAccess import ClassAccess
-from src.model.TeachersLogin import TeachersLogin
 
 from src import db
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 
 student_list_bp = Blueprint( 'student_list_bp',   __name__)
 
-@student_list_bp.route('/student_list', methods=['GET', 'POST'])
-def student_list():
 
-    if 'email' not in session:
-        return redirect(url_for('login_bp.login'))
+
+@student_list_bp.route('/student_list', methods=['GET'])
+@login_required
+def student_list():
 
     school_id = session['school_id']
     current_session = session['session_id']

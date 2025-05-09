@@ -5,11 +5,16 @@ from flask import session,  request, jsonify, Blueprint
 from src import db
 from src.model import StudentSessions
 
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
 
 final_depromotion_api_bp = Blueprint('final_depromotion_api_bp',   __name__)
 
 
 @final_depromotion_api_bp.route('/final_depromotion_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def depromote_student():
     data = request.json
 

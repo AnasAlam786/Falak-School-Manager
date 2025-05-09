@@ -65,7 +65,7 @@ content %}
                     <i class="bi bi-easel-fill"></i>
                 </span>
                 <select class="form-select bg-dark text-light border-secondary" id="classView"
-                    onchange="updatePage('/get_prv_year_students', 'StudentData', { 'class_id': event.target.value });">
+                    onchange="updatePage('/get_prv_year_students_api', 'StudentData', { 'class_id': event.target.value });">
                     <option selected hidden value="">Select Class</option>
                     {% if classes %}
                         {% for class in classes %}

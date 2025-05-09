@@ -1,11 +1,12 @@
 # src/controller/__init__.py
 
-from .home import home_bp
-from .students.student_list import student_list_bp
-from .students.student_modal_data_api import student_modal_data_api_bp
 
 from .auth.login import login_bp
 from .auth.logout import logout_bp
+
+from .home import home_bp
+from .students.student_list import student_list_bp
+from .students.student_modal_data_api import student_modal_data_api_bp
 
 from .marks.fill_marks import fill_marks_bp
 from .marks.update_marks_api import update_marks_api_bp
@@ -17,7 +18,7 @@ from .sessions.change_session import change_session_bp
 from .RTE.RTE_students import RTE_students_bp
 
 from .promote.promote_student import promote_student_bp
-from .promote.prv_year_students import prv_year_student_bp
+from .promote.prv_year_students_api import prv_year_student_api_bp
 from .promote.student_data_modal_api import student_data_modal_api_bp
 from .promote.promoted_student_modal_api import promoted_student_modal_api_bp
 
@@ -39,13 +40,16 @@ from .tools.question_paper_api import question_paper_api_bp
 
 
 def register_blueprints(app):
-    app.register_blueprint(home_bp)
-    app.register_blueprint(student_list_bp)
-    app.register_blueprint(student_modal_data_api_bp)
 
     app.register_blueprint(login_bp)
     app.register_blueprint(logout_bp)
     app.register_blueprint(change_session_bp)
+
+    app.register_blueprint(home_bp)
+    app.register_blueprint(student_list_bp)
+    app.register_blueprint(student_modal_data_api_bp)
+
+
 
     app.register_blueprint(admission_bp)
     app.register_blueprint(get_new_roll_api_bp)
@@ -58,7 +62,7 @@ def register_blueprints(app):
     app.register_blueprint(get_result_api_bp)
 
     app.register_blueprint(promote_student_bp)
-    app.register_blueprint(prv_year_student_bp)
+    app.register_blueprint(prv_year_student_api_bp)
     app.register_blueprint(student_data_modal_api_bp)
     app.register_blueprint(promoted_student_modal_api_bp)
 

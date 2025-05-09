@@ -12,11 +12,15 @@ from datetime import datetime
 from werkzeug.security import check_password_hash
 
 from .utils.upload_image import upload_image
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 
 final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 
 
 @final_admission_api_bp.route('/final_admission_api', methods=["POST"])
+@login_required
+@permission_required('admission')
 def final_admission_api():
     if not "email" in session:
         return jsonify({"message": "Unauthorized access. Login requires!"}), 400

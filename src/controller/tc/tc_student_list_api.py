@@ -10,10 +10,14 @@ from src.model import StudentSessions
 from src import db
 
 from bs4 import BeautifulSoup
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
 
 tc_student_list_api_bp = Blueprint( 'tc_student_list_api_bp',   __name__)
 
 @tc_student_list_api_bp.route('/tc_student_list_api', methods=['POST', 'GET'])
+@login_required
+@permission_required('tc')
 def tc_student_list_api():
     
     if "email" not in session:

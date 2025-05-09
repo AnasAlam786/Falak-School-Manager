@@ -1,15 +1,14 @@
 from flask import session, jsonify, Blueprint, request, redirect, url_for
 from src.model import Sessions
+from ..auth.login_required import login_required
 
 
 change_session_bp = Blueprint( 'change_session_bp',   __name__)
 
 
 @change_session_bp.route('/change_session', methods=["POST"])
+@login_required
 def change_session():
-
-    if "email" not in session:
-        return redirect(url_for('login_bp.login')) 
     
     data = request.json
     current_session = data.get('year')

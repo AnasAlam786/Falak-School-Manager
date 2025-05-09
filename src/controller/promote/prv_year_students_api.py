@@ -12,11 +12,16 @@ from bs4 import BeautifulSoup
 
 from src import db
 
-prv_year_student_bp = Blueprint( 'prv_year_student_bp',   __name__)
+from ..auth.login_required import login_required
+from ..permissions.permission_required import permission_required
+
+prv_year_student_api_bp = Blueprint( 'prv_year_student_api_bp',   __name__)
 
 
 
-@prv_year_student_bp.route('/get_prv_year_students', methods=["POST"])
+@prv_year_student_api_bp.route('/get_prv_year_students_api', methods=["POST"])
+@login_required
+@permission_required('promote_student')
 def get_prv_year_students():
     data = request.json
     class_id = data.get('class_id')

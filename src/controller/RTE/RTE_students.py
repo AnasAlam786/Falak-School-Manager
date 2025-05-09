@@ -9,12 +9,14 @@ from sqlalchemy.orm import aliased
 from src.model import StudentsDB
 from src.model import StudentSessions
 from src.model import ClassData
-
 from src import db
+
+from ..auth.login_required import login_required
 
 RTE_students_bp = Blueprint( 'RTE_students_bp',   __name__)
 
 @RTE_students_bp.route('/RTE_students')
+@login_required
 def RTE_students():
     if "email" not in session:
         return redirect(url_for('login_bp.login')) 
