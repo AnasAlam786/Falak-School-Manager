@@ -77,11 +77,25 @@
     <div style="text-align: center; border-bottom: 1px solid #464646;">
         <p style="font-size: 1.5em; font-weight: bold; margin: 0;">{{ school }}</p>
         <p style="font-size: 1.25em; font-weight: bold; margin: 0;">{{ event }}</p>
-        <p style="font-size: 1em; font-weight: bold; margin: 0;">Subject - {{ subject }}</p>
-        <div style="display: flex; justify-content: space-between; margin: 0;">
-            <p style="font-weight: bold; margin: 0;">Time: {{ hrs }} Hrs</p>
+        {% if subject %}
+            <p style="font-size: 1em; font-weight: bold; margin: 0;">Subject - {{ subject }}</p>
+        {% endif %}
+        <div style="
+                display: flex; 
+                {% if not hrs and not MM %}
+                    justify-content: center;
+                {% else %}
+                    justify-content: space-between;
+                {% endif %}
+                margin: 0;">
+
+            {% if hrs %}
+                <p style="font-weight: bold; margin: 0;">Time: {{ hrs }} Hrs</p>
+            {% endif %}
             <p style="font-size: 1em; font-weight: bold; margin: 0;">Class - {{ std }}</p>
-            <p style="font-weight: bold; margin: 0;">M.M: {{ MM }}</p>
+            {% if MM %}
+                <p style="font-weight: bold; margin: 0;">M.M: {{ MM }}</p>
+            {% endif %}
         </div>
     </div>
     
@@ -123,7 +137,7 @@
 
             {% for subQuestion in question.subQuestion %}
                 {% if subQuestion %}
-                <p style="margin: 0;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
+                <p style="margin: 0; line-height: 1px;">{{ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[loop.index-1] }}: {{ subQuestion }}</p>
                 {% endif %}
             {% endfor %}
         </div>
