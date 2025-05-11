@@ -48,7 +48,6 @@ class StudentsDB(db.Model):
     id = Column(BigInteger, unique=True, primary_key=True)
     STUDENTS_NAME = Column(Text, nullable=False)
     DOB = Column(Date, nullable=True)
-    class_data_id = Column(BigInteger, ForeignKey('ClassData.id', onupdate="CASCADE"), nullable=False)
 
 
     FATHERS_NAME = Column(Text, nullable=True)
@@ -98,11 +97,14 @@ class StudentsDB(db.Model):
     MOTHERS_OCCUPATION = Column(StudentsDBEnums.MOTHERS_OCCUPATION, nullable=True)
 
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=True)
-    session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
-    
     school = db.relationship("Schools", back_populates="students")
-    class_data = db.relationship("ClassData", back_populates="students")
+
+    session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     session = db.relationship("Sessions", back_populates="students")
+
+    class_data_id = Column(BigInteger, ForeignKey('ClassData.id', onupdate="CASCADE"), nullable=False)
+    class_data = db.relationship("ClassData", back_populates="students")
     
     student_sessions = db.relationship("StudentSessions", back_populates="students")
     students_marks = db.relationship("StudentsMarks", back_populates="students")
+    fee_data = db.relationship("FeeData", back_populates="students")

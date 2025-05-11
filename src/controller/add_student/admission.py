@@ -3,7 +3,12 @@
 from flask import render_template, session, url_for, redirect, Blueprint
 from sqlalchemy import func
 
-from src.model import StudentsDB
+from src.model.StudentsDB import StudentsDB
+from src.model.ClassData import ClassData
+from src.model.StudentsDB import StudentsDB
+from src.model.ClassAccess import ClassAccess
+
+from src import db
 
 from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
@@ -17,12 +22,23 @@ admission_bp = Blueprint( 'admission_bp',   __name__)
 @login_required
 @permission_required('admission')
 def admission():
-    
-    if "email" not in session:
-        return redirect(url_for('login_bp.login')) 
 
     
-    classes = session["classes"]
+    user_id = session["user_id"]
+
+    
+    classes_query = (
+        db.session.query(ClassData)
+        .join(ClassAccess, ClassAccess.class_id == ClassData.id)
+        .filter(ClassAccess.staff_id == user_id)
+        .order_by(ClassData.id.asc())
+    )
+
+    classes = classes_query.all()
+
+    classes = {str(cls.id): cls.CLASS for cls in classes}
+
+
     school_id = session["school_id"]
 
     PersonalInfo = {
@@ -57,7 +73,7 @@ def admission():
                     "type": "select",
                     "options": {"": "Select Class", **classes},
                     "default": "Select Class",
-                    "required": True   #True
+                    "required": True
                 },
             "Section": {
                 "label": "Section",
