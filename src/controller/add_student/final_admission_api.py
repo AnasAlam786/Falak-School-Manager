@@ -70,7 +70,7 @@ def final_admission_api():
             parsed_date = None
             for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
                 try:
-                    parsed_date = datetime.datetime.strptime(value, fmt).date()
+                    parsed_date = datetime.strptime(value, fmt).date()
                     break
                 except ValueError:
                     continue

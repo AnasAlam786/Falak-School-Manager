@@ -32,6 +32,7 @@ from .tc.tc_student_list_api import tc_student_list_api_bp
 from .tc.generate_tc_form_api import generate_tc_form_api_bp
 
 from .add_student.admission import admission_bp
+from .add_student.verify_admission_api import verify_admission_api_bp
 from .add_student.get_new_roll_api import get_new_roll_api_bp
 from .add_student.final_admission_api import final_admission_api_bp
 
@@ -52,6 +53,7 @@ def register_blueprints(app):
 
 
     app.register_blueprint(admission_bp)
+    app.register_blueprint(verify_admission_api_bp)
     app.register_blueprint(get_new_roll_api_bp)
     app.register_blueprint(final_admission_api_bp)
 

@@ -39,6 +39,8 @@ def verify_admission():
     faadhar = handle_aadhar('FATHERS_AADHAR')
     maadhar = handle_aadhar('MOTHERS_AADHAR')
 
+    
+
     # Mandatory text fields
     mandatory_names = [
         "STUDENTS_NAME", "FATHERS_NAME", "MOTHERS_NAME",
@@ -92,7 +94,7 @@ def verify_admission():
         parsed_date = None
         for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
             try:
-                parsed_date = datetime.datetime.strptime(normalized, fmt).date()
+                parsed_date = datetime.strptime(normalized, fmt).date()
                 break
             except ValueError:
                 continue
