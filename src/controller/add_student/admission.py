@@ -43,7 +43,7 @@ def admission():
 
     PersonalInfo = {
             "STUDENTS_NAME": {"label": "Student Name","type": "text", "required":True},  #True
-            "DOB": {"label": "DOB", "type": "text", "required":True},  #True
+            "DOB": {"label": "DOB", "type": "numeric", "required":True},  #True
             "GENDER": {"label": "Gender", "type": "select", "default": "Select Gender", "required":True,    #True
                         "options": {"" : "Select Gender", "Male" : "Male", "Female" : "Female"}},
             "AADHAAR": {"label": "Aadhar", "type": "numeric", "maxlength": 14, "required":True},   #True
@@ -85,7 +85,7 @@ def admission():
             "ROLL": {"label": "Roll No", "type": "numeric", "required":True},   #True
             "SR": {"label": "SR No.", "type": "numeric", "required":True},   #True
             "ADMISSION_NO": {"label": "Admission No.", "type": "numeric", "required":True},    #True
-            "ADMISSION_DATE": {"label": "Admission Date", "type": "text", "required":True},    #True
+            "ADMISSION_DATE": {"label": "Admission Date", "type": "numeric", "required":True},    #True
             "PEN": {"label": "PEN No.", "type": "numeric", "maxlength": 11, "required":False},
             "APAAR": {"label": "APAAR No.", "type": "numeric", "maxlength": 12, "required":False},
             
