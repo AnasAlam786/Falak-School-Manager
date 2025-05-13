@@ -4,6 +4,7 @@
 from .Schools import   Schools
 from .Sessions import  Sessions
 from .ClassData import ClassData
+from .ClassAccess import ClassAccess
 
 from .StudentsDB import StudentsDB
 from .StudentSessions import StudentSessions
@@ -23,6 +24,7 @@ __all__ = [
     "Schools",
     "Sessions",
     "ClassData",
+    "ClassAccess",
     
     "StudentsDB",
     "StudentSessions",

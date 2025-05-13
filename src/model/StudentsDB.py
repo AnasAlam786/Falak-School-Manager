@@ -78,7 +78,6 @@ class StudentsDB(db.Model):
 
 
     Free_Scheme = Column(JSON, nullable=True)
-    Attendance = Column(Text, nullable=True)
 
     Previous_School_Name = Column(Text, nullable=True)
     APAAR = Column(Text, unique=True, nullable=True)
