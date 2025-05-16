@@ -99,7 +99,7 @@ function openFeesModal(){
     var modal = new bootstrap.Modal(document.getElementById('feesModal'));    
     
     modal.show()
-    updatePage('/getfees', 'feesModalBody', { studentId: studentId, task: "get" })
+    updatePage('/api/get_fee', 'feesModalBody', { student_id : studentId })
     .then(() => {
         openFeesModal();
     });

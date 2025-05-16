@@ -14,7 +14,7 @@ from ..permissions.permission_required import permission_required
 
 student_list_bp = Blueprint( 'student_list_bp',   __name__)
 
-
+#add the aadhar of aarish in database after taking from udise
 
 @student_list_bp.route('/student_list', methods=['GET'])
 @login_required

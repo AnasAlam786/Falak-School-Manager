@@ -20,6 +20,7 @@ fernet = Fernet(FERNET_KEY)
 def create_encrypted_text_type(fernet_instance):
     class EncryptedText(TypeDecorator):
         impl = Text  # Underlying database type is Text
+        cache_ok = True
 
         def process_bind_param(self, value, dialect):
             """Encrypt the value before saving to the database."""
@@ -52,6 +53,7 @@ class StudentsDB(db.Model):
 
     FATHERS_NAME = Column(Text, nullable=True)
     MOTHERS_NAME = Column(Text, nullable=True)
+    family_id = Column(Text, nullable=True)
 
     FATHERS_AADHAR = db.Column(EncryptedText, nullable=True)
     MOTHERS_AADHAR = db.Column(EncryptedText, nullable=True)

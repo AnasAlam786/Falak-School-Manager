@@ -60,10 +60,11 @@ def get_result_api():
                         StudentsDB.STUDENTS_NAME, StudentsDB.PHONE, StudentsDB.id,
                         StudentsDB.FATHERS_NAME, StudentsDB.IMAGE, 
                         StudentsDB.MOTHERS_NAME, StudentsDB.ADDRESS,StudentsDB.GENDER,
-                        StudentsDB.PEN, StudentsDB.Attendance,
+                        StudentsDB.PEN,
 
                         ClassData.Numeric_Subjects,ClassData.Grading_Subjects, 
                         ClassData.exam_format,ClassData.CLASS, 
+                        StudentSessions.Attendance,
                         StudentSessions.ROLL,
                         TeachersLogin.Sign,
                         func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),

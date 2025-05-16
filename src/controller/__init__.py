@@ -1,12 +1,15 @@
 # src/controller/__init__.py
 
-
 from .auth.login import login_bp
 from .auth.logout import logout_bp
 
 from .home import home_bp
 from .students.student_list import student_list_bp
 from .students.student_modal_data_api import student_modal_data_api_bp
+
+from .fees.pay_fee import pay_fee_bp
+from .fees.get_fee_api import get_fee_api_bp
+
 
 from .marks.fill_marks import fill_marks_bp
 from .marks.update_marks_api import update_marks_api_bp
@@ -49,8 +52,9 @@ def register_blueprints(app):
     app.register_blueprint(home_bp)
     app.register_blueprint(student_list_bp)
     app.register_blueprint(student_modal_data_api_bp)
-
-
+    
+    app.register_blueprint(pay_fee_bp)
+    app.register_blueprint(get_fee_api_bp)
 
     app.register_blueprint(admission_bp)
     app.register_blueprint(verify_admission_api_bp)

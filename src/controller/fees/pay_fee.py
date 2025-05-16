@@ -13,7 +13,7 @@ from ..auth.login_required import login_required
 pay_fee_bp = Blueprint( 'pay_fee_bp',   __name__)
 
 
-@pay_fee_bp.route('/pay_fee', methods=["GET", "POST"])
+@pay_fee_bp.route('/pay_fee', methods=["GET"])
 @login_required
 def pay_fee():
-    pass
+    return render_template('fees.html')
