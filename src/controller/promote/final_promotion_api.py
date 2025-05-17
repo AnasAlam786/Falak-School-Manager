@@ -19,18 +19,23 @@ final_promotion_api_bp = Blueprint('final_promotion_api_bp',   __name__)
 @permission_required('promote_student')
 def final_promotion_api():
 
-    school_id = session.get("school_id")
+    
 
     #get the number of classes in the school
 
-    class_len = db.session.query(func.count(ClassData.id)).filter(ClassData.school_id == school_id).scalar()
 
     try:
+        school_id = session.get("school_id")
         current_session = int(session["session_id"])
-        classes = session["classes"]
     except (KeyError, ValueError):
         return jsonify({"message": "Session data is missing or corrupted. Please logout and login again!"}), 500
         
+
+    class_len = db.session.query(func.count(ClassData.id)).filter(ClassData.school_id == school_id).scalar()
+    
+    if class_len is None:
+        return jsonify({"message": "Class data not found for the school."}), 404
+    
     data = request.get_json()
     if not data:
         return jsonify({"message": "Missing JSON payload"}), 400
