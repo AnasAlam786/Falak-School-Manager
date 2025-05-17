@@ -1,9 +1,11 @@
 # src/controller/final_promotion_api.py
 
 from flask import session,  request, jsonify, Blueprint
+from sqlalchemy import func
 
 from src import db
 from src.model import StudentSessions
+from src.model import ClassData
 
 import datetime
 
@@ -16,6 +18,13 @@ final_promotion_api_bp = Blueprint('final_promotion_api_bp',   __name__)
 @login_required
 @permission_required('promote_student')
 def final_promotion_api():
+
+    school_id = session.get("school_id")
+
+    #get the number of classes in the school
+
+    class_len = db.session.query(func.count(ClassData.id)).filter(ClassData.school_id == school_id).scalar()
+
     try:
         current_session = int(session["session_id"])
         classes = session["classes"]
@@ -69,7 +78,7 @@ def final_promotion_api():
     
     class_to_promote = student.class_id + 1
 
-    if class_to_promote > len(classes):
+    if class_to_promote > class_len:
         return jsonify({"message": "Student cannot be promoted; maximum class reached."}), 400
 
 
