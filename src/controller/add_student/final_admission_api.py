@@ -22,8 +22,6 @@ final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 @login_required
 @permission_required('admission')
 def final_admission_api():
-    if not "email" in session:
-        return jsonify({"message": "Unauthorized access. Login requires!"}), 400
 
     data = request.get_json()
 
