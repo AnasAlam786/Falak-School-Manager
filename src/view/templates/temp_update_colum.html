@@ -32,27 +32,6 @@
 </style>
 
 <div class="container" id="student-container">
-  <div class="row mb-3">
-
-    <div class="col-12 col-md-5 mb-2">
-      <select class="form-select form-select-lg" id="classView" onchange="applyFilters()">
-        <option selected value="All">Class</option>
-
-        {% if classes %}
-          {% for class in classes %}
-            <option value="{{ class.id }}">{{ class.CLASS }}</option>
-          {% endfor %}
-        {% endif %}
-
-      </select>
-    </div>
-
-    <div class="col-12 col-md-5 mb-2">
-      <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg" placeholder="Search by Name, Class or Roll Number">
-    </div>
-
-
-  </div>
 
   <!-- Unified Card View for All Screen Sizes -->
   {% if data %}
@@ -147,8 +126,6 @@
                   <div class="mb-3 text-center">
                       <button type="submit" class="btn btn-primary">Submit</button>
                   </div>
-                  <p class="successMessage" style="color: green; display: none;"></p>
-                  <p class="errorMessage" style="color: red; display: none;"></p>
               </form>
               
 
@@ -172,7 +149,7 @@
 
 <script>
 document.querySelectorAll(".dataForm").forEach(function(form) {
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", async function(event) {
       event.preventDefault();  // Stop the default form submission
 
       let formData = new FormData(form);
@@ -186,32 +163,25 @@ document.querySelectorAll(".dataForm").forEach(function(form) {
       submitBTN.appendChild(spinner);
 
       // Use fetch to submit the form data asynchronously
-      fetch("/tempPagePost", {
-        method: "POST",
-        body: formData
-      })
-      .then(response => {
-        submitBTN.disabled = false;
-        spinner.remove();
-        return response.json();
+      try {
+        const response = await fetch("/fill_colums_api", {
+          method: "POST",
+          body: formData
+        });
 
-        })
-      .then(data => {
-        console.log("Success:", data);
-        let successMessage = form.querySelector(".successMessage");
-        successMessage.textContent = data.message;
-        successMessage.style.display = "block";
+        const data = await response.json();
 
+        showAlert(response.status, data.message);
         
-      })
-      .catch(error => {
-        console.error("Error:", error);
-        // Find the error message element within the current form
-        let errorMessage = form.querySelector(".errorMessage");
-        errorMessage.textContent = error.message;
-        errorMessage.style.display = "block";
+      } catch (error) {
+          showAlert(400, "There is an unexpected error!");
+          console.error("Error:", error);
+      } finally {
+          spinner.remove();
+          submitBTN.disabled = false;
+      }
 
-      });
+
 
     });
   });

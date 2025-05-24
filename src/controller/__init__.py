@@ -11,6 +11,7 @@ from .fees.pay_fee import pay_fee_bp
 from .fees.get_fee_api import get_fee_api_bp
 
 
+
 from .marks.fill_marks import fill_marks_bp
 from .marks.update_marks_api import update_marks_api_bp
 from .marks.show_marks import show_marks_bp
@@ -39,6 +40,10 @@ from .add_student.verify_admission_api import verify_admission_api_bp
 from .add_student.get_new_roll_api import get_new_roll_api_bp
 from .add_student.final_admission_api import final_admission_api_bp
 
+
+from .temp.temp_page import temp_page_bp
+from .temp.fill_colums_api import fill_colums_api_bp
+
 from .tools.question_paper import question_paper_bp
 from .tools.question_paper_api import question_paper_api_bp
 
@@ -55,6 +60,8 @@ def register_blueprints(app):
     
     app.register_blueprint(pay_fee_bp)
     app.register_blueprint(get_fee_api_bp)
+
+    
 
     app.register_blueprint(admission_bp)
     app.register_blueprint(verify_admission_api_bp)
@@ -83,6 +90,10 @@ def register_blueprints(app):
 
     app.register_blueprint(question_paper_bp)
     app.register_blueprint(question_paper_api_bp)
+
+
+    app.register_blueprint(temp_page_bp)
+    app.register_blueprint(fill_colums_api_bp)
 
 
     app.register_blueprint(RTE_students_bp)
