@@ -1,0 +1,75 @@
+      
+        <div class="accordion" id="accordionExample">
+            {% for student in student_fee_data %}
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#contentSection{{ student['id'] }}" aria-expanded="true" aria-controls="contentSection{{ student['student_name'] }}">
+                        &nbsp;{{ student["student_name"] }}, {{ student["class"] }} - {{ student["roll"] }}
+                    </button>
+                </h2>
+
+                <div id="contentSection{{ student['id'] }}" class="accordion-collapse collapse {% if loop.first %}show{% endif %}" data-id="{{ student['id'] }}" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                        <!-- Content Section -->
+  
+                            <div class="row g-2 p-2">
+                            {% for fee_data in student["fee_data"] %}
+                            {% if fee_data.paid_at is not none %}
+                            <div class="col">
+                                <label class="btn btn-success w-100" style="background-color: rgb(4, 180, 4); color: white;">
+                                {{ fee_data.period_name }}
+                                </label>
+                            </div>
+                            {% elif fee_data.paid_at is none and loop.index < current_month %}
+                            <div class="col">
+                                <input type="checkbox" class="btn-check" id="{{ fee_data.period_name }}-{{ student['id'] }}" autocomplete="on" data-structure-id="{{ fee_data.structure_id }}">
+                                <label class="btn w-100 btn-outline-danger" for="{{ fee_data.period_name }}-{{ student['id'] }}">{{ fee_data.period_name }}</label>
+                            </div>
+                            {% else %}
+                            <div class="col">
+                                <input type="checkbox" class="btn-check" id="{{ fee_data.period_name }}-{{ student['id'] }}" autocomplete="on" data-structure-id="{{ fee_data.structure_id }}">
+                                <label class="btn w-100 btn-outline-secondary" for="{{ fee_data.period_name }}-{{ student['id'] }}">{{ fee_data.period_name }}</label>
+                            </div>
+                            {% endif %}
+                            {% endfor %}
+                            </div>
+                        
+                        <!-- Net Amount Section -->
+                        <div class="container text-center mt-2 mb-1">
+                            <span class="text-warning fw-bold h4 d-inline position-relative" id="m-fees" style="text-align: center;">
+                                {{ student["total_fee_amount"] }}
+                                <small class="d-inline-block text-secondary" style="font-size: 0.6rem; position: absolute; bottom: -0.6rem; left: 45%; transform: translateX(-40%);">M.Fee</small>
+                            </span>
+                            <span class="text-secondary h5 d-inline">x</span>
+                            <span class="text-warning fw-bold h4 d-inline position-relative" id="checkedMonths" style="text-align: center;">
+                                0
+                                <small class="d-inline-block text-secondary" style="font-size: 0.6rem; position: absolute; bottom: -0.6rem; left: 50%; transform: translateX(-50%);">Months</small>
+                            </span>
+                            <span class="text-secondary h5 d-inline">=</span>
+                            <span class="fw-bold h2 d-inline position-relative" id="netAmount" style="color: #00da24; text-align: center;">
+                              ₹0
+                                <small class="d-inline-block text-secondary" style="font-size: 0.6rem; position: absolute; bottom: -0.5rem; left: 50%; transform: translateX(-50%);">Total</small>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-between align-items-center">
+        <!-- Grand Total on the Left -->
+        <div class="card shadow-lg border-1 rounded-3 p-2">
+          <span class="me-auto fs-5 fw-bold">Total : <span id="grandTotal" style="color: #00da24" class="fs-4">₹0</span></span>
+  
+        </div>
+        
+        <!-- Buttons on the Right -->
+        <div class="d-flex">
+          <button type="button" class="btn btn-outline-secondary me-3" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-success shadow-sm" onclick="verifyModal()">Pay Fees</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>

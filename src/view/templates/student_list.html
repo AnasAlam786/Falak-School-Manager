@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}Students Data{% endblock %}
+{% block content %}
+<style>
+  .modal-content,
+  .accordion-body {
+    background: #1e1e2f;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+  }
+
+  .modal-header {
+    background: linear-gradient(90deg, #4e54c8, #8f94fb);
+  }
+
+  .student-card-body {
+    background: #2a2a3d;
+    border-radius: 15px;
+    padding: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .student-image {
+    border: 3px solid #8f94fb;
+    border-radius: 50%;
+    object-fit: cover;
+    width: 150px;
+    height: 150px;
+  }
+
+  .table th,
+  .table td {
+    background-color: #34354a;
+  }
+
+  .table th {
+    background-color: #2a2a3d;
+  }
+
+  .modal-footer {
+    background: #2a2a3d;
+  }
+
+  .accordion-button {
+    box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .accordion-button:not(.collapsed) {
+    box-shadow: 0 0 15px rgba(0, 0, 255, 0.7);
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    transition: all 0.3s ease-in-out;
+  }
+</style>
+
+<div class="container" id="student-container">
+  <div class="row mb-3">
+
+    <div class="col-12 col-md-5 mb-2">
+      <select class="form-select form-select-lg" id="classView" onchange="applyFilters()">
+        <option selected value="All"> All Classes </option>
+        {% if classes %}
+        {% for class in classes %}
+        <option value="{{ class.id }}">{{ class.CLASS }}</option>
+        {% endfor %}
+        {% endif %}
+      </select>
+    </div>
+
+    <div class="col-12 col-md-5 mb-2">
+      <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg"
+        placeholder="Search by Name, Class or Roll Number">
+    </div>
+
+
+  </div>
+
+  <!-- Unified Card View for All Screen Sizes -->
+  {% if not data %}
+  <div class="alert alert-warning text-center" role="alert">
+    <strong>No students found!</strong>
+  </div>
+  {% endif %}
+  <div class="row" id="StudentData">
+    {% for row in data %}
+    <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}"
+      data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
+      <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
+
+        <!-- Top-right corner badges -->
+
+        {% if not row.AADHAAR %}
+        <div class="position-absolute top-0 end-0 p-1 text-end" style="z-index: 10;">
+          <span class="badge bg-danger mb-1">No Aadhar</span><br>
+        </div>
+        {% endif %}
+        {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
+        <div class="position-absolute top-0 start-0 p-1 text-start" style="z-index: 10;">
+          <span class="badge bg-warning text-dark">RTE</span>
+        </div>
+        {% endif %}
+
+
+        <div class="d-flex align-items-center p-3">
+
+          <img
+            src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
+            alt="Student Image" class="img-fluid rounded-circle"
+            style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
+          <div class="ms-3 text-start">
+            <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{
+              row.STUDENTS_NAME }}</a><br>
+            <p class="student-father text-muted mb-0"><small>{{ row.FATHERS_NAME }}</small></p>
+            <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
+            <!--<p class="text-muted">{{ row.ADMISSION_NO }}</p>-->
+            <span class="badge bg-success">{{ row.DOB }}</span>
+            <div class="mt-2">
+              <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
+                <i class="fa fa-phone"></i> <strong>{{ row.PHONE }}</strong>
+              </a>
+            </div>
+            <p class="student-name fw-bold mb-0"><small>PEN: {{ row.PEN }}</small></p>
+
+          </div>
+
+        </div>
+        <div class="d-flex border-top border-secondary" style="height: 50px;">
+          <div class="w-50 border-end border-secondary">
+            <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"
+              onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')" style="border-radius: 0;">
+              Student Details
+            </button>
+          </div>
+          <div class="w-50 border-start">
+            <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
+              onclick="openFeesModal('{{ row.id }}', '{{ row.family_id }}')" style="border-radius: 0;">
+              Pay Fee
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-center align-items-center w-100">
+        <div class="d-flex justify-content-center align-items-center w-100">
+          <h5 class="modal-title">
+            <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
+          </h5>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="modalBody" class="modal-body">
+
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="feesModal" tabindex="-1" aria-labelledby="feesModal" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fs-4 d-flex align-items-center">
+          <i class="bi bi-credit-card me-2"></i> Pay Fees
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div id="feesModalBody" class="modal-body p-0">
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="verify" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <!-- Header with gradient background -->
+      <div class="modal-header bg-primary text-white py-3">
+        <div class="d-flex align-items-center w-100">
+          <i class="fas fa-check-circle fa-lg me-3"></i>
+          <h4 class="modal-title mb-0 fw-semibold">Verify Payment Received</h4>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
+      </div>
+
+      <div class="modal-body py-4">
+        <form id="paymentVerificationForm" class="px-2">
+          <!-- Confirmation checkbox -->
+          <div class="form-check mb-4">
+            <input class="form-check-input mt-1" type="checkbox" value="" id="verifyCheckbox" required>
+            <label class="form-check-label fw-medium text-white ms-2" for="verifyCheckbox">
+              I confirm that the payment has been successfully received
+            </label>
+          </div>
+
+          <!-- Date input with improved styling -->
+          <div class="mb-4">
+            <label for="paymentDate" class="form-label fw-medium text-secondary mb-2">
+              <i class="far fa-calendar-alt me-2"></i>Payment Receipt Date
+            </label>
+            <div class="input-group">
+              <span class="input-group-text bg-light-subtle">
+                <i class="far fa-calendar text-primary"></i>
+              </span>
+              <input type="date" class="form-control border-start-0" id="paymentDate" required>
+            </div>
+            <div class="form-text text-muted mt-2">
+              Select the date when payment was received
+            </div>
+          </div>
+
+          <!-- Success message as alert -->
+          <div id="paymentSuccessMessage" class="alert alert-success d-flex align-items-center mt-4 py-2 d-none">
+            <i class="fas fa-check-circle me-2"></i>
+            <span class="small">Fees Paid Successfully! Now you can send message by clicking the send message button below.</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Footer with improved button styling -->
+      <div class="modal-footer bg-light-subtle py-3">
+        <div class="d-flex justify-content-between w-100 align-items-center">
+          <button type="button" class="btn btn-outline-secondary rounded-1 px-3 py-2" id="verifyBackButton" data-bs-target="#feesModal" data-bs-toggle="modal">
+            <i class="fas fa-arrow-left me-2"></i>Back
+          </button>
+
+          <button type="button" class="btn btn-outline-secondary rounded-1 d-none px-3 py-2" id="verifyCloseButton" data-bs-dismiss="modal">
+            <i class="fas fa-times me-2"></i>Close
+          </button>
+          
+          <div class="d-flex gap-2">
+            <button type="submit" form="paymentVerificationForm" class="btn btn-primary rounded-1 px-4 py-2" id="finalPay" onclick="Pay()" disabled>
+              <i class="fas fa-check-circle me-2"></i>Confirm Payment
+            </button>
+            
+            <button type="button" id="messageButton" class="btn btn-success rounded-1 px-4 py-2" onclick="sendMessage()" disabled>
+              <i class="bi bi-whatsapp me-1"></i> 
+              Send Message
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Optional JavaScript for interaction -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('verifyCheckbox');
+    const submitBtn = document.getElementById('finalPay');
+    const dateInput = document.getElementById('paymentDate');
+
+    const today = new Date()
+    currentDate = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`
+    dateInput.value = currentDate;
+
+    checkbox.addEventListener('change', function() {
+      if(this.checked) {
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = true;
+      }
+    });
+  });
+
+
+
+  function attachDateMask(selector, format) {
+        const el = document.querySelector(selector);
+        if (!el) return;
+
+        el.addEventListener("input", e => {
+          let value = e.target.value;
+          let numbers = value.replace(/\D/g, "").slice(0, 8);
+          let newValue = "";
+
+          if (format === "DD-MM-YYYY") {
+            if (numbers.length >= 5) {
+              newValue = `${numbers.slice(0,2)}-${numbers.slice(2,4)}-${numbers.slice(4)}`;
+            } else if (numbers.length >= 3) {
+              newValue = `${numbers.slice(0,2)}-${numbers.slice(2)}`;
+            } else {
+              newValue = numbers;
+            }
+          } else if (format === "YYYY-MM-DD") {
+            if (numbers.length >= 7) {
+              newValue = `${numbers.slice(0,4)}-${numbers.slice(4,6)}-${numbers.slice(6)}`;
+            } else if (numbers.length >= 5) {
+              newValue = `${numbers.slice(0,4)}-${numbers.slice(4)}`;
+            } else {
+              newValue = numbers;
+            }
+          }
+
+          // only set value if different to prevent cursor jumping
+          if (newValue !== value) {
+            e.target.value = newValue;
+          }
+        });
+      }
+  attachDateMask('#paymentDate', 'DD-MM-YYYY');
+
+
+
+
+async function sendMessage() {
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const message = document.getElementById('message').value;
+
+  if (!phoneNumber || !message) {
+    alert("Please enter both phone number and message.");
+    return;
+  }
+}
+
+</script>
+
+
+
+
+<script src="{{ url_for('static', filename='students.js') }}"></script>
+<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
+
+{% endblock %}

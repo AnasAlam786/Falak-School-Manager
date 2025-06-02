@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="icon" href="{{ session['logo'] }}">
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <title>{% block title %}{{ session['school_name'] }}{% endblock %}</title>
+
+  <style>
+    body {
+      background-color: #121212;
+      color: #ffffff;
+    }
+
+    .offcanvas {
+      background-color: #1f1f1f;
+    }
+
+    .offcanvas-header {
+      border-bottom: 1px solid #343a40;
+    }
+
+    .offcanvas-body a {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .offcanvas-body a:hover {
+      background-color: #343a40;
+    }
+  </style>
+
+</head>
+
+<body data-bs-theme="dark">
+  <nav class="navbar navbar-expand-lg bg-dark py-0">
+    <div class="container-fluid">
+      <!-- Group Toggle Button and Logo -->
+      <div class="d-flex align-items-center">
+        <!-- Sidebar Toggle Button -->
+        <button class="btn btn-outline-light me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar"
+          aria-controls="sidebar">
+          ☰
+        </button>
+        <!-- Logo and Brand -->
+        <a class="navbar-brand fw-bold fs-4 text-white d-flex align-items-center" href="/">
+          <!-- <img src="{{ session['logo'] }}" alt="Logo" width="40" height="35" class="me-2"/> -->
+          {{ session['school_name'] }}
+        </a>
+      </div>
+
+      <!-- Select Session -->
+      {% if session["current_session"] %}
+      <div class="btn-group">
+        <button id="sessionBtn" type="button" class="btn btn-info dropdown-toggle" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          {{ session["current_session"] }} - {{ session["current_session"]|int + 1 }}
+        </button>
+        <ul class="dropdown-menu">
+          {% for year in session['all_sessions'] %}
+          <li>
+            <a class="dropdown-item" href="#" onclick="changeSession('{{ year }}')" data-value="{{ year }}">
+              {{ year }} - {{ year|int + 1 }}
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <!-- Select Session End -->
+
+    </div>
+  </nav>
+
+
+
+  <!-- Sidebar (Offcanvas) -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title fw-bold" id="sidebarLabel">Falak Public School</h5>
+      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <!-- Make this a flex column -->
+    <div class="offcanvas-body d-flex flex-column">
+      <nav class="flex-grow-1">
+        <a href="/" class="d-block mb-2"><i class="fas fa-home"></i> Home</a>
+        <a href="/student_list" class="d-block mb-2"><i class="fas fa-user-graduate"></i> Students Data</a>
+        <a href="/fill_marks" class="d-block mb-2"><i class="fas fa-edit"></i> Update Marks</a>
+        <a href="/marks" class="d-block mb-2"><i class="fas fa-book-open"></i> Show Marks</a>
+
+        <a href="/admission" class="d-block mt-3 mb-2"><i class="fas fa-chair mr-2"></i> Add Student</a>
+        <a href="/promote_student" class="d-block mb-2"><i class="fas fa-arrow-up"></i> Promote Student</a>
+        <a href="/tc" class="d-block mb-2"><i class="fas fa-scroll"></i> Transfer Certificate</a>
+        <a href="/question_paper" class="d-block mt mb-2"><i class="fas fa-pencil-alt"></i> Create Paper</a>
+
+      </nav>
+
+      <!-- Session Change button -->
+      <div class="mt-2 mb-2">
+        <a href="#" class="btn btn-warning w-100">
+          <i class="fas fa-calendar-alt"></i> Change Session
+        </a>
+      </div>
+      <!-- Session Change button End -->
+
+      <!-- Logout button -->
+      <div class="mt-auto">
+        <a href="/logout" class="btn btn-danger w-100">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </div>
+      <!-- Logout button End -->
+
+
+    </div>
+  </div>
+
+
+
+  <div class="container-fluid mt-4">
+    <!-- Success Alert -->
+    <div id="successAlert"
+      class="alert alert-success alert-dismissible fade show position-fixed top-0 end-0 m-4 d-flex align-items-center d-none"
+      role="alert" style="z-index: 9999">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi me-2 text-success"
+        viewBox="0 0 16 16">
+        <path
+          d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM6.97 11.03a.75.75 0 0 0 1.08 0l3.992-3.992a.75.75 0 1 0-1.08-1.06L7.5 9.439 5.53 7.47a.75.75 0 0 0-1.06 1.06l2.5 2.5z" />
+      </svg>
+      <div id="successMessage" class="fw-bold"></div>
+    </div>
+
+    <!-- Error Alert -->
+    <div id="errorAlert"
+      class="alert alert-danger alert-dismissible fade show position-fixed top-0 end-0 m-4 d-flex align-items-center d-none"
+      role="alert" style="z-index: 9999">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi me-2 text-danger"
+        viewBox="0 0 16 16">
+        <path
+          d="M8.982 1.566a1.13 1.13 0 0 0-1.964 0L.165 13.233c-.457.778.091 1.767.982 1.767h13.707c.89 0 1.438-.99.982-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1-2.002 0 1 1 0 0 1 2.002 0z" />
+      </svg>
+      <div id="errorMessage" class="fw-bold"></div>
+    </div>
+
+    {% block content %}
+
+    {% endblock %}
+  </div>
+
+  <script>
+    async function updatePage(endpoint, id, payload, append = null) {
+      const url = endpoint;
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showAlert(response.status, data.message || "An unexpected error occurred. Please try again.");
+          console.error(data.message || "An unexpected error occurred. Please try again.")
+          return;
+        }
+
+        if (id) {
+          element = document.getElementById(id)
+
+          if (append) {
+            element.insertAdjacentHTML(append, data.html)
+          }  //"beforebegin", "afterbegin", "beforeend", "afterend"
+
+          else { element.innerHTML = data.html }
+        }
+        return data.html;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+
+    function showAlert(statusCode, message) {
+      const isSuccess = statusCode === 200;
+      const alertID = isSuccess ? "successAlert" : "errorAlert";
+      const messageElementID = isSuccess ? "successMessage" : "errorMessage";
+
+      const alert = document.getElementById(alertID);
+      const messageElement = document.getElementById(messageElementID);
+
+      // Set the alert message
+      messageElement.textContent = message;
+
+      // Show the alert
+      alert.classList.remove("d-none"); // Make it visible
+      alert.classList.add("show"); // Bootstrap fade-in class
+      alert.classList.add("fade"); // Optional: smoother animation
+
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        alert.classList.remove("show"); // Triggers fade out
+        setTimeout(() => {
+          alert.classList.add("d-none"); // Fully hide after fade-out
+        }, 300); // Wait for fade transition
+      }, 5000);
+    }
+
+
+
+    async function changeSession(year) {
+      try {
+        const response = await fetch('/change_session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ year }),
+        });
+
+        const data = await response.json();
+
+        // Show alert, then reload only once the user closes it:
+        if (response.ok) {
+          location.reload();
+        }
+        else {
+          showAlert(response.status, data.message);
+          console.error('Error:', data.message);
+        }
+
+      } catch (error) {
+        showAlert(500, "Some error occurred!");
+        console.error('Error:', error);
+      }
+    }
+
+
+
+
+
+
+  </script>
+</body>
+
+</html>
