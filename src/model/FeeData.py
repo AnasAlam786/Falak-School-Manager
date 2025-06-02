@@ -8,7 +8,7 @@ class FeeData(db.Model):
     
     id = Column(BigInteger, primary_key=True)
     paid_at = Column(Date, nullable=False)
-    amount = Column(Numeric, nullable=False)
+    paid_amount = Column(Numeric, nullable=False)
 
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=True)
     school = db.relationship("Schools", back_populates="fee_data")

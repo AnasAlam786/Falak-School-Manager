@@ -22,7 +22,7 @@
 <div id="choiceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
   <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative">
     <!-- Close Button -->
-    <button id="closeChoiceModal" class="absolute -top-3 -right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-lg transition-transform hover:scale-105">
+    <button id="closeChoiceModal" type="button" class="absolute -top-3 -right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-lg transition-transform hover:scale-105">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
@@ -37,14 +37,14 @@
 
       <!-- Action Buttons -->
       <div class="space-y-4">
-        <button id="useCamera" class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+        <button id="useCamera" type="button" class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
           </svg>
           Take Photo
         </button>
         
-        <button id="useUpload" class="w-full px-6 py-3.5 border-2 border-gray-200 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+        <button id="useUpload" type="button" class="w-full px-6 py-3.5 border-2 border-gray-200 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl transition-all font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
@@ -55,22 +55,6 @@
   </div>
 </div>
 
-<!-- Camera Preview Modal -->
-<div id="cameraModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
-    <div class="p-4">
-      <video id="videoPreview" class="w-full h-auto max-h-[70vh]" autoplay playsinline></video>
-    </div>
-    <div class="flex justify-center gap-4 p-4 border-t border-gray-200">
-      <button id="capturePhoto" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-        Capture
-      </button>
-      <button id="cancelCamera" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-        Cancel
-      </button>
-    </div>
-  </div>
-</div>
 
 <!-- Cropper Modal -->
 <div id="cropModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
@@ -142,21 +126,21 @@
 <script>
     let cropper = null;
     let mediaStream = null;
-    const imageInput = document.getElementById('imageInput');
+    let imageInput = document.getElementById('imageInput');
     const cropperImage = document.getElementById('cropperImage');
     const cropModal = document.getElementById('cropModal');
     const choiceModal = document.getElementById('choiceModal');
-    const cameraModal = document.getElementById('cameraModal');
-    const videoPreview = document.getElementById('videoPreview');
     const uploadContent = document.getElementById('uploadContent');
 
-  // Trigger file selection when clicking the container
-  document.getElementById('uploadContainer').addEventListener('click', () => {
+  // open choice modal when clicking on the upload content
+  uploadContent.addEventListener('click', () => {
         choiceModal.classList.remove('hidden');
     });
 
   // Handle upload choice
   document.getElementById('useUpload').addEventListener('click', () => {
+      //remove capture attribute if it exists
+      imageInput.removeAttribute('capture');
       imageInput.click();
       choiceModal.classList.add('hidden');
   });
@@ -176,41 +160,13 @@
   // Handle camera choice
   document.getElementById('useCamera').addEventListener('click', async () => {
       choiceModal.classList.add('hidden');
-      try {
-          mediaStream = await navigator.mediaDevices.getUserMedia({ 
-              video: { facingMode: 'environment' } 
-          });
-          cameraModal.classList.remove('hidden');
-          videoPreview.srcObject = mediaStream;
-      } catch (error) {
-          console.error('Error accessing camera:', error);
-          alert('Camera access denied. Please allow camera access to take photos.');
-      }
+      //add capture attribute to the image input
+
+      imageInput.setAttribute('capture', 'environment');
+      imageInput.click();
   });
 
 
-  // Capture photo from camera
-  document.getElementById('capturePhoto').addEventListener('click', () => {
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.width = videoPreview.videoWidth;
-      canvas.height = videoPreview.videoHeight;
-      context.drawImage(videoPreview, 0, 0, canvas.width, canvas.height);
-      
-      // Stop camera stream
-      mediaStream.getTracks().forEach(track => track.stop());
-      cameraModal.classList.add('hidden');
-      
-      // Show cropper with captured image
-      showCropperModal(canvas.toDataURL('image/jpeg'));
-  });
-
-
-  // Cancel camera capture
-  document.getElementById('cancelCamera').addEventListener('click', () => {
-      mediaStream.getTracks().forEach(track => track.stop());
-      cameraModal.classList.add('hidden');
-  });
 
   // Handle file input
   imageInput.addEventListener('change', (e) => {
@@ -259,6 +215,7 @@
   // Crop the image, update preview, and clear the file input
   let croppedBlob = null;
   document.getElementById('uploadCrop').addEventListener('click', () => {
+    
     event.preventDefault();
     if (cropper) {
       const croppedCanvas = cropper.getCroppedCanvas({
@@ -289,12 +246,16 @@
               </svg>
               <p id="uploadLabel" class="text-gray-500 mt-2">Click to upload an image</p>
             `;
+
+          croppedBlob = null;   // Reset croppedBlob on clicking on X 
+          
         });
 
-          cropModal.classList.add('hidden');
-          cropper.destroy();
-          cropper = null;
-          imageInput.value = '';
+        cropModal.classList.add('hidden');
+        cropper.destroy();
+        cropper = null;
+        imageInput.value = '';
+
       }, 'image/jpeg', 1.0);
     }
   });

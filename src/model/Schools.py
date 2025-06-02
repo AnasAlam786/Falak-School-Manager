@@ -29,3 +29,4 @@ class Schools(db.Model):
     staff_data = db.relationship("TeachersLogin", back_populates="school")
     fee_structure = db.relationship("FeeStructure", back_populates="school")
     fee_data = db.relationship("FeeData", back_populates="school")
+    fee_amount = db.relationship("FeeAmount", back_populates="school")

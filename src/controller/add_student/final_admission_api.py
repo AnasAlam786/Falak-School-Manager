@@ -2,16 +2,18 @@
 
 from flask import session, request, jsonify, Blueprint
 
-from src.model import StudentsDB
-from src.model import StudentSessions
-from src.model import Schools
+from src.model import (
+    StudentsDB, ClassData, StudentSessions, Schools
+    )
+
 from src import db
 
 from datetime import datetime
 
 from werkzeug.security import check_password_hash
 
-from .utils.upload_image import upload_image
+from .utils.upload_image import upload_image, delete_image
+from .utils.create_watsapp_message import watsapp_message
 from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
 
@@ -23,12 +25,12 @@ final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 @permission_required('admission')
 def final_admission_api():
 
-    data = request.get_json()
+    password = request.form.get("password")
+    image = request.files.get("IMAGE")
 
-    password = data["password"]
-    image = data['IMAGE']
-    data.pop('password', None)
-    data.pop('IMAGE', None)
+    if image:
+        if not image.filename.lower().endswith(('.jpg', '.jpeg')):
+            return jsonify({"message": "Invalid image format, Please upload a JPG or JPEG image."}), 400
 
     school_id=session["school_id"]
 
@@ -45,19 +47,16 @@ def final_admission_api():
         return jsonify({"message": "Wrong password"}), 401
     
 
+    data = dict(request.form)
+    data.pop('password', None)
+    data.pop('IMAGE', None)    
+
     StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
     StudentDB_data = {key: value for key, value in data.items() if key in StudentDB_colums}
 
     StudentsSession_colums = {column.name for column in StudentSessions.__table__.columns}
     StudentsSession_data = {key: value for key, value in data.items() if key in StudentsSession_colums}
 
-    #unknown_fields = [key for key in data if key not in StudentDB_colums]
-
-    if image:
-        folder_id = school.students_image_folder_id
-        drive_id = upload_image(image, data["ADMISSION_NO"], folder_id)
-        StudentDB_data["IMAGE"] = drive_id
-        print('Uploaded image Drive ID:', drive_id)
 
 
     # handling Date fields
@@ -111,9 +110,17 @@ def final_admission_api():
         if value == "":
             StudentsSession_data[key] = None
 
-    try:
-        # Start transaction
-        
+    if image:
+        try:
+            folder_id = school.students_image_folder_id
+            image_id = upload_image(image, data["ADMISSION_NO"], folder_id)
+            StudentDB_data["IMAGE"] = image_id
+            print('Uploaded image Drive ID:', image_id)
+        except Exception as e:
+            return jsonify({"message": f"Error uploading image: {e}"}), 400
+
+    try:    
+        # Adding new rows in StudentsDB and StudentSessions tables
         new_student = StudentsDB(**StudentDB_data)
         db.session.add(new_student)
         db.session.flush()  # Flush to get new_student.id
@@ -123,12 +130,36 @@ def final_admission_api():
             **StudentsSession_data
         )
         db.session.add(student_session)
+        db.session.flush()
 
-        db.session.commit()  # Commit both together
+        db.session.commit()
 
-        return jsonify({"message": "Data submitted successfully"}), 200
+
+        # now fetch the newly added studentDB and studentSession joined data
+        student_data = db.session.query(
+            StudentsDB, StudentSessions, ClassData, Schools
+        ).join(
+            StudentSessions, StudentsDB.id == StudentSessions.student_id
+        ).join(
+            ClassData, ClassData.id == StudentSessions.class_id
+        ).join(
+            Schools, Schools.id == StudentsDB.school_id
+        ).filter(
+            Schools.id == school_id,
+            StudentsDB.id == new_student.id,
+            StudentSessions.id == student_session.id,
+        ).first()
+
+        message = watsapp_message(student_data)
+        print('WhatsApp message:', message)
+
+        return jsonify({"message": "Data submitted successfully", "watsapp_message": message}), 200
 
     except Exception as e:
         db.session.rollback()  # Undo everything
+
+        if 'image_id' in locals():  # If image upload was successful, delete the image
+            delete_image(image_id)
+
         print('Error while adding student:', str(e))
         return jsonify({"message": "Failed to add student"}), 500

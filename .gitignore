@@ -8,4 +8,3 @@ venv/
 
 # Ignore environment variables file (.env)
 .env
-falak-drive-api.json

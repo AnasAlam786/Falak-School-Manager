@@ -188,7 +188,7 @@ def admission():
             "Due_Amount": {"label": "Due Amount (Rs.)", "short_label":"Due", "type": "numeric", "required":False},
 
             
-        }
+    }
 
     #get current date
     current_session_year = str(session["current_session"])[-2:]

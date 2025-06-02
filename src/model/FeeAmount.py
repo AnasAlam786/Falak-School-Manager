@@ -15,4 +15,7 @@ class FeeAmount(db.Model):
     session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     session = db.relationship("Sessions", back_populates="fee_amount")
 
+    school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=False)
+    school = db.relationship("Schools", back_populates="fee_amount")
+
     fee_data = db.relationship("FeeData", back_populates="fee_amount")

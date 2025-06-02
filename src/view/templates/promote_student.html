@@ -291,7 +291,7 @@ content %}
 
                 <button type="button" id="messageButton" class="btn btn-success d-none px-4">
                     <i class="bi bi-whatsapp me-1"></i>
-                    Send WhatsApp
+                    Send Message
                 </button>
 
 
@@ -304,7 +304,7 @@ content %}
 
 
 
-
+<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
 
     async function promoteStudentModal(studentID) {
@@ -619,38 +619,6 @@ content %}
         } finally {
             spinner.classList.add("d-none");
             btn.disabled = false;
-        }
-    }
-
-
-
-
-
-    function sendWhatsAppMessage(phone, message) {
-        // 1. Strip non‑digits & validate
-        let formattedPhone = phone.replace(/\D/g, '');
-        if (formattedPhone.length !== 10) {
-            showAlert(400, "📞 Invalid phone number. It must be 10 digits.");
-            return;
-        }
-        formattedPhone = '91' + formattedPhone; // add country code
-
-        // 2. Encode message
-        const encodedMessage = encodeURIComponent(message);
-
-        // 3. Detect mobile vs. desktop
-        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-        if (isMobile) {
-            // Mobile: open WhatsApp app via custom scheme
-            window.location.href =
-                `whatsapp://send?phone=${formattedPhone}&text=${encodedMessage}`;
-        } else {
-            // Desktop: open WhatsApp Web
-            window.open(
-                `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodedMessage}`,
-                '_blank'
-            );
         }
     }
 

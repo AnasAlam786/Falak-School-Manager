@@ -39,6 +39,7 @@ def student_list():
     data = db.session.query(
         StudentsDB.id,
         StudentsDB.STUDENTS_NAME,
+        StudentsDB.family_id,
         func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('dob'),
         StudentsDB.AADHAAR,
         StudentsDB.FATHERS_NAME,

@@ -7,7 +7,7 @@ from .home import home_bp
 from .students.student_list import student_list_bp
 from .students.student_modal_data_api import student_modal_data_api_bp
 
-from .fees.pay_fee import pay_fee_bp
+from .fees.pay_fee_api import pay_fee_api_bp
 from .fees.get_fee_api import get_fee_api_bp
 
 
@@ -58,7 +58,7 @@ def register_blueprints(app):
     app.register_blueprint(student_list_bp)
     app.register_blueprint(student_modal_data_api_bp)
     
-    app.register_blueprint(pay_fee_bp)
+    app.register_blueprint(pay_fee_api_bp)
     app.register_blueprint(get_fee_api_bp)
 
     
