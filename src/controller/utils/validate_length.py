@@ -1,4 +1,4 @@
-# src/controller/add_student/utills/validate_name.py
+# src/controller/utills/validate_name.py
 
 def validate_length( value: any, name: str, *, exact: int | None = None, 
                      min_len: int | None = None, max_len: int | None = None, 

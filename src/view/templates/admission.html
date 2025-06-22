@@ -57,20 +57,21 @@
         <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-          {% for id, InputDetailsDict in PersonalInfo.items() %}
+          {% set section = 'PersonalInfo' %}
+          {% for InputDetails in PersonalInfo %}
             {% include 'html-components/input.html' with context %}
           {% endfor %}
 
         </div>
       </div>
-
-      {% include 'html-components/image-uploader.html' with context %}
       
+
       <!-- Academic Details -->
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Academic Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {% for id, InputDetailsDict in AcademicInfo.items() %}
+          {% set section = 'AcademicInfo' %}
+          {% for InputDetails in AcademicInfo %}
             {% include 'html-components/input.html' with context %}
           {% endfor %}
  
@@ -81,7 +82,8 @@
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Guardian Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {% for id, InputDetailsDict in GuardianInfo.items() %}
+          {% set section = 'GuardianInfo' %}
+          {% for InputDetails in GuardianInfo %}
             {% include 'html-components/input.html' with context %}
           {% endfor %}
         </div>
@@ -91,7 +93,8 @@
       <div class="mb-6">
         <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {% for id, InputDetailsDict in ContactInfo.items() %}
+          {% set section = 'ContactInfo' %}
+          {% for InputDetails in ContactInfo %}
             {% include 'html-components/input.html' with context %}
           {% endfor %}
         </div>
@@ -102,11 +105,17 @@
         <h2 class="text-xl font-semibold mb-4">Additional/Logistical Information</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <!-- School to Home Distance -->
-          {% for id, InputDetailsDict in AdditionalInfo.items() %}
+          {% set section = 'AdditionalInfo' %}
+          {% for InputDetails in AdditionalInfo %}
             {% include 'html-components/input.html' with context %}
           {% endfor %}
           <!-- Total Due -->
         </div>
+      </div>
+
+      <div class="p-4">
+        {% set section = 'PersonalInfo' %}
+        {% include 'html-components/image-uploader.html' with context %}
       </div>
       
       <div class="text-center">
@@ -256,7 +265,7 @@
   });
 
 
-  
+  let verifiedData = null;
   const form = document.getElementById('DataForm');
   form.addEventListener('submit', async function(event) {
 
@@ -275,17 +284,26 @@
 
     try {
       const formData = await getFormData('DataForm');
-      const result   = await verifyFormData(formData);
-      let imageURL = null;
 
-      if (croppedBlob !== null && croppedBlob !== undefined) {
+      const response = await verifyFormData(formData);
+      const data = await response.json();
+      
+
+      if (!response.ok) {
+        showAlert(response.status, data.message || "Something went wrong");
+        return;
+      }
+
+      let imageURL = null;
+      if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
         imageURL = URL.createObjectURL(croppedBlob);
       }
-        // croppedBlob is the image blob, defined globally in the image uploader script
 
-      if (result === true) {
-        openVerificationModal(formData, imageURL);
-      }
+      verifiedData = data.verifiedData
+      const className = data.className
+
+      openVerificationModal(verifiedData, className, imageURL);
+
     } catch (err) {
       showAlert(400, "Unexpected error occured!")
       console.error(err);
@@ -301,71 +319,81 @@
 
   function getFormData(id) {
     const form = document.getElementById(id);
-    const formData = new FormData(form);
-    return formData;
+    formData = new FormData(form);
+    return formData
   }
 
 
 
   async function verifyFormData(formData){
-
+    
     let formDataObject = Object.fromEntries(formData.entries());
+    console.log(formDataObject)
+
 
     try {
-      const response = await fetch("/verify_admission", {
+      const response = await fetch("/verify_admission_api", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(formDataObject)
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        return true;
-      }
-      showAlert(response.status, data.message || "Something went wrong");
-      return false;
-      
+      return response
 
     } catch (err) {
-      console.error("Fetch error:", err);
       showAlert(404, "An error occurred while verifying the form data.");
-      return false;
+      throw new Error("Fetch error", err);
     }
   }
 
 
-  async function openVerificationModal(formData, imageURL) {
+  async function openVerificationModal(verifiedData, className, imageURL) {
     // --- Student name ---
-    document.getElementById('StudentNameInModal').innerText =
-      formData.STUDENTS_NAME;
+    const studentName = verifiedData.find(item => item.field === "STUDENTS_NAME")?.value;
+    document.getElementById('StudentNameInModal').innerText = studentName
 
     // --- Student image or placeholder ---
     const StudentImageInModal = document.getElementById('StudentImageInModal');
-    console.log("Image URL:", imageURL);
     StudentImageInModal.src = imageURL
       ? imageURL
       : 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
 
-    // --- Auto-pick required inputs ---
-    const requiredInputs = Array.from(document.querySelectorAll('input[required], select[required], textarea[required]'));
 
     let html = '';
-    for (const input of requiredInputs) {
-      const key = input.id; // assuming input's id matches the formData key
-      if (!key || !(key in formData)) continue;
+    for (const fieldData of verifiedData) {
 
-      const label = input.dataset.label ?? key;
-      html += `
-        <tr class="bg-[#34354a]">
-          <th class="bg-[#2a2a3d] p-3 text-left">${label}</th>
-          <td class="p-3">${formData[key]}</td>
-        </tr>`;
+      let fieldValue = fieldData.value
+      if (fieldValue) {
+
+        if (fieldData.field === "DOB") { 
+          fieldData.value = new Date(fieldData.value); 
+          fieldValue = fieldData.value.toLocaleDateString('en-GB', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+          });
+        }
+        if (fieldData.field === "ADMISSION_DATE") { 
+          fieldData.value = new Date(fieldData.value); 
+          fieldValue = fieldData.value.toLocaleDateString('en-GB', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+          });
+        }
+
+        if (fieldData.field === "CLASS") { fieldValue = className; }
+        if (fieldData.field === "STUDENTS_NAME") { continue; }
+
+        html += `
+          <tr class="bg-[#34354a]">
+            <th class="bg-[#2a2a3d] p-3 text-left">${fieldData.label}</th>
+            <td class="p-3">${fieldValue}</td>
+          </tr>`;
+      }
+      else{console.log(fieldData.field, "is empty")}
     }
     document.getElementById('ModalDataTable').innerHTML = html;
 
     // --- Show the modal ---
     document.getElementById('verificationModal').classList.remove('hidden');
+
   }
 
 
@@ -385,37 +413,40 @@
       return;
     }
 
-      const formData = await getFormData("DataForm");
-      formData.append("password", password);
-      if (croppedBlob !== null && croppedBlob !== undefined) {
-        formData.append("IMAGE", croppedBlob, "cropped.jpg");
+    if(!verifiedData){
+      showAlert(404, "Invalid Action");
+      return;
+    }
+
+
+    try {
+      let base64Image = null;
+      if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
+        base64Image = await convertBlobToBase64(croppedBlob);
       }
-       // correct way to attach Blob
-      console.log("Final Form Data:", formData);
+        // Send a POST request to the Flask backend
+        const response = await fetch('/final_admission_api', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ password : password, image : base64Image, verifiedData : verifiedData })
+        });
 
-        try {
-            // Send a POST request to the Flask backend
-            const response = await fetch('/final_admission_api', {
-              method: 'POST',
-              body: formData
-            });
+        // Parse the JSON response
+        const data = await response.json();
 
-            // Parse the JSON response
-            const data = await response.json();
-
-            // Optionally update the page content based on the response
-            if (response.ok) {
-              showAlert(response.status, data.message);
-              setTimeout(() => {location.reload();}, 3000);
-            }
-            else{
-              showAlert(response.status, data.message)
-            }
-
-        } catch (error) {
-          showAlert(400, "An error occurred while submitting the form.")
-          console.error('Error:', error);
+        // Optionally update the page content based on the response
+        if (response.ok) {
+          showAlert(response.status, data.message);
+          setTimeout(() => {location.reload();}, 3000);
         }
+        else{
+          showAlert(response.status, data.message)
+        }
+
+    } catch (error) {
+      showAlert(400, "An error occurred while submitting the form.")
+      console.error('Error:', error);
+    }
   });
 
 
@@ -440,6 +471,18 @@
     // Show password and hide password End
 
 
+
+
+  function convertBlobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        resolve(reader.result);  // base64 string
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
     //add DD/MM/YYYY mask to DOB and Admission Date
     function attachDateMask(selector, format) {
       const el = document.querySelector(selector);
@@ -502,6 +545,9 @@
       }
     });
   });
+
+
+
 
 
   document.querySelectorAll('.cancelModle').forEach(function(element) {

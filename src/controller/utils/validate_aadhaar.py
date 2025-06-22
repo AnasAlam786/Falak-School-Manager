@@ -48,3 +48,24 @@ def is_valid_aadhaar(aadhaar_number: str) -> bool:
         checksum = d_table[checksum][p_table[i % 8][int(digit)]]
 
     return checksum == 0
+
+
+def make_aadhaar_clean(aadhaar: str):
+    if not aadhaar:
+        return None
+    aadhaar = aadhaar.replace('-', '').replace(' ', '')
+    return aadhaar
+
+def verify_aadhaar(aadhaar):
+    clean_aadhaar = make_aadhaar_clean(aadhaar)
+    if not clean_aadhaar:
+        raise ValueError('There shoulf be 12 digits in aadhaar number')
+        
+    result = is_valid_aadhaar(clean_aadhaar)
+    
+    if result:
+        return clean_aadhaar
+    
+    raise ValueError('Invalid Aadhaar Number')
+
+    

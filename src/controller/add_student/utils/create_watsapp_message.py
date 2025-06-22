@@ -3,11 +3,12 @@
 def watsapp_message(student_data):
 
     student, session, class_data, school = student_data
+    
 
     message = f"""
         🎉 Admission Confirmed! 🎉
 
-        Dear {student.FATHERS_NAME},  # or use MOTHER/GUARDIAN field if available
+        Dear {student.FATHERS_NAME},
 
         We are pleased to inform you that the admission of your child has been successfully completed.
 

@@ -1,5 +1,5 @@
+import base64
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
 from google.oauth2 import service_account
 from googleapiclient.http import MediaIoBaseUpload
 
@@ -16,20 +16,25 @@ load_dotenv()
 scope = ['https://www.googleapis.com/auth/drive']
 
 def get_credentials():
-    creds_json = os.getenv("CREDENTIALS")
+
+    creds_json = os.getenv("GOOGLE_SERVICE_ACCOUNT")
+
+    if not creds_json:
+        raise Exception("Environment variable 'GOOGLE_SERVICE_ACCOUNT' not set.")
+
     creds_dict = json.loads(creds_json)
-    # Load credentials from a service account file
     creds = service_account.Credentials.from_service_account_info(
         creds_dict, scopes=scope)
     return creds
 
-def upload_image(image, image_name, drive_folder_id):
-    # Upload the image to Google Drive
+def upload_image(image_base64, image_name, drive_folder_id):
+    
     creds = get_credentials()
     drive_service = build('drive', 'v3', credentials=creds)
-
-    image_bytes = image.read()
-    byte_stream = io.BytesIO(image_bytes)
+    
+    image_data = base64.b64decode(image_base64)
+    
+    byte_stream = io.BytesIO(image_data)
 
     media = MediaIoBaseUpload(byte_stream, mimetype='image/jpeg')
     

@@ -1,4 +1,4 @@
-# src/controller/add_student/utills/validate_name.py
+# src/controller/utills/validate_name.py
 import re
 
 def validate_name(name, field_name):

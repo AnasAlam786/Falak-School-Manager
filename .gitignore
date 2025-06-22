@@ -8,3 +8,4 @@ venv/
 
 # Ignore environment variables file (.env)
 .env
+service_account.json

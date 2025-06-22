@@ -8,7 +8,7 @@ from src.model import (
 
 from src import db
 
-from datetime import datetime
+import base64
 
 from werkzeug.security import check_password_hash
 
@@ -24,15 +24,17 @@ final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 @login_required
 @permission_required('admission')
 def final_admission_api():
+    data = request.get_json()
 
-    password = request.form.get("password")
-    image = request.files.get("IMAGE")
-
-    if image:
-        if not image.filename.lower().endswith(('.jpg', '.jpeg')):
-            return jsonify({"message": "Invalid image format, Please upload a JPG or JPEG image."}), 400
-
+    password = data.get("password")
+    image = data.get("image", None)
+    verified_data = data.get("verifiedData", None)
     school_id=session["school_id"]
+
+
+    data = {}
+    for input_data in verified_data:
+        data[input_data["field"]] = input_data["value"]
 
     if not password:
         return jsonify({"message": "Missing password"}), 400
@@ -45,50 +47,14 @@ def final_admission_api():
     # 3) Verify password
     if not check_password_hash(school.Password, password):
         return jsonify({"message": "Wrong password"}), 401
-    
-
-    data = dict(request.form)
-    data.pop('password', None)
-    data.pop('IMAGE', None)    
+      
 
     StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
-    StudentDB_data = {key: value for key, value in data.items() if key in StudentDB_colums}
-
     StudentsSession_colums = {column.name for column in StudentSessions.__table__.columns}
+
+    StudentDB_data = {key: value for key, value in data.items() if key in StudentDB_colums}    
     StudentsSession_data = {key: value for key, value in data.items() if key in StudentsSession_colums}
 
-
-
-    # handling Date fields
-    date_fields = ["DOB", "ADMISSION_DATE"]
-    for field in date_fields:
-        try:
-            value = data[field].replace("/", "-")
-            parsed_date = None
-            for fmt in ("%d-%m-%Y", "%Y-%m-%d"):
-                try:
-                    parsed_date = datetime.strptime(value, fmt).date()
-                    break
-                except ValueError:
-                    continue
-            if not parsed_date:
-                return jsonify({"message": f"Invalid date format for {field}. Expected DD-MM-YYYY or YYYY-MM-DD."}), 400
-            StudentDB_data[field] = parsed_date
-        except KeyError:
-            return jsonify({"message": f"Missing required field: {field}"}), 400
-    # handling Date fields END
-
-
-    # handling Aadhar fields
-    aadhar_fields = ['MOTHERS_AADHAR', 'AADHAAR', 'FATHERS_AADHAR']
-    for field in aadhar_fields:
-        raw = data.get(field)
-        if raw:
-            StudentDB_data[field] = raw.replace('-', '').replace(' ', '')
-        else:
-            StudentDB_data[field] = None
-    # handling Aadhar fields End
-    
 
     
     StudentDB_data["school_id"] = school_id
@@ -102,21 +68,18 @@ def final_admission_api():
     StudentsSession_data["Section"] = data["Section"]
     
 
-    for key, value in StudentDB_data.items():
-        if value == "":
-            StudentDB_data[key] = None
-
-    for key, value in StudentsSession_data.items():
-        if value == "":
-            StudentsSession_data[key] = None
-
     if image:
         try:
+        
+            encoded_image = image.split(",")[1]
+
             folder_id = school.students_image_folder_id
-            image_id = upload_image(image, data["ADMISSION_NO"], folder_id)
+            image_id = upload_image(encoded_image, data["ADMISSION_NO"], folder_id)
+
             StudentDB_data["IMAGE"] = image_id
             print('Uploaded image Drive ID:', image_id)
         except Exception as e:
+            print(f"Error uploading image: {e}")
             return jsonify({"message": f"Error uploading image: {e}"}), 400
 
     try:    
