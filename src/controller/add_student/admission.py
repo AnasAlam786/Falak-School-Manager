@@ -12,7 +12,6 @@ from src import db
 
 from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
-from ..utils.admission_fields import AdmissionFields
 from ..utils.pydantic_to_fields import pydantic_model_to_field_dicts
 from ..utils.admission_form_schema import (PersonalInfoModel, AcademicInfoModel, 
                                            GuardianInfoModel, ContactInfoModel, 

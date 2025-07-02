@@ -7,10 +7,11 @@ from .home import home_bp
 from .students.student_list import student_list_bp
 from .students.student_modal_data_api import student_modal_data_api_bp
 
+from .update.update_student_info import update_student_info_bp
+from .update.final_student_update_api import final_student_update_api_bp
+
 from .fees.pay_fee_api import pay_fee_api_bp
 from .fees.get_fee_api import get_fee_api_bp
-
-
 
 from .marks.fill_marks import fill_marks_bp
 from .marks.update_marks_api import update_marks_api_bp
@@ -57,6 +58,9 @@ def register_blueprints(app):
     app.register_blueprint(home_bp)
     app.register_blueprint(student_list_bp)
     app.register_blueprint(student_modal_data_api_bp)
+
+    app.register_blueprint(update_student_info_bp)
+    app.register_blueprint(final_student_update_api_bp)
     
     app.register_blueprint(pay_fee_api_bp)
     app.register_blueprint(get_fee_api_bp)

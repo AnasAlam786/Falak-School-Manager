@@ -39,11 +39,19 @@ def upload_image(image_base64, image_name, drive_folder_id):
     media = MediaIoBaseUpload(byte_stream, mimetype='image/jpeg')
     
     file_metadata = {
-        'name': image_name,
+        'name': str(image_name),
         'parents': [drive_folder_id]
     }
     file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    return file.get('id')
+    file_id = file.get('id')
+
+    # make the file publicly accessible
+    permission = {
+        'type': 'anyone',
+        'role': 'reader'
+    }
+    drive_service.permissions().create(fileId=file_id, body=permission).execute()
+    return file_id
 
 
 def delete_image(file_id):
@@ -55,6 +63,26 @@ def delete_image(file_id):
     except Exception as error:
         print(f"An error occurred: {error}")
         return False  # Indicate failure
+    
+def move_image(file_id, new_folder_id, rename=None, older_images_folder_id=None):
+
+    creds = get_credentials()
+    drive_service = build('drive', 'v3', credentials=creds)
+
+    if not older_images_folder_id:
+        # Get current parent folder(s) of the file
+        file = drive_service.files().get(fileId=file_id, fields='parents').execute()
+        older_images_folder_id = ",".join(file.get('parents'))
+
+    # Move the file to the new folder
+    drive_service.files().update(fileId=file_id, addParents=new_folder_id, removeParents=older_images_folder_id).execute()
+
+    # Optionally rename the file
+    if rename:
+        drive_service.files().update(fileId=file_id, body={'name': rename}).execute()
+
+    return True  # Indicate success
+
 
 
 upload_image.__module__ = "src.controller.add_student.utils.upload_image"

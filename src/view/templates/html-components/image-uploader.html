@@ -3,18 +3,34 @@
                                 border-dashed border-gray-300 p-6 flex flex-col items-center 
                                 justify-center cursor-pointer transition hover:border-blue-500">
     <div id="uploadContent" class="flex flex-col items-center justify-center">
-      <!-- Upload Icon -->
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24"
-        stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 9l-3-3m3 3l3-3" />
-      </svg>
-      <!-- Upload Label -->
-      <p id="uploadLabel" class="text-gray-400 mt-2">Click to upload the image of student</p>
+
+      <!-- Upload Icon & Label (Visible by default) -->
+      <div id="uploadIconSection" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 9l-3-3m3 3l3-3" />
+        </svg>
+        <p class="text-gray-400 mt-2">Click to upload the image of student</p>
+      </div>
+      <!-- Upload Icon & Label END -->
+
+      <!-- Cropped Image Preview Section (Initially hidden) -->
+      <div id="uploadedImageSection" class="relative w-full {{ '' if image_url else 'hidden' }}">
+        <img id="uploadedImage" src="{{ image_url or '' }}" alt="Cropped Image" class="w-full rounded-md" />
+        <button id="destroyImage" type="button"
+          class="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full p-1 focus:outline-none">
+          &times;
+        </button>
+        <p class="mt-2 text-gray-600 text-center">Image uploaded successfully. Click to change.</p>
+      </div>
+      <!-- Cropped Image Preview Section END -->
+
     </div>
-    <!-- Hidden File Input -->
-    <input type="file" id="imageInput" accept="image/*" class="hidden">
   </div>
+  <!-- Hidden File Input -->
+  <input type="file" id="imageInput" accept="image/*" class="hidden">
+
 </div>
 
 
@@ -213,6 +229,7 @@
 
 
   // Crop the image, update preview, and clear the file input
+  let imageStatus = "unchanged";
   let croppedBlob = null;
   document.getElementById('uploadCrop').addEventListener('click', () => {
     
@@ -229,27 +246,12 @@
         croppedBlob = blob;
 
         const url = URL.createObjectURL(blob);
-        // Update the container with the cropped image, an X button, and a label
-        uploadContent.innerHTML = `
-            <div class="relative w-full">
-              <img src="${url}" alt="Cropped Image" class="w-full rounded-md">
-              <button id="destroyImage" class="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full p-1 focus:outline-none">&times;</button>
-            </div>
-            <p class="mt-2 text-gray-600 text-center">Image uploaded successfully. Click to change.</p>
-          `;
-        
-        // Add event listener to the X button to reset the container
-        document.getElementById('destroyImage').addEventListener('click', () => {
-          uploadContent.innerHTML = `
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 9l-3-3m3 3l3-3" />
-              </svg>
-              <p id="uploadLabel" class="text-gray-500 mt-2">Click to upload an image</p>
-            `;
 
-          croppedBlob = null;   // Reset croppedBlob on clicking on X 
-          
-        });
+        // Show cropped image and hide icon section
+        document.getElementById('uploadedImage').src = url;
+        document.getElementById('uploadedImageSection').classList.remove('hidden');
+        document.getElementById('uploadIconSection').classList.add('hidden');
+        imageStatus = "updated";
 
         cropModal.classList.add('hidden');
         cropper.destroy();
@@ -259,6 +261,15 @@
       }, 'image/jpeg', 1.0);
     }
   });
+// Add event listener to the X button to reset the image container
+document.getElementById('destroyImage').addEventListener('click', () => {
+  // Hide image, show icon section, and reset blob
+  document.getElementById('uploadedImageSection').classList.add('hidden');
+  document.getElementById('uploadIconSection').classList.remove('hidden');
+  document.getElementById('uploadedImage').src = '';
+  croppedBlob = null;
+  imageStatus = "removed";
+});
 
   // Control buttons event listeners for shifting and zooming
   document.getElementById('moveDown').addEventListener('click', () => {

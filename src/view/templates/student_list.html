@@ -136,10 +136,15 @@
             </button>
           </div>
           <div class="w-50 border-start">
+            <!-- <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
+                onclick="openFeesModal('{{ row.id }}', '{{ row.family_id }}')" style="border-radius: 0;">
+                Pay Fee
+            </button> -->
             <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
-              onclick="openFeesModal('{{ row.id }}', '{{ row.family_id }}')" style="border-radius: 0;">
-              Pay Fee
+                onclick="window.location.href='/update_student_info?id={{ row.id }}'" style="border-radius: 0;">
+                Edit Student
             </button>
+
           </div>
         </div>
       </div>

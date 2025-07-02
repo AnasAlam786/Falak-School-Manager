@@ -12,7 +12,7 @@ import base64
 
 from werkzeug.security import check_password_hash
 
-from .utils.upload_image import upload_image, delete_image
+from ..utils.upload_image import upload_image, delete_image
 from .utils.create_watsapp_message import watsapp_message
 from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
@@ -122,7 +122,7 @@ def final_admission_api():
         db.session.rollback()  # Undo everything
 
         if 'image_id' in locals():  # If image upload was successful, delete the image
-            delete_image(image_id)
+             (image_id)
 
         print('Error while adding student:', str(e))
         return jsonify({"message": "Failed to add student"}), 500

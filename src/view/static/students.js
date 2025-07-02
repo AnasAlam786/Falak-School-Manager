@@ -38,18 +38,18 @@ function applyFilters() {
   }
 }
 
-  function viewStudentDetails(studentId, phone) {
-    document.getElementById('modalBody').innerHTML = 'Loading...';
-    
-    const backdrop = document.querySelector('.modal-backdrop');
-    if (backdrop) {
-        backdrop.remove();
-    }
-    var modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));    
-    
-    modal.show()
-    updatePage('/student_modal_data_api', 'modalBody',   {student_id: studentId, phone: phone})
+function viewStudentDetails(studentId, phone) {
+  document.getElementById('modalBody').innerHTML = 'Loading...';
+  
+  const backdrop = document.querySelector('.modal-backdrop');
+  if (backdrop) {
+      backdrop.remove();
   }
+  var modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));    
+  
+  modal.show()
+  updatePage('/student_modal_data_api', 'modalBody',   {student_id: studentId, phone: phone})
+}
 
 
 
@@ -219,16 +219,15 @@ function openFeesModal(studentId, familyId) {
 
   }
 
-  function verifyModal() {
+function verifyModal() {
 
-    const grandTotalElement = document.getElementById('grandTotal');
+  const grandTotalElement = document.getElementById('grandTotal');
 
-    if (grandTotalElement.textContent.trim() === '₹0'){
-      showAlert(400, "You need to select a month in order to pay the fees."); return
-    } else {
-      // Hide Modal 1 and Show Modal 2
-      bootstrap.Modal.getInstance(document.getElementById('feesModal')).hide();
-      new bootstrap.Modal(document.getElementById('verify')).show();
-    }
+  if (grandTotalElement.textContent.trim() === '₹0'){
+    showAlert(400, "You need to select a month in order to pay the fees."); return
+  } else {
+    // Hide Modal 1 and Show Modal 2
+    bootstrap.Modal.getInstance(document.getElementById('feesModal')).hide();
+    new bootstrap.Modal(document.getElementById('verify')).show();
   }
-  
+}
