@@ -363,7 +363,7 @@ class GuardianInfoModel(CleanBaseModel):
         }
 
 class ContactInfoModel(CleanBaseModel):
-    ADDRESS: constr(pattern=r'^[^\W\d_]+(?: [^\W\d_]+)*$') = Field(...) # type: ignore
+    ADDRESS: constr(pattern=r'^[a-zA-Z0-9\s,.-/]+$') = Field(...) # type: ignore
     PHONE: Optional[constr(min_length=10, max_length=10)] = Field(...) # type: ignore
     ALT_MOBILE: Optional[constr(min_length=10, max_length=10)] = Field(None) # type: ignore
     PIN: constr(min_length=6, max_length=6) = Field(...) # type: ignore
