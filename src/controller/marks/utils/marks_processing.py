@@ -4,7 +4,6 @@ from itertools import groupby
 from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import case, cast, func, literal
-from sqlalchemy.orm import Session
 from sqlalchemy.sql.sqltypes import Integer, Numeric, String
 
 from src.model import StudentsDB, StudentsMarks, ClassData  
