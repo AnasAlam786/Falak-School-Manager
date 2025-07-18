@@ -46,6 +46,16 @@
       <span class="font-medium" id="errorMessage"></span>
     </div>
 
+    <!-- add send watsapp message and print form buttons -->
+    <div class="flex justify-end mb-4">
+      <button id="sendWhatsApp" onclick="sendMessage('{{ student.id }}')" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition mr-2">
+        <i class="fab fa-whatsapp"></i> Send Message
+      </button>
+      <button id="printForm" onclick="printAdmissionForm('{{ student.id }}')" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+        <i class="fas fa-print"></i> Print Form
+      </button>
+    </div>
+
     <h1 class="text-2xl font-bold mb-6 text-center">Edit Student Data</h1>
 
     <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3 p-3 mb-4">
@@ -229,8 +239,23 @@
   </div>
 </div>
 
-
+<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
+  async function sendMessage(studentID) {
+    const response = await fetch(`/create_watsapp_message_api?student_id=${encodeURIComponent(studentID)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      sendWhatsAppMessage(data.phone, data.watsapp_message);
+    } else {
+      showAlert(response.status, data.message);
+    }
+  }
 
   const classSelect = document.getElementById('CLASS');
   const rollInput   = document.getElementById('ROLL');

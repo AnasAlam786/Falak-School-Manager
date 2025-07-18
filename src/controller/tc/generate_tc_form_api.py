@@ -10,12 +10,10 @@ from src.model import StudentSessions
 from src.model import ClassAccess
 from src import db
 
-from ..utils.int_to_roman import int_to_roman
-
 from datetime import datetime
 
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 generate_tc_form_api_bp = Blueprint( 'generate_tc_form_api_bp',   __name__)
 

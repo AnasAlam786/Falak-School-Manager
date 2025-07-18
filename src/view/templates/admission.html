@@ -228,7 +228,55 @@
   </div>
 </div>
 
+<!-- Choice Modal -->
+<div id="admissionDoneModel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
+  <div class="relative w-full max-w-sm rounded-2xl bg-white shadow-xl transition-transform duration-300 ease-out scale-100">
+    
+    <!-- Close Button -->
+    <button id="closeAdmissionDoneModel" type="button" class="absolute -top-4 -right-4 rounded-full bg-white p-2 shadow-md hover:scale-105 hover:bg-gray-100">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
 
+    <!-- Modal Content -->
+    <div class="p-6 pt-8 text-center">
+      <!-- Header -->
+      <div class="mb-5">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+          <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-800">Admission Completed!</h3>
+        <p class="mt-1 text-sm text-gray-500">Send a confirmation on WhatsApp or print the admission form below.</p>
+      </div>
+
+      <!-- Buttons -->
+      <div class="space-y-3">
+        <button id="sendMessage" onclick="sendWhatsAppMessage()" type="button"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3 text-white font-medium transition-all hover:bg-[#1ebe5d]">
+          <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor">
+            <path d="M16 0C7.168 0 0 6.912 0 15.456c0 2.736.864 5.376 2.336 7.648L0 32l9.12-2.88c2.176.672 4.48.992 6.88.992 8.832 0 16-6.912 16-15.456S24.832 0 16 0zm0 28.448c-2.112 0-4.16-.352-6.064-1.024l-.432-.128-5.424 1.728 1.76-5.088-.288-.448c-1.36-2.112-2.064-4.512-2.064-7.008 0-6.752 5.6-12.256 12.496-12.256 6.912 0 12.496 5.504 12.496 12.256 0 6.72-5.584 12.256-12.48 12.256zm6.784-9.152c-.4-.208-2.368-1.168-2.736-1.296-.368-.128-.64-.192-.912.192s-1.04 1.296-1.28 1.552c-.24.256-.464.288-.864.096s-1.68-.624-3.2-1.984c-1.184-1.056-1.984-2.368-2.208-2.768s-.024-.608.176-.8c.176-.176.4-.464.608-.704.208-.256.288-.432.432-.72s.08-.544-.032-.768c-.112-.224-.912-2.176-1.248-2.976-.336-.8-.688-.688-.912-.704s-.512-.016-.784-.016-.72.096-1.104.544c-.384.448-1.44 1.408-1.44 3.424s1.472 3.984 1.68 4.256c.208.272 2.88 4.384 6.944 6.144.97.408 1.728.648 2.32.832.976.304 1.856.264 2.56.16.784-.112 2.368-.96 2.704-1.888.336-.928.336-1.728.24-1.888-.096-.16-.352-.256-.752-.448z"/>
+          </svg>
+          Send Message
+        </button>
+
+        <button id="printForm" onclick="printAdmissionForm()" type="button"
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-white font-medium transition hover:bg-blue-700">
+          <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 2h12a2 2 0 012 2v4H4V4a2 2 0 012-2zm12 12h2a2 2 0 002-2V9a2 2 0 00-2-2H4a2 2 0 00-2 2v3a2 2 0 002 2h2v4a2 2 0 002 2h8a2 2 0 002-2v-4z" />
+          </svg>
+          Print Admission Form
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
 
   const classSelect = document.getElementById('CLASS');
@@ -437,7 +485,16 @@
         // Optionally update the page content based on the response
         if (response.ok) {
           showAlert(response.status, data.message);
-          setTimeout(() => {location.reload();}, 3000);
+          // Close the modal
+          document.getElementById('verificationModal').classList.add('hidden');
+          // Show the admission done modal
+          document.getElementById('admissionDoneModel').classList.remove('hidden');
+
+          // add onclick attribute to the send message button
+          document.getElementById('sendWhatsAppMessage').onclick = function() {
+            sendMessage(data.student_id);
+          };
+
         }
         else{
           showAlert(response.status, data.message)
@@ -447,6 +504,31 @@
       showAlert(400, "An error occurred while submitting the form.")
       console.error('Error:', error);
     }
+  });
+
+  async function sendMessage(studentID) {
+    const response = await fetch(`/create_watsapp_message_api?student_id=${encodeURIComponent(studentID)}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    const data = await response.json();
+
+    if (response.ok) {
+      sendWhatsAppMessage(data.phone, data.watsapp_message);
+    } else {
+      showAlert(response.status, data.message);
+    }
+  }
+
+  async function printAdmissionForm() {
+    return 0;
+  }
+
+  // close admission done modal
+  document.getElementById('closeAdmissionDoneModel').addEventListener('click', function() {
+    document.getElementById('admissionDoneModel').classList.add('hidden');
   });
 
 

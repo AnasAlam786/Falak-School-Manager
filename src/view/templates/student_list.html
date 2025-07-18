@@ -93,7 +93,7 @@
 
         <!-- Top-right corner badges -->
 
-        {% if not row.AADHAAR %}
+        {% if not row.AADHAAR or row.AADHAAR == "999999999999" %}
         <div class="position-absolute top-0 end-0 p-1 text-end" style="z-index: 10;">
           <span class="badge bg-danger mb-1">No Aadhar</span><br>
         </div>

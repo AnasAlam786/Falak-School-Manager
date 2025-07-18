@@ -8,16 +8,15 @@ from src.model.StudentsDB import StudentsDB
 from src.model.ClassAccess import ClassAccess
 from src.model.StudentSessions import StudentSessions
 
-from ..utils.pydantic_to_fields import pydantic_model_to_field_dicts
-from ..utils.admission_form_schema import (PersonalInfoModel, AcademicInfoModel, 
+from src.controller.students.utils.pydantic_to_fields import pydantic_model_to_field_dicts
+from src.controller.students.utils.admission_form_schema import (PersonalInfoModel, AcademicInfoModel, 
                                            GuardianInfoModel, ContactInfoModel, 
                                            AdditionalInfoModel)
 
 from src import db
 
-from ..utils.admission_fields import AdmissionFields
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 update_student_info_bp = Blueprint( 'update_student_info_bp',   __name__)
 

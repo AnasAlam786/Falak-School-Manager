@@ -1,21 +1,18 @@
 # src/controller/update/update_student_image.py
 
 
-from flask import render_template, session, Blueprint, request, jsonify
-from sqlalchemy import func
+from flask import session, Blueprint, request, jsonify
 
 from src.model.Schools import Schools
 from src.model.StudentsDB import StudentsDB
-from src.model.ClassData import ClassData
 from src.model.StudentsDB import StudentsDB
-from src.model.ClassAccess import ClassAccess
 
 from src import db
 
-from ..utils.upload_image import upload_image, delete_image, move_image
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
-from datetime import datetime
+from src.controller.students.utils.upload_image import upload_image, delete_image, move_image
+
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 final_student_update_api_bp = Blueprint( 'final_student_update_api_bp',   __name__)
 
