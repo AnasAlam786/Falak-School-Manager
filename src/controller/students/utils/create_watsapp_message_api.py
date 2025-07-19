@@ -1,4 +1,4 @@
-# src/controller/update/send_watsapp_message_api.py
+# src/controller/students/utils/send_watsapp_message_api.py
 
 from flask import session, request, jsonify, Blueprint
 
@@ -37,8 +37,6 @@ def create_watsapp_message_api():
             StudentSessions.session_id == current_session_id,
         ).first()
     
-    print(f"Retrieved student data: {student_data}")
-
     if not student_data:
         return jsonify({"message": "Student not found"}), 404
     

@@ -240,6 +240,8 @@
 </div>
 
 <script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
+<script src="{{ url_for('static', filename='printAdmissionForm.js') }}"></script>
+
 <script>
   async function sendMessage(studentID) {
     const response = await fetch(`/create_watsapp_message_api?student_id=${encodeURIComponent(studentID)}`, {

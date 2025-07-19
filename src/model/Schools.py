@@ -20,6 +20,7 @@ class Schools(db.Model):
     Classes = Column(JSON, nullable=False)              # Not null in DB
     IP = Column(JSON, nullable=True)
     students_image_folder_id = Column(Text, nullable=True)  # Added students_image_folder_id as per DB
+    school_heading_image = Column(Text, nullable=True)  # Added school_heading_image as per DB
     session_id = Column(Text, nullable=False)
     
     # Relationships

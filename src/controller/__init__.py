@@ -42,6 +42,7 @@ from .students.add_student.get_new_roll_api import get_new_roll_api_bp
 from .students.add_student.final_admission_api import final_admission_api_bp
 
 from .students.utils.create_watsapp_message_api import create_watsapp_message_api_bp
+from .students.utils.create_admission_form_api import create_admission_form_api_bp
 
 
 from .temp.temp_page import temp_page_bp
@@ -67,14 +68,13 @@ def register_blueprints(app):
     app.register_blueprint(pay_fee_api_bp)
     app.register_blueprint(get_fee_api_bp)
 
-    
-
     app.register_blueprint(admission_bp)
     app.register_blueprint(verify_admission_api_bp)
     app.register_blueprint(get_new_roll_api_bp)
     app.register_blueprint(final_admission_api_bp)
 
     app.register_blueprint(create_watsapp_message_api_bp)
+    app.register_blueprint(create_admission_form_api_bp)
 
     app.register_blueprint(fill_marks_bp)
     app.register_blueprint(update_marks_api_bp)
