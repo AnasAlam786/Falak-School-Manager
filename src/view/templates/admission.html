@@ -222,7 +222,7 @@
           Close
         </button>
         <button id="finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
-          Submit
+          Final Submit
         </button>
       </div>      
   </div>
@@ -440,76 +440,80 @@
     }
     document.getElementById('ModalDataTable').innerHTML = html;
 
-    // --- Show the modal ---
+    // ---Show the modal ---
     document.getElementById('verificationModal').classList.remove('hidden');
 
   }
 
 
+document.getElementById('finalSubmit').addEventListener('click', async function () {
+  const submitButton = this;
+  if (submitButton.disabled) return; // prevent double submission
+  submitButton.disabled = true;
+  submitButton.innerText = "Submitting...";
 
+  const checkBox = document.getElementById('confirmCheckbox').checked;
+  const password = document.getElementById("password").value;
 
-  // Final submit to add student
-  document.getElementById('finalSubmit').addEventListener('click', async function() {
-    checkBox = document.getElementById('confirmCheckbox').checked
-    password = document.getElementById("password").value
+  if (!checkBox) {
+    showAlert(404, "Please confirm the details by checking the box.");
+    submitButton.disabled = false;
+    submitButton.innerText = "Final Submit";
+    return;
+  }
+  if (!password) {
+    showAlert(404, "Please Enter Password Also!");
+    submitButton.disabled = false;
+    submitButton.innerText = "Final Submit";
+    return;
+  }
+  if (!verifiedData) {
+    showAlert(404, "Invalid Action");
+    submitButton.disabled = false;
+    submitButton.innerText = "Final Submit";
+    return;
+  }
 
-    if (!checkBox) {
-      showAlert(404, "Please confirm the details by checking the box.");
-      return;
+  try {
+    let base64Image = null;
+    if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
+      base64Image = await convertBlobToBase64(croppedBlob);
     }
-    if (!password) {
-      showAlert(404, "Please Enter Password Also!");
-      return;
+
+    const response = await fetch('/final_admission_api', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: password, image: base64Image, verifiedData: verifiedData })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showAlert(response.status, data.message);
+      document.getElementById('verificationModal').classList.add('hidden');
+      document.getElementById('admissionDoneModel').classList.remove('hidden');
+
+      document.getElementById('sendWhatsAppMessage').onclick = function () {
+        sendMessage(data.student_id);
+      };
+      document.getElementById('printForm').onclick = function () {
+        printAdmissionForm(data.student_id);
+      };
+    } else {
+      showAlert(response.status, data.message);
     }
 
-    if(!verifiedData){
-      showAlert(404, "Invalid Action");
-      return;
-    }
+  } catch (error) {
+    showAlert(400, "An error occurred while submitting the form.");
+    console.error('Error:', error);
+  }
 
+  // Re-enable the button only after the response is handled
+  submitButton.disabled = false;
+  submitButton.innerText = "Final Submit";
+});
 
-    try {
-      let base64Image = null;
-      if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
-        base64Image = await convertBlobToBase64(croppedBlob);
-      }
-        // Send a POST request to the Flask backend
-        const response = await fetch('/final_admission_api', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ password : password, image : base64Image, verifiedData : verifiedData })
-        });
-
-        // Parse the JSON response
-        const data = await response.json();
-
-        // Optionally update the page content based on the response
-        if (response.ok) {
-          showAlert(response.status, data.message);
-          // Close the modal
-          document.getElementById('verificationModal').classList.add('hidden');
-          // Show the admission done modal
-          document.getElementById('admissionDoneModel').classList.remove('hidden');
-
-          // add onclick attribute to the send message button
-          document.getElementById('sendWhatsAppMessage').onclick = function() {
-            sendMessage(data.student_id);
-          };
-          // add onclick attribute to the print form button
-          document.getElementById('printForm').onclick = function() {
-            printAdmissionForm(data.student_id);  // Function in static/printAdmissionForm.js
-          };
-
-        }
-        else{
-          showAlert(response.status, data.message)
-        }
-
-    } catch (error) {
-      showAlert(400, "An error occurred while submitting the form.")
-      console.error('Error:', error);
-    }
-  });
+  
 
   async function sendMessage(studentID) {
     const response = await fetch(`/create_watsapp_message_api?student_id=${encodeURIComponent(studentID)}`, {
