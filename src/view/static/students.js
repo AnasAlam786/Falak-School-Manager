@@ -16,7 +16,7 @@ function applyFilters() {
     const studentPEN = card.getAttribute('data-PEN').toLowerCase();
 
     // Check if the class matches
-    const classMatches = selectedClass === 'all classes' || studentClass.includes(selectedClass);
+    const classMatches = selectedClass === 'all classes' || studentClass === selectedClass;
 
     // Check if the search query matches any student data
     const searchMatches = 
