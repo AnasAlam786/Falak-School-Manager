@@ -25,8 +25,7 @@ def student_modal_data_api():
     student = db.session.query(
             StudentsDB.id, StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
-            StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
-            StudentsDB.WEIGHT, StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
+            StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
             StudentsDB.GENDER, StudentsDB.PEN,
             func.to_char(StudentsDB.DOB, 'Dy, DD Month YYYY').label('DOB'),
             ClassData.CLASS,  # Get the class name from the ClassData table
