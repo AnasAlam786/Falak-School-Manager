@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional, Union
 from sqlalchemy import case, cast, func, literal
 from sqlalchemy.sql.sqltypes import Integer, Numeric, String
 
-from src.model import StudentsDB, StudentsMarks, ClassData  
+from src.model import StudentsDB, StudentsMarks, ClassData, StudentSessions
 from src import db
 
 def _cast_numeric_if_digits(column_expr, default: Union[int, float] = 0):
@@ -142,7 +142,8 @@ def result_data(current_session_id: int, student_ids: Optional[List[int]] = None
             .label("Grand_Rank"),
         )
         .join(StudentsDB, StudentsMarks.student_id == StudentsDB.id)
-        .join(ClassData, StudentsDB.class_data_id == ClassData.id)
+        .join(StudentSessions, StudentsDB.id == StudentSessions.student_id)
+        .join(ClassData, StudentSessions.class_id == ClassData.id)
         .filter(StudentsMarks.session_id == current_session_id)
         .group_by(StudentsMarks.student_id, ClassData.CLASS)
     )

@@ -67,8 +67,6 @@ class StudentsDB(db.Model):
 
     ADMISSION_SESSION = Column(Text, nullable=True)
     ADDRESS = Column(Text, nullable=True)
-    HEIGHT = Column(Integer, nullable=True)
-    WEIGHT = Column(Integer, nullable=True)
     Caste = Column(Text, nullable=True)
 
     PIN = Column(Text, nullable=True)
@@ -102,9 +100,6 @@ class StudentsDB(db.Model):
 
     session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     session = db.relationship("Sessions", back_populates="students")
-
-    class_data_id = Column(BigInteger, ForeignKey('ClassData.id', onupdate="CASCADE"), nullable=False)
-    class_data = db.relationship("ClassData", back_populates="students")
     
     student_sessions = db.relationship("StudentSessions", back_populates="students")
     students_marks = db.relationship("StudentsMarks", back_populates="students")
