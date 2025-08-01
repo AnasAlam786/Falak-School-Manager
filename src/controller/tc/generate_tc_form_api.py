@@ -44,10 +44,9 @@ def generate_tc_form_api():
 
             StudentsDB.STUDENTS_NAME, StudentsDB.AADHAAR,StudentsDB.SR,
             StudentsDB.FATHERS_NAME, StudentsDB.MOTHERS_NAME, StudentsDB.PHONE,
-            StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.HEIGHT,
-            StudentsDB.WEIGHT, StudentsDB.Caste_Type, StudentsDB.RELIGION,
+            StudentsDB.ADMISSION_NO, StudentsDB.ADDRESS, StudentsDB.Caste_Type, StudentsDB.RELIGION,
             StudentsDB.ADMISSION_DATE, StudentsDB.SR, StudentsDB.IMAGE,
-            StudentsDB.GENDER, StudentsDB.PEN, StudentsDB.HEIGHT,StudentsDB.WEIGHT,
+            StudentsDB.GENDER, StudentsDB.PEN,
             StudentsDB.APAAR, 
             func.to_char(StudentsDB.DOB, 'Dy, DD Mon YYYY').label('DOB'),
 

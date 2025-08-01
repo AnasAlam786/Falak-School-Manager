@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>57x88mm Page</title>
+  <link href='https://fonts.googleapis.com/css?family=League Spartan' rel='stylesheet'>
   <style>
     @page {
       size: 57mm 88mm;
@@ -11,36 +12,22 @@
     body {
       margin: 0;
       padding: 50px;
+      font-family: 'League Spartan';
     }
 
     .page {
       width: 57mm;
       height: 88mm;
+      font-family: 'League Spartan';
       box-sizing: border-box;
       display: flex;
-      align-items: center;
       justify-content: center;
       font-family: Arial, sans-serif;
-      font-size: 12pt;
       background: rgb(20, 56, 104);
       position: relative;
       overflow: hidden;
-      border: 2px solid rgb(30, 228, 89);
+      border: 1px solid rgb(221, 221, 221);
     }
-
-   .hexagon {
-      position: absolute;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    svg {
-        width: 100%;
-        height: 50%;
-        display: block;
-        position: relative;
-        top: 0;
-        }
 
     
   </style>
@@ -48,15 +35,156 @@
 <body>
   <div class="page">
 
-    <div>
 
-        <svg viewBox="0 0 100 100">
+    <!-- Larger white hexagon -->
+    <div style="display: flex; justify-content: center; z-index: 1; position: absolute;">
+        <svg width="57mm" viewBox="-0.5 150 257 257">
             <path 
             d="M149.0608082214179,3.735229821355155L234.93919177773057,18.96615047161027C247.1226014561723,21.126933412318678 255.9999999994323,31.71731551342968 255.9999999994323,44.09085397654978L255.9999999994323,262.01854871132133C255.9999999994323,274.39208717444143 247.1226014561723,284.98246927555243 234.93919177773057,287.14325221626086L149.0608082214179,302.37417286651595C135.1289763427541,304.8450464180284 120.87102365667819,304.8450464180284 106.93919177801442,302.37417286651595L21.060808221701734,287.14325221626086C8.877398543259988,284.98246927555243 0,274.39208717444143 0,262.01854871132133L0,44.09085397654978C0,31.71731551342968 8.877398543259988,21.126933412318678 21.060808221701734,18.96615047161027L106.93919177801442,3.735229821355155C120.87102365667819,1.2643562698426967 135.1289763427541,1.2643562698426967 149.0608082214179,3.735229821355155Z" 
             fill="white"/>
         </svg>
-
     </div>
+    <!-- END of Larger white hexagon -->
+
+
+    <!-- Smaller blue hexagon -->
+    <div style="display: flex; justify-content: center; z-index: 2; position: absolute;">
+        <svg viewBox="-7 150 270 270" width="50mm">
+            <path 
+            d="M149.0608082214179,3.735229821355155L234.93919177773057,18.96615047161027C247.1226014561723,21.126933412318678 255.9999999994323,31.71731551342968 255.9999999994323,44.09085397654978L255.9999999994323,262.01854871132133C255.9999999994323,274.39208717444143 247.1226014561723,284.98246927555243 234.93919177773057,287.14325221626086L149.0608082214179,302.37417286651595C135.1289763427541,304.8450464180284 120.87102365667819,304.8450464180284 106.93919177801442,302.37417286651595L21.060808221701734,287.14325221626086C8.877398543259988,284.98246927555243 0,274.39208717444143 0,262.01854871132133L0,44.09085397654978C0,31.71731551342968 8.877398543259988,21.126933412318678 21.060808221701734,18.96615047161027L106.93919177801442,3.735229821355155C120.87102365667819,1.2643562698426967 135.1289763427541,1.2643562698426967 149.0608082214179,3.735229821355155Z" 
+            fill="rgb(12, 192, 223)"/>
+        </svg>
+    </div>
+    <!-- END of Smaller blue hexagon -->
+    
+
+
+    <!-- Hanging blue image frame -->
+    <div style="display: flex; justify-content: center; z-index: 4; position: absolute;">
+        <svg viewBox="-82 100 420 380" width="50mm">
+            <path 
+            d="M85.37944615384615,429.14564538832576C98.50387692307693,433.82319911988105 113.42473846153845,436.8925535373774 128.06892307692306,436.8925535373774C142.71359999999999,436.8925535373774 156.80541538461537,434.2612360841531 169.79150769230768,429.58368235259775C170.0681846153846,429.4376700311738 170.3443692307692,429.4376700311738 170.62055384615383,429.29165770974976C219.38904615384612,410.58144278352853 255.30929230769226,361.1751039593499 256,301.0669341856152L256,0L0,0L0,300.84350466690995C0.6907716923076921,361.46712860219793 36.058289230769226,410.8739833709752 85.37944615384615,429.14564538832576Z" 
+            fill="rgb(12, 192, 223)"/>
+        </svg>
+    </div>
+    <!-- END of Hanging blue image frame -->
+
+    
+<div style="
+      position: absolute;
+      top: 29.5%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 5;">
+      <svg width="100" height="100" viewBox="0 0 100 100">
+
+        <circle cx="50" cy="50" r="50" fill="white"/>
+
+        <defs>
+          <clipPath id="circleClip">
+            <circle cx="50" cy="50" r="47"/>
+          </clipPath>
+        </defs>
+        <image href="https://lh3.googleusercontent.com/d/1hkEipZ1aiUEugjWhH4lfONK3eJNOsWZy" 
+               x="0" 
+               y="0"
+               width="100" 
+               height="100" 
+               clip-path="url(#circleClip)"/>
+      </svg>
+    </div>
+
+    
+
+
+    <!-- shadow below the hanging frame -->
+    <div style="
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 3;">
+      <svg width="200" height="200" viewBox="0 0 100 100">
+        <defs>
+          <filter id="shadow" x="-80%" y="-80%" width="250%" height="250%">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"/>
+            <feOffset in="blur" dx="0" dy="0" result="offsetBlur"/>
+            <feFlood flood-color="rgba(0,0,0,1)" result="darkShadow"/> <!-- Darker shadow color -->
+            <feComposite in="darkShadow" in2="offsetBlur" operator="in" result="darkBlur"/>
+            <feComposite in="SourceGraphic" in2="darkBlur" operator="over"/>
+          </filter>
+        </defs>
+        <circle cx="50" cy="50" r="25" fill="white" filter="url(#shadow)"/>
+      </svg>
+    </div>
+    <!-- END of shadow below the hanging frame -->
+
+    
+
+
+
+
+    <div style="font-family: 'League Spartan'; position: absolute; line-height: 0.15; top: 52%; left: 50%; transform: translate(-50%, -50%); width: 90%; text-align: center; z-index: 5;">
+      <h1 style="font-weight: bolder; font-size: 15px; color: #ffffff;">Mohammad Uzain</h1>
+      <p style="font-weight: bolder; font-size: 12px; color: #bebebe;">C/O Mr.Iqrar Husain</p>
+    </div>
+
+    <div style="font-family: 'League Spartan'; position: absolute; top: 67%; left: 52%; transform: translate(-50%, -50%);  width: 75%; text-align: center; z-index: 5;">
+      <table style="width: 100%;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tbody style="color: #ffffff; line-height: 1.2;">
+            
+            <tr>
+              <td style="color: #bebebe; font-weight: bolder; font-size: 8px; text-align: left; padding: 1px 0; white-space: nowrap;">Class</td>
+              <td style="font-weight: bolder; font-size: 8px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+              <td style="font-size: 9px; font-weight: bolder; text-align: left; padding: 1px 0;">LKG</td>
+            </tr>
+
+            <tr>
+              <td style="color: #bebebe; font-weight: bolder; font-size: 8px; text-align: left; padding: 1px 0; white-space: nowrap;">Date of Birth</td>
+              <td style="font-weight: bolder; font-size: 8px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+              <td style="font-size: 9px; font-weight: bolder; text-align: left; padding: 1px 0;">Wed, 1 January 2022</td>
+            </tr>
+
+            <tr>
+              <td style="color: #bebebe; font-weight: bolder; font-size: 8px; text-align: left; padding: 1px 0; white-space: nowrap;">Phone</td>
+              <td style="font-weight: bolder; font-size: 8px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+              <td style="font-size: 9px; font-weight: bolder; text-align: left; padding: 1px 0;">9411897919</td>
+            </tr>
+
+            <tr>
+              <td style="color: #bebebe; font-weight: bolder; font-size: 8px; text-align: left; padding: 1px 0; white-space: nowrap;">Address</td>
+              <td style="font-weight: bolder; font-size: 8px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+              <td style="font-size: 7px; font-weight: bolder; text-align: left; padding: 1px 0;">Meena Nagar near Tikoniya Masjid Karula</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </table>
+    </div>
+
+
+
+
+    <svg style="font-family: 'League Spartan'; font-weight: bolder; position: absolute; left: 0; bottom: 0; z-index: 6;" width="100%" height="45px">
+      <rect width="100%" height="45px" fill="white"/>
+      <text  x="50%" y="20%" 
+        dominant-baseline="middle" 
+        text-anchor="middle" 
+        font-size="12px" fill="black" >
+        Meena Nagar Near Tikoniya Masjid
+      </text>
+
+      <text 
+        x="50%" y="55%" 
+        dominant-baseline="middle" 
+        text-anchor="middle" 
+        font-size="15px"
+        fill="black" >
+       +918533998822
+      </text>
+    </svg>
+  
 
   </div>
 </body>
