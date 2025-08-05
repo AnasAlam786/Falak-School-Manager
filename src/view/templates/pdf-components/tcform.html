@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admission Form</title>
+  <style>
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 10mm;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        page-break-inside: avoid;
+        page-break-after: auto;
+        page-break-before: auto;
+        max-height: calc(297mm - 20mm); /* A4 minus top+bottom margins */
+        width: calc(210mm - 20mm);      /* A4 minus left+right margins */
+        margin: auto;
+      }
+    }
+    .container {
+      /* Remove the fixed height */
+      width: 210mm;
+      max-height: 297mm;
+      border: 3px solid black;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+
+    .header {
+      margin-top: 8px;
+      text-align: center;
+      border-bottom: 2px solid black; 
+     }
+     .header p {
+        margin: 0;
+        font-weight: bold;
+      }
+
+    .details{
+      position: relative;
+      padding: 20px;
+      padding-bottom: 175px;
+    }
+
+    .center-logo {
+      position: absolute;
+      top: 37%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%; /* Adjust size as needed */
+      opacity: 0.1; /* Makes it very light */
+      z-index: -1; /* Sends it behind other content */
+    }
+
+    .detail-block{
+        
+        /*border: 1px dotted black;*/
+        margin-top: 20px;
+        border-radius: 10px;
+        padding: 10px;
+        font-size: 17px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    td {
+    padding: 7px;
+  }
+
+  .exam-base-text{ font-size: 0.60rem; margin-top: 2px;}
+  .exam-header {
+    font-family: 13px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    word-wrap: break-word;
+    padding: 1px;
+    border: 1px solid #c7c7c7;
+  }
+
+
+  </style>
+
+</head>
+<body>
+    <div class="container">
+    <div class="header">
+      <div style="display: flex; justify-content: space-between;">
+
+        <!-- First Image (Left) -->
+        <img style= "margin-top: 5px; margin-left: 15px;width: 110px; height: 110px; " src="https://lh3.googleusercontent.com/d/{{ school_logo }}=s400">
+    
+        <!-- Middle Text (Centered) -->
+        <img style="height: 120px; width: 525px;" src="{{ url_for('static', filename='falak_heading.png') }}">
+    
+        <!-- Last Image (Right) -->
+        <img 
+        style="margin-right: 15px; 
+            margin-top: 0px;
+            margin-bottom: 5px; 
+            width: 115px; 
+            height: 115px; 
+            object-fit: cover; 
+            object-position: top; 
+            border: 1px solid #808080; 
+            border-radius: 50%;" 
+        src="https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s500">
+      </div>
+    </div>
+
+    <div class="details">
+
+      <img class="center-logo" src="https://lh3.googleusercontent.com/d/{{ school_logo }}=s500" alt="School Logo">
+
+
+        <div style="display: flex; align-items: center; justify-content: center; width: 100%; position: relative;">
+            <span style="font-size: 30px; font-weight: bold;"> <u>Transfer Certificate</u></span>
+        </div>
+        
+        
+        
+        
+
+        <div class="detail-block">
+            <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0; ">
+              
+              <tr>
+                <td><strong>SR No:</strong></td>
+                <td>{{ student.SR }}</td>
+                <td><strong>PEN No:</strong></td>
+                <td>{{ student.PEN }}</td>
+              </tr>
+
+              <tr>
+                <td><strong>Student Name:</strong></td>
+                <td>{{ student.STUDENTS_NAME }}</td>
+                <td><strong>Gender:</strong></td>
+                <td>{{ student.GENDER }}</td>
+              </tr>
+
+              <tr>
+                <td><strong>Father's Name:</strong> </td>
+                <td>{{ student.FATHERS_NAME }}</td>
+                <td><strong>Mother's Name:</strong></td>
+                <td>{{ student.MOTHERS_NAME }}</td>      
+              </tr>
+
+              <tr>
+                <td><strong>Date of Birth:</strong></td>
+                <td>{{ student.DOB }}</td>
+                <td><strong>Aadhaar No:</strong></td>
+                <td>{{ student.AADHAAR }}</td>
+              </tr>
+
+              <tr>
+                <td><strong>Admission No:</strong></td>
+                <td>{{ student.ADMISSION_NO }}</td>
+                <td><strong>Admission Date:</strong></td>
+                <td>{{ student.ADMISSION_DATE }}</td>
+              </tr>
+              
+              <tr>
+                <td><strong>Previous Class:</strong></td>
+                <td>{{ student.current_class }}</td>
+                <td><strong>Promoted Class:</strong></td>
+                <td>{{ promoted_class }}</td>
+              </tr>
+
+              <tr>
+                <td><strong>APAAR No:</strong></td>
+                <td>{{ student.APAAR }}</td>
+                <td><strong>Nationality:</strong></td>
+                <td>Indian</td>
+              </tr>
+
+              <tr>
+                <td><strong>Caste:</strong></td>
+                <td>{{ student.Caste_Type }}</td>
+                <td><strong>Religion:</strong></td>
+                <td>{{ student.RELIGION }}</td>
+              </tr>
+
+              <tr>
+                <td><strong>Height:</strong></td>
+                <td>{{ student.HEIGHT }} cm</td>
+                <td><strong>Weight:</strong></td>
+                <td>{{ student.WEIGHT }} kg</td>
+              </tr>
+
+            </table>
+
+            <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
+                <tr>
+                    <td style="text-align: left; vertical-align: top; width: 25%;"><strong>Address:</strong></td>
+                    <td style="text-align: left; vertical-align: top;">{{ student.ADDRESS }}</td>
+                </tr>
+            </table>
+
+            
+          </div>
+
+        <div class="detail-block">
+
+            <table style="width: 100%; border-collapse: collapse; margin: 0; padding: 0;">
+                
+
+                <tr>
+                  <td><strong>Total No. of working days in the academic session:</strong> </td>
+                  <td>{{ working_days }}</td>
+
+                </tr>
+                <tr>
+                  <td><strong>Total number of working days the student was present in class:</strong></td>
+                  <td>{{ student.Attendance }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>Issue Date of Transfer Certificate:</strong> </td>
+                  <td>{{ current_date }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>Reason for leaving the school:</strong></td>
+                  <td>{{ leaving_reason }}</td>
+                </tr>
+
+                <tr>
+                  <td><strong>Any Other Remark:</strong></td>
+                  <td></td>
+                </tr>
+
+                <tr>
+                  <td><strong>General Conduct:</strong></td>
+                  <td>{{ general_conduct }}</td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="detail-block">
+
+            <table style="width: 100%; font-size: 14px; table-layout: fixed; border-collapse: collapse; text-align: center; border: 1px solid #c7c7c7;">
+                <caption style="font-weight: bold; font-size: 1.5em; margin-bottom: 10px;">Subject-Wise Marks Performance</caption>
+                <thead>
+                  <tr>
+
+                    {% for exam in results %}
+                      <th class = "exam-header">{{ exam["subject"] }} <br><span class="exam-base-text">Out of 200</span></th>
+                    {% endfor %}
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {% for exam in results %}
+                      <td style="padding: 10px; border: 1px solid #c7c7c7;">{{ exam["total"] }}</td>
+                    {% endfor %}  
+                  </td>
+                    
+                  </tr>
+                </tbody>
+              </table>
+        
+
+        </div>
+
+        <div style="position: absolute; left:0; right:0; bottom:0px;">
+            
+
+            <table style="width: 100%;">
+              <tr>
+                <td style="text-align: center; padding: 5px;">
+                  <strong>_______________________</strong>
+                </td>
+                <td style="text-align: center; padding: 5px;">
+                  <strong>_______________________</strong>
+                </td>
+                <td style="text-align: center; padding: 5px;">
+                    <strong>_______________________</strong>
+                  </td>
+              </tr>
+              <tr>
+                <td style="text-align: center; padding-top: 5px;">
+                  <strong>Teacher's Sign</strong>
+                </td>
+                <td style="text-align: center; padding-top: 5px;">
+                  <strong>Checked by</strong>
+                </td>
+                <td style="text-align: center; padding-top: 5px;">
+                  <strong>Principal Sign</strong>
+                </td>
+              </tr>
+            </table>
+          </div>
+          
+
+    </div>
+</div>
+</body>
+</html>

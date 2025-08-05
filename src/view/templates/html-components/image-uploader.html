@@ -1,0 +1,293 @@
+<div class="flex justify-center">
+  <div id="uploadContainer" class="w-full max-w-md bg-dark rounded-xl shadow-md border-2 
+                                border-dashed border-gray-300 p-6 flex flex-col items-center 
+                                justify-center cursor-pointer transition hover:border-blue-500">
+    <div id="uploadContent" class="flex flex-col items-center justify-center">
+
+      <!-- Upload Icon & Label (Visible by default) -->
+      <div id="uploadIconSection" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none"
+          viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 9l-3-3m3 3l3-3" />
+        </svg>
+        <p class="text-gray-400 mt-2">Click to upload the image of student</p>
+      </div>
+      <!-- Upload Icon & Label END -->
+
+      <!-- Cropped Image Preview Section (Initially hidden) -->
+      <div id="uploadedImageSection" class="relative w-full {{ '' if image_url else 'hidden' }}">
+        <img id="uploadedImage" src="{{ image_url or '' }}" alt="Cropped Image" class="w-full rounded-md" />
+        <button id="destroyImage" type="button"
+          class="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full p-1 focus:outline-none">
+          &times;
+        </button>
+        <p class="mt-2 text-gray-600 text-center">Image uploaded successfully. Click to change.</p>
+      </div>
+      <!-- Cropped Image Preview Section END -->
+
+    </div>
+  </div>
+  <!-- Hidden File Input -->
+  <input type="file" id="imageInput" accept="image/*" class="hidden">
+
+</div>
+
+
+<!-- Choice Modal -->
+<div id="choiceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative">
+    <!-- Close Button -->
+    <button id="closeChoiceModal" type="button" class="absolute -top-3 -right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-lg transition-transform hover:scale-105">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
+    
+    <div class="p-6 pt-8 text-center">
+      <!-- Modal Header -->
+      <div class="mb-6">
+        <h3 class="text-xl font-semibold text-gray-900">Upload Student Photo</h3>
+        <p class="text-gray-500 mt-1">Choose your preferred method</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-4">
+        <button id="useCamera" type="button" class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+          </svg>
+          Take Photo
+        </button>
+        
+        <button id="useUpload" type="button" class="w-full px-6 py-3.5 border-2 border-gray-200 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+          </svg>
+          Upload Image
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Cropper Modal -->
+<div id="cropModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+    <!-- Cropper Container -->
+    <div class="p-4">
+      <div class="aspect-w-1 aspect-h-1 bg-gray-100">
+        <img id="cropperImage" class="max-w-full max-h-[70vh]" alt="Image to crop">
+      </div>
+    </div>
+    <!-- Controls for shifting & zooming -->
+    <div class="flex justify-center gap-3 p-4 border-t border-gray-200">
+      <!-- Up -->
+      <button id="moveUp" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+        </svg>
+      </button>
+      <!-- Left -->
+      <button id="moveLeft" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+      </button>
+      <!-- Zoom Out -->
+      <button id="zoomOut" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
+        </svg>
+      </button>
+      <!-- Zoom In -->
+      <button id="zoomIn" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+      </button>
+      <!-- Right -->
+      <button id="moveRight" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+      <!-- Down -->
+      <button id="moveDown" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+    </div>
+    <!-- Modal Footer -->
+    <div class="flex justify-end gap-4 p-4 border-t border-gray-200">
+      <button id="cancelCrop" type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+        Cancel
+      </button>
+      <button id="uploadCrop" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+        Crop & Save
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Script -->
+<script>
+    let cropper = null;
+    let mediaStream = null;
+    let imageInput = document.getElementById('imageInput');
+    const cropperImage = document.getElementById('cropperImage');
+    const cropModal = document.getElementById('cropModal');
+    const choiceModal = document.getElementById('choiceModal');
+    const uploadContent = document.getElementById('uploadContent');
+
+  // open choice modal when clicking on the upload content
+  uploadContent.addEventListener('click', () => {
+        choiceModal.classList.remove('hidden');
+    });
+
+  // Handle upload choice
+  document.getElementById('useUpload').addEventListener('click', () => {
+      //remove capture attribute if it exists
+      imageInput.removeAttribute('capture');
+      imageInput.click();
+      choiceModal.classList.add('hidden');
+  });
+
+  // Close modal handlers
+  document.getElementById('closeChoiceModal').addEventListener('click', () => {
+    choiceModal.classList.add('hidden');
+  });
+
+  // Close modal when clicking outside
+  choiceModal.addEventListener('click', (e) => {
+    if (e.target === choiceModal) {
+      choiceModal.classList.add('hidden');
+    }
+  });
+
+  // Handle camera choice
+  document.getElementById('useCamera').addEventListener('click', async () => {
+      choiceModal.classList.add('hidden');
+      //add capture attribute to the image input
+
+      imageInput.setAttribute('capture', 'environment');
+      imageInput.click();
+  });
+
+
+
+  // Handle file input
+  imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => showCropperModal(event.target.result);
+          reader.readAsDataURL(file);
+      }
+  });
+
+  // Common function to show cropper modal
+  function showCropperModal(imageSrc) {
+      cropperImage.src = imageSrc;
+      cropModal.classList.remove('hidden');
+      if (cropper) {
+          cropper.destroy();
+      }
+      cropper = new Cropper(cropperImage, {
+          aspectRatio: 1,
+          viewMode: 1,
+          autoCropArea: 1,
+          guides: false,
+          background: false,
+          movable: true,
+          zoomable: true,
+          rotatable: false,
+          scalable: false,
+      });
+  }
+
+
+
+  // Cancel cropping and clear the file input
+  document.getElementById('cancelCrop').addEventListener('click', () => {
+    cropModal.classList.add('hidden');
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
+    imageInput.value = '';
+  });
+
+
+
+  // Crop the image, update preview, and clear the file input
+  let imageStatus = "unchanged";
+  let croppedBlob = null;
+  document.getElementById('uploadCrop').addEventListener('click', () => {
+    
+    event.preventDefault();
+    if (cropper) {
+      const croppedCanvas = cropper.getCroppedCanvas({
+        width: 512,
+        height: 512,
+        fillColor: '#fff',
+        imageSmoothingEnabled: true, // Ensures smoothing is applied
+        imageSmoothingQuality: 'high' // Uses the best available algorithm for scaling
+      });
+      croppedCanvas.toBlob((blob) => {
+        croppedBlob = blob;
+
+        const url = URL.createObjectURL(blob);
+
+        // Show cropped image and hide icon section
+        document.getElementById('uploadedImage').src = url;
+        document.getElementById('uploadedImageSection').classList.remove('hidden');
+        document.getElementById('uploadIconSection').classList.add('hidden');
+        imageStatus = "updated";
+
+        cropModal.classList.add('hidden');
+        cropper.destroy();
+        cropper = null;
+        imageInput.value = '';
+
+      }, 'image/jpeg', 1.0);
+    }
+  });
+// Add event listener to the X button to reset the image container
+document.getElementById('destroyImage').addEventListener('click', () => {
+  // Hide image, show icon section, and reset blob
+  document.getElementById('uploadedImageSection').classList.add('hidden');
+  document.getElementById('uploadIconSection').classList.remove('hidden');
+  document.getElementById('uploadedImage').src = '';
+  croppedBlob = null;
+  imageStatus = "removed";
+});
+
+  // Control buttons event listeners for shifting and zooming
+  document.getElementById('moveDown').addEventListener('click', () => {
+    if (cropper) cropper.move(0, -10);
+  });
+  document.getElementById('moveUp').addEventListener('click', () => {
+    if (cropper) cropper.move(0, 10);
+  });
+  document.getElementById('moveRight').addEventListener('click', () => {
+    if (cropper) cropper.move(-10, 0);
+  });
+  document.getElementById('moveLeft').addEventListener('click', () => {
+    if (cropper) cropper.move(10, 0);
+  });
+  document.getElementById('zoomIn').addEventListener('click', () => {
+    if (cropper) cropper.zoom(0.1);
+  });
+  document.getElementById('zoomOut').addEventListener('click', () => {
+    if (cropper) cropper.zoom(-0.1);
+  });
+</script>

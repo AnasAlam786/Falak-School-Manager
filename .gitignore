@@ -1,0 +1,11 @@
+# Ignore Python bytecode files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Ignore virtual environments
+venv/
+
+# Ignore environment variables file (.env)
+.env
+service_account.json
