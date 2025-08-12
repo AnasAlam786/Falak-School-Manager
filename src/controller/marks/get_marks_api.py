@@ -4,9 +4,7 @@ from collections import OrderedDict
 from sqlalchemy import exists, true
 from flask import session, request, jsonify, Blueprint, render_template 
 
-from src.model.StudentsDB import StudentsDB
-from src.model.StudentSessions import StudentSessions
-from src.model.ClassData import ClassData
+
 from src.model.ClassAccess import ClassAccess
 from src import db
 
