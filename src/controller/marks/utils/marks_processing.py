@@ -175,7 +175,7 @@ def result_data(school_id, session_id, class_id):
         db.session.query(
             subq.c.exam_name,
             subq.c.weightage,
-            # subq.c.exam_term,
+            subq.c.exam_term,
             subq.c.subject_marks_dict,
             subq.c.exam_total,
             subq.c.percentage,

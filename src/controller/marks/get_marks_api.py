@@ -96,7 +96,7 @@ def get_marks_api():
 
 
     all_columns = student_marks_df.columns.tolist()
-    non_common_colums = ['exam_name', 'subject_marks_dict', 'exam_total', 'percentage', 'exam_display_order', 'weightage']
+    non_common_colums = ['exam_name', 'subject_marks_dict', 'exam_total', 'percentage', 'exam_display_order', 'weightage', "exam_term"]
     common_columns = [col for col in all_columns if col not in non_common_colums]
 
 
@@ -110,6 +110,7 @@ def get_marks_api():
                 'exam_total': row['exam_total'],
                 'percentage': row['percentage'],
                 'weightage': row['weightage'],
+                'exam_term': row['exam_term'],
             }
         return ordered_exams
 
@@ -119,8 +120,8 @@ def get_marks_api():
     student_marks = student_marks_df.to_dict(orient='records')
 
     # Print the structure of result student_marks_dict
-    # import pprint
-    # pprint.pprint(student_marks)
+    import pprint
+    pprint.pprint(student_marks)
    
 
     html = render_template('show_marks.html', student_marks=student_marks)
