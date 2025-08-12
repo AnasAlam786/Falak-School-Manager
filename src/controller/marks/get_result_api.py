@@ -84,7 +84,14 @@ def get_result_api():
     
     students_id = [students_obj.id]
 
-    result = result_data(current_session_id, students_id)
+    # Dynamic exam names based on this student's class exam_format
+    exam_names = None
+    try:
+        exam_names = list(students_obj.exam_format.keys())
+    except Exception:
+        exam_names = None
+
+    result = result_data(current_session_id, students_id, exam_names=exam_names)
     if not result:
         return jsonify({
             "html": '<div class="alert alert-warning text-center mt-5"><h5>No Result Found</h5></div>'
@@ -105,14 +112,10 @@ def get_result_api():
     grading_subjects = student_data['Grading_Subjects']
     exam_format = student_data['exam_format']
 
-    FA1_Outof = int(exam_format["FA1"])
-    SA1_Outof = int(exam_format["SA1"])
-    FA2_Outof = int(exam_format["FA2"])
-    SA2_Outof = int(exam_format["SA2"])
-
-    FA1_SA1_Outof = FA1_Outof + SA1_Outof
-    FA2_SA2_Outof = FA2_Outof + SA2_Outof
-    Grand_Total_Outof = FA1_SA1_Outof + FA2_SA2_Outof
+    # Recompute dynamic totals
+    ordered_exams = list(exam_format.keys())
+    outofs = [int(exam_format[name]) for name in ordered_exams]
+    Grand_Total_Outof = sum(outofs)
 
     no_of_subjects = len(numeric_subjects)
     extended_subjects = numeric_subjects + ["Total", "Percentage"]
@@ -124,13 +127,12 @@ def get_result_api():
 
     student_data["Percentage"] = {}
 
-    student_data["Percentage"]["FA1"] = round((float(student_data["Total"]["FA1"]) / (FA1_Outof * no_of_subjects))  * 100, 1)
-    student_data["Percentage"]["FA2"] = round((int(student_data["Total"]["FA2"]) / (FA2_Outof * no_of_subjects))  * 100, 1)
-    student_data["Percentage"]["SA1"] = round((int(student_data["Total"]["SA1"]) / (SA1_Outof * no_of_subjects)) * 100, 1)
-    student_data["Percentage"]["SA2"] = round((int(student_data["Total"]["SA2"]) / (SA2_Outof * no_of_subjects)) * 100, 1)
-    student_data["Percentage"]["FA1_SA1_Total"] = round((int(student_data["Total"]["FA1_SA1_Total"]) / (FA1_SA1_Outof * no_of_subjects))  * 100, 1)
-    student_data["Percentage"]["FA2_SA2_Total"] = round((int(student_data["Total"]["FA2_SA2_Total"]) / (FA2_SA2_Outof * no_of_subjects)) * 100, 1)
-    student_data["Percentage"]["Grand_Total"] = round((int(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_subjects)) * 100, 1)
+    # Dynamic per-exam percentages
+    for idx, name in enumerate(ordered_exams):
+        denom = (outofs[idx] * no_of_subjects) if outofs[idx] else 1
+        value = student_data["Total"].get(name) or 0
+        student_data["Percentage"][name] = round((float(value) / denom) * 100, 1)
+    student_data["Percentage"]["Grand_Total"] = round((float(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_subjects)) * 100, 1)
 
 
     for subject in extended_subjects:

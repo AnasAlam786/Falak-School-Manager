@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}{{ 'Add Staff' if mode=='add' else 'Edit Staff' }}{% endblock %}
+{% block content %}
+<h3 class="mb-3">{{ 'Add Staff' if mode=='add' else 'Edit Staff' }}</h3>
+
+<form id="staffForm" class="card bg-dark border-secondary p-3" onsubmit="submitForm(event)">
+  <div class="row g-3">
+    <div class="col-12"><h5>Personal Info</h5></div>
+    <div class="col-md-4">
+      <label class="form-label">Name</label>
+      <input class="form-control" name="Name" required value="{{ staff.Name if staff }}"/>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Email</label>
+      <input class="form-control" type="email" name="Email" required value="{{ staff.email if staff }}"/>
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Status</label>
+      <select class="form-select" name="Status">
+        {% set st = staff.status if staff else 'Active' %}
+        <option value="Active" {{ 'selected' if st=='Active' }}>Active</option>
+        <option value="Inactive" {{ 'selected' if st=='Inactive' }}>Inactive</option>
+      </select>
+    </div>
+
+    <div class="col-12"><hr class="border-secondary"><h5>Role & Classes</h5></div>
+    <div class="col-md-4">
+      <label class="form-label">Role</label>
+      <select class="form-select" name="Role" required>
+        {% for r in roles %}
+          <option value="{{ r.id }}" {{ 'selected' if staff and staff.role_id==r.id }}>{{ r.role_name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-8">
+      <div class="alert alert-secondary small mb-0">Assign classes from the Access page.</div>
+    </div>
+
+    <div class="col-12"><hr class="border-secondary"><h5>Login Details</h5></div>
+    <div class="col-md-4">
+      <label class="form-label">Password {{ '(leave blank to keep unchanged)' if mode=='edit' }}</label>
+      <input class="form-control" type="password" name="Password" {{ 'required' if mode=='add' }} />
+    </div>
+
+    <div class="col-12"><hr class="border-secondary"><h5>Profile Image & Signature</h5></div>
+    <div class="col-md-6">
+      <label class="form-label">Profile Photo</label>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+      {% set prefix = 'staffProfile' %}
+      {% set label = 'Click to upload staff photo' %}
+      {% set modal_title = 'Upload Staff Photo' %}
+      {% include 'html-components/image-uploader.html' %}
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Signature (optional)</label>
+      {% set prefix = 'staffSign' %}
+      {% set label = 'Click to upload signature' %}
+      {% set modal_title = 'Upload Signature' %}
+      {% include 'html-components/image-uploader.html' %}
+    </div>
+  </div>
+
+  <div class="mt-3 d-flex gap-2">
+    <button class="btn btn-primary" type="submit">{{ 'Add Staff' if mode=='add' else 'Save Changes' }}</button>
+    <a class="btn btn-secondary" href="/staff">Cancel</a>
+  </div>
+</form>
+
+<script>
+async function submitForm(e){
+  e.preventDefault();
+  const form = e.target;
+  const fd = new FormData(form);
+  // Collect multi-select classes
+  const classes = Array.from(form.querySelector('select[name="Classes"]').selectedOptions).map(o=>o.value);
+  const payload = Object.fromEntries(fd.entries());
+  payload.Classes = classes;
+  if (window.staffProfileUploader && window.staffProfileUploader.getBlob()){
+    const blob = window.staffProfileUploader.getBlob();
+    payload.ProfileImage = await toBase64(blob);
+  }
+  if (window.staffSignUploader && window.staffSignUploader.getBlob()){
+    const sblob = window.staffSignUploader.getBlob();
+    payload.Signature = await toBase64(sblob);
+  }
+  const url = '{{ "/staff/add" if mode=="add" else "/staff/edit/" ~ staff.id }}'
+  const res = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)});
+  const data = await res.json();
+  if(res.ok){
+    showAlert(200, data.message);
+    setTimeout(()=>{ window.location.href = '/staff'; }, 800);
+  } else {
+    showAlert(res.status, data.message || 'Validation failed');
+  }
+}
+
+function toBase64(blob){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onloadend = ()=>resolve(r.result);
+    r.onerror = reject;
+    r.readAsDataURL(blob);
+  });
+}
+</script>
+{% endblock %}
+

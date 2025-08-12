@@ -65,6 +65,7 @@ def fill_marks():
 
         marks_data = (
             db.session.query(
+                StudentsMarks_duplicate.id.label('id'),
                 StudentsMarks_duplicate.score,          # Student's mark (can be None)
                 StudentsDB.STUDENTS_NAME,               # Name of the student
                 StudentsDB.id.label('student_id'), 
@@ -97,8 +98,6 @@ def fill_marks():
                 (StudentsMarks_duplicate.exam_id == exam_id) &
                 (StudentsMarks_duplicate.subject_id == Subjects.id)
             )
-
-            
 
             # Filter by class, school, and session
             .filter(

@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, BigInteger, Text, DateTime, Numeric,
-    ForeignKey
+    ForeignKey, UniqueConstraint
 )
 from src import db
 
@@ -23,3 +23,7 @@ class StudentSessions(db.Model):
     class_data = db.relationship("ClassData", back_populates="student_sessions")
     students = db.relationship("StudentsDB", back_populates="student_sessions")
     session = db.relationship("Sessions", back_populates="student_sessions")
+
+    __table_args__ = (
+        UniqueConstraint('class_id', 'ROLL', 'session_id' ,'Section', name='uix_school_SR'),
+    )

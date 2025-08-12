@@ -16,6 +16,10 @@ class TeachersLogin(db.Model):
     User = Column(Text, nullable=False)
     status = Column(Text, nullable=False)
 
+    # New optional assets
+    # profile_image_url = Column(Text, nullable=True)
+    # signature_url = Column(Text, nullable=True)
+
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=False)
     school = db.relationship("Schools", back_populates="staff_data")
 

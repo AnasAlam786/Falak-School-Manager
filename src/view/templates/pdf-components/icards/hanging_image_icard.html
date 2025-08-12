@@ -3,33 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>57x88mm Page</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@400;700;800&display=swap" rel="stylesheet">
   <style>
+
+    @font-face {
+      font-family: 'League Spartan';
+      src: url('/static/LeagueSpartan-Regular.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
 
     html, body {
       margin: 0 !important;
       padding: 0 !important;
-      width: 57mm;
-      height: 88mm;
-      overflow: hidden;
     }
 
-    * {
-      box-sizing: border-box;
-    }
-
-
-    @page {
-      size: 57mm 88mm;
-      margin: 0;
-        }
 
     .page {
+      image-rendering: crisp-edges; /* or pixelated */
       width: 57mm;
       height: 88mm;
-      margin: 0 auto; /* Optional: center align */
+      margin: 0; /* Optional: center align */
       padding: 0;
       font-family: 'League Spartan';
       box-sizing: border-box;
@@ -40,26 +33,6 @@
       overflow: hidden;
       page-break-after: always;
     }
-
-    .page {
-  border: 1px solid red; /* REMOVE after testing */
-}
-
-
-    @media print {
-    @page {
-      size: 57mm 88mm;
-      margin: 0;
-    }
-    body {
-      margin: 0;
-      padding: 0;
-    }
-  }
-
-
-
-
     
   </style>
 </head>
@@ -74,7 +47,7 @@
       <div style="position: absolute; top: 15%; left: 50%; transform: translate(-50%, -50%); z-index: 7;">
         <svg width="300" height="180" viewBox="0 0 160 60">
           <path id="curve" d="M40,40 A45,28 0 0 1 120,40" fill="transparent"/>
-          <text font-family="League Spartan" font-size="8.5" font-weight="900" fill="#fff">
+          <text font-family="League Spartan" font-size="9.3" stroke="#fff" stroke-width="0.5" fill="#fff" font>
             <textPath href="#curve" startOffset="50%" text-anchor="middle" font-family= 'League Spartan' >
               {{ school.School_Name }}
             </textPath>
@@ -111,7 +84,7 @@
 
 
       <!-- Circular Session 2024-26 image on the right top corner -->
-      <div style="position: absolute; top: 3%; right: 9.5%; z-index: 7; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: #fff;">
+      <div style="position: absolute; top: 3%; left: 76.5%; z-index: 7; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: #fff;">
         <img src="https://lh3.googleusercontent.com/d/1tJnm5i4GgSyb4HIULAb2tvbejXfrz5HZ=s200"
             alt="profile"
             width="100%"
@@ -176,6 +149,7 @@
             style="
               width: 95px;
               height: 95px;
+              object-position: top;
               object-fit: cover;
               display: block;
               border-radius: 50%;
@@ -274,62 +248,69 @@
       <!-- END of Teachers and principle sign below the Student Information table -->
 
       <!-- School Contact information at the bottom -->
-      <div style="
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        width: 100%;
-        height: 40px;
-        background-color: white;
-        z-index: 6;
-        font-family: 'League Spartan', sans-serif;
-        font-weight: bold;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 10px;
-        text-align: center;
-        line-height: 1.2;
-      ">
-        <div>{{ school.Address }}</div>
-        <div style="font-size: 11px;">+91{{ school.Phone }}</div>
-      </div>
+      <svg style="font-family: 'League Spartan'; font-weight: bolder; position: absolute; left: 0; bottom: 0; z-index: 6;" width="100%" height="38px">
+        <rect width="100%" height="45px" fill="white"/>
+        <text  x="50%" y="24%" 
+          dominant-baseline="middle" 
+          text-anchor="middle" 
+          font-size="10px" fill="black" >
+          {{ school.Address }}
+        </text>
+
+        <text 
+          x="50%" y="55%" 
+          dominant-baseline="middle" 
+          text-anchor="middle" 
+          font-size="11px"
+          fill="black" >
+        +91{{ school.Phone}}
+        </text>
+      </svg>
       <!-- END of School Contact information at the bottom -->
     </div>
 
   {% endfor %}
   </div>
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+
 
 
 <script>
-  function downloadPDF() {
-    const element = document.getElementsByClassName('page')[0];
-    element.style.margin = '0';
-    element.style.padding = '0';
-    element.style.boxSizing = 'border-box';
+  async function downloadPDF() {
+    // Ensure the League Spartan font is loaded
+    await document.fonts.ready;
 
+    const zip = new JSZip();
+    const cards = document.querySelectorAll('.page');
 
-    const opt = {
-      margin: 0,
-      filename: 'idcards.pdf',
-      image: { type: 'jpeg', quality: 1 },
-      html2canvas: {
-        scale: 2.5,              // Sharper rendering
-        useCORS: true,
-        allowTaint: false,
-      },
-      jsPDF: {
-        unit: 'mm',
-        format: [57, 88],
-        orientation: 'portrait'
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      try {
+
+        const dataUrl = await htmlToImage.toJpeg(card, {
+            quality: 1,
+            width: 215.433,
+            height: 332.598,
+            pixelRatio: 3
+          })
+        const base64 = dataUrl.split(',')[1];
+        zip.file(`idcard-${i + 1}.jpg`, base64, { base64: true });
+      } catch (err) {
+          console.error(`Error processing card ${i + 1}:`, err);
       }
-    };
+    }
 
-    html2pdf().set(opt).from(element).save();
-  }
-
-  // Call downloadPDF() on button click or event
+    // Generate and trigger ZIP download
+    zip.generateAsync({ type: 'blob' })
+      .then(function (content) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(content);
+        a.download = 'idcards.zip';
+        a.click();
+      });
+  };
 </script>
+
 </body>
 </html>

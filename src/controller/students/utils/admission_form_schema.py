@@ -1,10 +1,44 @@
 from pydantic import BaseModel, Field, EmailStr, constr, conint, ConfigDict, field_validator, model_validator
-from typing import Optional, Literal, Any, get_origin
+from typing import Optional, Literal, Any, get_origin, get_args
+from enum import Enum as PyEnum
 
 from datetime import date
 
 from .validate_aadhaar import verify_aadhaar
 from .str_to_date import str_to_date
+
+from src.model.enums import StudentsDBEnums
+
+# Build Python Enums from SQLAlchemy Enum values for use with Pydantic
+def _sanitize_enum_member_name(raw: str) -> str:
+    name = ''.join(ch if ch.isalnum() else '_' for ch in str(raw)).upper()
+    if name and name[0].isdigit():
+        name = f'N_{name}'
+    return name or 'EMPTY'
+
+def _build_python_enum(enum_name: str, sa_enum) -> type[PyEnum]:
+    members: dict[str, str] = {}
+    seen: set[str] = set()
+    for idx, value in enumerate(sa_enum.enums):
+        base_name = _sanitize_enum_member_name(value)
+        name = base_name
+        # ensure unique member names in case sanitization collides
+        counter = 1
+        while name in seen:
+            counter += 1
+            name = f"{base_name}_{counter}"
+        seen.add(name)
+        members[name] = value
+    return PyEnum(enum_name, members)
+
+GenderEnum = _build_python_enum("GENDER", StudentsDBEnums.GENDER)
+CasteTypeEnum = _build_python_enum("Caste_Type", StudentsDBEnums.CASTE_TYPE)
+ReligionEnum = _build_python_enum("RELIGION", StudentsDBEnums.RELIGION)
+BloodGroupEnum = _build_python_enum("BLOOD_GROUP", StudentsDBEnums.BLOOD_GROUP)
+EducationTypeEnum = _build_python_enum("EDUCATION_TYPE", StudentsDBEnums.EDUCATION_TYPE)
+FatherOccupationEnum = _build_python_enum("FATHERS_OCCUPATION", StudentsDBEnums.FATHERS_OCCUPATION)
+MotherOccupationEnum = _build_python_enum("MOTHERS_OCCUPATION", StudentsDBEnums.MOTHERS_OCCUPATION)
+HomeDistanceEnum = _build_python_enum("Home_Distance", StudentsDBEnums.HOME_DISTANCE)
 
 class CleanBaseModel(BaseModel):
 
@@ -15,18 +49,44 @@ class CleanBaseModel(BaseModel):
 
         for key, value in values.items():
     
-            # Skip cleaning if field is Literal
+            # Skip cleaning if field is Literal or Enum-typed
             field = cls.model_fields.get(key)
 
             if field:
-                origin = get_origin(field.annotation)
+                annotation = field.annotation
+                origin = get_origin(annotation)
+
+                # Skip Literal[...] as-is
                 if origin is Literal:
                     cleaned_data[key] = value
                     continue
 
+                # Skip Enum types, even when wrapped in Optional/Union,
+                # but convert empty strings to None for Optional enum fields
+                def _is_enum_annotation(ann: Any) -> bool:
+                    if isinstance(ann, type) and issubclass(ann, PyEnum):
+                        return True
+                    inner_origin = get_origin(ann)
+                    if inner_origin is not None:
+                        for arg in get_args(ann):
+                            if isinstance(arg, type) and issubclass(arg, PyEnum):
+                                return True
+                    return False
+
+                if _is_enum_annotation(annotation):
+                    if isinstance(value, str):
+                        stripped_value = value.strip()
+                        # treat empty selection as None for Optional enum fields
+                        if stripped_value == "":
+                            cleaned_data[key] = None
+                        else:
+                            cleaned_data[key] = value
+                    else:
+                        cleaned_data[key] = value
+                    continue
+
             #updating text fields.
             if isinstance(value, str):
-
                 value = value.strip()
 
                 if value == "":
@@ -36,7 +96,7 @@ class CleanBaseModel(BaseModel):
                     value = value.title()
 
             cleaned_data[key] = value
-
+        
         return cleaned_data
     
     def verified_model_dump(self) -> dict[str, dict[str, Any]]:
@@ -50,9 +110,15 @@ class CleanBaseModel(BaseModel):
         for field, value in data.items():
             field_meta = config_extra.get(field, {})
             short_label =  field_meta.get("data-short_label")
+            # ensure Enum values are serialized to their raw value
+            if isinstance(value, PyEnum):
+                value_out = value.value
+            else:
+                value_out = value
+
             result.append({
                 "field": field,
-                "value": value,
+                "value": value_out,
                 "label": short_label
             })
 
@@ -61,24 +127,21 @@ class CleanBaseModel(BaseModel):
 
 # ------------------------- Personal Info -------------------------
 class PersonalInfoModel(CleanBaseModel):
+    
     STUDENTS_NAME: constr(pattern=r'^[^\W\d_]+(?: [^\W\d_]+)*$') = Field(...) # type: ignore
     
     DOB: date = Field(...)
-    GENDER: Literal["Male", "Female"] = Field(...)
-    AADHAAR: constr(min_length=12, max_length=12) = Field(...) # type: ignore
+    GENDER: GenderEnum = Field(...)
+    AADHAAR: Optional[constr(min_length=12, max_length=12)] = Field(default=None) # type: ignore
     Caste: Optional[str] = Field(None)
-    Caste_Type: Literal["OBC", "GENERAL", "ST", "SC"] = Field(...)
+    Caste_Type: CasteTypeEnum = Field(...)
 
-    RELIGION: Literal[
-        "Muslim", "Hindu", "Christian", "Sikh", "Buddhist", "Parsi", "Jain"
-    ] = Field(...)
+    RELIGION: ReligionEnum = Field(...)
 
     Height: Optional[conint(gt=0, lt=300)] = Field(None) # type: ignore
     Weight: Optional[conint(gt=0, lt=300)] = Field(None) # type: ignore
 
-    BLOOD_GROUP: Optional[
-        Literal["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"]
-        ] = Field(None)
+    BLOOD_GROUP: Optional[BloodGroupEnum] = Field(None)
     
     # --- Aadaar validators ---
     @field_validator('AADHAAR', mode='before')
@@ -119,14 +182,14 @@ class PersonalInfoModel(CleanBaseModel):
             "GENDER": {
                 "id": "GENDER", "type": "select", "value": "Select Gender",
                 "data-short_label": "Gender", "required": True,
-                "options": {"": "Select Gender", "Male": "Male", "Female": "Female"},
+                "options": {"": "Select Gender", **{e: e for e in StudentsDBEnums.GENDER.enums}},
                 "data-description": "Select the Gender of student",
                 "name": "GENDER"
             },
 
             "AADHAAR": {
                 "id": "AADHAAR", "type": "text", "label": "Aadhar Number", "placeholder": "",
-                "data-short_label": "Aadhar", "required": True, "maxlength": 14,
+                "data-short_label": "Aadhar", "maxlength": 14,
                 "data-description": "AADHAAR Number of the student",
                 "name": "AADHAAR"
             },
@@ -141,7 +204,7 @@ class PersonalInfoModel(CleanBaseModel):
                 "id": "Caste_Type", "type": "select",
                 "value": "Select Caste Type",
                 "data-short_label": "Caste Type", "required": True,
-                "options": {"": "Select Cast Type", "OBC": "OBC", "GENERAL": "GENERAL", "ST": "ST", "SC": "SC"},
+                "options": {"": "Select Caste Type", **{e: e for e in StudentsDBEnums.CASTE_TYPE.enums}},
                 "data-description": "Select the Caste Type of student",
                 "name": "Caste_Type"
             },
@@ -149,7 +212,7 @@ class PersonalInfoModel(CleanBaseModel):
             "RELIGION": {
                 "id": "RELIGION", "type": "select", "value": "Select Religion",
                 "data-short_label": "Religion", "required": True,
-                "options": {"": "Select Religion", "Muslim": "Muslim", "Hindu": "Hindu", "Christian": "Christian", "Sikh": "Sikh", "Buddhist": "Buddhist", "Parsi": "Parsi", "Jain": "Jain"},
+                "options": {"": "Select Religion", **{e: e for e in StudentsDBEnums.RELIGION.enums}},
                 "data-description": "Select the Religion of student",
                 "name": "RELIGION"
             },
@@ -171,7 +234,7 @@ class PersonalInfoModel(CleanBaseModel):
             "BLOOD_GROUP": {
                 "id": "BLOOD_GROUP", "type": "select", "value": "Select Blood Group",
                 "data-short_label": "Blood Group",
-                "options": {"": "Select Blood Group", "A+": "A+", "A-": "A-", "B+": "B+", "B-": "B-", "O+": "O+", "O-": "O-", "AB+": "AB+", "AB-": "AB-"},
+                "options": {"": "Select Blood Group", **{e: e for e in StudentsDBEnums.BLOOD_GROUP.enums}},
                 "data-description": "Select the Blood Group of student",
                 "name": "BLOOD_GROUP"
             }
@@ -259,23 +322,13 @@ class GuardianInfoModel(CleanBaseModel):
     FATHERS_AADHAR: Optional[constr(max_length=12, min_length=12)] = Field(None) # type: ignore
     MOTHERS_AADHAR: Optional[constr(max_length=12, min_length=12)] = Field(None) # type: ignore
     
-    FATHERS_EDUCATION: Literal[
-        "Primary", "Upper Primary", "Secondary or Equivalent",
-        "Higher Secondary or Equivalent", "More than Higher Secondary", "No Schooling Experience"
-    ] = Field(...)
+    FATHERS_EDUCATION: EducationTypeEnum = Field(...)
 
-    FATHERS_OCCUPATION: Literal[
-        "Labour", "Business", "Shop Owner", "Private Job", "Government Job", "Farmer", "Other"
-    ] = Field(...)
+    FATHERS_OCCUPATION: FatherOccupationEnum = Field(...)
 
-    MOTHERS_EDUCATION: Literal[
-        "Primary", "Upper Primary", "Secondary or Equivalent",
-        "Higher Secondary or Equivalent", "More than Higher Secondary", "No Schooling Experience"
-    ] = Field(None)
+    MOTHERS_EDUCATION: Optional[EducationTypeEnum] = Field(None)
 
-    MOTHERS_OCCUPATION: Literal[
-        "Homemaker", "Labour", "Business", "Shop Owner", "Private Job", "Government Job", "Farmer", "Other"
-    ] = Field(None)
+    MOTHERS_OCCUPATION: Optional[MotherOccupationEnum] = Field(None)
 
     # --- Field validators ---
     @field_validator('FATHERS_AADHAR', 'MOTHERS_AADHAR', mode='before')
@@ -315,61 +368,39 @@ class GuardianInfoModel(CleanBaseModel):
             "FATHERS_EDUCATION": {
                 "id": "FATHERS_EDUCATION", "type": "select", "value": "Select Father Qualification",
                 "data-short_label": "Father Edu.", "required": True,
-                "options": {
-                    "": "Select Father Qualification", "Primary": "Primary", "Upper Primary": "Upper Primary",
-                    "Secondary or Equivalent": "Secondary or Equivalent",
-                    "Higher Secondary or Equivalent": "Higher Secondary or Equivalent",
-                    "More than Higher Secondary": "More than Higher Secondary",
-                    "No Schooling Experience": "No Schooling Experience"
-                },
+                "options": {"": "Select Father's Qualification", **{e: e for e in StudentsDBEnums.EDUCATION_TYPE.enums}},
                 "data-description": "Education qualification of the father",
                 "name": "FATHERS_EDUCATION"
             },
             "FATHERS_OCCUPATION": {
                 "id": "FATHERS_OCCUPATION", "type": "select", "value": "Select Father Occupation",
                 "data-short_label": "F Occupation", "required": True,
-                "options": {
-                    "": "Select Father Occupation", "Labour": "Labour", "Business": "Business", "Shop Owner": "Shop Owner",
-                    "Private Job": "Private Job", "Government Job": "Government Job",
-                    "Farmer": "Farmer", "Other": "Other"
-                },
+                "options": {"": "Select Father's Occupation", **{e: e for e in StudentsDBEnums.FATHERS_OCCUPATION.enums}},
                 "data-description": "Occupation of the father",
                 "name": "FATHERS_OCCUPATION"
             },
             "MOTHERS_EDUCATION": {
                 "id": "MOTHERS_EDUCATION", "type": "select", "value": "Select Mother Qualification",
                 "data-short_label": "Mother Edu.",
-                "options": {
-                    "": "Select Mother Qualification", "Primary": "Primary", "Upper Primary": "Upper Primary",
-                    "Secondary or Equivalent": "Secondary or Equivalent",
-                    "Higher Secondary or Equivalent": "Higher Secondary or Equivalent",
-                    "More than Higher Secondary": "More than Higher Secondary",
-                    "No Schooling Experience": "No Schooling Experience"
-                },
+                "options": {"": "Select Mother's Qualification", **{e: e for e in StudentsDBEnums.EDUCATION_TYPE.enums}},
                 "data-description": "Education qualification of the mother",
                 "name": "MOTHERS_EDUCATION"
             },
             "MOTHERS_OCCUPATION": {
                 "id": "MOTHERS_OCCUPATION", "type": "select", "value": "Select Mother Occupation",
                 "data-short_label": "M Occupation",
-                "options": {
-                    "": "Select Mother Occupation", "Homemaker": "Homemaker", "Labour": "Labour", "Business": "Business",
-                    "Shop Owner": "Shop Owner", "Private Job": "Private Job",
-                    "Government Job": "Government Job", "Farmer": "Farmer", "Other": "Other"
-                },
+                "options": {"": "Select Mother's Occupation", **{e: e for e in StudentsDBEnums.MOTHERS_OCCUPATION.enums}},
                 "data-description": "Occupation of the mother",
                 "name": "MOTHERS_OCCUPATION"
             }
         }
 
 class ContactInfoModel(CleanBaseModel):
-    ADDRESS: constr(pattern=r'^[a-zA-Z0-9\s,.-/]+$') = Field(...) # type: ignore
+    ADDRESS: str = Field(...) # type: ignore
     PHONE: Optional[constr(min_length=10, max_length=10)] = Field(...) # type: ignore
     ALT_MOBILE: Optional[constr(min_length=10, max_length=10)] = Field(None) # type: ignore
     PIN: constr(min_length=6, max_length=6) = Field(...) # type: ignore
-    Home_Distance: Literal[
-        "Less than 1 km", "Between 1-3 Kms", "Between 3-5 Kms", "More than 5 Kms"
-    ] = Field(...)
+    Home_Distance: Optional[HomeDistanceEnum] = Field(default=None)
     EMAIL: Optional[EmailStr] = Field(None)
 
     class Config:
@@ -401,13 +432,8 @@ class ContactInfoModel(CleanBaseModel):
             "Home_Distance": {
                 "id": "Home_Distance", "name": "Home_Distance",
                 "value": "Select Home Distance", "data-short_label": "Home Distance",
-                "type": "select", "required": True,
-                "options": {
-                    "": "Select Home Distance", "Less than 1 km": "Less than 1 km",
-                    "Between 1-3 Kms": "Between 1-3 Kms",
-                    "Between 3-5 Kms": "Between 3-5 Kms",
-                    "More than 5 Kms": "More than 5 Kms"
-                },
+                "type": "select",
+                "options": {"": "Select Home Distance", **{e: e for e in StudentsDBEnums.HOME_DISTANCE.enums}},
                 "data-description": "Distance from school to student's home (km)"
             },
             "EMAIL": {

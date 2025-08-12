@@ -109,7 +109,7 @@
                 {% if row.evaluation_type == 'numeric' %}
                   min="0" max="{{ row.weightage }}"
                 {% endif %}
-                value="{{ row.score }}"
+                value="{{ '' if row.score is none else row.score }}"
                 >
             <button type="submit" class="btn btn-primary"  data-id='{{ row.id }}' data-evaluation_type='{{ row.evaluation_type }}' data-student_id='{{ row.student_id }}' 
                     data-subject_id='{{ row.subject_id }}' data-exam_id='{{ row.exam_id }}'

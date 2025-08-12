@@ -20,11 +20,11 @@ from src.controller.permissions.permission_required import permission_required
 
 update_student_info_bp = Blueprint( 'update_student_info_bp',   __name__)
 
-def fill_field_values(field_dicts, student_obj):
+def fill_field_values(field_dicts, student_data):
     for field in field_dicts:
         column_name = field.get("id")
-        if hasattr(student_obj, column_name):
-            value = getattr(student_obj, column_name)
+        if column_name in student_data:
+            value = student_data[column_name]
             if value:
                 field["value"] = value
     return field_dicts
@@ -32,7 +32,7 @@ def fill_field_values(field_dicts, student_obj):
 
 @update_student_info_bp.route('/update_student_info', methods=["GET"])
 @login_required
-@permission_required('admission')
+@permission_required('update_student')
 def update_student_info():
     student_id = request.args.get('id')
     user_id = session["user_id"]
@@ -52,7 +52,7 @@ def update_student_info():
 
     class_ids = [cls.id for cls in classes]
     student = (
-        db.session.query(StudentsDB)
+        db.session.query(StudentsDB, StudentSessions)
         .join(StudentSessions, StudentSessions.student_id == StudentsDB.id)
         .join(ClassData, StudentSessions.class_id == ClassData.id)
         .filter(
@@ -62,9 +62,29 @@ def update_student_info():
         ).first()
     )
 
+
     if not student:
         return jsonify({"message": "Student not found"}), 404
 
+    studentDB, sessionDB = student
+    student_data = {}
+
+    # Add StudentSessions data
+    student_data.update({
+        f"{col.name}": getattr(sessionDB, col.name)
+        for col in sessionDB.__table__.columns
+    })
+
+    student_data.update({
+        f"{col.name}": getattr(studentDB, col.name)
+        for col in studentDB.__table__.columns
+    })
+
+    student_data.update({
+        "id": studentDB.id,
+    })
+
+    
 
     AcademicInfo = pydantic_model_to_field_dicts(AcademicInfoModel)
     GuardianInfo = pydantic_model_to_field_dicts(GuardianInfoModel)
@@ -72,23 +92,20 @@ def update_student_info():
     ContactInfo = pydantic_model_to_field_dicts(ContactInfoModel)
     PersonalInfo = pydantic_model_to_field_dicts(PersonalInfoModel)
 
-    AcademicInfo = fill_field_values(AcademicInfo, student)
-    GuardianInfo = fill_field_values(GuardianInfo, student)
-    AdditionalInfo = fill_field_values(AdditionalInfo, student)
-    ContactInfo = fill_field_values(ContactInfo, student)
-    PersonalInfo = fill_field_values(PersonalInfo, student)
-
-
+    AcademicInfo = fill_field_values(AcademicInfo, student_data)
+    GuardianInfo = fill_field_values(GuardianInfo, student_data)
+    AdditionalInfo = fill_field_values(AdditionalInfo, student_data)
+    ContactInfo = fill_field_values(ContactInfo, student_data)
+    PersonalInfo = fill_field_values(PersonalInfo, student_data)
 
 
     classes_dict = {str(cls.id): cls.CLASS for cls in classes}
     for academic_inputfield in AcademicInfo:
         if academic_inputfield["id"] == "CLASS":
             academic_inputfield["options"] = {"": "Select Class", **classes_dict}
+            academic_inputfield["value"] = student_data["class_id"]
             break
 
+
     return render_template('edit_student.html', PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo,
-                           GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo, student=student)
-
-
-    
+                           GuardianInfo=GuardianInfo, ContactInfo=ContactInfo, AdditionalInfo=AdditionalInfo, student=student_data)

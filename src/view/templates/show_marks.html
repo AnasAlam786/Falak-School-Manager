@@ -30,8 +30,8 @@
 
   <!-- START: Results List -->
   <div id="results">
-    {% if Data %}
-      {% for data in Data %}
+    {% if student_marks %}
+      {% for student in student_marks %}
         <!-- START: Single Result Card -->
         <div class="card shadow-lg mb-4 result-card">
           <div class="card-body">
@@ -45,63 +45,91 @@
                     <th>Roll</th>
                     <th>Class</th>
                     <th>F's Name</th>
-                    <th>Rank</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr class="student-summary">
-                    <td>{{ data["STUDENTS_NAME"] }}</td>
-                    <td>{{ data["ROLL"] }}</td>
-                    <td>{{ data["CLASS"] }}</td>
-                    <td>{{ data["FATHERS_NAME"] }}</td>
-                    <td>{{ data["Total"]["Grand_Rank"] }}</td>
+                    <td>{{ student["STUDENTS_NAME"] }}</td>
+                    <td>{{ student["ROLL"] }}</td>
+                    <td>{{ student["CLASS"] }}</td>
+                    <td>{{ student["FATHERS_NAME"] }}</td>
                   </tr>
                 </tbody>
+                  <tr>
+                    <td colspan="5" class="text-end">
+                      <button class="btn btn-primary btn-lg fs-4 mt-2" onclick="getResult('{{ student['student_id'] }}')">
+                        <i class="bi bi-printer-fill"></i> Print Result
+                      </button>
+                    </td>
+                  </tr>
               </table>
-              <button class="btn btn-primary btn-lg fs-4 mt-2" onclick="getResult('{{ data["id"] }}')">
-                <i class="bi bi-printer-fill"></i> Print Result
-              </button>
             </div>
             <!-- END: Student Header Table -->
 
             <!-- START: Subjects Table -->
             <div class="table-responsive">
               <table class="table table-hover table-striped align-middle fs-5">
+
+                {% set marks = student.marks %}
+                
+                {% set exam_names = marks.keys() | list %}
+                {% set subjects = student.marks[exam_names[0]].subject_marks_dict.keys() | list %}
+                {% set special_colums = ["G. Total", "Grades", "Percentage", "Total"] %}
+
                 <thead class="text-center">
                   <tr style="border: 1px solid #ffffff; font-weight: bold;" >
                     <th class="fs-5">Sub.</th>
-                    <th class="fs-5 lh-1">FA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th>
-                    <th class="fs-5 lh-1">SA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
-                    <th class="fs-5 lh-1">Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(100)</span></th>
-                    <th class="fs-5 lh-1">FA2 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th>
-                    <th class="fs-5 lh-1">SA2 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(80)</span></th>
-                    <th class="fs-5 lh-1">Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(100)</span></th>
-                    <th class="fs-5 lh-1">G. Total <span class="text-secondary small d-block" style="font-size: 0.9rem;">(200)</span></th>
-                    <th class="fs-5 lh-1">Grades <span class="text-secondary small d-block" style="font-size: 0.9rem;">(A,B,C,D,E)</span></th>
+                    {# Loop through exams sorted by exam_display_order #}
+                    {% for exam_name, exam_data in student.marks.items() %}
+                      <!-- <th class="fs-5 lh-1">FA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th> -->
+                      <th class="fs-5 lh-1">
+                        {{ exam_name }} 
+                        <span class="text-secondary small d-block" style="font-size: 0.9rem;">
+                          ({{ exam_data.weightage }})
+                        </span>
+                      </th>
+                    {% endfor %}
                   </tr>
                 </thead>
-                <tbody>
-                  {% for subject in data["Subjects"] %}
-    
-                    {% if data[subject] %}
-    
-                      <tr class="text-center fs-5" 
-                          {% if subject in ['Total','Percentage']  %}
-                            style="border: 2px solid #ffffff; font-weight: bold;"
-                          {% endif %}>
-                        <th class="text-start " style="border-left: 1px solid #ffffff;">{{ subject }}</th>
-                        <td class="text-center ">{{ data[subject]["FA1"] }}</td>
-                        <td class="text-center ">{{ data[subject]["SA1"] }}</td>
-                        <td class="text-center text-danger">{{ data[subject]["FA1_SA1_Total"] if data[subject]["FA1_SA1_Total"] else '' }}</td>
-                        <td class="text-center ">{{ data[subject]["FA2"] }}</td>
-                        <td class="text-center ">{{ data[subject]['SA2'] }}</td>
-                        <td class="text-center text-danger">{{ data[subject]['FA2_SA2_Total'] if data[subject]['FA2_SA2_Total'] else '' }}</td>
-                        <td class="text-center text-danger" style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;">{{ data[subject]['Grand_Total'] if data[subject]['Grand_Total'] else '' }}</td>
-                        <td class="text-center text-danger">{{ data[subject]['Grade'] }}</td>
-                      </tr>
-                    {% endif %}
-                  {% endfor %}
+
+                  <tbody>
+                    {# Subject-wise marks #}
+                    {% for subject in subjects %}
+
+                    
+
+                        <tr class="text-center fs-5" >
+                            <th class="text-start" style="border-left: 1px solid #ffffff;">{{ subject }}</th>
+                            {% for exam_name in exam_names %}
+                                {% set exam_data = marks[exam_name] %}
+                                <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
+                                    {{ exam_data.subject_marks_dict.get(subject, '') }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                
+                    {# Grand Total row #}
+                    <tr class="text-center fs-5" style="border: 2px solid #ffffff; font-weight: bold;">
+                        <th class="text-start" style="border-left: 1px solid #ffffff;">G.Total</th>
+                        {% for exam_name in exam_names %}
+                            <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
+                              {{ marks[exam_name].exam_total }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                
+                    {# Percentage row #}
+                    <tr class="text-center fs-5" style="border: 2px solid #ffffff; font-weight: bold;">
+                        <th class="text-start" style="border-left: 1px solid #ffffff;">Percentage</th>
+                        {% for exam_name in exam_names %}
+                            <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
+                              {{ marks[exam_name].percentage }}
+                            </td>
+                        {% endfor %}
+                    </tr>
                 </tbody>
+                
               </table>
             </div>
             <!-- END: Subjects Table -->

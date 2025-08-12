@@ -9,6 +9,7 @@ from .students_list.student_modal_data_api import student_modal_data_api_bp
 
 from .students.update.update_student_info import update_student_info_bp
 from .students.update.final_student_update_api import final_student_update_api_bp
+from .students.update.update_conflic_varification import update_conflict_verification_api_bp
 
 from .fees.pay_fee_api import pay_fee_api_bp
 from .fees.get_fee_api import get_fee_api_bp
@@ -40,7 +41,8 @@ from .tc.tc_student_list_api import tc_student_list_api_bp
 from .tc.generate_tc_form_api import generate_tc_form_api_bp
 
 from .students.add_student.admission import admission_bp
-from .students.add_student.verify_admission_api import verify_admission_api_bp
+from .students.add_student.pydantic_verification_api import pydantic_verification_api_bp
+from .students.add_student.conflict_verification_api import conflict_verification_api_bp
 from .students.add_student.get_new_roll_api import get_new_roll_api_bp
 from .students.add_student.final_admission_api import final_admission_api_bp
 
@@ -54,6 +56,7 @@ from .temp.fill_colums_api import fill_colums_api_bp
 from .tools.question_paper import question_paper_bp
 from .tools.question_paper_api import question_paper_api_bp
 
+from .staff_module import staff_bp
 
 def register_blueprints(app):
 
@@ -67,12 +70,14 @@ def register_blueprints(app):
 
     app.register_blueprint(update_student_info_bp)
     app.register_blueprint(final_student_update_api_bp)
+    app.register_blueprint(update_conflict_verification_api_bp)
     
     app.register_blueprint(pay_fee_api_bp)
     app.register_blueprint(get_fee_api_bp)
 
     app.register_blueprint(admission_bp)
-    app.register_blueprint(verify_admission_api_bp)
+    app.register_blueprint(pydantic_verification_api_bp)
+    app.register_blueprint(conflict_verification_api_bp)
     app.register_blueprint(get_new_roll_api_bp)
     app.register_blueprint(final_admission_api_bp)
 
@@ -110,4 +115,5 @@ def register_blueprints(app):
 
 
     app.register_blueprint(RTE_students_bp)
+    app.register_blueprint(staff_bp)
     

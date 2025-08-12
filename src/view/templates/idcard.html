@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Student iCard Selector - Dark Mode</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://unpkg.com/html-to-image@1.11.12/dist/html-to-image.min.js"></script>
+
+  <script>
+    // Enable dark mode class strategy for tailwind
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {},
+      },
+      variants: {},
+      plugins: [],
+    }
+  </script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen p-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-3xl font-bold text-center flex-grow">Student iCard Selector</h1>
+    <button id="darkModeToggle" class="ml-6 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 rounded shadow hover:bg-gray-400 dark:hover:bg-gray-600 transition">
+      Toggle Dark Mode
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="flex flex-wrap justify-center gap-4 mb-6">
+    <select id="classSelect" class="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+      <option value="">All Classes</option>
+      <option value="10">Class 10</option>
+      <option value="11">Class 11</option>
+      <option value="12">Class 12</option>
+    </select>
+
+    <input type="text" id="searchBox" placeholder="Search by name, roll, or class" class="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
+
+    <label class="flex items-center space-x-2 cursor-pointer select-none">
+      <input type="checkbox" id="imageFilter" class="w-5 h-5" />
+      <span>Has Image Only</span>
+    </label>
+
+    <label class="flex items-center space-x-2 cursor-pointer select-none">
+      <input type="checkbox" id="selectAllCheckbox" class="w-5 h-5" />
+      <span>Select All Visible</span>
+    </label>
+  </div>
+
+  <!-- Selected count and Download buttons -->
+  <div class="flex justify-center items-center gap-6 mb-6">
+    <span id="selectedCount" class="font-semibold">Selected: 0</span>
+    <button id="downloadPdfBtn" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">Download PDF</button>
+    <button id="downloadJpegBtn" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">Download JPEG</button>
+  </div>
+
+  <!-- Cards container -->
+  <div id="mainGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+
+  <script>
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    darkModeToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+    });
+
+    // Sample student data - replace with your own data source
+    const students = [
+      { id: 1, name: "Anas Alam", roll: "101", class: "10", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=1" },
+      { id: 2, name: "John Doe", roll: "102", class: "10", hasImage: false, imageUrl: "" },
+      { id: 3, name: "Mary Jane", roll: "201", class: "11", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=3" },
+      { id: 4, name: "Alice Smith", roll: "301", class: "12", hasImage: false, imageUrl: "" },
+      { id: 5, name: "Bob Martin", roll: "302", class: "12", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=5" },
+    ];
+
+    const mainGrid = document.getElementById("mainGrid");
+    const classSelect = document.getElementById("classSelect");
+    const searchBox = document.getElementById("searchBox");
+    const imageFilter = document.getElementById("imageFilter");
+    const selectAllCheckbox = document.getElementById("selectAllCheckbox");
+    const selectedCountSpan = document.getElementById("selectedCount");
+    const downloadPdfBtn = document.getElementById("downloadPdfBtn");
+    const downloadJpegBtn = document.getElementById("downloadJpegBtn");
+
+    // Track selected cards by student ID
+    const selectedCards = new Set();
+
+    // Render cards filtered by current filter values
+    function renderCards() {
+      mainGrid.innerHTML = "";
+
+      const selectedClass = classSelect.value.trim();
+      const searchText = searchBox.value.trim().toLowerCase();
+      const filterHasImage = imageFilter.checked;
+
+      let visibleCardsCount = 0;
+
+      students.forEach(student => {
+        if (selectedClass && student.class !== selectedClass) return;
+        if (
+          !(
+            student.name.toLowerCase().includes(searchText) ||
+            student.roll.toLowerCase().includes(searchText) ||
+            student.class.toLowerCase().includes(searchText)
+          )
+        ) return;
+        if (filterHasImage && !student.hasImage) return;
+
+        visibleCardsCount++;
+
+        const card = document.createElement("div");
+        card.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-4 relative flex flex-col items-center transition-colors";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.className = "absolute top-3 right-3 w-5 h-5 cursor-pointer";
+        checkbox.checked = selectedCards.has(student.id);
+
+        checkbox.addEventListener("change", () => {
+          if (checkbox.checked) {
+            selectedCards.add(student.id);
+          } else {
+            selectedCards.delete(student.id);
+            selectAllCheckbox.checked = false;
+          }
+          updateSelectedCount();
+        });
+
+        card.appendChild(checkbox);
+
+        if (student.hasImage && student.imageUrl) {
+          const img = document.createElement("img");
+          img.src = student.imageUrl;
+          img.alt = student.name;
+          img.className = "w-24 h-24 rounded-full mb-4 object-cover border border-gray-300 dark:border-gray-600";
+          card.appendChild(img);
+        } else {
+          const placeholder = document.createElement("div");
+          placeholder.className = "w-24 h-24 rounded-full mb-4 bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold text-xl";
+          placeholder.textContent = student.name.charAt(0);
+          card.appendChild(placeholder);
+        }
+
+        const nameEl = document.createElement("h2");
+        nameEl.className = "text-lg font-semibold mb-1";
+        nameEl.textContent = student.name;
+        card.appendChild(nameEl);
+
+        const infoEl = document.createElement("p");
+        infoEl.className = "text-sm text-gray-500 dark:text-gray-400";
+        infoEl.textContent = `Roll: ${student.roll} | Class: ${student.class}`;
+        card.appendChild(infoEl);
+
+        card.id = `student-card-${student.id}`;
+
+        mainGrid.appendChild(card);
+      });
+
+      if (visibleCardsCount === 0) {
+        const noData = document.createElement("p");
+        noData.className = "col-span-full text-center text-gray-500 dark:text-gray-400";
+        noData.textContent = "No student iCards match the filters.";
+        mainGrid.appendChild(noData);
+      }
+    }
+
+    function updateSelectedCount() {
+      selectedCountSpan.textContent = `Selected: ${selectedCards.size}`;
+    }
+
+    selectAllCheckbox.addEventListener("change", () => {
+      const checkboxes = mainGrid.querySelectorAll('input[type="checkbox"]');
+      if (selectAllCheckbox.checked) {
+        checkboxes.forEach(cb => {
+          cb.checked = true;
+          const cardId = parseInt(cb.parentElement.id.replace("student-card-", ""));
+          selectedCards.add(cardId);
+        });
+      } else {
+        checkboxes.forEach(cb => {
+          cb.checked = false;
+          const cardId = parseInt(cb.parentElement.id.replace("student-card-", ""));
+          selectedCards.delete(cardId);
+        });
+      }
+      updateSelectedCount();
+    });
+
+    [classSelect, searchBox, imageFilter].forEach(el =>
+      el.addEventListener("input", () => {
+        selectAllCheckbox.checked = false;
+        renderCards();
+        updateSelectedCount();
+      })
+    );
+
+    downloadPdfBtn.addEventListener("click", () => {
+      if (selectedCards.size === 0) {
+        alert("Please select at least one iCard to download.");
+        return;
+      }
+
+      const container = document.createElement("div");
+      container.style.display = "flex";
+      container.style.flexWrap = "wrap";
+      container.style.gap = "20px";
+      container.style.padding = "20px";
+      container.style.backgroundColor = "white";
+
+      selectedCards.forEach(id => {
+        const origCard = document.getElementById(`student-card-${id}`);
+        if (!origCard) return;
+        const clone = origCard.cloneNode(true);
+        clone.style.width = "200px";
+        clone.style.boxShadow = "none";
+        clone.style.border = "1px solid #ccc";
+        clone.style.pageBreakInside = "avoid";
+        container.appendChild(clone);
+      });
+
+      document.body.appendChild(container);
+
+      html2pdf()
+        .set({
+          margin: 0.2,
+          filename: "student_iCards.pdf",
+          image: { type: "jpeg", quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
+        })
+        .from(container)
+        .save()
+        .finally(() => {
+          document.body.removeChild(container);
+        });
+    });
+
+    downloadJpegBtn.addEventListener("click", () => {
+      if (selectedCards.size === 0) {
+        alert("Please select at least one iCard to download.");
+        return;
+      }
+
+      const firstId = selectedCards.values().next().value;
+      const origCard = document.getElementById(`student-card-${firstId}`);
+
+      if (!origCard) return;
+
+      htmlToImage.toJpeg(origCard, { quality: 0.95, backgroundColor: "#fff" })
+        .then(dataUrl => {
+          const link = document.createElement("a");
+          link.download = `student_iCard_${firstId}.jpeg`;
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(err => {
+          alert("Failed to generate JPEG: " + err);
+        });
+    });
+
+    renderCards();
+    updateSelectedCount();
+  </script>
+</body>
+</html>

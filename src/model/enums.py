@@ -11,12 +11,6 @@ class StudentsDBEnums:
         name='RELIGION'
     )
 
-    HOME_DISTANCE = Enum(
-        'Less than 1 km', 'Between 1-3 Kms', 'Between 3-5 Kms',
-        'More than 5 Kms',
-        name='Home_Distance'
-    )
-
     BLOOD_GROUP = Enum(
         'A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-',
         name='BLOOD_GROUP'
@@ -39,4 +33,10 @@ class StudentsDBEnums:
         'Homemaker', 'Labour',  'Business',  'Shop Owner', 
         'Private Job',  'Government',
         name='MOTHERS_OCCUPATION'
+    )
+
+    HOME_DISTANCE = Enum(
+        'Less than 1 km', 'Between 1-3 Kms', 'Between 3-5 Kms',
+        'More than 5 Kms',
+        name='Home_Distance'
     )

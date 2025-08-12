@@ -1,6 +1,6 @@
 from sqlalchemy import (
     Column, Integer, BigInteger, Text, Date, Numeric, JSON,
-    ForeignKey, TypeDecorator)
+    ForeignKey, TypeDecorator, UniqueConstraint)
 
 from src import db
 from .enums import StudentsDBEnums
@@ -105,3 +105,9 @@ class StudentsDB(db.Model):
     marks = db.relationship("StudentsMarks_duplicate", back_populates="students")
     # students_marks = db.relationship("StudentsMarks", back_populates="students")
     fee_data = db.relationship("FeeData", back_populates="students")
+
+
+    __table_args__ = (
+        UniqueConstraint('school_id', 'SR', name='uix_school_SR'),
+        UniqueConstraint('school_id', 'ADMISSION_NO', name='uix_school_ADMISSION_NO'),
+    )

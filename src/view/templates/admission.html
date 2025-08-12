@@ -5,29 +5,17 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <style>
-
-
-.card {
-  background-color: #1e1e1e;
- border-radius:5px;
-}
-
-.form-control:focus,
-.form-select:focus {
-      border-color: #2892e9;
-      box-shadow: 0 0 0 .25rem rgba(19, 82, 255, 0.5);
-      color: #fff;
-    }
-
-  .table th,
-  .table td {
-    background-color: #34354a;
-  }
-
-  .table th {
-    background-color: #2a2a3d;
-  }
-
+  /* Scope to this page only */
+  /* Match Bootstrap bg-dark (#212529) */
+  #DataForm select { color-scheme: dark; background-color: #212529; color: #e9ecef; }
+  #DataForm select option { background-color: #212529; color: #e9ecef; }
+  #DataForm select optgroup { background-color: #212529; color: #e9ecef; }
+  #verificationModal select { color-scheme: dark; background-color: #212529; color: #e9ecef; }
+  #verificationModal select option { background-color: #212529; color: #e9ecef; }
+  /* Improve scrollbar visibility on dark surfaces (WebKit) */
+  #verificationModal ::-webkit-scrollbar { width: 10px; height: 10px; }
+  #verificationModal ::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.15); border-radius: 8px; }
+  #verificationModal ::-webkit-scrollbar-track { background: transparent; }
 </style>
 
     <!-- Hidden Success Alert -->
@@ -46,16 +34,22 @@
       <span class="font-medium" id="errorMessage"></span>
     </div>
 
-    <h1 class="text-2xl font-bold mb-6 text-center">Student Registration Form</h1>
+    <div class="w-full">
+      <h1 class="mb-6 text-center text-2xl font-semibold tracking-tight text-white sm:text-3xl">Student Registration</h1>
+    </div>
 
     <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3 p-3 mb-4">
 
       <form id = "DataForm">
+        
           
       <!-- Personal Information -->
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mb-8">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white sm:text-xl">Personal Information</h2>
+          <div class="ml-4 h-px flex-1 bg-white/10"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 
           {% set section = 'PersonalInfo' %}
           {% for InputDetails in PersonalInfo %}
@@ -67,9 +61,12 @@
       
 
       <!-- Academic Details -->
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Academic Details</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white sm:text-xl">Academic Details</h2>
+          <div class="h-px flex-1 ml-4 bg-white/10"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {% set section = 'AcademicInfo' %}
           {% for InputDetails in AcademicInfo %}
             {% include 'html-components/input.html' with context %}
@@ -79,9 +76,12 @@
       </div>
       
       <!-- Guardian Information -->
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Guardian Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white sm:text-xl">Guardian Information</h2>
+          <div class="h-px flex-1 ml-4 bg-white/10"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {% set section = 'GuardianInfo' %}
           {% for InputDetails in GuardianInfo %}
             {% include 'html-components/input.html' with context %}
@@ -90,9 +90,12 @@
       </div>
 
       <!-- Contact Information -->
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Contact Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white sm:text-xl">Contact Information</h2>
+          <div class="h-px flex-1 ml-4 bg-white/10"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {% set section = 'ContactInfo' %}
           {% for InputDetails in ContactInfo %}
             {% include 'html-components/input.html' with context %}
@@ -101,9 +104,12 @@
       </div>
       
       <!-- Additional/Logistical Information -->
-      <div class="mb-6">
-        <h2 class="text-xl font-semibold mb-4">Additional/Logistical Information</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="mb-10">
+        <div class="mb-4 flex items-center justify-between">
+          <h2 class="text-lg font-semibold text-white sm:text-xl">Additional / Logistical</h2>
+          <div class="ml-4 h-px flex-1 bg-white/10"></div>
+        </div>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <!-- School to Home Distance -->
           {% set section = 'AdditionalInfo' %}
           {% for InputDetails in AdditionalInfo %}
@@ -118,8 +124,8 @@
         {% include 'html-components/image-uploader.html' with context %}
       </div>
       
-      <div class="text-center">
-        <button id="FormSubmit" class="flex items-center justify-center bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition">
+      <div class="mt-4 flex justify-center">
+        <button id="FormSubmit" class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-2 text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#0b0b13] transition">
           <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
           <span id="btn-text">Submit</span>
         </button>
@@ -130,15 +136,15 @@
 
   <div id="verificationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center p-3 overflow-y-auto">
     <!-- Modal Container -->
-  <div class="w-full max-w-2xl bg-[#1e1e2f] rounded-2xl shadow-2xl overflow-hidden">
+  <div class="w-full max-w-2xl overflow-hidden rounded-2xl bg-[#1e1e2f] shadow-2xl">
       <!-- Modal Header -->
-      <div class="w-full bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] p-4 flex justify-between items-center">
+      <div class="flex w-full items-center justify-between bg-gradient-to-r from-[#4e54c8] to-[#8f94fb] p-4">
           <div class="flex-1 text-center">
-              <h2 class="text-white text-xl font-semibold">
+              <h2 class="text-xl font-semibold text-white">
                   <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
               </h2>
           </div>
-          <button class="cancelModle" class="text-white hover:text-gray-200 text-2xl">&times;</button>
+          <button class="cancelModle text-2xl text-white hover:text-gray-200">&times;</button>
       </div>
 
       <!-- Modal Body -->
@@ -152,8 +158,8 @@
           <h3 id = "StudentNameInModal" class=" mb-2 text-2xl text-center font-bold text-white"></h3>
 
 
-          <div class="bg-[#2a2a3d] rounded-xl p-2 shadow-lg">
-              <table class="table table-hover align-middle">
+          <div class="rounded-lg border border-neutral-700 bg-neutral-900 p-2 shadow-lg">
+              <table class="w-full border-collapse text-left">
                   <tbody id = "ModalDataTable" class="text-white">
                       <!-- Table Rows (Same content structure as original) -->
 
@@ -181,7 +187,7 @@
                 id="password"
                 placeholder="Enter your password"
                 autocomplete="new-password"
-                class="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full rounded-md border border-neutral-700 bg-neutral-900 pl-10 pr-10 py-2.5 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
               <!-- Show Password Button -->
               <button
@@ -217,11 +223,11 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="bg-[#2a2a3d] p-4 flex justify-end space-x-2">
-        <button type="button" class="cancelModle px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all">
+      <div class="flex justify-end space-x-2 border-t border-neutral-800 bg-neutral-900 p-4">
+        <button type="button" class="cancelModle rounded-md bg-blue-600 px-6 py-2 text-white transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
           Close
         </button>
-        <button id="finalSubmit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-all">
+        <button id="finalSubmit" class="rounded-md bg-green-600 px-6 py-2 text-white transition-all hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
           Final Submit
         </button>
       </div>      
@@ -229,12 +235,12 @@
 </div>
 
 <!-- Choice Modal -->
-<div id="admissionDoneModel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4 backdrop-blur-sm">
-  <div class="relative w-full max-w-sm rounded-2xl bg-white shadow-xl transition-transform duration-300 ease-out scale-100">
+<div id="admissionDoneModel" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+  <div class="relative w-full max-w-sm scale-100 rounded-xl border border-neutral-700 bg-neutral-900 shadow-xl transition-transform duration-300 ease-out">
     
     <!-- Close Button -->
-    <button id="closeAdmissionDoneModel" type="button" class="absolute -top-4 -right-4 rounded-full bg-white p-2 shadow-md hover:scale-105 hover:bg-gray-100">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="closeAdmissionDoneModel" type="button" class="absolute -top-4 -right-4 rounded-full bg-white/10 p-2 text-white shadow-md hover:scale-105 hover:bg-white/20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
@@ -243,19 +249,19 @@
     <div class="p-6 pt-8 text-center">
       <!-- Header -->
       <div class="mb-5">
-        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-          <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <div class="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
+          <svg class="h-6 w-6 text-green-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h3 class="text-lg font-semibold text-gray-800">Admission Completed!</h3>
-        <p class="mt-1 text-sm text-gray-500">Send a confirmation on WhatsApp or print the admission form below.</p>
+        <h3 class="text-lg font-semibold text-white">Admission Completed!</h3>
+        <p class="mt-1 text-sm text-gray-300">Send a confirmation on WhatsApp or print the admission form below.</p>
       </div>
 
       <!-- Buttons -->
       <div class="space-y-3">
         <button id="sendMessageBTN" type="button"
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3 text-white font-medium transition-all hover:bg-[#1ebe5d]">
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-5 py-3 font-medium text-white transition-all hover:bg-[#1ebe5d] focus:outline-none focus:ring-2 focus:ring-emerald-400">
           <svg class="h-5 w-5" viewBox="0 0 32 32" fill="currentColor">
             <path d="M16 0C7.168 0 0 6.912 0 15.456c0 2.736.864 5.376 2.336 7.648L0 32l9.12-2.88c2.176.672 4.48.992 6.88.992 8.832 0 16-6.912 16-15.456S24.832 0 16 0zm0 28.448c-2.112 0-4.16-.352-6.064-1.024l-.432-.128-5.424 1.728 1.76-5.088-.288-.448c-1.36-2.112-2.064-4.512-2.064-7.008 0-6.752 5.6-12.256 12.496-12.256 6.912 0 12.496 5.504 12.496 12.256 0 6.72-5.584 12.256-12.48 12.256zm6.784-9.152c-.4-.208-2.368-1.168-2.736-1.296-.368-.128-.64-.192-.912.192s-1.04 1.296-1.28 1.552c-.24.256-.464.288-.864.096s-1.68-.624-3.2-1.984c-1.184-1.056-1.984-2.368-2.208-2.768s-.024-.608.176-.8c.176-.176.4-.464.608-.704.208-.256.288-.432.432-.72s.08-.544-.032-.768c-.112-.224-.912-2.176-1.248-2.976-.336-.8-.688-.688-.912-.704s-.512-.016-.784-.016-.72.096-1.104.544c-.384.448-1.44 1.408-1.44 3.424s1.472 3.984 1.68 4.256c.208.272 2.88 4.384 6.944 6.144.97.408 1.728.648 2.32.832.976.304 1.856.264 2.56.16.784-.112 2.368-.96 2.704-1.888.336-.928.336-1.728.24-1.888-.096-.16-.352-.256-.752-.448z"/>
           </svg>
@@ -263,7 +269,7 @@
         </button>
 
         <button id="printFormBTN" type="button"
-          class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-white font-medium transition hover:bg-blue-700">
+          class="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
           <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
             <path d="M6 2h12a2 2 0 012 2v4H4V4a2 2 0 012-2zm12 12h2a2 2 0 002-2V9a2 2 0 00-2-2H4a2 2 0 00-2 2v3a2 2 0 002 2h2v4a2 2 0 002 2h8a2 2 0 002-2v-4z" />
           </svg>
@@ -280,6 +286,18 @@
 <script src="{{ url_for('static', filename='printAdmissionForm.js') }}"></script>
 <script>
 
+  window.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('DataForm');
+    form.querySelectorAll('input, select, textarea').forEach(el => {
+      if (!el.value) {
+        if (el.tagName.toLowerCase() === 'select') {
+          el.selectedIndex = 0;
+        } else {
+          el.value = '';
+        }
+      }
+    });
+  });
   const classSelect = document.getElementById('CLASS');
   const rollInput   = document.getElementById('ROLL');
 
@@ -318,7 +336,7 @@
   const form = document.getElementById('DataForm');
   form.addEventListener('submit', async function(event) {
 
-    // Handle DataForm Button
+    // Handle updateDataForm Button
     var imageUpload = document.getElementById('imageInput');
     const submitBtn = document.getElementById('FormSubmit');
     const spinner   = document.getElementById('btn-spinner');
@@ -334,12 +352,20 @@
     try {
       const formData = await getFormData('DataForm');
 
-      const response = await verifyFormData(formData);
-      const data = await response.json();
-      
+      // verify form data from pydantic class
+      const pydanticResponse = await pydanticVerification(formData);
+      const pydanticData = await pydanticResponse.json();
+      verifiedData = pydanticData.verifiedData
+      if (!pydanticResponse.ok) {
+        showAlert(pydanticResponse.status, pydanticData.message || "Something went wrong");
+        return;
+      }
 
-      if (!response.ok) {
-        showAlert(response.status, data.message || "Something went wrong");
+      // check for unique datafield conflicts
+      const conflictResponse = await conflictVerification(verifiedData);
+      const conflict = await conflictResponse.json();
+      if (!conflictResponse.ok) {
+        showAlert(conflictResponse.status, conflict.message || "Something went wrong");
         return;
       }
 
@@ -348,11 +374,9 @@
         imageURL = URL.createObjectURL(croppedBlob);
       }
 
-      verifiedData = data.verifiedData
-      const className = data.className
-
-      openVerificationModal(verifiedData, className, imageURL);
-
+      openVerificationModal(verifiedData, imageURL);
+      
+      
     } catch (err) {
       showAlert(400, "Unexpected error occured!")
       console.error(err);
@@ -364,7 +388,7 @@
       btnText.textContent = 'Submit';
     }
   });
-  // Handle DataForm Button END
+  // Handle updateDataForm Button END
 
   function getFormData(id) {
     const form = document.getElementById(id);
@@ -374,20 +398,35 @@
 
 
 
-  async function verifyFormData(formData){
-    
+  async function pydanticVerification(formData){
     let formDataObject = Object.fromEntries(formData.entries());
-    console.log(formDataObject)
-
-
+    
     try {
-      const response = await fetch("/verify_admission_api", {
+      const pydanticResponse = await fetch("/api/pydantic_verification", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(formDataObject)
       });
 
-      return response
+      return pydanticResponse;
+
+    } catch (err) {
+      showAlert(404, "An error occurred while verifying the form data.");
+      throw new Error("Fetch error", err);
+    }
+  }
+
+  async function conflictVerification(pydenticVerifiedData){
+    try {
+
+      const conflictResponse = await fetch("/api/conflict_verification", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(pydenticVerifiedData)
+      });
+
+      return conflictResponse;
+
 
     } catch (err) {
       showAlert(404, "An error occurred while verifying the form data.");
@@ -396,7 +435,7 @@
   }
 
 
-  async function openVerificationModal(verifiedData, className, imageURL) {
+  async function openVerificationModal(verifiedData, imageURL) {
     // --- Student name ---
     const studentName = verifiedData.find(item => item.field === "STUDENTS_NAME")?.value;
     document.getElementById('StudentNameInModal').innerText = studentName
@@ -427,21 +466,21 @@
           });
         }
 
-        if (fieldData.field === "CLASS") { fieldValue = className; }
+        // if (fieldData.field === "CLASS") { fieldValue = className; }
         if (fieldData.field === "STUDENTS_NAME") { continue; }
 
         html += `
-          <tr class="bg-[#34354a]">
-            <th class="bg-[#2a2a3d] p-3 text-left">${fieldData.label}</th>
-            <td class="p-3">${fieldValue}</td>
+          <tr class="border-b border-white/10">
+            <th class="whitespace-nowrap align-top bg-white/5 p-3 text-left text-sm text-gray-300">${fieldData.label}</th>
+            <td class="p-3 text-sm text-gray-100">${fieldValue}</td>
           </tr>`;
       }
-      else{console.log(fieldData.field, "is empty")}
     }
     document.getElementById('ModalDataTable').innerHTML = html;
 
     // ---Show the modal ---
     document.getElementById('verificationModal').classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
 
   }
 
@@ -492,6 +531,9 @@ document.getElementById('finalSubmit').addEventListener('click', async function 
       showAlert(response.status, data.message);
       document.getElementById('verificationModal').classList.add('hidden');
       document.getElementById('admissionDoneModel').classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+
+      document.getElementById('DataForm').reset();
 
       document.getElementById('sendMessageBTN').onclick = function () {
         sendMessage(data.student_id);
@@ -536,6 +578,7 @@ document.getElementById('finalSubmit').addEventListener('click', async function 
   // close admission done modal
   document.getElementById('closeAdmissionDoneModel').addEventListener('click', function() {
     document.getElementById('admissionDoneModel').classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
   });
 
 
@@ -642,6 +685,7 @@ document.getElementById('finalSubmit').addEventListener('click', async function 
   document.querySelectorAll('.cancelModle').forEach(function(element) {
     element.addEventListener('click', function() {
       document.getElementById('verificationModal').classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
     });
   });
 

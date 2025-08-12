@@ -1,45 +1,47 @@
+{% set _pid = prefix if prefix is defined else '' %}
+{% set _suffix = ('-' + _pid) if _pid else '' %}
 <div class="flex justify-center">
-  <div id="uploadContainer" class="w-full max-w-md bg-dark rounded-xl shadow-md border-2 
-                                border-dashed border-gray-300 p-6 flex flex-col items-center 
-                                justify-center cursor-pointer transition hover:border-blue-500">
-    <div id="uploadContent" class="flex flex-col items-center justify-center">
+  <div id="uploadContainer{{ _suffix }}" class="w-full max-w-md rounded-3 border-2 border-dashed border-gray-500/40 bg-dark p-6 shadow-sm transition hover:border-blue-400/70">
+    <div id="uploadContent" class="flex flex-col items-center justify-center cursor-pointer">
 
       <!-- Upload Icon & Label (Visible by default) -->
-      <div id="uploadIconSection" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-blue-500" fill="none"
+      <div id="uploadIconSection{{ _suffix }}" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none"
           viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 12V3m0 9l-3-3m3 3l3-3" />
         </svg>
-        <p class="text-gray-400 mt-2">Click to upload the image of student</p>
+        <p class="text-gray-400 mt-2">{{ label or 'Click to upload the image' }}</p>
       </div>
       <!-- Upload Icon & Label END -->
 
       <!-- Cropped Image Preview Section (Initially hidden) -->
-      <div id="uploadedImageSection" class="relative w-full {{ '' if image_url else 'hidden' }}">
-        <img id="uploadedImage" src="{{ image_url or '' }}" alt="Cropped Image" class="w-full rounded-md" />
-        <button id="destroyImage" type="button"
-          class="absolute top-2 right-2 bg-gray-200 hover:bg-gray-300 text-gray-600 rounded-full p-1 focus:outline-none">
-          &times;
+      <div id="uploadedImageSection{{ _suffix }}" class="relative w-full {{ '' if image_url else 'hidden' }}">
+        <img id="uploadedImage{{ _suffix }}" src="{{ image_url or '' }}" alt="Cropped Image" class="w-full rounded-2 border border-white/25" />
+        <button id="destroyImage{{ _suffix }}" type="button"
+          class="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/85 focus:outline-none focus:ring-2 focus:ring-white/70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
-        <p class="mt-2 text-gray-600 text-center">Image uploaded successfully. Click to change.</p>
+        <p class="mt-2 text-center text-gray-300">Image uploaded successfully. Click to change.</p>
       </div>
       <!-- Cropped Image Preview Section END -->
 
     </div>
   </div>
   <!-- Hidden File Input -->
-  <input type="file" id="imageInput" accept="image/*" class="hidden">
+  <input type="file" id="imageInput{{ _suffix }}" accept="image/*" class="hidden">
 
 </div>
 
 
 <!-- Choice Modal -->
-<div id="choiceModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm relative">
+<div id="choiceModal{{ _suffix }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+  <div class="relative w-full max-w-sm rounded-xl bg-neutral-900 shadow-2xl border border-neutral-700">
     <!-- Close Button -->
-    <button id="closeChoiceModal" type="button" class="absolute -top-3 -right-3 p-2 bg-white hover:bg-gray-100 rounded-full shadow-lg transition-transform hover:scale-105">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <button id="closeChoiceModal{{ _suffix }}" type="button" class="absolute -top-3 -right-3 p-2 rounded-full bg-white/10 text-white shadow-lg transition-transform hover:scale-105 hover:bg-white/20">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
@@ -47,20 +49,20 @@
     <div class="p-6 pt-8 text-center">
       <!-- Modal Header -->
       <div class="mb-6">
-        <h3 class="text-xl font-semibold text-gray-900">Upload Student Photo</h3>
-        <p class="text-gray-500 mt-1">Choose your preferred method</p>
+        <h3 class="text-xl font-semibold text-white">{{ modal_title or 'Upload Photo' }}</h3>
+        <p class="mt-1 text-gray-400">Choose your preferred method</p>
       </div>
 
       <!-- Action Buttons -->
       <div class="space-y-4">
-        <button id="useCamera" type="button" class="w-full px-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+        <button id="useCamera{{ _suffix }}" type="button" class="w-full rounded-xl bg-blue-600 px-6 py-3.5 text-white transition-all hover:bg-blue-700 font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
           </svg>
           Take Photo
         </button>
         
-        <button id="useUpload" type="button" class="w-full px-6 py-3.5 border-2 border-gray-200 hover:border-blue-500 text-gray-700 hover:text-blue-600 rounded-xl transition-all font-medium flex items-center justify-center gap-2">
+        <button id="useUpload{{ _suffix }}" type="button" class="w-full rounded-xl border border-white/10 px-6 py-3.5 text-gray-200 hover:text-white hover:border-blue-500 transition-all font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
@@ -73,53 +75,53 @@
 
 
 <!-- Cropper Modal -->
-<div id="cropModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+<div id="cropModal{{ _suffix }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60">
+  <div class="w-full max-w-2xl rounded-xl bg-neutral-900 shadow-xl border border-neutral-700">
     <!-- Cropper Container -->
     <div class="p-4">
-      <div class="aspect-w-1 aspect-h-1 bg-gray-100">
-        <img id="cropperImage" class="max-w-full max-h-[70vh]" alt="Image to crop">
+      <div class="rounded-lg overflow-hidden bg-neutral-800">
+        <img id="cropperImage{{ _suffix }}" class="max-w-full max-h-[70vh]" alt="Image to crop">
       </div>
     </div>
     <!-- Controls for shifting & zooming -->
-    <div class="flex justify-center gap-3 p-4 border-t border-gray-200">
+    <div class="flex justify-center gap-3 p-4 border-t border-neutral-700">
       <!-- Up -->
-      <button id="moveUp" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+      <button id="moveUp{{ _suffix }}" type="button" class="rounded bg-white/10 p-2 text-white hover:bg-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
         </svg>
       </button>
       <!-- Left -->
-      <button id="moveLeft" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+      <button id="moveLeft{{ _suffix }}" type="button" class="rounded bg-white/10 p-2 text-white hover:bg-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
         </svg>
       </button>
       <!-- Zoom Out -->
-      <button id="zoomOut" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+      <button id="zoomOut{{ _suffix }}" type="button" class="rounded bg-white/10 p-2 text-white hover:bg-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
         </svg>
       </button>
       <!-- Zoom In -->
-      <button id="zoomIn" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+      <button id="zoomIn{{ _suffix }}" type="button" class="rounded bg-white/10 p-2 text-white hover:bg-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
       </button>
       <!-- Right -->
-      <button id="moveRight" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
+      <button id="moveRight{{ _suffix }}" type="button" class="rounded bg-white/10 p-2 text-white hover:bg-white/20">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
         </svg>
       </button>
       <!-- Down -->
-      <button id="moveDown" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
+      <button id="moveDown{{ _suffix }}" type="button" class="p-2 bg-gray-100 hover:bg-gray-200 rounded">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24"
           stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
@@ -127,11 +129,11 @@
       </button>
     </div>
     <!-- Modal Footer -->
-    <div class="flex justify-end gap-4 p-4 border-t border-gray-200">
-      <button id="cancelCrop" type="button" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+    <div class="flex justify-end gap-3 p-4 border-t border-neutral-700">
+      <button id="cancelCrop{{ _suffix }}" type="button" class="rounded-lg border border-neutral-700 px-4 py-2 text-gray-200 hover:text-white hover:border-neutral-500">
         Cancel
       </button>
-      <button id="uploadCrop" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+      <button id="uploadCrop{{ _suffix }}" type="button" class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
         Crop & Save
       </button>
     </div>
@@ -140,21 +142,26 @@
 
 <!-- Main Script -->
 <script>
+  (function(){
+    const PID = '{{ _pid }}';
+    const SUFFIX = PID ? '-' + PID : '';
+    const get = (id) => document.getElementById(id + SUFFIX);
     let cropper = null;
     let mediaStream = null;
-    let imageInput = document.getElementById('imageInput');
-    const cropperImage = document.getElementById('cropperImage');
-    const cropModal = document.getElementById('cropModal');
-    const choiceModal = document.getElementById('choiceModal');
+    let imageInput = get('imageInput');
+    const cropperImage = get('cropperImage');
+    const cropModal = get('cropModal');
+    const choiceModal = get('choiceModal');
     const uploadContent = document.getElementById('uploadContent');
 
   // open choice modal when clicking on the upload content
   uploadContent.addEventListener('click', () => {
         choiceModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
     });
 
   // Handle upload choice
-  document.getElementById('useUpload').addEventListener('click', () => {
+  get('useUpload').addEventListener('click', () => {
       //remove capture attribute if it exists
       imageInput.removeAttribute('capture');
       imageInput.click();
@@ -162,19 +169,21 @@
   });
 
   // Close modal handlers
-  document.getElementById('closeChoiceModal').addEventListener('click', () => {
+  get('closeChoiceModal').addEventListener('click', () => {
     choiceModal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
   });
 
   // Close modal when clicking outside
   choiceModal.addEventListener('click', (e) => {
     if (e.target === choiceModal) {
       choiceModal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
     }
   });
 
   // Handle camera choice
-  document.getElementById('useCamera').addEventListener('click', async () => {
+  get('useCamera').addEventListener('click', async () => {
       choiceModal.classList.add('hidden');
       //add capture attribute to the image input
 
@@ -198,6 +207,7 @@
   function showCropperModal(imageSrc) {
       cropperImage.src = imageSrc;
       cropModal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
       if (cropper) {
           cropper.destroy();
       }
@@ -217,8 +227,9 @@
 
 
   // Cancel cropping and clear the file input
-  document.getElementById('cancelCrop').addEventListener('click', () => {
+  get('cancelCrop').addEventListener('click', () => {
     cropModal.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
     if (cropper) {
       cropper.destroy();
       cropper = null;
@@ -231,7 +242,7 @@
   // Crop the image, update preview, and clear the file input
   let imageStatus = "unchanged";
   let croppedBlob = null;
-  document.getElementById('uploadCrop').addEventListener('click', () => {
+  get('uploadCrop').addEventListener('click', () => {
     
     event.preventDefault();
     if (cropper) {
@@ -248,12 +259,13 @@
         const url = URL.createObjectURL(blob);
 
         // Show cropped image and hide icon section
-        document.getElementById('uploadedImage').src = url;
-        document.getElementById('uploadedImageSection').classList.remove('hidden');
-        document.getElementById('uploadIconSection').classList.add('hidden');
+          get('uploadedImage').src = url;
+          get('uploadedImageSection').classList.remove('hidden');
+          get('uploadIconSection').classList.add('hidden');
         imageStatus = "updated";
 
         cropModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
         cropper.destroy();
         cropper = null;
         imageInput.value = '';
@@ -262,32 +274,47 @@
     }
   });
 // Add event listener to the X button to reset the image container
-document.getElementById('destroyImage').addEventListener('click', () => {
+get('destroyImage').addEventListener('click', () => {
   // Hide image, show icon section, and reset blob
-  document.getElementById('uploadedImageSection').classList.add('hidden');
-  document.getElementById('uploadIconSection').classList.remove('hidden');
-  document.getElementById('uploadedImage').src = '';
+  get('uploadedImageSection').classList.add('hidden');
+  get('uploadIconSection').classList.remove('hidden');
+  get('uploadedImage').src = '';
   croppedBlob = null;
   imageStatus = "removed";
 });
 
   // Control buttons event listeners for shifting and zooming
-  document.getElementById('moveDown').addEventListener('click', () => {
+  get('moveDown').addEventListener('click', () => {
     if (cropper) cropper.move(0, -10);
   });
-  document.getElementById('moveUp').addEventListener('click', () => {
+  get('moveUp').addEventListener('click', () => {
     if (cropper) cropper.move(0, 10);
   });
-  document.getElementById('moveRight').addEventListener('click', () => {
+  get('moveRight').addEventListener('click', () => {
     if (cropper) cropper.move(-10, 0);
   });
-  document.getElementById('moveLeft').addEventListener('click', () => {
+  get('moveLeft').addEventListener('click', () => {
     if (cropper) cropper.move(10, 0);
   });
-  document.getElementById('zoomIn').addEventListener('click', () => {
+  get('zoomIn').addEventListener('click', () => {
     if (cropper) cropper.zoom(0.1);
   });
-  document.getElementById('zoomOut').addEventListener('click', () => {
+  get('zoomOut').addEventListener('click', () => {
     if (cropper) cropper.zoom(-0.1);
   });
+
+  // Expose state for integrators
+  const state = { getBlob: () => croppedBlob, setBlob: (b) => {croppedBlob = b;} };
+  if (PID) {
+    window[PID + 'Uploader'] = state;
+  } else {
+    // Backward compatibility for admission.html
+    window.croppedBlob = null;
+    Object.defineProperty(window, 'croppedBlob', {
+      get(){ return croppedBlob; },
+      set(v){ croppedBlob = v; }
+    });
+    window.imageInput = imageInput;
+  }
+  })();
 </script>

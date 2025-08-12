@@ -24,8 +24,10 @@ idcard_bp = Blueprint( 'idcard_bp',   __name__)
 def student_list():
 
     school_id = session['school_id']
-    current_session = session['session_id']
+    current_session = 2
     user_id = session["user_id"]
+
+    print(current_session)
 
     # build your query
     students = db.session.query(
@@ -50,6 +52,7 @@ def student_list():
     ).filter(
         StudentsDB.school_id    == school_id,
         StudentSessions.session_id == current_session,
+        # StudentSessions.class_id == 6,
         StudentsDB.IMAGE.isnot(None)
     ).order_by(
         ClassData.id.asc(),

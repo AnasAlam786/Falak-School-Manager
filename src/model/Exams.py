@@ -10,6 +10,7 @@ class Exams(db.Model):
     exam_name = Column(Text, nullable=False)
     exam_code = Column(Text, nullable=False)
     weightage = Column(Numeric, nullable=False)
+    term = Column(Numeric, nullable=False)
     display_order = Column(Numeric, nullable=False)
 
     # Optional relationship
