@@ -314,6 +314,12 @@ get('destroyImage').addEventListener('click', () => {
       get(){ return croppedBlob; },
       set(v){ croppedBlob = v; }
     });
+    // Expose imageStatus globally for templates without a prefix (e.g., edit_student.html)
+    window.imageStatus = 'unchanged';
+    Object.defineProperty(window, 'imageStatus', {
+      get(){ return imageStatus; },
+      set(v){ imageStatus = v; }
+    });
     window.imageInput = imageInput;
   }
   })();
