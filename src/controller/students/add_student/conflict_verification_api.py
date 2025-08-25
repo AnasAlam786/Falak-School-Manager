@@ -77,10 +77,7 @@ def verify_admission():
         ).first()
 
         print(aadhaar)
-        print(global_conflict.AADHAAR)
-
-        print(type(aadhaar))
-        print(type(global_conflict.AADHAAR))
+        print(global_conflict)
 
         
         if global_conflict:
