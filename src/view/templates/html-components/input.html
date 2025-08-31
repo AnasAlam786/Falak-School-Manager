@@ -5,7 +5,6 @@
     {{ InputDetails['data-description'] }}
     {% if InputDetails.get('required') %}
     <span class="text-danger fw-bold" aria-hidden="true"> * </span>
-    <span class="visually-hidden">required</span>
     {% endif %}
   </label>
 
@@ -38,16 +37,23 @@
     {{ InputDetails["label"] }}
     {% if InputDetails.get('required') %}
     <span class="text-red-600 font-bold" aria-hidden="true">*</span>
-    <span class="sr-only">required</span>
     {% endif %}
   </label>
 
   <input oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
     class="w-full p-3 custom-bg-gray-darker custom-border rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-    {% set input_value=InputDetails.get('value') %} {% for attribute_name, attribute_value in InputDetails.items() %} {%
-    if attribute_name=='name' %} name="{{ section }}-{{ attribute_value }}" {% elif attribute_name=='value' %} {% if
-    input_value is not none and input_value !='' %} value="{{ input_value }}" {% endif %} {% else %} {{ attribute_name
-    }}="{{ attribute_value }}" {% endif %} {% endfor %} />
+    {% set input_value=InputDetails.get('value') %} 
+    {% for attribute_name, attribute_value in InputDetails.items() %} 
+      {% if attribute_name=='name' %} 
+        name="{{ section }}-{{ attribute_value }}" 
+      {% elif attribute_name=='value' %} 
+      {% if input_value is not none and input_value !='' %} 
+        value="{{ input_value }}" 
+      {% endif %} 
+      {% else %} 
+        {{ attribute_name }}="{{ attribute_value }}" 
+      {% endif %} 
+    {% endfor %} />
   <div class="error-message text-danger text-sm mt-1 hidden" id="">
     Please enter valid {{ InputDetails["label"] }}.
   </div>
