@@ -20,6 +20,11 @@ from .marks.show_marks import show_marks_bp
 from .marks.get_marks_api import get_marks_api_bp
 from .marks.get_result_api import get_result_api_bp
 
+from .staff_module.staff_view import staff_view_bp
+from .staff_module.add_staff import add_staff_bp
+from .staff_module.update_staff import update_staff_bp
+from .staff_module.add_staff_api import add_staff_api_bp
+
 from .idcard.idcard import idcard_bp
 
 
@@ -89,6 +94,11 @@ def register_blueprints(app):
     app.register_blueprint(show_marks_bp)
     app.register_blueprint(get_marks_api_bp)
     app.register_blueprint(get_result_api_bp)
+
+    app.register_blueprint(staff_view_bp)
+    app.register_blueprint(add_staff_api_bp)
+    app.register_blueprint(add_staff_bp)
+    app.register_blueprint(update_staff_bp)
 
     app.register_blueprint(idcard_bp)
 

@@ -1,0 +1,159 @@
+  <div class="id-card-container">
+    <div class="page">
+        <!-- School name in rounded effect above the image -->
+        <div style="position: absolute; top: 15%; left: 50%; transform: translate(-50%, -50%); z-index: 7;">
+            <svg width="300" height="180" viewBox="0 0 160 60">
+                <path id="curve" d="M40,40 A45,28 0 0 1 120,40" fill="transparent"/>
+                <text font-family="League Spartan" font-size="9.3" stroke="#fff" stroke-width="0.5" fill="#fff">
+                    <textPath href="#curve" startOffset="50%" text-anchor="middle" font-family='League Spartan' id="school-name">
+                        School Name
+                    </textPath>
+                </text>
+            </svg>
+        </div>
+        
+        <div style="position: absolute; top: 5.6%; left: 50%; transform: translate(-50%, -50%); z-index: 7;">
+            <p id="school-UDISE" style="font-size: 8px; font-weight: bolder; color: rgb(0, 0, 0); font-family: 'League Spartan';">UDISE: <span>123456</span></p>
+        </div>
+        
+        <!-- School logo -->
+        <div style="position: absolute; top: 3%; left: 9.5%; z-index: 7; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: #fff;">
+            <img src="" id="school-logo"
+                alt="School Logo"
+                style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                crossorigin="anonymous" />
+        </div>
+        
+        <!-- Session image -->
+        <div style="position: absolute; top: 3%; left: 76.5%; z-index: 7; width: 30px; height: 30px; border-radius: 50%; overflow: hidden; background: #fff;">
+            <img src=""
+                id="session-logo"
+                alt="profile"
+                width="100%"
+                height="100%"
+                style="object-fit: cover; display: block;" 
+                crossorigin="anonymous" />
+        </div>
+        
+        <!-- Larger white hexagon -->
+        <div style="display: flex; justify-content: center; z-index: 1; position: absolute;">
+            <svg width="57mm" viewBox="0.5 150 255 255">
+                <path 
+                d="M149.0608082214179,3.735229821355155L234.93919177773057,18.96615047161027C247.1226014561723,21.126933412318678 255.9999999994323,31.71731551342968 255.9999999994323,44.09085397654978L255.9999999994323,262.01854871132133C255.9999999994323,274.39208717444143 247.1226014561723,284.98246927555243 234.93919177773057,287.14325221626086L149.0608082214179,302.37417286651595C135.1289763427541,304.8450464180284 120.87102365667819,304.8450464180284 106.93919177801442,302.37417286651595L21.060808221701734,287.14325221626086C8.877398543259988,284.98246927555243 0,274.39208717444143 0,262.01854871132133L0,44.09085397654978C0,31.71731551342968 8.877398543259988,21.126933412318678 21.060808221701734,18.96615047161027L106.93919177801442,3.735229821355155C120.87102365667819,1.2643562698426967 135.1289763427541,1.2643562698426967 149.0608082214179,3.735229821355155Z" 
+                fill="white"/>
+            </svg>
+        </div>
+        
+        <!-- Smaller blue hexagon -->
+        <div style="display: flex; justify-content: center; z-index: 2; position: absolute;">
+            <svg viewBox="-7 150 270 270" width="55mm">
+                <path 
+                d="M149.0608082214179,3.735229821355155L234.93919177773057,18.96615047161027C247.1226014561723,21.126933412318678 255.9999999994323,31.71731551342968 255.9999999994323,44.09085397654978L255.9999999994323,262.01854871132133C255.9999999994323,274.39208717444143 247.1226014561723,284.98246927555243 234.93919177773057,287.14325221626086L149.0608082214179,302.37417286651595C135.1289763427541,304.8450464180284 120.87102365667819,304.8450464180284 106.93919177801442,302.37417286651595L21.060808221701734,287.14325221626086C8.877398543259988,284.98246927555243 0,274.39208717444143 0,262.01854871132133L0,44.09085397654978C0,31.71731551342968 8.877398543259988,21.126933412318678 21.060808221701734,18.96615047161027L106.93919177801442,3.735229821355155C120.87102365667819,1.2643562698426967 135.1289763427541,1.2643562698426967 149.0608082214179,3.735229821355155Z" 
+                fill="rgb(12, 192, 223)"/>
+            </svg>
+        </div>
+        
+
+
+        <!-- Hanging blue rectangle frame with more rounded bottom corners -->
+        <div style="display: flex; justify-content: center; z-index: 4; position: absolute;">
+            <svg viewBox="-82 0 420 410" width="42mm">
+                <path d="
+                    M0,0 
+                    H256 
+                    V390 
+                    Q256,410 230,410 
+                    H20 
+                    Q0,410 0,390 
+                    Z" 
+                    fill="rgb(12, 192, 223)" />
+            </svg>
+        </div>
+        
+        <!-- Student image rectangle with slightly rounded corners and white border -->
+        <div style="position: absolute; top: 29.5%; left: 50%; transform: translate(-50%, -50%); z-index: 5; width: 80px; height: 100px; 
+                    overflow: hidden; background: white; display: flex; align-items: center; justify-content: center; 
+                    border: 2px solid rgb(255, 255, 255); border-radius: 8px;">
+            <img src="" id="student-image"
+                loading="lazy"
+                style="width: 100px; height: 100px; object-position: top; object-fit: cover; display: block;"
+                crossorigin="anonymous" />
+        </div>
+
+        
+        <!-- Student Information -->
+        <div style="font-family: 'League Spartan'; position: absolute; top: 52%; left: 50%; line-height: 1; transform: translate(-50%, -50%); width: 90%; text-align: center; z-index: 5;">
+            <h1 style="font-weight: bolder; font-size: 16px; color:red" id="student-name">Student Name</h1>
+            <p style="font-weight: bolder; font-size: 12px; color: #1d1d1d;" id="student-father">Father's Name</p>
+        </div>
+        
+        <div style="font-family: 'League Spartan'; position: absolute; top: 68%; left: 52%; transform: translate(-50%, -50%);  width: 75%; text-align: center; z-index: 5;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <tbody style="line-height: 1.3;">
+                    <tr>
+                        <td style="color: #202020; font-weight: bolder; font-size: 9px; text-align: left; padding: 1px 0; white-space: nowrap;">Class</td>
+                        <td style="font-weight: bolder; font-size: 10px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+                        <td style="font-size: 10px; font-weight: bolder; text-align: left; padding: 1px 0;" id="student-class-roll">Class - Roll</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #202020; font-weight: bolder; font-size: 9px; text-align: left; padding: 1px 0; white-space: nowrap;">Date of Birth</td>
+                        <td style="font-weight: bolder; font-size: 10px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+                        <td style="font-size: 10px; font-weight: bolder; text-align: left; padding: 1px 0;" id="student-DOB">DOB</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #202020; font-weight: bolder; font-size: 9px; text-align: left; padding: 1px 0; white-space: nowrap;">Phone</td>
+                        <td style="font-weight: bolder; font-size: 10px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+                        <td style="font-size: 10px; font-weight: bolder; text-align: left; padding: 1px 0;" id="student-phone">Phone</td>
+                    </tr>
+                    <tr>
+                        <td style="color: #202020; font-weight: bolder; font-size: 9px; text-align: left; padding: 1px 0; white-space: nowrap;">Address</td>
+                        <td style="font-weight: bolder; font-size: 10px; text-align: right; padding: 1px 2px; width: 8px;">:</td>
+                        <td style="font-size: 7.5px; font-weight: bolder; text-align: left; padding: 1px 0;" id="student-address">Address</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Signatures -->
+        <div style="font-family: 'League Spartan'; position: absolute; top: 84%; left: 25%; transform: translate(-50%, -50%); width: 90%; text-align: center; z-index: 5;">
+            <img src="" id="teacher-sign"
+                loading="lazy"
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 200%; max-height: 200%; object-fit: contain;"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='none';">
+            <p style="font-weight: bolder; font-size: 9px; color: #919191;">Teacher's Sign</p>
+        </div>
+        
+        <div style="font-family: 'League Spartan'; position: absolute; top: 84%; left: 75%; transform: translate(-50%, -50%); width: 90%; text-align: center; z-index: 5;">
+            <img src="" id="principal-sign"
+                loading="lazy"
+                style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); max-width: 200%; max-height: 200%; object-fit: contain;">
+            <p style="font-weight: bolder; font-size: 9px; color: #919191;">Principal Sign</p>
+        </div>
+        
+        <!-- Footer -->
+        <svg style="font-family: 'League Spartan'; font-weight: bolder; position: absolute; left: 0; bottom: 0; z-index: 6; background-color:rgb(20, 56, 104);" width="100%" height="38px">
+            <!-- Blue background -->
+            <rect width="100%" height="45px" fill="rgb(20, 56, 104)"/>
+            
+            <!-- White text -->
+            <text  
+                x="50%" y="24%" id="school-address"
+                dominant-baseline="middle"
+                text-anchor="middle" 
+                font-size="10px"
+                fill="white">
+                School Address
+            </text>
+
+            <text 
+                x="50%" y="55%" id="school-phone"
+                dominant-baseline="middle" 
+                text-anchor="middle"
+                font-size="11px"
+                fill="white">
+                School Phone
+            </text>
+        </svg>
+
+    </div>
+  </div>

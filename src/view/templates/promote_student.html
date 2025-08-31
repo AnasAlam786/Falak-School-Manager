@@ -2,173 +2,218 @@
 content %}
 
 <style>
-    .form-control.focus-green:focus {
-        border-color: #198754 !important;
-        box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25) !important;
+    .promotion-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(0, 420px));
+        gap: 16px;
+        /* space between cards */
+        justify-content: center;
+        /* leftover space only on sides */
+        align-items: start;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-
-    .modal-content,
-    .accordion-body {
-        background: #1e1e2f;
-        border-radius: 15px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    /* On very small screens (phones), force 1 card per row */
+    @media (max-width: 480px) {
+        .spromotion-cards {
+            grid-template-columns: 1fr;
+            /* single column full width */
+        }
     }
 
-    .modal-header {
-        background: linear-gradient(90deg, #4e54c8, #8f94fb);
-    }
-
-    .student-card-body {
-        background: #2a2a3d;
-        border-radius: 15px;
-        padding: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    }
-
+    /* Card styling */
     .student-image {
         border: 3px solid #8f94fb;
-        border-radius: 50%;
+        object-position: top;
         object-fit: cover;
-        width: 150px;
-        height: 150px;
+        display: block;
+        width: 120px;
+        height: 160px;
     }
 
-    .table th,
-    .table td {
-        background-color: #34354a;
+    .card-hover {
+        transition: all 0.3s ease;
+        background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: 1px solid #333;
     }
 
-    .table th {
-        background-color: #2a2a3d;
+    .card-hover:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        border-color: #4e54c8;
     }
 
-    .modal-footer {
-        background: #2a2a3d;
+    .modal {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .modal-hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.9);
+    }
+
+    .modal-visible {
+        opacity: 1;
+        pointer-events: auto;
+        transform: scale(1);
+    }
+
+
+    /* ✅ Hide scrollbar but allow scroll for modal*/
+    .hide-scrollbar {
+        scrollbar-width: none;
+        /* Firefox */
+        -ms-overflow-style: none;
+        /* IE & Edge */
+    }
+
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+        /* Chrome, Safari */
     }
 </style>
 
 
 <div class="container" id="student-container">
-    <h3 class="mb-0 fw-bold text-center text-success">
-        Promote Students
-    </h3>
-    <small class="d-block text-center text-muted lh-1 mt-0 mb-4">
-        Student records from the previous academic session will be displayed here.
-    </small>
 
-    <div class="row justify-content-center gx-2 gy-3 mb-3">
-        <!-- Select Box -->
-        <div class="col-12 col-md-6">
-            <div class="input-group">
-                <span class="input-group-text bg-secondary text-white border-secondary">
-                    <i class="bi bi-easel-fill"></i>
-                </span>
-                <select class="form-select bg-dark text-light border-secondary" id="classView"
-                    onchange="updatePage('/get_prv_year_students_api', 'StudentData', { 'class_id': event.target.value });">
-                    <option selected hidden value="">Select Class</option>
-                    {% if classes %}
-                        {% for class in classes %}
-                            <option value="{{ class.id }}">{{ class.CLASS }}</option>
-                        {% endfor %}
-                    {% endif %}
-                </select>
-            </div>
-        </div>
-
-        <!-- Search Box -->
-        <div class="col-12 col-md-6">
-            <div class="input-group w-100">
-                <span class="input-group-text bg-secondary text-white border-secondary">
-                    <i class="bi bi-search"></i>
-                </span>
-                <input type="text" id="search-input" oninput="applyFilters()"
-                    class="form-control bg-dark text-light border-secondary"
-                    placeholder="Search by Name, Class, Roll No." />
-            </div>
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl md:text-3xl font-bold text-green-400 ">Student Promotion Portal</h1>
+            <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">Manage student promotions to the next academic
+                session with
+                an intuitive interface</p>
         </div>
     </div>
 
-    <div class="row" id="StudentData">
+    <!-- Search and Filter Section -->
+    <div class="flex flex-col gap-3 mb-6 md:mb-10">
+        <!-- Search Box -->
+        <div class="p-3 rounded-lg md:rounded-xl bg-[#1e1e1e]">
+            <div class="flex items-center">
+                <i class="fas fa-search text-gray-500 mr-3"></i>
+                <input type="text" id="search-input" oninput="applyFilters()"
+                    placeholder="Search by name or roll number..."
+                    class="w-full bg-transparent border-0 text-white placeholder-gray-500 focus:outline-none text-sm md:text-base">
+            </div>
+        </div>
 
+        <!-- Dropdown -->
+        <div class="relative">
+            <div class="flex items-center p-3 rounded-lg md:rounded-xl bg-[#1e1e1e]">
+                <!-- Left Icon -->
+                <i class="fas fa-layer-group text-gray-500 mr-3"></i>
+
+                <!-- Select -->
+                <select id="classView"
+                    onchange="updatePage('/get_prv_year_students_api', 'StudentData', { 'class_id': event.target.value });"
+                    class="w-full appearance-none cursor-pointer text-gray-400 text-sm md:text-base bg-transparent focus:outline-none pr-8">
+                    <option class="bg-[#1e1e1e] text-white" selected hidden value="">Select Class</option>
+                    {% if classes %}
+                    {% for class in classes %}
+                    <option class="bg-[#1e1e1e] text-white" value="{{ class.id }}">{{ class.CLASS }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <!-- Right Chevron -->
+            <i
+                class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+        </div>
+
+    </div>
+
+    <div class="promotion-cards" id="StudentData">
         {% if not data %}
-        <div class="alert alert-info text-center" role="alert" style="margin-top: 50px;">
-            <strong>Please Select the class!</strong>
+        <div class="col-span-full">
+            <div class="flex flex-col items-center justify-center text-center bg-gray-800 rounded-2xl p-6 shadow-lg">
+                <i class="fas fa-info-circle text-blue-400 text-4xl mb-3"></i>
+                <h3 class="text-xl font-semibold text-white mb-1">No Students Loaded</h3>
+                <p class="text-gray-400">Please select a class to view the student list.</p>
+            </div>
         </div>
         {% endif %}
 
+
+
         {% for row in data %}
-        <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}"
+        <div class="student-card rounded-2xl overflow-hidden shadow-lg card-hover" data-name="{{ row.STUDENTS_NAME }}"
             data-class="{{ row.previous_class }}" data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}"
             data-roll="{{ row.previous_roll }}" data-phone="{{ row.PHONE }}">
-            <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3">
-                <div class="card-body d-flex">
-                    <img src="{{ 
-                        'https://lh3.googleusercontent.com/d/' ~ row.IMAGE ~ '=s200' 
-                        if row.IMAGE 
-                        else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' 
-                        }}" alt="Student Image" class="rounded-circle border border-light shadow-sm" style="width: 120px;
-                            height: 160px;
-                            object-fit: cover;
-                            object-position: top;
-                        " />
 
-                    <div class="ms-3 mt-3 flex-grow-1">
-                        <h5 class="card-title mb-0 fw-bold">
-                            <a href="javascript:void(0);" class="text-decoration-none text-success">
-                                {{ row.STUDENTS_NAME }}
-                            </a>
-                        </h5>
+            <div class="p-6">
+                <div class="flex items-start gap-3">
+                    <img src="{% if row.IMAGE %}
+                        {{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' }}
+                        {% else %}
+                            {{ url_for('static', filename=('no-student-boy-image.png' if row.GENDER == 'Male' else 'no-student-girl-image.png')) }}
+                        {% endif %}" alt="Student Image" class="student-image mt-2" loading="lazy">
 
-                        <p class="mb-2 text-secondary small">
-                            <span class="fw-semibold">Child of:</span>
-                            <i>{{ row.FATHERS_NAME }}</i>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-bold text-lg text-green-400 truncate">{{ row.STUDENTS_NAME }}</h3>
+                        <p class="text-sm text-gray-400">
+                            <span class="font-medium">C/O:</span> {{ row.FATHERS_NAME }}
                         </p>
 
-                        <p class="mb-2 text-muted small">
-                            <span class="fw-semibold">Old Class:</span> <i>{{ row.previous_class }}</i>
-                            <br />
-                            <span class="fw-semibold">Old Roll No: </span> {{ row.previous_roll }}
-                        </p>
-
-                        <p class="text-muted small">
-                            <span class="fw-semibold">Next Class:</span> <i>{{ row.next_class }}</i>
-                            <br />
-
-                            {% if row.promoted_session_id %}
-                            <span class="fw-semibold">Next Roll No:</span> <i>{{ row.promoted_roll }}</i>
+                        <div class="mt-3 space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Old Class:</span>
+                                <span class="font-medium text-white">{{ row.previous_class }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Old Roll No:</span>
+                                <span class="font-medium text-white">{{ row.previous_roll }}</span>
+                            </div>
+                            {% if row.next_class %}
+                            <div class="flex justify-between text-green-300">
+                                <span>Next Class:</span>
+                                <span class="font-medium">{{ row.next_class }}</span>
+                            </div>
                             {% endif %}
-                        </p>
-
-
+                            {% if row.promoted_session_id %}
+                            <div class="flex justify-between text-green-300">
+                                <span>Next Roll No:</span>
+                                <span class="font-medium">{{ row.next_roll }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
 
-                <div class="card-footer bg-dark border-0 pt-0">
-                    <form class="row g-2 align-items-center">
-                        <div class="col-12">
-                            {% if row.promoted_session_id %}
-                            <div class="d-flex gap-2">
-                                <button type="button" class="btn btn-outline-secondary w-100 fw-bold"
-                                    onclick="updateStudentModal('{{ row.promoted_session_id }}')">
-                                    <i class="bi bi-file-earmark-check-fill me-1"></i> Update
-                                </button>
 
-                                <button type="button" class="btn btn-outline-danger w-100 fw-bold"
-                                    onclick="depromoteStudentModal('{{ row.promoted_session_id }}')">
-                                    <i class="bi bi-file-earmark-x-fill me-1"></i> Depromote
-                                </button>
-                            </div>
-                            {% else %}
-                            <button type="button" class="btn btn-outline-success w-100 fw-bold"
-                                onclick="promoteStudentModal('{{ row.id }}')">
-                                <i class="bi bi-file-earmark-text-fill me-1"></i> Promote Student
-                            </button>
-                            {% endif %}
-                        </div>
+                <div class="mt-6 flex gap-3">
+                    {% if row.promoted_session_id %}
+                    <button
+                        class="update-btn flex-1 bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        onclick="updateStudentModal('{{ row.promoted_session_id }}')">
+                        <i class="fas fa-edit mr-2"></i> Update
+                    </button>
+                    <button
+                        class="depromote-btn flex-1 bg-red-700 hover:bg-red-600 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        onclick="depromoteStudentModal('{{ row.promoted_session_id }}')">
+                        <i class="fas fa-times-circle mr-2"></i> Depromote
+                    </button>
+                    {% else %}
+                    <button
+                        class="promote-btn mt-2 flex-1 bg-green-700 hover:bg-green-600 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        onclick="promoteStudentModal('{{ row.id }}')" {% if not row.next_class %} disabled
+                        style="opacity: 0.6; cursor: not-allowed;" {% endif %}>
+                        <i class="fas fa-graduation-cap mr-2"></i> {% if not row.next_class %}No Classes{% else %}
+                        Promote {% endif %}
+                    </button>
 
-                    </form>
+                    <button
+                        class="tc-btn mt-2 flex-1 bg-yellow-700 hover:bg-yellow-600 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center"
+                        onclick="CreateTCModal('{{ row.id }}')">
+                        <i class="fa fa-file-text mr-2"></i> Create TC
+                    </button>
+                    {% endif %}
                 </div>
+
             </div>
         </div>
 
@@ -176,136 +221,294 @@ content %}
     </div>
 </div>
 
+<!-- No Results Section (Initially Hidden) -->
+<div id="noResults" class="no-results hidden mt-16 text-center">
+    <div class="bg-gray-800 rounded-2xl p-10 border border-gray-700 max-w-2xl mx-auto">
+        <i class="fas fa-search text-5xl text-gray-500 mb-4"></i>
+        <h3 class="text-2xl font-bold text-gray-300 mb-2">No Students Found</h3>
+        <p class="text-gray-500">Try adjusting your search or filter criteria to find what you're looking for.</p>
+    </div>
+</div>
 
 <!-- Student Promotion Modal -->
-<div class="modal fade" id="studentPromotionModal" tabindex="-1" aria-labelledby="studentPromotionModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <!-- Modal Header -->
-            <div class="modal-header d-flex justify-content-center align-items-center w-100">
-                <div class="d-flex justify-content-center align-items-center w-100">
-                    <h5 class="modal-title">
-                        <i class="fas fa-school"></i>&nbsp;&nbsp;Promote Student
-                    </h5>
+<div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm z-50 flex items-center justify-center p-4 modal-hidden"
+    id="studentPromotionModal">
+    <div class="bg-gray-800 rounded-lg w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" id="modalContent">
+
+        <!-- Modal Header -->
+        <div class="relative bg-blue-600 p-4 rounded-t-lg flex items-center justify-center">
+            <i class="fas fa-school text-white text-xl mr-2"></i>
+            <h5 class="text-white text-xl font-bold" id="modalTitle">Promote Student</h5>
+
+            <!-- Close button -->
+            <button type="button"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200 text-xl"
+                id="closeModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body (scrollable, scrollbar hidden) -->
+        <div class="flex-1 overflow-y-auto px-6 py-5 hide-scrollbar">
+            <form id="promotionForm" class="px-6">
+                <!-- Student Image and Name -->
+                <div class="flex flex-col items-center mb-3">
+                    <img id="studentImage" src="" alt="Student Image" class="student-image w-32 h-32 rounded-full mb-2" loading="lazy">
+
+                    <h3 id="studentName" data-id="" class="text-2xl font-bold text-white text-center"></h3>
+                    <p id="father" class="text-gray-400 text-center"></p>
                 </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Promotion Form -->
-            <form id="promotionForm" class="modal-body text-center">
-                <!-- Student Image -->
-                <img id="studentImage" src="https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png"
-                    alt="Graduation Cap Icon" class="student-image mb-3"
-                    style="width:150px; height:150px; object-fit:cover; object-position:top; border-radius:50%;">
-
-                <!-- Student Name (data-id carries the student ID) -->
-                <h3 id="studentName" data-id="" class="mb-4"></h3>
 
                 <!-- Details Table -->
-                <table class="table table-hover align-middle text-start mb-4">
-                    <tbody>
-                        <tr>
-                            <th scope="row">Father</th>
-                            <td id="father"></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">Old Class</th>
-                            <td id="oldClass"></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">New Class</th>
-                            <td id="newClass"></td>
-                        </tr>
-                    </tbody>
-                </table>
-
-                <!-- Input Fields -->
-                <div class="form-floating mb-3">
-                    <input required type="number" inputmode="numeric" id="newRoll" name="newRoll"
-                        placeholder="New Roll No" class="form-control text-white"
-                        style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
-                    <label for="newRoll" style="color: #bbb;">New Roll No</label>
-                    <div class="invalid-feedback">Please enter a valid roll number.</div>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input type="number" inputmode="numeric" id="due" name="due" min="0" step="0.01"
-                        placeholder="Due Amount" class="form-control text-white"
-                        style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
-                    <label for="due" style="color: #bbb;">Due Amount</label>
-                    <div class="invalid-feedback">Please enter a non-negative amount.</div>
-                </div>
-
-                <div class="form-floating mb-3">
-                    <input required inputmode="numeric" id="promotion_date" name="promotion_date"
-                        placeholder="Promotion Date" class="form-control text-white"
-                        style="background-color: #1e1e2f; border: 1px solid #8f94fb; border-radius: 10px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);">
-                    <label for="promotion_date" style="color: #bbb;">Promotion Date</label>
-                    <div class="invalid-feedback">Please select a valid date.</div>
-                </div>
-
-                <div class="form-check d-none mb-3 ms-4" id="depromoteCheckboxContainer">
-                    <input class="form-check-input border-danger" type="checkbox" id="depromoteCheckbox"
-                        aria-describedby="depromoteHelp">
-                    <label class="form-check-label fw-semibold" for="depromoteCheckbox">
-                        Depromote Student, Due amount will also be cleared.
-                    </label>
-                    <div id="depromoteHelp" class="form-text text-danger">
-                        <strong>This action cannot be undone.</strong>
+                <div class="bg-gray-700 rounded-xl p-4 mb-5">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span class="text-gray-300 font-medium">Old Class</span>
+                            <span id="oldClass" class="text-white font-semibold"></span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300 font-medium">New Class</span>
+                            <span id="newClass" class="text-accent-green font-semibold"></span>
+                        </div>
                     </div>
                 </div>
 
+                <!-- Input Fields -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="newRoll" class="block text-gray-300 mb-2 font-medium">New Roll Number <span
+                                class="text-red-400">*</span></label>
+                        <input type="number" inputmode="numeric" id="newRoll" name="newRoll" required
+                            class="w-full bg-gray-700  rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200"
+                            placeholder="Enter new roll number">
+                        <p id="newRollError" class="error-message hidden" style="color: red;"></p>
+                    </div>
 
+                    <div>
+                        <label for="due" class="block text-gray-300 mb-2 font-medium">Due Amount</label>
+                        <input type="number" inputmode="numeric" id="due" name="due" min="0" step="0.01"
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200"
+                            placeholder="Enter due amount (if any)">
+                        <p id="dueError" class="error-message hidden" style="color: red;"></p>
+                    </div>
 
+                    <div>
+                        <label for="promotion_date" class="block text-gray-300 mb-2 font-medium">Promotion Date <span
+                                class="text-red-400">*</span></label>
+                        <input type="date" id="promotion_date" name="promotion_date" required
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200">
+                        <p id="dateError" class="error-message hidden" style="color: red;"></p>
+                    </div>
+
+                    <div class="hidden pt-2" id="depromoteCheckboxContainer">
+                        <div class="flex items-start">
+                            <input
+                                class="form-check-input mt-1 mr-3 w-5 h-5 text-red-500 bg-gray-700 border-gray-600 rounded focus:ring-red-500"
+                                type="checkbox" id="depromoteCheckbox">
+                            <div>
+                                <label class="text-red-300 font-medium" for="depromoteCheckbox">
+                                    Depromote Student, Due amount will also be cleared.
+                                </label>
+                                <p class="text-red-400 text-sm mt-1">
+                                    <strong>This action cannot be undone.</strong>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </form>
+        </div>
+        <!-- Modal Footer -->
+        <div class="bg-gray-700 rounded-b-lg border-t border-gray-600 px-6 py-3 flex flex-wrap gap-3 justify-between">
 
-            <!-- Modal Footer -->
-            <div class="modal-footer px-4 py-3 border-0 justify-content-between" id="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            <!-- Close button on the left -->
+            <div>
+                <button type="button"
+                    class="px-3 py-2.5 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-medium transition-colors duration-200"
+                    onclick="closeModal()">
+                    <i class="fas fa-times mr-2"></i>
+                    Close
+                </button>
+            </div>
 
-                <button type="button" class="btn btn-success px-4 d-none" id="promoteButton">
-                    <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status"
-                        aria-hidden="true"></span>
-                    <i class="bi bi-check-circle me-1"></i>
+            <!-- Action buttons on the right -->
+            <div class="flex flex-wrap gap-3" id="modal-footer">
+
+                <button type="button"
+                    class="px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-medium transition-colors duration-200 flex items-center"
+                    id="promoteButton">
+                    <span id="promoteSpinner"
+                        class="spinner-border hidden h-4 w-4 mr-2 border-2 border-t-transparent rounded-full"></span>
+                    <i class="fas fa-check-circle mr-2"></i>
                     Promote
                 </button>
 
-                <button type="button" class="btn btn-danger px-4 d-none" id="depromoteButton">
-                    <span class="spinner-border spinner-border-sm d-none me-1" id="depromoteSpinner" role="status"
-                        aria-hidden="true"></span>
-                    <i class="bi bi-x-circle me-1"></i>
+                <button type="button"
+                    class="px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-medium transition-colors duration-200 hidden"
+                    id="depromoteButton">
+                    <span id="depromoteSpinner"
+                        class="spinner-border hidden h-4 w-4 mr-2 border-2 border-t-transparent rounded-full"></span>
+                    <i class="fas fa-times-circle mr-2"></i>
                     Depromote
                 </button>
 
-
-
-                <button type="button" id="updateButton" class="btn btn-success d-none px-4">
-                    <span class="spinner-border spinner-border-sm d-none me-1" id="promoteSpinner" role="status"
-                        aria-hidden="true"></span>
-                    <i class="bi bi-check-circle me-1"></i>
+                <button type="button"
+                    class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors duration-200 hidden"
+                    id="updateButton">
+                    <span id="updateSpinner"
+                        class="spinner-border hidden h-4 w-4 mr-2 border-2 border-t-transparent rounded-full"></span>
+                    <i class="fas fa-sync-alt mr-2"></i>
                     Update
                 </button>
 
+                <button type="button"
+                    class="px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-medium transition-colors duration-200 hidden"
+                    id="messageButton">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    Send Message
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+<!-- Student TC generation Modal -->
+<div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm z-50 flex items-center justify-center p-4 modal-hidden"
+    id="studenttcModal">
+    <div class="bg-gray-800 rounded-lg w-full max-w-md shadow-2xl max-h-[90vh] flex flex-col" id="tc-modalContent">
+
+        <!-- Modal Header -->
+        <div class="relative bg-blue-600 p-4 rounded-t-lg flex items-center justify-center">
+            <i class="fas fa-school text-white text-xl mr-2"></i>
+            <h5 class="text-white text-xl font-bold" id="tc-modalTitle"></h5>
+            <button type="button"
+                class="absolute right-4 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-200 text-xl"
+                id="tc-closeModal" onclick="closeTCModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Modal Body (scrollable, scrollbar hidden) -->
+        <div class="flex-1 overflow-y-auto px-6 py-5 hide-scrollbar">
+            <form id="promotionForm" class="px-6">
+                <!-- Student Image and Name -->
+                <div class="flex flex-col items-center mb-3">
+                    <img id="studentImageTC" src="" alt="Student Image"
+                        class="student-image w-32 h-32 rounded-full mb-2" loading="lazy">
+
+                    <h3 id="studentNameTC" data-id="" class="text-2xl font-bold text-white text-center"></h3>
+                    <p id="fatherNameTC" class="text-gray-400 text-center"></p>
+                </div>
+
+                <!-- Details Table -->
+                <div class="bg-gray-700 rounded-xl p-4 mb-5">
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b border-gray-600 pb-2">
+                            <span class="text-gray-300 font-medium">Old Class</span>
+                            <span id="oldClassTC" class="text-white font-semibold">10-B (Roll No: 08)</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300 font-medium">New Class</span>
+                            <span id="newClassTC" class="text-accent-green font-semibold">11-B</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Fields -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="leavingReason" class="block text-gray-300 mb-2 font-medium">Leaving Reason <span
+                                class="text-red-400">*</span></label>
+                        <input type="text" id="leavingReason" name="leavingReason" required
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200"
+                            placeholder="Enter leaving reason" list="leavingReasonList">
+                        <datalist id="leavingReasonList">
+                            <option value="Completed the studies"></option>
+                            <option value="Parent's Wish"></option>
+                            <option value="Transfer to another school"></option>
+                            <option value="Due to Relocation"></option>
+                            <option value="Due to Financial reasons"></option>
+                        </datalist>
+                        <p id="leavingReasonError" class="error-message hidden" style="color: red;"></p>
+                    </div>
+
+                    <div>
+                        <label for="generalConduct" class="block text-gray-300 mb-2 font-medium">General Conduct <span
+                                class="text-red-400">*</span></label>
+                        <input type="text" id="generalConduct" name="generalConduct" required
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200"
+                            placeholder="Enter general conduct" list="generalConductList">
+                        <datalist id="generalConductList">
+                            <option value="Very Good"></option>
+                            <option value="Excellent"></option>
+                            <option value="Good"></option>
+                            <option value="Satisfactory"></option>
+                            <option value="Needs Improvement"></option>
+                        </datalist>
+                        <p id="generalConductError" class="error-message hidden" style="color: red;"></p>
+                    </div>
+
+                    <div>
+                        <label for="leavingDate" class="block text-gray-300 mb-2 font-medium">Leaving Date <span
+                                class="text-red-400">*</span></label>
+                        <input type="date" id="leavingDate" name="leavingDate" required
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200">
+                        <p id="dateError" class="error-message hidden" style="color: red;"></p>
+                    </div>
 
 
-                <button type="button" id="messageButton" class="btn btn-success d-none px-4">
-                    <i class="bi bi-whatsapp me-1"></i>
+                    <div>
+                        <label for="otherRemark" class="block text-gray-300 mb-2 font-medium">Any Remarks?</label>
+                        <input type="text" id="otherRemark" name="otherRemark"
+                            class="w-full bg-gray-700 rounded-xl py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-accent-green focus:border-accent-green transition-colors duration-200"
+                            placeholder="Enter any remark (if any)">
+                        <p id="otherRemarkError" class="error-message hidden" style="color: red;"></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <!-- Modal Footer -->
+        <div class="bg-gray-700 rounded-b-lg border-t border-gray-600 px-6 py-3 flex flex-wrap gap-3 justify-between">
+
+            <!-- Close button on the left -->
+            <div>
+                <button type="button"
+                    class="px-3 py-2.5 bg-gray-600 hover:bg-gray-500 text-white rounded-xl font-medium transition-colors duration-200"
+                    onclick="closeTCModal()">
+                    <i class="fas fa-times mr-2"></i>
+                    Close
+                </button>
+            </div>
+
+            <!-- Action buttons on the right -->
+            <div class="flex flex-wrap gap-3" id="tc-modal-footer">
+                <button type="button"
+                    class="px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-medium transition-colors duration-200 hidden"
+                    id="tc-messageButton">
+                    <i class="fab fa-whatsapp mr-2"></i>
                     Send Message
                 </button>
 
-
+                <button type="button"
+                    class="px-4 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-medium transition-colors duration-200"
+                    id="tc-generateButton">
+                    <i class="fab fa-arrow-right mr-2"></i>
+                    Generate TC
+                </button>
             </div>
         </div>
+
     </div>
 </div>
 
 
 
-
-
 <script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
+
+
 
     async function promoteStudentModal(studentID) {
 
@@ -320,9 +523,10 @@ content %}
 
             if (res.ok) {
                 //Verify the data before sending the request
+                document.getElementById("modalTitle").innerHTML = "Promote Student";
                 document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
                 document.getElementById("studentName").setAttribute("data-id", data.id);
-                document.getElementById("oldClass").innerHTML = data.CLASS + " - " + data.ROLL;
+                document.getElementById("oldClass").innerHTML = data.CLASS + " | Roll: " + data.ROLL;
                 document.getElementById("newClass").innerHTML = data.promoted_class;
                 document.getElementById("newRoll").value = data.promoted_roll;
                 document.getElementById("promotion_date").value = data.promoted_date;
@@ -337,18 +541,18 @@ content %}
 
                 const footer = document.getElementById("modal-footer");
 
-                footer.querySelector("#messageButton").classList.add("d-none");
-                footer.querySelector('#updateButton')?.classList.add("d-none");
-                footer.querySelector('#depromoteButton')?.classList.add("d-none");
-                document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
+                footer.querySelector("#messageButton").classList.add("hidden");
+                footer.querySelector('#updateButton')?.classList.add("hidden");
+                footer.querySelector('#depromoteButton')?.classList.add("hidden");
+                document.getElementById('depromoteCheckboxContainer').classList.add('hidden');
 
                 promoteButton = footer.querySelector("#promoteButton");
                 promoteButton.setAttribute("onclick", `finalPromote('${data.id}')`);
-                promoteButton.classList.remove("d-none");
+                promoteButton.classList.remove("hidden");
                 promoteButton.disabled = false;
 
-                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
-                modal.show();
+                // Show modal and prevent background scrolling
+                openPromotionModal()
 
             } else {
                 showAlert(res.status, data.message);
@@ -374,9 +578,10 @@ content %}
             if (res.ok) {
 
                 //Verify the data before sending the request
+                document.getElementById("modalTitle").innerHTML = "Update Student";
                 document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
                 document.getElementById("studentName").setAttribute("data-id", data.id);
-                document.getElementById("oldClass").innerHTML = data.CLASS + " - " + data.ROLL;
+                document.getElementById("oldClass").innerHTML = data.CLASS + " | Roll: " + data.ROLL;
                 document.getElementById("newClass").innerHTML = data.promoted_class;
                 document.getElementById("newRoll").value = data.promoted_roll;
                 document.getElementById("promotion_date").value = data.promoted_date;
@@ -389,21 +594,31 @@ content %}
                     document.getElementById("studentImage").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
                 }
 
+                // Enable required buttons
+
                 const footer = document.getElementById("modal-footer");
 
-                footer.querySelector("#messageButton").classList.add("d-none");
-                footer.querySelector('#promoteButton')?.classList.add("d-none");
-                footer.querySelector('#depromoteButton')?.classList.add("d-none");
-                document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
+                messageButton = footer.querySelector("#messageButton");
+                messageButton.classList.add("hidden");
+                messageButton.disabled = true;
+
+                promoteButton = footer.querySelector('#promoteButton');
+                promoteButton.classList.add("hidden");
+                promoteButton.disabled = true;
+
+                depromoteButton = footer.querySelector('#depromoteButton');
+                depromoteButton.classList.add("hidden");
+                depromoteButton.disabled = true;
+
+                document.getElementById('depromoteCheckboxContainer').classList.add('hidden');
 
                 const updateButton = footer.querySelector("#updateButton");
                 updateButton.setAttribute("onclick", `finalUpdate('${data.promoted_session_id}')`);
-                updateButton.classList.remove("d-none");
+                updateButton.classList.remove("hidden");
                 updateButton.disabled = false;
 
-                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
-                modal.show();
-
+                // Show modal and prevent background scrolling
+                openPromotionModal();
 
             } else {
                 showAlert(res.status, data.message);
@@ -430,14 +645,23 @@ content %}
             if (res.ok) {
 
                 //Verify the data before sending the request
+                document.getElementById("modalTitle").innerHTML = "Depromote Student";
                 document.getElementById("studentName").innerHTML = data.STUDENTS_NAME;
                 document.getElementById("studentName").setAttribute("data-id", data.id);
-                document.getElementById("oldClass").innerHTML = data.CLASS + " - " + data.ROLL;
+                document.getElementById("oldClass").innerHTML = data.CLASS + " | Roll: " + data.ROLL;
                 document.getElementById("newClass").innerHTML = data.promoted_class;
-                document.getElementById("newRoll").value = data.promoted_roll;
-                document.getElementById("promotion_date").value = data.promoted_date;
                 document.getElementById("father").innerHTML = data.FATHERS_NAME;
-                document.getElementById("due").value = data.due_amount;
+
+                document.getElementById("newRoll").value = data.promoted_roll;
+                document.getElementById("newRoll").disabled = true;
+                document.getElementById("promotion_date").value = data.promoted_date;
+                document.getElementById("promotion_date").disabled = true;
+                document.getElementById("due").disabled = true;
+                if (data.due_amount) {
+                    document.getElementById("due").value = data.due_amount;
+                } else {
+                    document.getElementById("due").value = 0;
+                }
 
                 if (data.IMAGE) {
                     document.getElementById("studentImage").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200';
@@ -446,19 +670,19 @@ content %}
                 }
 
                 const footer = document.getElementById("modal-footer");
-                footer.querySelector("#messageButton").classList.add("d-none");
-                footer.querySelector('#promoteButton')?.classList.add("d-none");
-                footer.querySelector('#updateButton')?.classList.add("d-none");
+                footer.querySelector("#messageButton").classList.add("hidden");
+                footer.querySelector('#promoteButton')?.classList.add("hidden");
+                footer.querySelector('#updateButton')?.classList.add("hidden");
 
-                document.getElementById('depromoteCheckboxContainer').classList.remove('d-none');
+                document.getElementById('depromoteCheckboxContainer').classList.remove('hidden');
                 const depromoteButton = footer.querySelector("#depromoteButton");
                 depromoteButton.setAttribute("onclick", `finalDepromote('${data.promoted_session_id}')`);
-                depromoteButton.classList.remove("d-none");
+                depromoteButton.classList.remove("hidden");
                 depromoteButton.disabled = false;
 
-                var modal = new bootstrap.Modal(document.getElementById('studentPromotionModal'));
-                modal.show();
 
+                // Show modal
+                openPromotionModal();
 
             } else {
                 showAlert(res.status, data.message);
@@ -469,6 +693,63 @@ content %}
             showAlert(400, "An unexpected error occurred. Please try again.");
         }
     }
+
+
+    async function CreateTCModal(studentID) {
+
+        try {
+            const res = await fetch('/student_data_modal_api', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 'student_id': studentID }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                //Verify the data before sending the request
+                document.getElementById("tc-modalTitle").innerHTML = "Generate TC";
+                document.getElementById("studentNameTC").innerHTML = data.STUDENTS_NAME;
+                document.getElementById("studentNameTC").setAttribute("data-id", data.id);
+                document.getElementById("leavingDate").value = data.promoted_date;
+                document.getElementById("oldClassTC").innerHTML = data.CLASS + " | Roll: " + data.ROLL;
+                document.getElementById("newClassTC").innerHTML = data.promoted_class;
+                document.getElementById("fatherNameTC").innerHTML = data.FATHERS_NAME;
+
+                if (data.IMAGE) {
+                    document.getElementById("studentImageTC").src = 'https://lh3.googleusercontent.com/d/' + data.IMAGE + '=s200';
+                } else {
+                    document.getElementById("studentImageTC").src = 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png';
+                }
+
+                const tc_modal_footer = document.getElementById("tc-modal-footer");
+                tc_modal_footer.querySelector("#tc-messageButton").classList.add("hidden");
+                tc_modal_footer.querySelector("#tc-generateButton").classList.remove("hidden");
+
+                generateTCButton = tc_modal_footer.querySelector("#tc-generateButton");
+                generateTCButton.addEventListener("click", () => {
+                    const leavingReason = document.getElementById("leavingReason").value;
+                    const leavingDate = document.getElementById("leavingDate").value;
+                    const generalConduct = document.getElementById("generalConduct").value;
+                    const otherRemarks = document.getElementById("otherRemark").value;
+                    generateTC(data.id, leavingReason, leavingDate, generalConduct, otherRemarks);
+                });
+
+                // Show modal and prevent background scrolling
+                const modal = document.getElementById('studenttcModal');
+                modal.classList.remove("modal-hidden");
+                document.body.style.overflow = "hidden"; // 🚫 lock background scroll
+
+            } else {
+                showAlert(res.status, data.message);
+            }
+
+        } catch (err) {
+            console.error(err);
+            showAlert(400, "An unexpected error occurred. Please try again.");
+        }
+    }
+
 
     async function finalPromote(studentID) {
 
@@ -513,18 +794,20 @@ content %}
                     const messageButton = document.getElementById("messageButton");
                     const phone = document.getElementById("messageButton").getAttribute("data-phone");
 
-                    footer.querySelector('#promoteButton')?.classList.add("d-none");
-                    footer.querySelector('#updateButton')?.classList.add("d-none");
-                    footer.querySelector('#depromoteButton')?.classList.add("d-none");
-                    document.getElementById('depromoteCheckboxContainer').classList.add('d-none');
+                    footer.querySelector('#promoteButton')?.classList.add("hidden");
+                    footer.querySelector('#updateButton')?.classList.add("hidden");
+                    footer.querySelector('#depromoteButton')?.classList.add("hidden");
+                    document.getElementById('depromoteCheckboxContainer').classList.add('hidden');
+
+                    console.log("WhatsApp message generated successfully.");
 
                     messageButton.setAttribute("onclick", `sendWhatsAppMessage('${generate_message.PHONE}', \`${generate_message.whatsappMessage}\`)`);
-                    messageButton.classList.remove("d-none");
+                    messageButton.classList.remove("hidden");
+                    messageButton.disabled = false;
                 }
                 else {
                     console.log("WhatsApp message not generated successfully.");
-                    modal = bootstrap.Modal.getInstance(document.getElementById('studentPromotionModal'));
-                    modal.hide();
+                    closeModal()
                 }
             }
             showAlert(res.status, data.message);
@@ -536,7 +819,7 @@ content %}
             spinner.classList.add("d-none");
             btn.disabled = false;
         }
-}
+    }
 
     async function finalUpdate(studentSessionID) {
 
@@ -566,10 +849,9 @@ content %}
             const data = await res.json();
 
             if (res.ok) {
-                modal = bootstrap.Modal.getInstance(document.getElementById('studentPromotionModal'));
-                modal.hide();
+                closeModal()
             }
-            
+
             showAlert(res.status, data.message);
 
         } catch (err) {
@@ -608,8 +890,7 @@ content %}
             const data = await res.json();
 
             if (res.ok) {
-                modal = bootstrap.Modal.getInstance(document.getElementById('studentPromotionModal'));
-                modal.hide();
+                closeModal();
             }
             showAlert(res.status, data.message);
 
@@ -625,11 +906,152 @@ content %}
 
 
 
+    async function generateTC(studentId, leavingReason, leavingDate, generalConduct, otherRemarks = "") {
+
+        if (!leavingReason) {
+            showAlert(400, "Please select a reason for leaving.");
+            return;
+        }
+        if (!leavingDate) {
+            showAlert(400, "Please select a leaving date.");
+            return;
+        }
+        if (!generalConduct) {
+            showAlert(400, "Please provide general conduct remarks.");
+            return;
+        }
+
+        try {
+            // 1. Send the request
+            const resp = await fetch("/generate_tc_form_api", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    student_id: studentId,
+                    leavingReason: leavingReason,
+                    leavingDate: leavingDate,
+                    generalConduct: generalConduct,
+                    otherRemarks: otherRemarks
+                }),
+            });
+
+            // 2. Get the HTML text
+            const content = await resp.json();
+
+            if (!resp.ok) {
+                showAlert(resp.status, content.message);
+                console.error(`Server error: ${content.message}`);
+                return;
+            }
+
+            // 3. Open a new window/tab
+            const printWindow = window.open("", "_blank");
+
+            if (!printWindow) {
+                showAlert(400, "Unable to open print window");
+                throw new Error("Unable to open print window");
+            }
+
+            // 4. Write the HTML into the new window
+            printWindow.document.open();
+            printWindow.document.write(content.html);
+            printWindow.document.close();
+
+            // 5. Wait for resources (CSS/images) to load, then print
+            printWindow.onload = () => {
+                printWindow.focus();
+                printWindow.print();
+            };
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    // Form validation function
+    function validateForm() {
+        let isValid = true;
+
+        // Error messages
+        let newRollError = document.getElementById('newRollError');
+        let dueError = document.getElementById('dueError');
+        let dateError = document.getElementById('dateError');
+
+        // Reset error states
+        newRoll.classList.remove('input-error');
+        due.classList.remove('input-error');
+        promotionDate.classList.remove('input-error');
+        newRollError.style.display = 'none';
+        dueError.style.display = 'none';
+        dateError.style.display = 'none';
+
+        // Validate new roll number
+        if (!newRoll.value || isNaN(newRoll.value) || newRoll.value <= 0) {
+            newRoll.classList.add('input-error');
+            newRollError.style.display = 'block';
+            isValid = false;
+        }
+
+        // Validate due amount (optional)
+        if (due.value && (isNaN(due.value) || due.value < 0)) {
+            due.classList.add('input-error');
+            dueError.style.display = 'block';
+            isValid = false;
+        }
+
+        // Validate promotion date
+        if (!promotionDate.value) {
+            promotionDate.classList.add('input-error');
+            dateError.style.display = 'block';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+
+    // Example: function to open modal
+    function openPromotionModal() {
+        const modal = document.getElementById('studentPromotionModal');
+        modal.classList.remove("modal-hidden");
+        document.body.style.overflow = "hidden"; // 🚫 lock background scroll
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('studentPromotionModal');
+        modal.classList.add("modal-hidden");
+        document.body.style.overflow = ""; // ✅ restore scroll
+
+        // we disable the form elements in de-promotion modal, enable them after closing
+        document.getElementById("promotionForm").reset();
+        document.getElementById("newRoll").disabled = false;
+        document.getElementById("due").disabled = false;
+        document.getElementById("promotion_date").disabled = false;
+    }
+
+    function closeTCModal() {
+        const modal = document.getElementById('studenttcModal');
+        modal.classList.add("modal-hidden");
+        document.body.style.overflow = ""; // ✅ restore scroll
+    }
+
+    document.getElementById('closeModal').addEventListener("click", closeModal);
+
+    // Click outside modal closes it
+    document.getElementById('studentPromotionModal').addEventListener("click", (e) => {
+        if (!document.getElementById('modalContent').contains(e.target)) {
+            closeModal();
+        }
+    });
+
     function applyFilters() {
         const term = document
             .getElementById("search-input")
             .value.trim()
             .toLowerCase();
+
+        console.log("Search Term:", term);
 
         // Grab all student cards
         const cards = document.querySelectorAll(".student-card");

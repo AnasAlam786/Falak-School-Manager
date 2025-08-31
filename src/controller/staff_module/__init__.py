@@ -109,7 +109,7 @@ def staff_list():
             'has_next': pagination.has_next
         })
 
-    return render_template('staff/list.html', staff=pagination.items, roles=roles, classes=classes, has_next=pagination.has_next)
+    return render_template('staff/staff_view.html', staff=pagination.items, roles=roles, classes=classes, has_next=pagination.has_next)
 
 
 

@@ -1,269 +1,924 @@
-<!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Student iCard Selector - Dark Mode</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://unpkg.com/html-to-image@1.11.12/dist/html-to-image.min.js"></script>
-
-  <script>
-    // Enable dark mode class strategy for tailwind
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {},
-      },
-      variants: {},
-      plugins: [],
+{% extends 'base.html' %}
+{% block title %}ID Card Maker{% endblock %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+    :root {
+        --primary: #1a73e8;
+        --primary-dark: #0d47a1;
+        --secondary: #00c4de;
+        --surface: #1e1e1e;
+        --card-bg: #252525;
+        --text-primary: #e0e0e0;
+        --text-secondary: #b0b0b0;
+        --accent: #4caf50;
+        --warning: #ff9800;
+        --danger: #f44336;
+        --success: #4caf50;
+        --border: #333333;
+        --shadow: rgba(0, 0, 0, 0.4);
     }
-  </script>
-</head>
-<body class="bg-gray-50 dark:bg-gray-900 min-h-screen p-6 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    
+    @font-face {
+        font-family: 'League Spartan';
+        src: url('/static/LeagueSpartan-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
 
-  <div class="flex justify-between items-center mb-6">
-    <h1 class="text-3xl font-bold text-center flex-grow">Student iCard Selector</h1>
-    <button id="darkModeToggle" class="ml-6 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-4 py-2 rounded shadow hover:bg-gray-400 dark:hover:bg-gray-600 transition">
-      Toggle Dark Mode
-    </button>
-  </div>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    .container {
+        max-width: 1600px;
+        margin: 0 auto;
+    }
+    
+    header {
+        margin-bottom: 40px;
+        width: 100%;
+        animation: fadeIn 0.8s ease-out;
+    }
 
-  <!-- Filters -->
-  <div class="flex flex-wrap justify-center gap-4 mb-6">
-    <select id="classSelect" class="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
-      <option value="">All Classes</option>
-      <option value="10">Class 10</option>
-      <option value="11">Class 11</option>
-      <option value="12">Class 12</option>
-    </select>
+    .header-content {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
 
-    <input type="text" id="searchBox" placeholder="Search by name, roll, or class" class="px-4 py-2 border rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 w-64 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
+    .title-section {
+        text-align: center;
+        padding: 10px 0;
+        max-width: 900px;
+        margin: 0 auto;
+    }
 
-    <label class="flex items-center space-x-2 cursor-pointer select-none">
-      <input type="checkbox" id="imageFilter" class="w-5 h-5" />
-      <span>Has Image Only</span>
-    </label>
+    .icard-heading {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        margin-bottom: 15px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        display: inline-block;
+        letter-spacing: -0.5px;
+    }
+    
+    .icard-heading::after {
+        content: "";
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        border-radius: 3px;
+    }
+    
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: clamp(0.95rem, 2.5vw, 1.15rem);
+        margin: 25px auto 15px;
+        max-width: 700px;
+        line-height: 1.7;
+    }
+    
+    .controls-container {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 30px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        margin-bottom: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .controls-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+    }
+    
+    .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .filter-group label {
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .filter-group label i {
+        color: var(--primary);
+        background: rgba(74, 108, 250, 0.15);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    input[type="text"],
+    select {
+        background: var(--card-bg);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        color: var(--text-primary);
+        font-size: 1rem;
+        transition: var(--transition);
+        width: 100%;
+    }
+    
+    input[type="text"]:focus,
+    select:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(74, 108, 250, 0.25);
+    }
+    
+    .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 5px;
+    }
+    
+    .checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 10px 16px;
+        border-radius: 10px;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    
+    .checkbox-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+    
+    .checkbox-item label {
+        cursor: pointer;
+        user-select: none;
+        margin: 0;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
 
-    <label class="flex items-center space-x-2 cursor-pointer select-none">
-      <input type="checkbox" id="selectAllCheckbox" class="w-5 h-5" />
-      <span>Select All Visible</span>
-    </label>
-  </div>
-
-  <!-- Selected count and Download buttons -->
-  <div class="flex justify-center items-center gap-6 mb-6">
-    <span id="selectedCount" class="font-semibold">Selected: 0</span>
-    <button id="downloadPdfBtn" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition">Download PDF</button>
-    <button id="downloadJpegBtn" class="bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition">Download JPEG</button>
-  </div>
-
-  <!-- Cards container -->
-  <div id="mainGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
-
-  <script>
-    // Dark mode toggle
-    const darkModeToggle = document.getElementById("darkModeToggle");
-    darkModeToggle.addEventListener("click", () => {
-      document.documentElement.classList.toggle("dark");
-    });
-
-    // Sample student data - replace with your own data source
-    const students = [
-      { id: 1, name: "Anas Alam", roll: "101", class: "10", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=1" },
-      { id: 2, name: "John Doe", roll: "102", class: "10", hasImage: false, imageUrl: "" },
-      { id: 3, name: "Mary Jane", roll: "201", class: "11", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=3" },
-      { id: 4, name: "Alice Smith", roll: "301", class: "12", hasImage: false, imageUrl: "" },
-      { id: 5, name: "Bob Martin", roll: "302", class: "12", hasImage: true, imageUrl: "https://i.pravatar.cc/100?img=5" },
-    ];
-
-    const mainGrid = document.getElementById("mainGrid");
-    const classSelect = document.getElementById("classSelect");
-    const searchBox = document.getElementById("searchBox");
-    const imageFilter = document.getElementById("imageFilter");
-    const selectAllCheckbox = document.getElementById("selectAllCheckbox");
-    const selectedCountSpan = document.getElementById("selectedCount");
-    const downloadPdfBtn = document.getElementById("downloadPdfBtn");
-    const downloadJpegBtn = document.getElementById("downloadJpegBtn");
-
-    // Track selected cards by student ID
-    const selectedCards = new Set();
-
-    // Render cards filtered by current filter values
-    function renderCards() {
-      mainGrid.innerHTML = "";
-
-      const selectedClass = classSelect.value.trim();
-      const searchText = searchBox.value.trim().toLowerCase();
-      const filterHasImage = imageFilter.checked;
-
-      let visibleCardsCount = 0;
-
-      students.forEach(student => {
-        if (selectedClass && student.class !== selectedClass) return;
-        if (
-          !(
-            student.name.toLowerCase().includes(searchText) ||
-            student.roll.toLowerCase().includes(searchText) ||
-            student.class.toLowerCase().includes(searchText)
-          )
-        ) return;
-        if (filterHasImage && !student.hasImage) return;
-
-        visibleCardsCount++;
-
-        const card = document.createElement("div");
-        card.className = "bg-white dark:bg-gray-800 rounded-lg shadow p-4 relative flex flex-col items-center transition-colors";
-
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.className = "absolute top-3 right-3 w-5 h-5 cursor-pointer";
-        checkbox.checked = selectedCards.has(student.id);
-
-        checkbox.addEventListener("change", () => {
-          if (checkbox.checked) {
-            selectedCards.add(student.id);
-          } else {
-            selectedCards.delete(student.id);
-            selectAllCheckbox.checked = false;
-          }
-          updateSelectedCount();
-        });
-
-        card.appendChild(checkbox);
-
-        if (student.hasImage && student.imageUrl) {
-          const img = document.createElement("img");
-          img.src = student.imageUrl;
-          img.alt = student.name;
-          img.className = "w-24 h-24 rounded-full mb-4 object-cover border border-gray-300 dark:border-gray-600";
-          card.appendChild(img);
-        } else {
-          const placeholder = document.createElement("div");
-          placeholder.className = "w-24 h-24 rounded-full mb-4 bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold text-xl";
-          placeholder.textContent = student.name.charAt(0);
-          card.appendChild(placeholder);
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+        outline: none;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(90deg, var(--primary), var(--secondary));
+        color: white;
+        box-shadow: 0 4px 15px rgba(74, 108, 250, 0.3);
+    }
+    /* CSS of Commented preview button */
+    /* .btn-outline {
+        background: transparent;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+    } */
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(74, 108, 250, 0.4);
+    }
+    
+    .btn:active {
+        transform: translateY(-1px);
+    }
+    
+    /* Download loader */
+    .download-status {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        margin-top: 10px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 3px solid rgba(255, 255, 255, 0.2);
+        border-top-color: var(--primary);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    .btn[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+            /* Tablet-specific adjustments */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .controls-container {
+            padding: 25px;
         }
-
-        const nameEl = document.createElement("h2");
-        nameEl.className = "text-lg font-semibold mb-1";
-        nameEl.textContent = student.name;
-        card.appendChild(nameEl);
-
-        const infoEl = document.createElement("p");
-        infoEl.className = "text-sm text-gray-500 dark:text-gray-400";
-        infoEl.textContent = `Roll: ${student.roll} | Class: ${student.class}`;
-        card.appendChild(infoEl);
-
-        card.id = `student-card-${student.id}`;
-
-        mainGrid.appendChild(card);
-      });
-
-      if (visibleCardsCount === 0) {
-        const noData = document.createElement("p");
-        noData.className = "col-span-full text-center text-gray-500 dark:text-gray-400";
-        noData.textContent = "No student iCards match the filters.";
-        mainGrid.appendChild(noData);
-      }
+        
+        .filters {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .checkbox-group {
+            grid-column: span 2;
+            justify-content: center;
+        }
+        
+        .actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .stats-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
     }
 
-    function updateSelectedCount() {
-      selectedCountSpan.textContent = `Selected: ${selectedCards.size}`;
+    /* Mobile adjustments */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+        
+        .container {
+            padding: 10px;
+        }
+        
+        .controls-container {
+            padding: 20px 15px;
+        }
+        
+        .filters {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .checkbox-group {
+            justify-content: center;
+        }
+        
+        .actions {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 12px;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+        
+        .stats-container {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .stat-card {
+            padding: 15px;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .title-section {
+            padding: 10px 0;
+        }
+        
+        .icard-heading::after {
+            width: 60px;
+            bottom: -8px;
+        }
+    }
+    /* Header Filter END */
+    
+    .actions {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: 0.5s;
+    }
+    
+    .btn:hover::before {
+        left: 100%;
+    }
+    
+    .btn-primary {
+        background: var(--primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--primary-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(26, 115, 232, 0.3);
+    }
+    
+    .btn-secondary {
+        background: var(--secondary);
+        color: #121212;
+    }
+    
+    .btn-secondary:hover {
+        background: #00b4cc;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 196, 222, 0.3);
+    }
+    
+    .btn i {
+        font-size: 1.2rem;
     }
 
-    selectAllCheckbox.addEventListener("change", () => {
-      const checkboxes = mainGrid.querySelectorAll('input[type="checkbox"]');
-      if (selectAllCheckbox.checked) {
-        checkboxes.forEach(cb => {
-          cb.checked = true;
-          const cardId = parseInt(cb.parentElement.id.replace("student-card-", ""));
-          selectedCards.add(cardId);
+    /* Idcard continer START */
+    
+    .id-cards-container {
+        background: var(--surface);
+        border-radius: 12px;
+        padding: 25px;
+        box-shadow: 0 8px 20px var(--shadow);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .cards-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid var(--border);
+    }
+    
+    .cards-count {
+        font-weight: 600;
+        color: var(--text-secondary);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 5px 12px;
+        border-radius: 20px;
+    }
+    
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 25px;
+    }
+
+
+    .card-wrapper {
+        position: relative;
+        background: var(--card-bg);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px var(--shadow);
+        transition: all 0.3s ease;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+    }
+
+    .card-wrapper.selected {
+        box-shadow: 0 0 0 3px var(--primary);
+        transform: translateY(-5px);
+    }
+
+    .card-wrapper.selected::after {
+        content: "✓";
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 28px;
+        height: 28px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: bold;
+        z-index: 10;
+    }
+
+        /* Add to existing .card-wrapper styles */
+    .card-wrapper:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-wrapper.selected:hover {
+        transform: translateY(-5px) scale(1.02);
+    }
+    
+    
+    .card-selector {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        z-index: 10;
+        width: 20px;
+        height: 20px;
+        accent-color: var(--primary);
+        cursor: pointer;
+    }
+    
+    .status-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius);
+        margin: 25px 0;
+        font-size: 0.95rem;
+        border: 1px solid var(--border);
+    }
+        
+    
+    .selected-count {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Card info below each idcard START*/
+
+    .card-info {
+        padding: 12px 15px;
+        border-top: 1px solid #333;
+        font-family: 'Segoe UI', sans-serif;
+        font-size: 14px;
+        color: #eee;
+        border-radius: 8px;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+
+    .card-info .student-name {
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #fff;
+    }
+
+    .card-info .student-class {
+        font-weight: 400;
+        color: #aaa;
+        font-size: 13px;
+    }
+    /* Card info below each idcard END*/
+    
+    @media (max-width: 768px) {
+        .filters {
+            grid-template-columns: 1fr;
+        }
+        
+        .icard-heading {
+            font-size: 2rem;
+        }
+        .status-bar {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+        
+        .cards-header {
+            flex-direction: column;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        
+        .cards-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+    }
+
+    /* Idcard continer END */
+
+</style>
+<div class="container">
+
+    <header>
+        <div class="header-content">
+            <div class="title-section">
+                <h1 class="icard-heading">ID Card Maker</h1>
+                <p class="subtitle">Create and download professional ID cards for your students. Search by name, filter by class, and select multiple cards for batch downloading.</p>
+            </div>
+            
+            <div class="controls-container">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label for="search"><i class="fas fa-search"></i> Search Students</label>
+                        <input type="text" id="search" placeholder="Enter student name...">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label for="class-filter"><i class="fas fa-school"></i> Filter by Class</label>
+                        <select id="class-filter">
+                            <option value="">All Classes</option>
+                            {% if classes %}
+                                {% for class in classes %}
+                                <option value="{{ class.id }}">{{ class.CLASS }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label><i class="fas fa-cog"></i> Display Options</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="show-images" checked>
+                                <label for="show-images">Show only with images</label>
+                            </div>
+                            
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="select-all">
+                                <label for="select-all">Select all visible</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="actions">
+                    <!-- <button id="preview-btn" class="btn btn-outline">
+                        <i class="fas fa-eye"></i> Preview Cards
+                    </button> -->
+                    <button id="download-images" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download Images
+                    </button>
+                    <div id="download-status" class="download-status">
+                        <div class="spinner"></div>
+                        <span class="status-text">Preparing images...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+
+    <div class="id-cards-container">
+        <div class="cards-header">
+            <h1 style="font-weight: bolder; font-size: large;">Preview ID Cards</h1>
+            <div class="cards-count">Showing <span id="visible-count">0</span> of <span id="total-count">0</span> cards</div>
+        </div>
+
+        <div class="status-bar" style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-radius: 8px;">
+            <div class="selected-count" style="display: flex; align-items: center; gap: 5px; font-weight: 500;">
+                <i class="fas fa-check-circle" style="color: green;"></i> 
+                <span id="selected-count">0</span> selected
+            </div>
+            <div class="total-students" style="display: flex; align-items: center; gap: 5px; font-weight: 500;">
+                <i class="fas fa-users" style="color: #007bff;"></i>
+                Total students: <span id="total-students">1,248</span>
+            </div>
+        </div>
+        
+        
+        <div class="cards-grid" id="cards-grid">
+            <!-- ID Cards will be generated here with Jinja -->
+            {% for student in students %}
+            <div class="card-wrapper" data-id="{{ student.id }}" data-class-id="{{ student.class_id }}" data-has-image="{% if student.IMAGE %}true{% else %}false{% endif %}">
+                <!-- <input type="checkbox" class="card-selector"> -->
+
+                <hanging-image-icard
+                    school-name="{{ school.School_Name }}"
+                    school-UDISE="{{ school.UDISE }}"
+                    school-logo="{{ school.Logo }}"
+                    session-logo="https://lh3.googleusercontent.com/d/1tJnm5i4GgSyb4HIULAb2tvbejXfrz5HZ=s200"
+                    student-image="{% if student.IMAGE %}https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s220{% else %}''{% endif %}"
+                    student-name="{{ student.STUDENTS_NAME }}"
+                    student-father="C/O Mr. {{ student.FATHERS_NAME }}"
+                    student-class-roll="{{ student.CLASS }} - {{ student.ROLL }}"
+                    student-DOB="{{ student.dob }}"
+                    student-phone="{{ student.PHONE }}"
+                    student-address="{{ student.ADDRESS }}"
+                    teacher-sign="https://lh3.googleusercontent.com/d/{{ student.teachers_sign }}=s200"
+                    principal-sign="https://lh3.googleusercontent.com/d/14A_2bL47AwZ9ZZyhxsEpCcB1sfInjhe4=s200"
+                    school-address="{{ school.Address }}"
+                    school-phone="{{ school.Phone }}">
+                </hanging-image-icard>
+                
+                <div class="card-info">
+                    <div class="student-name">{{ student.STUDENTS_NAME }}</div>
+                    <div class="student-class">Class: {{ student.CLASS }} - {{ student.ROLL }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+    <script src="/static/pdf-components/icards/hanging_image_icard.js"></script>
+    <script>
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            updateCardCounts();
+            filterCards(); // Initial filtering
         });
-      } else {
-        checkboxes.forEach(cb => {
-          cb.checked = false;
-          const cardId = parseInt(cb.parentElement.id.replace("student-card-", ""));
-          selectedCards.delete(cardId);
-        });
-      }
-      updateSelectedCount();
-    });
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Search input
+            document.getElementById('search').addEventListener('input', filterCards);
+            
+            // Class filter
+            document.getElementById('class-filter').addEventListener('change', filterCards);
+            
+            // Show images checkbox
+            document.getElementById('show-images').addEventListener('change', filterCards);
+            
+            // Select all checkbox
+            document.getElementById('select-all').addEventListener('change', function() {
+                const visibleCards = document.querySelectorAll('.card-wrapper:not([style*="display: none"])');
+                
+                visibleCards.forEach(card => {
+                    let checkbox = card.querySelector('.card-selector');
+                    if (!checkbox) {
+                        checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.className = 'card-selector';
+                        checkbox.style.display = 'none';
+                        card.appendChild(checkbox);
+                    }
+                    
+                    checkbox.checked = this.checked;
+                    card.classList.toggle('selected', this.checked);
+                });
+                
+                updateSelectedCount();
+            });
+            
+            
+            // Download Images button
+            document.getElementById('download-images').addEventListener('click', downloadImages);
+            
+            // Event delegation for card selection
+            document.getElementById('cards-grid').addEventListener('click', function(e) {
+                const cardWrapper = e.target.closest('.card-wrapper');
+                if (cardWrapper) {
+                    // Find or create the hidden checkbox
+                    let checkbox = cardWrapper.querySelector('.card-selector');
+                    if (!checkbox) {
+                        checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.className = 'card-selector';
+                        checkbox.style.display = 'none';
+                        cardWrapper.appendChild(checkbox);
+                    }
+                    
+                    // Toggle selection
+                    checkbox.checked = !checkbox.checked;
+                    cardWrapper.classList.toggle('selected', checkbox.checked);
+                    
+                    // Update UI
+                    const event = new Event('change', { bubbles: true });
+                    checkbox.dispatchEvent(event);
+                }
+            });
+        }
+        
+        // Filter cards based on criteria
+        function filterCards() {
+            const searchTerm = document.getElementById('search').value.toLowerCase();
+            const classFilter = document.getElementById('class-filter').value;
+            console.log(classFilter)
+            const showImagesOnly = document.getElementById('show-images').checked;
+            
+            const cards = document.querySelectorAll('.card-wrapper');
+            let visibleCount = 0;
+            
+            cards.forEach(card => {
+                const name = card.querySelector('.student-name').textContent.toLowerCase();
+                const classID = card.dataset.classId;
+                const hasImage = card.dataset.hasImage === 'true';
+                
+                const matchesSearch = name.includes(searchTerm);
+                const matchesClass = !classFilter || classFilter === '' || Number(classID) === Number(classFilter);
+                console.log(classID)
+                const matchesImage = !showImagesOnly || hasImage;
+                
+                if (matchesSearch && matchesClass && matchesImage) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
 
-    [classSelect, searchBox, imageFilter].forEach(el =>
-      el.addEventListener("input", () => {
-        selectAllCheckbox.checked = false;
-        renderCards();
-        updateSelectedCount();
-      })
-    );
+            cards.forEach(card => {
+                const checkbox = card.querySelector('.card-selector');
+                if (checkbox) {
+                    card.classList.toggle('selected', checkbox.checked);
+                }
+            });
+            
+            document.getElementById('visible-count').textContent = visibleCount;
+            document.getElementById('total-count').textContent = cards.length;
+            updateSelectAllCheckbox();
+            updateSelectedCount();
+        }
+        
+        // Update the updateCardSelection function
+        function updateCardSelection(checkbox) {
+            const cardWrapper = checkbox.closest('.card-wrapper');
+            cardWrapper.classList.toggle('selected', checkbox.checked);
+        }
+                
+        // Update select all checkbox state
+        function updateSelectAllCheckbox() {
+            const visibleCards = document.querySelectorAll('.card-wrapper:not([style*="display: none"])');
+            const selectedCards = document.querySelectorAll('.card-wrapper:not([style*="display: none"]) .card-selector:checked');
+            
+            const selectAllCheckbox = document.getElementById('select-all');
+            selectAllCheckbox.checked = visibleCards.length > 0 && visibleCards.length === selectedCards.length;
+            selectAllCheckbox.indeterminate = selectedCards.length > 0 && selectedCards.length < visibleCards.length;
+        }
+        
+        // Update card counts
+        function updateCardCounts() {
+            const cards = document.querySelectorAll('.card-wrapper');
+            const visibleCards = document.querySelectorAll('.card-wrapper:not([style*="display: none"])');
+            
+            document.getElementById('visible-count').textContent = visibleCards.length;
+            document.getElementById('total-count').textContent = cards.length;
+            document.getElementById('total-students').textContent = cards.length;
+            updateSelectedCount();
+        }
+        
+        // Update selected count
+        function updateSelectedCount() {
+            const selectedCards = document.querySelectorAll('.card-selector:checked');
+            document.getElementById('selected-count').textContent = selectedCards.length;
+        }
+        
+        
+        // Download as images
+        async function downloadImages() {
+            const selectedCards = document.querySelectorAll('.card-wrapper .card-selector:checked');
+            
+            if (selectedCards.length === 0) {
+                alert('Please select at least one ID card to download.');
+                return;
+            }
+            
+            const downloadBtn = document.getElementById('download-images');
+            const statusEl = document.getElementById('download-status');
+            const statusText = statusEl.querySelector('.status-text');
+            downloadBtn.disabled = true;
+            statusText.textContent = 'Preparing images...';
+            statusEl.style.display = 'flex';
 
-    downloadPdfBtn.addEventListener("click", () => {
-      if (selectedCards.size === 0) {
-        alert("Please select at least one iCard to download.");
-        return;
-      }
+            const zip = new JSZip();
+            try {
+                for (let i = 0; i < selectedCards.length; i++) {
+                    statusText.textContent = `Preparing ${i + 1} / ${selectedCards.length}`;
+                    const wrapper = selectedCards[i].closest('.card-wrapper');
 
-      const container = document.createElement("div");
-      container.style.display = "flex";
-      container.style.flexWrap = "wrap";
-      container.style.gap = "20px";
-      container.style.padding = "20px";
-      container.style.backgroundColor = "white";
+                    // Access the custom element and its shadow root
+                    const icardEl = wrapper.querySelector('hanging-image-icard');
+                    if (!icardEl || !icardEl.shadowRoot) {
+                        console.error('ID card component or shadow root not found for a selected card.');
+                        continue;
+                    }
 
-      selectedCards.forEach(id => {
-        const origCard = document.getElementById(`student-card-${id}`);
-        if (!origCard) return;
-        const clone = origCard.cloneNode(true);
-        clone.style.width = "200px";
-        clone.style.boxShadow = "none";
-        clone.style.border = "1px solid #ccc";
-        clone.style.pageBreakInside = "avoid";
-        container.appendChild(clone);
-      });
+                    const card = icardEl.shadowRoot.querySelector('.page');
+                    if (!card) {
+                        console.error('Unable to find .page inside the ID card shadow root.');
+                        continue;
+                    }
 
-      document.body.appendChild(container);
+                    const studentName = selectedCards[i].closest('.card-wrapper').querySelector('.student-name').textContent;
+                    
+                    try {
+                        const rect = card.getBoundingClientRect();
+                        const dataUrl = await htmlToImage.toJpeg(card, {
+                            quality: 0.98,
+                            width: Math.round(rect.width) || 215,
+                            height: Math.round(rect.height) || 332,
+                            pixelRatio: 3
+                        });
+                        
+                        const base64 = dataUrl.split(',')[1];
+                        zip.file(`${studentName.replace(/\s+/g, '_')}_idcard.jpg`, base64, { base64: true });
+                    } catch (err) {
+                        console.error(`Error processing card ${i + 1}:`, err);
+                    }
+                }
 
-      html2pdf()
-        .set({
-          margin: 0.2,
-          filename: "student_iCards.pdf",
-          image: { type: "jpeg", quality: 0.98 },
-          html2canvas: { scale: 2 },
-          jsPDF: { unit: "in", format: "letter", orientation: "portrait" }
-        })
-        .from(container)
-        .save()
-        .finally(() => {
-          document.body.removeChild(container);
-        });
-    });
+                statusText.textContent = 'Creating ZIP...';
+                const content = await zip.generateAsync({ type: 'blob' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(content);
+                a.download = 'school-id-cards.zip';
+                a.click();
+            } finally {
+                downloadBtn.disabled = false;
+                statusEl.style.display = 'none';
+            }
+        }
+    
 
-    downloadJpegBtn.addEventListener("click", () => {
-      if (selectedCards.size === 0) {
-        alert("Please select at least one iCard to download.");
-        return;
-      }
 
-      const firstId = selectedCards.values().next().value;
-      const origCard = document.getElementById(`student-card-${firstId}`);
-
-      if (!origCard) return;
-
-      htmlToImage.toJpeg(origCard, { quality: 0.95, backgroundColor: "#fff" })
-        .then(dataUrl => {
-          const link = document.createElement("a");
-          link.download = `student_iCard_${firstId}.jpeg`;
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch(err => {
-          alert("Failed to generate JPEG: " + err);
-        });
-    });
-
-    renderCards();
-    updateSelectedCount();
-  </script>
-</body>
-</html>
+    </script>
+{% endblock %}

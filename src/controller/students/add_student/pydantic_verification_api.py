@@ -36,54 +36,29 @@ def verify_admission():
 
 
     verified_data = []
+    errors = []
 
+    models = {
+        "PersonalInfo": PersonalInfoModel,
+        "AcademicInfo": AcademicInfoModel,
+        "GuardianInfo": GuardianInfoModel,
+        "ContactInfo": ContactInfoModel,
+        "AdditionalInfo": AdditionalInfoModel,
+    }
 
-    try:
-        
-        personal_data = PersonalInfoModel(**grouped_data['PersonalInfo'])
-        verified_data.extend(personal_data.verified_model_dump())
-    except ValidationError as e:
-        print(e.errors())
-        error_field = e.errors()[0]["loc"][0]
-        clean_field_name = error_field.title().replace("_", " ")
-        return jsonify({'message': f"Please enter valid {clean_field_name}", "field" : error_field}), 400
-    
-    try:
-        academic_data = AcademicInfoModel(**grouped_data['AcademicInfo'])
-        verified_data.extend(academic_data.verified_model_dump())
-    except ValidationError as e:
-        print(e.errors())
-        error_field = e.errors()[0]["loc"][0]
-        clean_field_name = error_field.title().replace("_", " ")
-        return jsonify({'message': f"Please enter valid {clean_field_name}", "field" : error_field}), 400
-   
-    try:
-        guardian_data = GuardianInfoModel(**grouped_data['GuardianInfo'])
-        verified_data.extend(guardian_data.verified_model_dump())
-    except ValidationError as e:
-        print(e.errors())
-        error_field = e.errors()[0]["loc"][0]
-        clean_field_name = error_field.title().replace("_", " ")
-        return jsonify({'message': f"Please enter valid {clean_field_name}", "field" : error_field}), 400
-    
-    try:
-        contact_data = ContactInfoModel(**grouped_data['ContactInfo'])
-        verified_data.extend(contact_data.verified_model_dump())
-    except ValidationError as e:
-        print(e.errors())
-        error_field = e.errors()[0]["loc"][0]
-        clean_field_name = error_field.title().replace("_", " ")
-        return jsonify({'message': f"Please enter valid {clean_field_name}", "field" : error_field}), 400
-    
-    try:
-        additional_data = AdditionalInfoModel(**grouped_data['AdditionalInfo'])
-        verified_data.extend(additional_data.verified_model_dump())
-    except ValidationError as e:
-        print(e.errors())
-        error_field = e.errors()[0]["loc"][0]
-        clean_field_name = error_field.title().replace("_", " ")
-        return jsonify({'message': f"Please enter valid {clean_field_name}", "field" : error_field}), 400
-    
-    
-    return jsonify({'message': 'Admission details are valid.', "verifiedData" : verified_data}), 200
+    for section, model in models.items():
+        try:
+            instance = model(**grouped_data[section])
+            verified_data.extend(instance.verified_model_dump())
+        except ValidationError as e:
+            errors.extend([
+                {
+                    "field": err["loc"][0],
+                    "message": err["msg"]
+                } for err in e.errors()
+            ])
 
+    if errors:
+        return jsonify({"message": "Validation failed", "errors": errors}), 400
+
+    return jsonify({"message": "Admission details are valid", "verifiedData": verified_data}), 200

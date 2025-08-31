@@ -77,14 +77,14 @@
                 <div class="card-container">
                     <div class="card border-3">
                         <div class="card-header text-center bg-transparent border-0 p-2">
-                        <img src = {{ logo }} alt="School Logo" class="logo">
+                        <img src = {{ logo }} alt="School Logo" class="logo"  loading="lazy">
                             <h4 class="fw-bold mt-2 mb-0">{{ school }}</h4>
                             <p class="text-muted">Admit Card {{ exam }} {{ year }}</p>
                             <hr>
                         </div>
                         <div class="d-flex align-items-center p-1 mb-0" style="margin-top: -8px;">
                             <img src="{{ 'https://lh3.googleusercontent.com/d/' + student.IMAGE + '=s'+ quality if student.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
-                                alt="Student Image"
+                                alt="Student Image" loading="lazy"
                                 class="img-fluid rounded-circle"
                                 style="width: 150px; height: 200px; object-fit: cover; object-position: top; border: 2px solid #808080">
                                 <div class="ms-3 text-start">

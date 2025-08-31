@@ -34,17 +34,17 @@ def final_admission_api():
     for input_data in verified_data:
         data[input_data["field"]] = input_data["value"]
 
-    if not password:
-        return jsonify({"message": "Missing password"}), 400
+    # if not password:
+    #     return jsonify({"message": "Missing password"}), 400
 
     # 2) Lookup school
-    school = Schools.query.filter_by(id=school_id).first()
-    if not school:
-        return jsonify({"message": "School not found"}), 404
+    # school = Schools.query.filter_by(id=school_id).first()
+    # if not school:
+    #     return jsonify({"message": "School not found"}), 404
 
     # 3) Verify password
-    if not check_password_hash(school.Password, password):
-        return jsonify({"message": "Wrong password"}), 401
+    # if not check_password_hash(school.Password, password):
+    #     return jsonify({"message": "Wrong password"}), 401
       
 
     StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
@@ -70,6 +70,10 @@ def final_admission_api():
         try:
         
             encoded_image = image.split(",")[1]
+
+            school = Schools.query.filter_by(id=school_id).first()
+            if not school:
+                return jsonify({"message": "School not found"}), 404
 
             folder_id = school.students_image_folder_id
             image_id = upload_image(encoded_image, data["ADMISSION_NO"], folder_id)

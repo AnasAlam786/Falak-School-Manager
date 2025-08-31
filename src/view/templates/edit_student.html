@@ -1,13 +1,23 @@
 {% extends "base.html" %}
 {% block title %}Edit Student{% endblock %}
 {% block content %}
-<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <style>
-  /* Scope to this page only */
-  #DataForm select { color-scheme: dark; }
-  #DataForm select option { background-color: #0b0b13; color: #e5e7eb; }
+  .custom-bg-gray-darker {
+    background-color: rgba(33, 37, 41, 0.7);
+    /* #212529 with 70% opacity */
+    color: #e9ecef;
+  }
+
+  .custom-border {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+  }
+
+  .red-error-border {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2) !important;
+  }
 </style>
 
 
@@ -38,105 +48,144 @@
       </button>
     </div>
 
-    <div class="w-full">
-      <h1 class="mb-6 text-center text-2xl font-semibold tracking-tight text-white sm:text-3xl">Edit Student Data</h1>
+
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6 m-8">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">Update Student</h1>
+      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">Update student information</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+      <button id="FormSubmit" student-id="{{ student.id }}"
+        class="bg-gradient-to-r from-blue-500 to-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center">
+        <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none"
+          viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        <span id="btn-text"><i class="fa fa-paper-plane mr-2" ></i>Update</span>
+      </button>
+      </div>
+  </div>
+
+
+  <!-- Validation Summary -->
+  <div class="validation-summary hidden bg-danger/10 border border-danger/30 rounded-xl p-4 mb-5 m-8"
+    id="validationSummary">
+    <h4 class="text-danger mb-2 flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> Please fix the
+      following errors:</h4>
+    <ul class="pl-5 text-[#ff9f9f]" id="errorList"></ul>
+  </div>
+
+
+
+  <form id="DataForm">
+    <!-- Personal Information -->
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-6 shadow-section m-8">
+      <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
+        <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+          <i class="fas fa-user"></i>
+        </div>
+        <h2 class="section-title text-[1.4rem] font-semibold">Personal Information</h2>
+      </div>
+
+      <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {% set section = 'PersonalInfo' %}
+        {% for InputDetails in PersonalInfo %}
+        {% include 'html-components/input.html' with context %}
+        {% endfor %}
+
+      </div>
     </div>
 
-    <div class="card bg-dark text-light shadow-sm h-100 border-0 rounded-3 p-3 mb-4">
-
-      <form id = "DataForm" autocomplete="off">
-          
-      <!-- Personal Information -->
-      <div class="mb-8">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white sm:text-xl">Personal Information</h2>
-          <div class="ml-4 h-px flex-1 bg-white/10"></div>
+    <!-- Academic Details -->
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-6 shadow-section m-8">
+      <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
+        <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+          <i class="fas fa-graduation-cap"></i>
         </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          
-          {% set section = 'PersonalInfo' %}
-          {% for InputDetails in PersonalInfo %}
-            {% include 'html-components/input.html' with context %}
-          {% endfor %}
-
-        </div>
-      </div>
-      
-
-      <!-- Academic Details -->
-      <div class="mb-10">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white sm:text-xl">Academic Details</h2>
-          <div class="ml-4 h-px flex-1 bg-white/10"></div>
-        </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {% set section = 'AcademicInfo' %}
-          {% for InputDetails in AcademicInfo %}
-            {% include 'html-components/input.html' with context %}
-          {% endfor %}
- 
-        </div>
-      </div>
-      
-      <!-- Guardian Information -->
-      <div class="mb-10">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white sm:text-xl">Guardian Information</h2>
-          <div class="ml-4 h-px flex-1 bg-white/10"></div>
-        </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {% set section = 'GuardianInfo' %}
-          {% for InputDetails in GuardianInfo %}
-            {% include 'html-components/input.html' with context %}
-          {% endfor %}
-        </div>
+        <h2 class="section-title text-[1.4rem] font-semibold">Academic Details</h2>
       </div>
 
-      <!-- Contact Information -->
-      <div class="mb-10">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white sm:text-xl">Contact Information</h2>
-          <div class="ml-4 h-px flex-1 bg-white/10"></div>
-        </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {% set section = 'ContactInfo' %}
-          {% for InputDetails in ContactInfo %}
-            {% include 'html-components/input.html' with context %}
-          {% endfor %}
-        </div>
+      <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {% set section = 'AcademicInfo' %}
+        {% for InputDetails in AcademicInfo %}
+        {% include 'html-components/input.html' with context %}
+        {% endfor %}
+
       </div>
-      
-      <!-- Additional/Logistical Information -->
-      <div class="mb-10">
-        <div class="mb-4 flex items-center justify-between">
-          <h2 class="text-lg font-semibold text-white sm:text-xl">Additional / Logistical</h2>
-          <div class="ml-4 h-px flex-1 bg-white/10"></div>
+    </div>
+
+    <!-- Guardian Information -->
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-6 shadow-section m-8">
+      <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
+        <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+          <i class="fas fa-user-friends"></i> 
         </div>
-        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <!-- School to Home Distance -->
-          {% set section = 'AdditionalInfo' %}
-          {% for InputDetails in AdditionalInfo %}
-            {% include 'html-components/input.html' with context %}
-          {% endfor %}
-          <!-- Total Due -->
-        </div>
+        <h2 class="section-title text-[1.4rem] font-semibold">Guardian Information</h2>
       </div>
 
-      <div class="p-4">
+      <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {% set section = 'GuardianInfo' %}
+        {% for InputDetails in GuardianInfo %}
+        {% include 'html-components/input.html' with context %}
+        {% endfor %}
+
+      </div>
+    </div>
+
+
+    <!-- Contact Information -->
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-6 shadow-section m-8">
+      <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
+        <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+          <i class="fas fa-address-book"></i>
+        </div>
+        <h2 class="section-title text-[1.4rem] font-semibold">Contact Information</h2>
+      </div>
+
+      <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {% set section = 'ContactInfo' %}
+        {% for InputDetails in ContactInfo %}
+        {% include 'html-components/input.html' with context %}
+        {% endfor %}
+
+      </div>
+    </div>
+
+
+    <!-- Additional/Logistical Information -->
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-6 shadow-section m-8">
+      <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
+        <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+          <i class="fas fa-info-circle"></i>
+        </div>
+        <h2 class="section-title text-[1.4rem] font-semibold">Additional Information</h2>
+      </div>
+
+      <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        {% set section = 'AdditionalInfo' %}
+        {% for InputDetails in AdditionalInfo %}
+        {% include 'html-components/input.html' with context %}
+        {% endfor %}
+
+      </div>
+    </div>
+     
+    <div class="p-4">
         {% set section = 'PersonalInfo' %}
         {% set image_url = 'https://lh3.googleusercontent.com/d/' ~ student.IMAGE if student.IMAGE else '' %}
         {% include 'html-components/image-uploader.html' with context %}
-      </div>
-      
-      <div class="mt-4 flex justify-center">
-        <button id="FormSubmit" class="inline-flex items-center justify-center rounded-lg bg-blue-600 px-6 py-2 text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#0b0b13] transition" onclick = "finalUpdate('{{student.id}}')">
-          <svg id="btn-spinner" class="hidden animate-spin w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
-          <span id="btn-text">Update</span>
-        </button>
-      </div>
+    </div>
 
-    </form>
-</div>
+  </form>
+
+
 
 
 <script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
@@ -192,11 +241,13 @@
   });
 
 
-  let verifiedData = null;
   
-  async function finalUpdate(studentId) {
-
+  document.getElementById('FormSubmit').addEventListener('click', async function () {
     const form = document.getElementById('DataForm');
+    studentId = document.getElementById('FormSubmit').getAttribute('student-id');
+
+    document.getElementById('validationSummary').classList.add('hidden');
+    document.getElementById('errorList').innerHTML = '';
 
     // Handle DataForm Button
     var imageUpload = document.getElementById('imageInput');
@@ -220,18 +271,24 @@
       }
       
 
-      const pydanticResponse = await pydanticVerification(formData);
-      const pydanticData = await pydanticResponse.json();
-      verifiedData = pydanticData.verifiedData
-      if (!pydanticResponse.ok) {
+      const { ok, pydanticData } = await pydanticVerification(formData)
+      verifiedData = pydanticData.verifiedData;
+      console.log("Pydantic Data: ", verifiedData);
+      
+      if (!ok) {
+        console.error("Pydantic validation failed:", pydanticData.errors);
         showAlert(pydanticResponse.status, pydanticData.message || "Something went wrong");
         return;
       }
-
-      // After pydantic ok, check update conflicts
-      const conflictResp = await conflictVerification(studentId, verifiedData)
+      
+      // const verifiedData = pydanticData.verifiedData;
+      // console.log("Verified Data: ", verifiedData);
+      const conflictResp = await conflictVerification(studentId, verifiedData);
       const conflictData = await conflictResp.json();
       if (!conflictResp.ok) {
+        document.getElementById('errorList').innerHTML = (`<li>${conflictData.message}</li>`);
+        document.getElementById('validationSummary').classList.remove('hidden');
+        console.error("Conflict verification failed:", conflictData.errors);
         showAlert(conflictResp.status, conflictData.message || 'Conflict found');
         return;
       }
@@ -283,7 +340,7 @@
       submitBtn.disabled = false;
       btnText.textContent = 'Submit';
     }
-  };
+  });
   // Handle DataForm Button END
 
   function getFormData(id) {
@@ -294,23 +351,46 @@
 
 
 
-  async function pydanticVerification(formData){
+  async function pydanticVerification(formData) {
     let formDataObject = Object.fromEntries(formData.entries());
-    
+
     try {
       const pydanticResponse = await fetch("/api/pydantic_verification", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formDataObject)
       });
 
-      return pydanticResponse;
+      const pydanticData = await pydanticResponse.json();
+
+      if (!pydanticResponse.ok) {
+
+        pydanticData.errors.forEach(error => {
+          const errorField = document.getElementById(error.field)
+          const errorElement = errorField.parentElement.querySelector(".error-message");
+
+          errorElement.style.display = 'block';
+          errorElement.textContent = error.message;
+          errorField.classList.add('red-error-border');
+
+          
+        });
+        // scroll to the first error field
+        errorField = document.getElementById(pydanticData.errors[0].field);
+        errorField.focus();
+        errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return { ok: false, pydanticData: pydanticData };
+      }
+      // If validation is successful, return the verified data
+      return { ok: true, pydanticData: pydanticData };
 
     } catch (err) {
       showAlert(404, "An error occurred while verifying the form data.");
-      throw new Error("Fetch error", err);
+      console.error("Error occurred while submitting the form:", err);
     }
   }
+
+
 
   async function conflictVerification(studentId, verifiedData){
     

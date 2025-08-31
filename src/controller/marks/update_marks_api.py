@@ -12,7 +12,7 @@ update_marks_api_bp = Blueprint('update_marks_api_bp',   __name__)
 @update_marks_api_bp.route('/update_marks_api', methods=['POST'])
 def update_marks_api():
     data = request.json
-
+    
     marks_id = data.get('marks_id')
     score = data.get('score')
     student_id = data.get('student_id')
@@ -22,12 +22,16 @@ def update_marks_api():
     current_session_id = session.get("session_id")
     school_id = session.get("school_id")
 
+    
+
     if not all([student_id, subject_id, exam_id, current_session_id, school_id]):
         return jsonify({"message": "Missing required fields"}), 400
 
     # 🟩 CASE 1: Update existing mark
     if marks_id and marks_id != "":
+        
         student_marks = StudentsMarks_duplicate.query.filter_by(id=marks_id).first()
+        print("Received data for update:", data)
         if student_marks:
             student_marks.score = score
             db.session.commit()

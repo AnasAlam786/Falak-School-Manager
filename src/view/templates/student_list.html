@@ -2,150 +2,714 @@
 {% block title %}Students Data{% endblock %}
 {% block content %}
 <style>
-  .modal-content,
-  .accordion-body {
-    background: #1e1e2f;
+  /* Custom styles to match our theme */
+  .search-box {
+    background: #1e1e1e;
+    border: 1px solid #333;
+  }
+
+  .custom-select {
+    background: #1e1e1e;
+    border: 1px solid #333;
+  }
+
+  .modal-content {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
     border-radius: 15px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    border: 1px solid #4361ee;
   }
 
   .modal-header {
     background: linear-gradient(90deg, #4e54c8, #8f94fb);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
   }
 
-  .student-card-body {
-    background: #2a2a3d;
-    border-radius: 15px;
-    padding: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+
+
+
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
   }
+
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #2d3748;
+    transition: .4s;
+    border-radius: 34px;
+  }
+
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+  }
+
+  input:checked+.slider {
+    background-color: #4361ee;
+  }
+
+  input:checked+.slider:before {
+    transform: translateX(30px);
+  }
+
+  .info-badge {
+    background: rgba(67, 97, 238, 0.15);
+    border: 1px solid rgba(67, 97, 238, 0.3);
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    max-width: fit-content;
+  }
+
+  .detail-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  /* Fix for select dropdown */
+  .dark-select {
+    background-color: #1e1e1e;
+    color: white;
+  }
+
+  .dark-select option {
+    background-color: #1e1e1e;
+    color: white;
+  }
+
+  /* Roll number badge fix */
+  .roll-badge {
+    background: #4361ee;
+    color: white;
+    border: 2px solid #2a2a3d;
+  }
+
+  /* Action buttons at bottom */
+  .action-button {
+    border-top: 1px solid #333;
+    transition: all 0.2s ease;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  /* Phone badge styling */
+  .phone-badge {
+    background: rgba(67, 97, 238, 0.15);
+    border: 1px solid rgba(67, 97, 238, 0.3);
+    border-radius: 8px;
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    max-width: fit-content;
+    transition: all 0.2s ease;
+  }
+
+  .phone-badge:hover {
+    background: rgba(67, 97, 238, 0.3);
+    transform: translateY(-2px);
+  }
+
+
 
   .student-image {
     border: 3px solid #8f94fb;
-    border-radius: 50%;
+    object-position: top;
     object-fit: cover;
-    width: 150px;
-    height: 150px;
+    display: block;
+    width: 120px;
+    height: 162px;
   }
 
-  .table th,
-  .table td {
-    background-color: #34354a;
+
+  .students-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 420px));
+    gap: 16px;
+    /* space between cards */
+    justify-content: center;
+    /* leftover space only on sides */
+    align-items: start;
+    width: 100%;
+    box-sizing: border-box;
   }
 
-  .table th {
-    background-color: #2a2a3d;
+  /* Card styling */
+  .student-card {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    width: 100%;
+    /* take full width of grid track */
+    max-width: 420px;
+    /* never exceed 420px */
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #333;
+    position: relative;
+    height: auto;
   }
 
-  .modal-footer {
-    background: #2a2a3d;
-  }
-
-  .accordion-button {
-    box-shadow: 0 0 10px rgba(0, 0, 255, 0.5);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .accordion-button:not(.collapsed) {
-    box-shadow: 0 0 15px rgba(0, 0, 255, 0.7);
-  }
-
-  .card:hover {
+  .student-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
-    transition: all 0.3s ease-in-out;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    border-color: #4361ee;
+  }
+
+  /* On very small screens (phones), force 1 card per row */
+  @media (max-width: 480px) {
+    .students-grid {
+      grid-template-columns: 1fr;
+      /* single column full width */
+    }
+  }
+
+  footer {
+    text-align: center;
+    margin-top: 50px;
+    padding: 20px;
+    color: #94a3b8;
+    font-size: 14px;
   }
 </style>
 
-<div class="container" id="student-container">
-  <div class="row mb-3">
 
-    <div class="col-12 col-md-5 mb-2">
-      <select class="form-select form-select-lg" id="classView" onchange="applyFilters()">
-        <option selected value="All"> All Classes </option>
+<!-- Modal CSS -->
+<style>
+  .student-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 20px;
+  }
+
+  .student-modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .student-modal-content {
+    background: linear-gradient(165deg, #1a1a1a 0%, #242424 100%);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 32rem;
+    /* Increased from max-w-md to slightly larger */
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .student-modal.active .student-modal-content {
+    transform: scale(1);
+  }
+
+  .student-modal-header {
+    background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .school-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .school-icon {
+    font-size: 24px;
+    color: white;
+  }
+
+  .school-name {
+    color: white;
+    font-size: 1.3rem;
+    /* Slightly larger */
+    font-weight: 600;
+  }
+
+  .close-btn {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .student-modal-body {
+    padding: 24px;
+    /* Increased padding */
+    overflow-y: auto;
+    flex-grow: 1;
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+  }
+
+  /* Hide scrollbar for Chrome, Safari and Opera */
+  .student-modal-body::-webkit-scrollbar {
+    display: none;
+  }
+
+  .student-profile {
+    text-align: center;
+    margin-bottom: 24px;
+    /* Increased margin */
+  }
+
+  .student-img {
+    width: 110px;
+    /* Slightly larger */
+    height: 110px;
+    /* Slightly larger */
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #2563eb;
+    margin: 0 auto 14px;
+    /* Increased margin */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  .student-name {
+    font-size: 1.6rem;
+    /* Increased font size */
+    font-weight: 600;
+    color: white;
+    margin-bottom: 5px;
+  }
+
+  .student-class {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    /* Increased font size */
+  }
+
+  .details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+  }
+
+  .details-table tr {
+    border-bottom: 1px solid #333;
+    transition: background 0.2s;
+  }
+
+  .details-table tr:last-child {
+    border-bottom: none;
+  }
+
+  .details-table tr:hover {
+    background: #2a2a2a;
+  }
+
+  .details-table th {
+    text-align: left;
+    padding: 14px 12px;
+    /* Increased padding */
+    width: 35%;
+    color: #a0a0a0;
+    font-weight: 500;
+    vertical-align: middle;
+    /* Center vertically */
+    font-size: 1rem;
+    /* Increased font size */
+  }
+
+  .details-table td {
+    padding: 14px 12px;
+    /* Increased padding */
+    color: #f0f0f0;
+    /* Lighter color for better contrast */
+    font-weight: 500;
+    vertical-align: middle;
+    /* Center vertically */
+    font-size: 1rem;
+    /* Increased font size */
+    background-color: #232323;
+    /* Different background for details column */
+    border-radius: 0 8px 8px 0;
+  }
+
+  .sibling-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    /* Increased gap */
+  }
+
+  .sibling-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    /* Increased padding */
+    background: #2a2a2a;
+    border-radius: 8px;
+  }
+
+  .sibling-info {
+    flex-grow: 1;
+  }
+
+  .sibling-name {
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    /* Increased font size */
+  }
+
+  .sibling-class {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+    /* Increased font size */
+  }
+
+  .view-btn {
+    background: transparent;
+    border: 1px solid #2563eb;
+    color: #2563eb;
+    padding: 5px 10px;
+    /* Slightly larger */
+    border-radius: 5px;
+    font-size: 0.9rem;
+    /* Increased font size */
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .view-btn:hover {
+    background: rgba(37, 99, 235, 0.1);
+  }
+
+  .contact-link {
+    color: #3b82f6;
+    /* Brighter blue for better visibility */
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s;
+    font-size: 1rem;
+    /* Increased font size */
+    font-weight: 500;
+  }
+
+  .contact-link:hover {
+    color: #60a5fa;
+    text-decoration: underline;
+  }
+
+  .student-modal-footer {
+    padding: 18px 24px;
+    /* Increased padding */
+    border-top: 1px solid #333;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .action-btn {
+    background: #2d2d2d;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 1rem;
+    /* Increased font size */
+  }
+
+  .action-btn:hover {
+    background: #3d3d3d;
+  }
+
+  @media (max-width: 480px) {
+    .student-modal-content {
+      max-width: 100%;
+    }
+
+    .details-table th,
+    .details-table td {
+      padding: 12px 10px;
+      font-size: 0.95rem;
+    }
+
+    .student-name {
+      font-size: 1.4rem;
+    }
+
+    .student-modal-header {
+      padding: 18px;
+    }
+
+    .student-modal-body {
+      padding: 20px;
+    }
+  }
+</style>
+<!-- Modal CSS END-->
+<div class="p-3 mx-auto">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">Student Management</h1>
+      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">Manage all students and their information</p>
+    </div>
+    <div class="mt-4 md:mt-0">
+      <button onclick="window.location.href='/admission'"
+        class="bg-gradient-to-r from-blue-500 to-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center">
+        <i class="fas fa-plus mr-2"></i> Add New Student
+      </button>
+    </div>
+  </div>
+
+
+  <!-- Search and Filter Section -->
+  <div class="flex flex-col gap-3 mb-6 md:mb-10">
+    <div class="search-box p-3 rounded-lg md:rounded-xl">
+      <div class="flex items-center">
+        <i class="fas fa-search text-gray-500 mr-3"></i>
+        <input type="text" id="search-input" oninput="applyFilters()"
+          placeholder="Search by name, class or roll number..."
+          class="w-full bg-transparent border-0 text-white focus:outline-none text-sm md:text-base">
+      </div>
+    </div>
+    <!-- Dropdown -->
+    <div class="relative">
+      <select
+        class="custom-select w-full p-3 rounded-lg md:rounded-xl appearance-none cursor-pointer text-gray-400 text-sm md:text-base"
+        id="classView" onchange="applyFilters()">
+        <option selected value="All">All Classes</option>
         {% if classes %}
         {% for class in classes %}
         <option value="{{ class.id }}">{{ class.CLASS }}</option>
         {% endfor %}
         {% endif %}
       </select>
+      <i
+        class="fas fa-chevron-down absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
     </div>
-
-    <div class="col-12 col-md-5 mb-2">
-      <input type="text" id="search-input" oninput="applyFilters()" class="form-control form-control-lg"
-        placeholder="Search by Name, Class or Roll Number">
-    </div>
-
-
   </div>
 
-  <!-- Unified Card View for All Screen Sizes -->
-  {% if not data %}
-  <div class="alert alert-warning text-center" role="alert">
-    <strong>No students found!</strong>
-  </div>
-  {% endif %}
-  <div class="row" id="StudentData">
-    {% for row in data %}
-    <div class="col-md-6 col-lg-4 mb-4 student-card" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}"
-      data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
-      <div class="card shadow-lg h-100 border-0" style="border-radius: 12px;">
+  <div class="stats-accordion px-2 py-3">
 
-        <!-- Top-right corner badges -->
+    <!-- Accordion Header -->
+    <div id="statsAccordion"
+      class="flex justify-between items-center bg-gradient-to-br from-[#1a1a2e] to-[#16213e] rounded-xl p-3 cursor-pointer shadow-md transition-all duration-300 hover:from-[#16213e] hover:to-[#0f3460] hover:border-[#4361ee] hover:shadow-xl">
+      <h2 class="flex items-center text-[#8f94fb] font-semibold text-lg">
+        <i class="fas fa-chart-line mr-3 text-xl"></i> Student Statistics Overview
+      </h2>
+      <span class="accordion-icon text-[#8f94fb] transition-transform duration-300">
+        <i class="fas fa-chevron-down"></i>
+      </span>
+    </div>
 
-        {% if not row.AADHAAR or row.AADHAAR == "999999999999" %}
-        <div class="position-absolute top-0 end-0 p-1 text-end" style="z-index: 10;">
-          <span class="badge bg-danger mb-1">No Aadhar</span><br>
-        </div>
-        {% endif %}
-        {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
-        <div class="position-absolute top-0 start-0 p-1 text-start" style="z-index: 10;">
-          <span class="badge bg-warning text-dark">RTE</span>
-        </div>
-        {% endif %}
+    <!-- Accordion Content -->
+    <div class="accordion-content overflow-hidden transition-all duration-500 ease-in-out mt-4 max-h-0">
+      <div class="pb-4">
 
+        <!-- Stats Grid -->
+        <div class="grid gap-6 justify-center" style="grid-template-columns: repeat(auto-fit, minmax(200px, 420px));">
+          <!-- Total Students Card -->
+          <div
+            class="stat-card relative w-full bg-gradient-to-br from-[#1e1e1e] to-[#2a2a2a] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1.5 hover:border-[#4361ee] transition-all duration-300 overflow-hidden">
+            <!-- Purple Top Line -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb]"></div>
 
-        <div class="d-flex align-items-center p-3">
-
-          <img
-            src="{{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' if row.IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"
-            alt="Student Image" class="img-fluid rounded-circle"
-            style="width: 130px; height: 180px; object-fit: cover; object-position: top; border: 2px solid #ffffff">
-          <div class="ms-3 text-start">
-            <a class="student-name fw-bold mb-0" onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{
-              row.STUDENTS_NAME }}</a><br>
-            <p class="student-father text-muted mb-0"><small>{{ row.FATHERS_NAME }}</small></p>
-            <p class="student-class-roll fw-bold mt-3">{{ row.CLASS }} - {{ row.ROLL }}</p>
-            <!--<p class="text-muted">{{ row.ADMISSION_NO }}</p>-->
-            <span class="badge bg-success">{{ row.DOB }}</span>
-            <div class="mt-2">
-              <a href="tel:{{ row['PHONE'] }}" class="text-decoration-none">
-                <i class="fa fa-phone"></i> <strong>{{ row.PHONE }}</strong>
-              </a>
+            <div
+              class="stat-icon w-12 h-12 flex items-center justify-center rounded-full bg-[#4f54c820] text-[#8f94fb] text-2xl mb-4">
+              <i class="fas fa-user-plus"></i>
             </div>
 
+            <h3 class="stat-title text-[#a0a7ff] font-medium mb-2 text-lg">Total Students</h3>
+            <div class="stat-value text-white text-3xl font-bold mb-2">{{ total_students }}</div>
+
+            <div class="stat-meta flex items-center font-bold text-sm  mb-4 {% if total_growth_percentage > 0 %}text-green-500{% else %}text-red-500{% endif %}">
+              <span>{% if total_growth_percentage > 0 %}+{% endif %}{{ increased_students }} students YoY</span>
+              <i class="fas fa-chart-line ml-2 {% if total_growth_percentage > 0 %}text-green-500{% else %}text-red-500{% endif %}"></i>
+            </div>
+
+            <ul class="stat-details text-[#8a92b2] text-sm border-t border-[#333] pt-4 space-y-2">
+              <li class="flex justify-between"><span>New Admissions:</span> <span class="text-white font-medium">{{
+                  new_students }}</span></li>
+              <li class="flex justify-between"><span>Old Students:</span> <span class="text-white font-medium">{{
+                  old_students }}</span></li>
+            </ul>
+          </div>
+
+          <!-- Student Growth Card -->
+          <div
+            class="stat-card relative w-full bg-gradient-to-br from-[#1e1e1e] to-[#2a2a2a] rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1.5 hover:border-[#4361ee] transition-all duration-300 overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#4e54c8] to-[#8f94fb]"></div>
+
+            <div
+              class="stat-icon w-12 h-12 flex items-center justify-center rounded-full bg-[#4f54c820] text-[#8f94fb] text-2xl mb-4">
+              <i class="fas fa-chart-bar"></i>
+            </div>
+
+            <h3 class="stat-title text-[#a0a7ff] font-medium mb-2 text-lg">Student Growth</h3>
+            <div class="stat-value text-white text-3xl font-bold mb-2">{% if total_growth_percentage > 0 %}+{% endif %}{{ total_growth_percentage | round(1) }}%</div>
+
+            <div class="stat-meta flex items-center text-sm font-bold {% if new_students_growth_percentage > 0 %}text-green-500{% else %}text-red-500{% endif %} mb-4">
+              <span>{% if new_students_growth_percentage > 0 %}+{% endif %}{{ new_students_growth_percentage | round(1) }}% from last year</span>
+              <i class="f ml-2 {% if new_students_growth_percentage > 0 %}text-green-500 fas fa-arrow-up {% else %}text-red-500 fas fa-arrow-down{% endif %}"></i>
+            </div>
+
+
+
+            <ul class="stat-details text-[#8a92b2] text-sm border-t border-[#333] pt-4 space-y-2">
+               <li class="flex justify-between"><span>Last Year New Admissions:</span> <span
+                  class="text-white font-medium">{{ new_students_prev }}</span></li>
+              <li class="flex justify-between"><span>Last Year Students:</span> 
+                <span class="text-white font-medium">{{ previous_year_students_total }}</span>
+              </li>
+             
+            </ul>
           </div>
 
         </div>
-        <div class="d-flex border-top border-secondary" style="height: 50px;">
-          <div class="w-50 border-end border-secondary">
-            <button class="btn btn-outline-primary fw-bold w-100 h-100 border-0"
-              onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')" style="border-radius: 0;">
-              Student Details
-            </button>
-          </div>
-          <div class="w-50 border-start">
-            <!-- <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
-                onclick="openFeesModal('{{ row.id }}', '{{ row.family_id }}')" style="border-radius: 0;">
-                Pay Fee
-            </button> -->
-            <button class="btn btn-outline-success fw-bold w-100 h-100 border-0"
-                onclick="window.location.href='/update_student_info?id={{ row.id }}'" style="border-radius: 0;">
-                Edit Student
-            </button>
+      </div>
+    </div>
 
+  </div>
+
+  <!-- Student Cards Grid -->
+  <div class="students-grid" id="StudentData">
+    {% if not data %}
+    <div class="col-span-3">
+      <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded-xl p-6 text-center">
+        <i class="fas fa-exclamation-triangle text-yellow-500 text-4xl mb-4"></i>
+        <h3 class="text-xl font-bold text-white mb-2">No Students Found</h3>
+        <p class="text-gray-400">Try adjusting your search criteria or add new students</p>
+      </div>
+    </div>
+    {% endif %}
+
+    {% for row in data %}
+    <div class="student-card overflow-hidden" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}"
+      data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
+      <!-- Badges - Always visible -->
+      <div class="absolute top-4 right-4 flex flex-col items-end z-10">
+        {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
+        <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded">RTE</span>
+        {% endif %}
+      </div>
+
+
+
+
+      <!-- Student Card Content - Updated layout -->
+      <div class="p-4">
+        <div class="flex items-start">
+          <!-- Student Image on LEFT -->
+          <div class="relative mr-4 flex-shrink-0">
+            <img src="{% if row.IMAGE %}
+                        {{ 'https://lh3.googleusercontent.com/d/' + row.IMAGE + '=s200' }}
+                    {% else %}
+                        {{ url_for('static', filename=('no-student-boy-image.png' if row.GENDER == 'Male' else 'no-student-girl-image.png')) }}
+                    {% endif %}" alt="Student Image" class="student-image" loading="lazy">
+            <div
+              class="absolute -bottom-0 -right-1 roll-badge rounded-full w-8 h-8 flex items-center justify-center border-2 border-gray-800">
+              <span class="text-xl font-bold text-white">{{ row.ROLL }}</span>
+            </div>
+          </div>
+
+          <!-- Student Details on RIGHT -->
+          <div class="flex-1 min-w-0">
+            <h3 class="text-xl font-bold text-blue-400 mb-0 truncate">
+              <a class="cursor-pointer hover:text-blue-300"
+                onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">{{ row.STUDENTS_NAME }}</a>
+            </h3>
+            <p class="text-gray-400 text-md mb-2 truncate"> C/O Mr. {{ row.FATHERS_NAME }}</p>
+
+            <!-- Larger class badge -->
+            <div
+              class="bg-blue-900 bg-opacity-50 text-blue-400 px-2 py-1 rounded text-base font-medium mb-1 inline-block">
+              {{ row.CLASS }}
+            </div>
+
+            <div class="text-gray-400 text-sm truncate mb-2">
+              <span class="text-lg">🎂</span>
+              {{ row.DOB }}
+            </div>
+
+            <!-- Contact -->
+            <a href="tel:{{ row.PHONE }}" class="phone-badge">
+              <i class="fas fa-phone text-blue-400 mr-2"></i>
+              <span class="text-white text-sm font-semibold">{{ row.PHONE }}</span>
+            </a>
           </div>
         </div>
+      </div>
+
+      <!-- Action Buttons at Bottom -->
+      <div class="grid grid-cols-2 border-t border-gray-700 mt-auto">
+        <button
+          class="action-button bg-blue-800 bg-opacity-20 text-blue-400 hover:text-white hover:bg-[rgba(67,97,238,0.2)] rounded-bl-lg"
+          onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')">
+          <i class="fas fa-user-circle mr-2"></i> Details
+        </button>
+        <button
+          class="action-button bg-green-800 bg-opacity-20 text-green-400 hover:bg-[rgba(65,233,135,0.2)] hover:text-white rounded-br-lg"
+          onclick="window.location.href='/update_student_info?id={{ row.id }}'">
+          <i class="fas fa-edit mr-2"></i> Edit
+        </button>
       </div>
     </div>
     {% endfor %}
@@ -153,114 +717,142 @@
 </div>
 
 
+<div class="student-modal" id="studentDetailsModal">
+  <div class="student-modal-content">
+    <div class="student-modal-header">
+      <div class="school-info">
+        <i class="fas fa-school school-icon"></i>
+        <div class="school-name">Falak Public School</div>
+      </div>
+      <button class="close-btn" onclick="closeModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
 
-<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-labelledby="studentDetailsLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header d-flex justify-content-center align-items-center w-100">
-        <div class="d-flex justify-content-center align-items-center w-100">
-          <h5 class="modal-title">
-            <i class="fas fa-school"></i>&nbsp;&nbsp;Falak Public School
-          </h5>
+    <div class="student-modal-body" id='studentsDetailsModalBody'>
+
+    </div>
+
+    <div class="student-modal-footer">
+      <button class="action-btn" onclick="closeModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+<div id="studentDetailsModal"
+  class="fixed inset-0 hidden overflow-y-auto bg-black bg-opacity-50 transition-opacity backdrop-blur-sm z-50 transition-opacity">
+  <div class="flex min-h-screen items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-lg bg-white shadow-xl">
+      <!-- Modal Header -->
+      <div class="rounded-t-lg bg-blue-600 p-4 justify-between items-center">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <i class="fas fa-school text-xl text-white mr-3"></i>
+            <h3 class="text-xl font-bold text-white">Falak Public School</h3>
+          </div>
+          <button type="button" class="text-white hover:text-gray-200 focus:outline-none"
+            onclick="document.getElementById('studentDetailsModal').classList.add('hidden');">
+            <i class="fas fa-times text-xl"></i>
+          </button>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div id="modalBody" class="modal-body">
 
-
+      <!-- Modal Body -->
+      <div class="max-h-[70vh] overflow-y-auto p-6" id='studentsDetailsModalBody'>
 
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+      <!-- Modal Footer -->
+      <div class="rounded-b-lg border-t bg-gray-50 px-6 py-4">
+        <button type="button" class="rounded-lg bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 focus:outline-none"
+          onclick="document.getElementById('studentDetailsModal').classList.add('hidden');">
+          Close
+        </button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Fees Modal -->
 <div class="modal fade" id="feesModal" tabindex="-1" aria-labelledby="feesModal" aria-hidden="true">
   <div class="modal-dialog modal-lg">
-
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title fs-4 d-flex align-items-center">
-          <i class="bi bi-credit-card me-2"></i> Pay Fees
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="flex items-center">
+          <i class="fas fa-credit-card text-white text-xl mr-3"></i>
+          <h5 class="modal-title text-white">Pay Fees</h5>
+        </div>
+        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <div id="feesModalBody" class="modal-body p-0">
-
+      <div id="feesModalBody" class="modal-body">
+        <!-- Content will be loaded dynamically -->
       </div>
     </div>
   </div>
 </div>
 
-
-
+<!-- Payment Verification Modal -->
 <div class="modal fade" id="verify" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-      <!-- Header with gradient background -->
-      <div class="modal-header bg-primary text-white py-3">
-        <div class="d-flex align-items-center w-100">
-          <i class="fas fa-check-circle fa-lg me-3"></i>
-          <h4 class="modal-title mb-0 fw-semibold">Verify Payment Received</h4>
+    <div class="modal-content">
+      <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4">
+        <div class="flex items-center w-full">
+          <i class="fas fa-check-circle text-xl mr-3"></i>
+          <h4 class="modal-title font-semibold">Verify Payment Received</h4>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
       </div>
 
-      <div class="modal-body py-4">
-        <form id="paymentVerificationForm" class="px-2">
-          <!-- Confirmation checkbox -->
-          <div class="form-check mb-4">
-            <input class="form-check-input mt-1" type="checkbox" value="" id="verifyCheckbox" required>
-            <label class="form-check-label fw-medium text-white ms-2" for="verifyCheckbox">
-              I confirm that the payment has been successfully received
-            </label>
-          </div>
-
-          <!-- Date input with improved styling -->
+      <div class="modal-body py-4 px-5">
+        <form id="paymentVerificationForm">
           <div class="mb-4">
-            <label for="paymentDate" class="form-label fw-medium text-secondary mb-2">
-              <i class="far fa-calendar-alt me-2"></i>Payment Receipt Date
+            <label class="flex items-center cursor-pointer">
+              <input class="form-checkbox h-5 w-5 text-blue-600 rounded" type="checkbox" id="verifyCheckbox" required>
+              <span class="ml-2 text-white">I confirm that the payment has been successfully received</span>
             </label>
-            <div class="input-group">
-              <span class="input-group-text bg-light-subtle">
-                <i class="far fa-calendar text-primary"></i>
-              </span>
-              <input type="date" class="form-control border-start-0" id="paymentDate" required>
-            </div>
-            <div class="form-text text-muted mt-2">
-              Select the date when payment was received
-            </div>
           </div>
 
-          <!-- Success message as alert -->
-          <div id="paymentSuccessMessage" class="alert alert-success d-flex align-items-center mt-4 py-2 d-none">
-            <i class="fas fa-check-circle me-2"></i>
-            <span class="small">Fees Paid Successfully! Now you can send message by clicking the send message button below.</span>
+          <div class="mb-4">
+            <label class="block text-gray-400 mb-2">
+              <i class="far fa-calendar-alt mr-2"></i>Payment Receipt Date
+            </label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <i class="far fa-calendar text-blue-500"></i>
+              </div>
+              <input type="date"
+                class="bg-gray-800 border border-gray-700 text-white rounded-lg block w-full pl-10 p-2.5"
+                id="paymentDate" required>
+            </div>
+            <p class="text-gray-500 text-sm mt-1">Select the date when payment was received</p>
+          </div>
+
+          <div id="paymentSuccessMessage"
+            class="bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-lg mt-4 hidden">
+            <div class="flex items-center">
+              <i class="fas fa-check-circle mr-2"></i>
+              <span>Fees Paid Successfully! Now you can send message by clicking the send message button below.</span>
+            </div>
           </div>
         </form>
       </div>
 
-      <!-- Footer with improved button styling -->
-      <div class="modal-footer bg-light-subtle py-3">
-        <div class="d-flex justify-content-between w-100 align-items-center">
-          <button type="button" class="btn btn-outline-secondary rounded-1 px-3 py-2" id="verifyBackButton" data-bs-target="#feesModal" data-bs-toggle="modal">
-            <i class="fas fa-arrow-left me-2"></i>Back
+      <div class="modal-footer bg-gray-800 py-3 px-5">
+        <div class="flex justify-between w-full">
+          <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
+            id="verifyBackButton" data-bs-target="#feesModal" data-bs-toggle="modal">
+            <i class="fas fa-arrow-left mr-2"></i>Back
           </button>
 
-          <button type="button" class="btn btn-outline-secondary rounded-1 d-none px-3 py-2" id="verifyCloseButton" data-bs-dismiss="modal">
-            <i class="fas fa-times me-2"></i>Close
-          </button>
-          
-          <div class="d-flex gap-2">
-            <button type="submit" form="paymentVerificationForm" class="btn btn-primary rounded-1 px-4 py-2" id="finalPay" onclick="Pay()" disabled>
-              <i class="fas fa-check-circle me-2"></i>Confirm Payment
+          <div class="flex space-x-3">
+            <button type="submit" form="paymentVerificationForm"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" id="finalPay" onclick="Pay()"
+              disabled>
+              <i class="fas fa-check-circle mr-2"></i>Confirm Payment
             </button>
-            
-            <button type="button" id="messageButton" class="btn btn-success rounded-1 px-4 py-2" onclick="sendMessage()" disabled>
-              <i class="bi bi-whatsapp me-1"></i> 
-              Send Message
+
+            <button type="button" id="messageButton"
+              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" onclick="sendMessage()" disabled>
+              <i class="fab fa-whatsapp mr-2"></i>Send Message
             </button>
           </div>
         </div>
@@ -269,20 +861,21 @@
   </div>
 </div>
 
-
 <!-- Optional JavaScript for interaction -->
+<script src="{{ url_for('static', filename='students.js') }}"></script>
+<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     const checkbox = document.getElementById('verifyCheckbox');
     const submitBtn = document.getElementById('finalPay');
     const dateInput = document.getElementById('paymentDate');
 
     const today = new Date()
-    currentDate = `${today.getDate()}-${today.getMonth()+1}-${today.getFullYear()}`
+    currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`
     dateInput.value = currentDate;
 
-    checkbox.addEventListener('change', function() {
-      if(this.checked) {
+    checkbox.addEventListener('change', function () {
+      if (this.checked) {
         submitBtn.disabled = false;
       } else {
         submitBtn.disabled = true;
@@ -291,61 +884,19 @@
   });
 
 
+  const header = document.getElementById('statsAccordion');
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.accordion-icon');
 
-  function attachDateMask(selector, format) {
-        const el = document.querySelector(selector);
-        if (!el) return;
+  header.addEventListener('click', () => {
+    const isOpen = content.style.maxHeight && content.style.maxHeight !== "0px";
+    content.style.maxHeight = isOpen ? "0" : content.scrollHeight + "px";
+    icon.classList.toggle('rotate-180');
+  });
 
-        el.addEventListener("input", e => {
-          let value = e.target.value;
-          let numbers = value.replace(/\D/g, "").slice(0, 8);
-          let newValue = "";
-
-          if (format === "DD-MM-YYYY") {
-            if (numbers.length >= 5) {
-              newValue = `${numbers.slice(0,2)}-${numbers.slice(2,4)}-${numbers.slice(4)}`;
-            } else if (numbers.length >= 3) {
-              newValue = `${numbers.slice(0,2)}-${numbers.slice(2)}`;
-            } else {
-              newValue = numbers;
-            }
-          } else if (format === "YYYY-MM-DD") {
-            if (numbers.length >= 7) {
-              newValue = `${numbers.slice(0,4)}-${numbers.slice(4,6)}-${numbers.slice(6)}`;
-            } else if (numbers.length >= 5) {
-              newValue = `${numbers.slice(0,4)}-${numbers.slice(4)}`;
-            } else {
-              newValue = numbers;
-            }
-          }
-
-          // only set value if different to prevent cursor jumping
-          if (newValue !== value) {
-            e.target.value = newValue;
-          }
-        });
-      }
-  attachDateMask('#paymentDate', 'DD-MM-YYYY');
-
-
-
-
-async function sendMessage() {
-  const phoneNumber = document.getElementById('phoneNumber').value;
-  const message = document.getElementById('message').value;
-
-  if (!phoneNumber || !message) {
-    alert("Please enter both phone number and message.");
-    return;
-  }
-}
 
 </script>
 
 
-
-
-<script src="{{ url_for('static', filename='students.js') }}"></script>
-<script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 
 {% endblock %}

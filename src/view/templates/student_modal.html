@@ -1,75 +1,71 @@
-<div class="modal-body">
-  <div class="text-center mb-4">
-    <img src="{{ 'https://lh3.googleusercontent.com/d/' + student[0].IMAGE + '=s500' if student[0].IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}" 
-     alt="Student Image" 
-     class="student-image" 
-     style="object-fit: cover; object-position: top;">
-    <h3 class="mt-2">{{ student[0].STUDENTS_NAME }}</h3>
-  </div>
-  <div class="student-card-body">
-    <table class="table table-hover align-middle">
-      <thead>
-      </thead>
-      <tbody>
-        <tr>
-          <th>Class</th>
-          <td>{{ student[0].CLASS }} - {{ student[0].ROLL }}</td>
-        </tr>
-        <tr>
-          <th>Father</th>
-          <td>{{ student[0].FATHERS_NAME }}</td>
-        </tr>
-        <tr>
-          <th>Mother</th>
-          <td>{{ student[0].MOTHERS_NAME }}</td>
-        </tr>
-        <tr>
-          <th>Aadhaar</th>
-          <td>{{ student[0].AADHAAR }}</td>
-        </tr>
-        
-        <tr>
-          <th>DOB</th>
-          <td>{{ student[0].DOB }}</td>
-        </tr>
-        <tr>
-          <th>SR No.</th>
-          <td>{{ student[0].SR }}</td>
-        </tr>  
-        <tr>
-          <th>Ad. No</th>
-          <td>{{ student[0].ADMISSION_NO }}</td>
-        </tr>
-        <tr>
-          <th>Adm. Dt</th>
-          <td>{{ student[0].ADMISSION_DATE }}</td>
-        </tr>
-        <tr>
-          <th>PEN No.</th>
-          <td>{{ student[0].PEN }}</td>
-        </tr>
-        <tr>
-          <th>Phone</th>
-            <td><a href="tel:{{ student[0].PHONE }}" class="text-decoration-none">
-              <i class="fa fa-phone"></i> <strong>{{ student[0].PHONE }}</strong>
-            </a>
-        </td>
-        </tr>
-        {% if student|length > 1 %}
-        <tr>
-          <th>Siblings</th>
-          <td>
-            {% for sib in student[1:] %}
-              <a class="link-style" onclick="viewStudentDetails('{{ sib.id }}', '{{ sib.PHONE }}')">{{ sib.STUDENTS_NAME }}</a>&nbsp;&nbsp;{{ sib.CLASS }} - {{ sib.ROLL }}<br>
-            {% endfor %}
-          </td>
-        </tr>
-        {% endif %}
-        <tr>
-          <th>Address</th>
-          <td>{{ student[0].ADDRESS }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+<div class="student-profile">
+  <img src="{{ 'https://lh3.googleusercontent.com/d/' + student[0].IMAGE + '=s200' if student[0].IMAGE else 'https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png' }}"            
+        alt="Student" class="student-img" loading="lazy">
+  <h2 class="student-name">{{ student[0].STUDENTS_NAME }}</h2>
+  <div class="student-class">Class {{ student[0].CLASS }} | Roll {{ student[0].ROLL }}</div>
 </div>
+
+<table class="details-table">
+  <tr>
+      <th>Father's Name</th>
+      <td>{{ student[0].FATHERS_NAME }}</td>
+  </tr>
+  <tr>
+      <th>Mother's Name</th>
+      <td>{{ student[0].MOTHERS_NAME }}</td>
+  </tr>
+  <tr>
+      <th>Date of Birth</th>
+      <td>{{ student[0].DOB }}</td>
+  </tr>
+  <tr>
+      <th>Aadhaar Number</th>
+      <td>{{ student[0].AADHAAR }}</td>
+  </tr>
+  <tr>
+      <th>SR Number</th>
+      <td>{{ student[0].SR }}</td>
+  </tr>
+  <tr>
+      <th>Admission Number</th>
+      <td>{{ student[0].ADMISSION_NO }}</td>
+  </tr>
+  <tr>
+      <th>Admission Date</th>
+      <td>{{ student[0].ADMISSION_DATE }}</td>
+  </tr>
+  <tr>
+      <th>PEN Number</th>
+      <td>{{ student[0].PEN }}</td>
+  </tr>
+  <tr>
+      <th>Phone Number</th>
+      <td>
+          <a href="tel:+919876543210" class="contact-link">
+              <i class="fas fa-phone"></i> {{ student[0].PHONE }}
+          </a>
+      </td>
+  </tr>
+  <tr>
+      <th>Address</th>
+      <td>{{ student[0].ADDRESS }}</td>
+  </tr>
+  {% if student|length > 1 %}
+  <tr>
+      <th>Siblings</th>
+      <td>
+          <div class="sibling-list">
+            {% for sib in student[1:] %}
+              <div class="sibling-item">
+                  <div class="sibling-info">
+                      <div class="sibling-name">{{ sib.STUDENTS_NAME }}</div>
+                      <div class="sibling-class">Class {{ sib.CLASS }} - Roll {{ sib.ROLL }}</div>
+                  </div>
+                  <button onclick="viewStudentDetails('{{ sib.id }}', '{{ sib.PHONE }}')" class="view-btn">View</button>
+              </div>
+              {% endfor %}
+          </div>
+      </td>
+  </tr>
+  {% endif %}
+</table>

@@ -68,6 +68,7 @@ def fill_marks():
                 StudentsMarks_duplicate.id.label('id'),
                 StudentsMarks_duplicate.score,          # Student's mark (can be None)
                 StudentsDB.STUDENTS_NAME,               # Name of the student
+                StudentsDB.GENDER,
                 StudentsDB.id.label('student_id'), 
                 StudentSessions.ROLL,                   # Roll number
                 ClassData.CLASS,                        # Class name or number

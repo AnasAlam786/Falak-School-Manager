@@ -161,6 +161,7 @@ class PersonalInfoModel(CleanBaseModel):
             return None
         
         date = str_to_date(v)
+        print(date)
         return date
     
 
@@ -397,9 +398,9 @@ class GuardianInfoModel(CleanBaseModel):
 
 class ContactInfoModel(CleanBaseModel):
     ADDRESS: str = Field(...) # type: ignore
-    PHONE: Optional[constr(min_length=10, max_length=10)] = Field(...) # type: ignore
-    ALT_MOBILE: Optional[constr(min_length=10, max_length=10)] = Field(None) # type: ignore
-    PIN: constr(min_length=6, max_length=6) = Field(...) # type: ignore
+    PHONE: conint(ge=1000000000, le=9999999999) = Field(...) # type: ignore
+    ALT_MOBILE: Optional[conint(ge=1000000000, le=9999999999)] = Field(None) # type: ignore
+    PIN: conint(ge=100000, le=999999) = Field(...) # type: ignore
     Home_Distance: Optional[HomeDistanceEnum] = Field(default=None)
     EMAIL: Optional[EmailStr] = Field(None)
 

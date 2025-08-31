@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, Text, JSON, ForeignKey, BigInteger
+    Column, Date, Numeric, Text, JSON, ForeignKey, BigInteger
 )
 from src import db
 
@@ -15,10 +15,15 @@ class TeachersLogin(db.Model):
     Sign = Column(Text, nullable=True)
     User = Column(Text, nullable=False)
     status = Column(Text, nullable=False)
+    image = Column(Text, nullable=True)
+    qualification = Column(Text, nullable=True)
+    dob = Column(Date, nullable=True)
+    phone = Column(BigInteger, nullable=True)
+    date_of_joining = Column(Date, nullable=True)
+    address = Column(Text, nullable=True)
+    # salary = Column(Numeric, nullable=True)
+    gender = Column(db.Enum('Male', 'Female', name='GENDER'), nullable=True)
 
-    # New optional assets
-    # profile_image_url = Column(Text, nullable=True)
-    # signature_url = Column(Text, nullable=True)
 
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=False)
     school = db.relationship("Schools", back_populates="staff_data")

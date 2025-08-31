@@ -48,7 +48,7 @@ content %}
           <img
             src="{% if student.IMAGE %}https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s200{% else %}https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png{% endif %}"
             alt="Student Image" class="rounded-circle border border-light shadow-sm"
-            style="width: 120px; height: 160px; object-fit: cover; object-position: top;" />
+            style="width: 120px; height: 160px; object-fit: cover; object-position: top;"  loading="lazy"/>
           <!-- End Photo -->
 
           <!-- Start Details -->

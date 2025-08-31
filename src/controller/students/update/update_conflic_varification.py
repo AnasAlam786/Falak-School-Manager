@@ -129,7 +129,7 @@ def verify_update_conflicts():
                     conflicting_fields.append(field)
 
             return jsonify({
-                'message': f"Conflict in school for field(s): {', '.join(conflicting_fields)} with student '{existing.STUDENTS_NAME}'"
+                'message': f"Conflict in school for field(s): {', '.join(conflicting_fields)} with student '{existing.STUDENTS_NAME}' \nAdmission number: {existing.ADMISSION_NO}, SR: {existing.SR}"
             }), 409
 
     # ----------------------------
@@ -158,7 +158,7 @@ def verify_update_conflicts():
 
     if existing_roll:
         return jsonify({
-            'message': f"Another student '{existing_roll.STUDENTS_NAME}' already has the same CLASS, Section, and ROLL in this session."
+            'message': f"Another student '{existing_roll.STUDENTS_NAME}' already has the same CLASS, Section, and ROLL in this session.\nAdmission number: {existing_roll.ADMISSION_NO}\nSR: {existing_roll.SR}"
         }), 409
 
     return jsonify({'message': 'No conflicts found'}), 200

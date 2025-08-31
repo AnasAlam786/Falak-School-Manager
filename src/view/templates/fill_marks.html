@@ -2,43 +2,156 @@
 {% block title %}Update Marks{% endblock %}
 {% block content %}
 <style>
-  @media (max-width: 768px) {
-  .table thead {
-    display: none;
+  body {
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+    color: #f5f5f5;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   }
-  .table, .table tbody, .table tr, .table td {
-    display: block;
-    width: 100%;
+
+  .container-lg {
+    background: rgba(30, 30, 30, 0.9);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+    margin-bottom: 30px;
   }
-  .table tr {
-    margin-bottom: 15px;
-    border-bottom: 2px solid #dee2e6;
+
+  /* Dropdowns */
+  .select-input {
+    background-color: #222;
+    border: 1px solid #444;
+    border-radius: 12px;
   }
-  .table td {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.75rem;
+
+  .select-input:focus {
+    background-color: #1e1e1e;
+    border-color: #007bff;
+    box-shadow: 0 0 8px #007bff;
+  }
+
+  /* Button */
+  .btn-primary {
+    background: linear-gradient(135deg, #007bff, #0056b3);
     border: none;
-    border-bottom: 1px solid #dee2e6;
-    text-align: right;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
-  .table td::before {
-    content: attr(data-label);
-    flex: 1;
-    font-weight: bold;
-    text-align: left;
-    padding-right: 0.75rem;
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(0, 123, 255, 0.4);
   }
-}
+
+
+  /* Custom animations */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  /* Custom scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(75, 85, 99, 0.2);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #2563eb;
+  }
+
+  /* Card styling with #242424 background */
+  .student-card {
+    background-color: #242424;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Table styling with #242424 background */
+  .table-body {
+    background-color: #242424;
+  }
+
+  .table-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .table-row:last-child {
+    border-bottom: none;
+  }
+
+  /* Input focus effect */
+  .modern-input {
+    background-color: #1E1E1E;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .modern-input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+
+  /* Submit button animation */
+  @keyframes pulse {
+    0% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.05);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .submit-btn:active {
+    animation: pulse 0.3s ease-in-out;
+  }
 </style>
 
-<script src="{{ url_for('static', filename='fill_marks.js') }}"></script>
+<div class="container mx-auto px-4">
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">
+        <i class="fas fa-edit text-indigo-400 mr-2"></i>
+        Student Marks Management
+      </h1>
+      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">
+        Select class, subject, and exam to update student marks. Changes are saved automatically.
+      </p>
+    </div>
+  </div>
 
-
-<div class="container">
-  <div class="row mb-3">
-    <div class="col-12 col-md-4 mb-2">
-      <select class="form-select form-select-lg" id="Class" name="selectClass" required>
+  <!-- Form Row -->
+  <div class="flex flex-col md:flex-row md:space-x-4 mb-3">
+    <div class="mb-2 md:mb-0 md:w-1/3">
+      <select class="w-full select-input text-gray-300 text-sm md:text-base p-2 rounded" id="Class" name="selectClass" required>
         <option selected value="">Class</option>
         {% if classes %}
           {% for class in classes %}
@@ -47,82 +160,168 @@
         {% endif %}
       </select>
     </div>
-    <div class="col-12 col-md-4 mb-2">
-      <select class="form-select form-select-lg" id="Subject" name="selectSubject" required>
+    <div class="mb-2 md:mb-0 md:w-1/3">
+      <select class="w-full select-input text-gray-300 text-sm md:text-base p-2 rounded" id="Subject" name="selectSubject" required>
         <option selected value="">Subject</option>
         {% if subjects %}
           {% for subject in subjects %}
             <option value="{{ subject }}">{{ subject }}</option>
           {% endfor %}
         {% endif %}
-        
       </select>
     </div>
-    <div class="col-12 col-md-4 mb-2">
-      <select class="form-select form-select-lg" id="Exam" name="selectExam" required>
+    <div class="mb-2 md:mb-0 md:w-1/3">
+      <select class="w-full select-input text-gray-300 text-sm md:text-base p-2 rounded" id="Exam" name="selectExam" required>
         <option selected value="">Exam</option>
         {% if exams %}
           {% for exam in exams %}
             <option value="{{ exam.id }}">{{ exam.exam_name }}</option>
           {% endfor %}
-        {% endif %}      
+        {% endif %}
       </select>
     </div>
   </div>
-  <div class="text-center d-grid gap-2 col-6 mx-auto">
-    <button type="button" class="btn btn-primary btn-lg mb-3" 
-            onclick="submitData()" 
-            id="submitButton">Get Marks</button>
+
+  <!-- Button -->
+  <div class="text-center">
+    <button type="button" onclick="submitData()"
+      class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg text-lg mb-3"
+      id="submitButton">
+      Get Marks
+    </button>
   </div>
 </div>
 
 
-<div class="container-lg table-responsive" id="marksTable">
-  <table class="table table-bordered table-striped table-hover">
-    <thead class="thead-dark">
-      <tr id="tableRow">
-        <th scope="col">Name</th>
-        <th scope="col">Class</th>
-        <th scope="col">Subject</th>
-        <th scope="col">Roll No</th>
-        <th scope="col">Marks</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody">
-      {% if data %}
-      {% for row in data %}
-      <tr>
-        <td data-label="Name">{{ row.STUDENTS_NAME }}</td>
-        <td data-label="Class">{{ row.CLASS }}</td>
-        <td data-label="Subject">{{ row.subject }}</td>
-        <td data-label="Roll no">{{ row.ROLL }}</td>
-        
-        <td>
-          <div class="input-group">
-            <input type="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}" 
-                inputmode="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}" 
-                placeholder = "{{ row.subject + ' ' + row.exam_name + ' Marks' }}" 
-                class="form-control" 
-                oninput="{{ 'this.value = this.value.toUpperCase();' if row.evaluation_type == 'grading' else '' }}"
-                onfocus="this.select()" 
+<div id="marksTable">
+  {% if data %}
+  <!-- Desktop Table (hidden on mobile) -->
+  <div class="hidden lg:block rounded-2xl shadow-xl overflow-hidden p-3 mb-8">
+    <div class="custom-scrollbar overflow-x-auto rounded-2xl">
+      <table class="w-full text-sm text-left text-gray-300">
+        <thead class="text-xs uppercase bg-gradient-to-r from-blue-900/70 to-purple-900/70 text-gray-200">
+          <tr>
+            <th scope="col" class="px-6 py-4">Name</th>
+            <th scope="col" class="px-6 py-4">Class</th>
+            <th scope="col" class="px-6 py-4">Subject</th>
+            <th scope="col" class="px-6 py-4">Roll No</th>
+            <th scope="col" class="px-6 py-4">Marks</th>
+          </tr>
+        </thead>
+        <tbody class="table-body">
+          
+          {% for row in data %}
+          <tr class="table-row hover:bg-gray-800/50">
+            <td class="px-6 py-4 font-medium whitespace-nowrap">
+              <div class="flex items-center">
+                <!-- <div class="flex-shrink-0 h-10 w-10">
+                  <div class="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                    <span class="text-blue-400 font-bold">EJ</span>
+                  </div>
+                </div> -->
+                <div class="ml-4">
+                  <div class="font-medium text-lg">{{ row.STUDENTS_NAME }}</div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span
+                class="bg-blue-900/40 {% if row.GENDER == 'Male' %}text-blue-300{% else %}text-pink-300{% endif %} text-md font-medium px-2.5 py-0.5 rounded-full">{{
+                row.CLASS }}</span>
+            </td>
+            <td class="px-6 py-4">{{ row.subject }}</td>
+            <td class="px-6 py-4 text-lg">{{ row.ROLL }}</td>
+            <td class="px-6 py-4">
+              <div class="flex">
+                <input type="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}"
+                  placeholder="{{ row.subject + ' ' + row.exam_name + ' Marks' }}"
+                  inputmode="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}" onfocus="this.select()" {%
+                  if row.evaluation_type=='numeric' %} min="0" max="{{ row.weightage }}" {% endif %}
+                  value="{{ '' if row.score is none else row.score }}"
+                  oninput="{{ 'this.value = this.value.toUpperCase();' if row.evaluation_type == 'grading' else '' }}"
+                  class="modern-input text-white rounded-l-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                  id="marks-desktop-{{ row.student_id }}">
+                <button
+                  class="submit-btn {% if row.GENDER == 'Male' %}bg-blue-600 hover:bg-blue-700{% else %}bg-pink-600 hover:bg-pink-700{% endif %} text-white font-medium py-2.5 px-4 rounded-r-lg transition duration-200"
+                  data-id="{{ row.id }}" data-evaluation_type="{{ row.evaluation_type }}"
+                  data-student_id="{{ row.student_id }}" data-subject_id="{{ row.subject_id }}"
+                  data-exam_id="{{ row.exam_id }}" onclick="submit(this, inputID='marks-desktop-{{ row.student_id }}')">
+                  <span class="inline-flex items-center"><i class="fas fa-paper-plane mr-1"></i> SUBMIT</span>
+                </button>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+          
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
 
-                {% if row.evaluation_type == 'numeric' %}
-                  min="0" max="{{ row.weightage }}"
-                {% endif %}
-                value="{{ '' if row.score is none else row.score }}"
-                >
-            <button type="submit" class="btn btn-primary"  data-id='{{ row.id }}' data-evaluation_type='{{ row.evaluation_type }}' data-student_id='{{ row.student_id }}' 
-                    data-subject_id='{{ row.subject_id }}' data-exam_id='{{ row.exam_id }}'
-              onclick="submit(this)">SUBMIT</button>
+  <!-- Mobile Cards (shown on mobile) -->
+  <div class="lg:hidden p-4" id="marks-mobile-container">
+    {% if data %}
+    {% for row in data %}
+    <!-- Student Cards -->
+    <div class="student-card p-4 mb-4">
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex items-center">
+          <!-- <div class="flex-shrink-0 h-12 w-12">
+            <div class="h-12 w-12 rounded-full bg-blue-500/20 flex items-center justify-center">
+              <span class="text-blue-400 font-bold">{{ row.STUDENTS_NAME }}</span>
+            </div>
+          </div> -->
+          <div class="">
+            <h3 class="text-lg font-bold text-white">{{ row.STUDENTS_NAME }}</h3>
+            <p
+              class="text-blue-400 text-sm {% if row.GENDER == 'Male' %}text-blue-300{% else %}text-pink-300{% endif %}">
+              Roll No: {{ row.ROLL }}</p>
           </div>
-        </td>
-      </tr>
-      {% endfor %}
-      {% endif %}
-    </tbody>
-  </table>
+        </div>
+        <span
+          class="bg-blue-900/40 text-blue-300 text-xs font-medium px-2.5 py-0.5 rounded-full {% if row.GENDER == 'Male' %}text-blue-300{% else %}text-pink-300{% endif %}">{{
+          row.CLASS }}</span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div>
+          <p class="text-gray-400 text-sm">Subject</p>
+          <p class="text-white font-medium">{{ row.subject }}</p>
+        </div>
+        <div>
+          <p class="text-gray-400 text-sm">Exam Type</p>
+          <p class="text-white font-medium">{{ row.exam_name }}</p>
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <p class="text-gray-400 text-sm mb-2">Enter Marks (0-{{ row.weightage }})</p>
+        <input type="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}"
+          placeholder="{{ row.subject + ' ' + row.exam_name + ' Marks' }}"
+          inputmode="{{ 'text' if row.evaluation_type == 'grading' else 'number' }}" onfocus="this.select()" {% if
+          row.evaluation_type=='numeric' %} min="0" max="{{ row.weightage }}" {% endif %}
+          oninput="{{ 'this.value = this.value.toUpperCase();' if row.evaluation_type == 'grading' else '' }}"
+          value="{{ '' if row.score is none else row.score }}"
+          class="modern-input bg-dark text-white rounded-lg focus:ring-blue-500 block w-full p-3" min="0"
+          max="{{ row.weightage }}" id="marks-mobile-{{ row.student_id }}">
+      </div>
+
+      <button onclick="submit(this, inputID='marks-mobile-{{ row.student_id }}')" data-id="{{ row.id }}"
+        data-evaluation_type="{{ row.evaluation_type }}" data-student_id="{{ row.student_id }}"
+        data-subject_id="{{ row.subject_id }}" data-exam_id="{{ row.exam_id }}"
+        class="w-full {% if row.GENDER == 'Male' %}bg-blue-600 hover:bg-blue-700{% else %}bg-pink-600 hover:bg-pink-700{% endif %} text-white font-medium py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center submit-btn">
+        <span class="inline-flex items-center gap-2"><i class="fas fa-paper-plane mr-2"></i> SUBMIT</span>
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+  </div>
+
 </div>
 
+<script src="{{ url_for('static', filename='fill_marks.js') }}"></script>
 <script>
   function submitData() {
     // Get selected values

@@ -38,19 +38,39 @@ function applyFilters() {
   }
 }
 
+
+// ---------------- Student Modall Code START ----------------
+
 function viewStudentDetails(studentId, phone) {
-  document.getElementById('modalBody').innerHTML = 'Loading...';
-  
-  const backdrop = document.querySelector('.modal-backdrop');
-  if (backdrop) {
-      backdrop.remove();
-  }
-  var modal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));    
-  
-  modal.show()
-  updatePage('/student_modal_data_api', 'modalBody',   {student_id: studentId, phone: phone})
+   updatePage('/student_modal_data_api', 'studentsDetailsModalBody',   {student_id: studentId, phone: phone})
+  openModal()
+}
+function openModal() {
+    document.getElementById('studentDetailsModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 
+function closeModal() {
+    document.getElementById('studentDetailsModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside the content
+document.getElementById('studentDetailsModal')
+  .addEventListener('click', function (e) {
+      if (e.target === this) {
+          closeModal();
+      }
+  });
+
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModal();
+    }
+});
+// ---------------- Student Modall Jvascript END ----------------
 
 
 

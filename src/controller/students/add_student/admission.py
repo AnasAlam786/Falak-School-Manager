@@ -53,7 +53,7 @@ def admission():
 
  
     #get current date
-    current_session_year = str(session["current_session"])[-2:]
+    current_session_year = str(session["session_id"])[-2:]
 
     max_sr, max_adm = (
         StudentsDB.query

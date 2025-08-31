@@ -33,7 +33,7 @@ def final_update_api():
     due_amount = None
     if due_amount_input:
         try:
-            due_amount = int(due_amount_input)  # Using float to handle decimal values
+            due_amount = float(due_amount_input)  # Using float to handle decimal values
         except ValueError:
             return jsonify({"message": "Invalid due amount."}), 400
 

@@ -25,7 +25,6 @@ prv_year_student_api_bp = Blueprint( 'prv_year_student_api_bp',   __name__)
 def get_prv_year_students():
     data = request.json
     class_id = data.get('class_id')
-    next_class_id = int(class_id)+1
 
     school_id = session["school_id"]
     current_session = session["session_id"]
@@ -36,7 +35,7 @@ def get_prv_year_students():
         select(
             PromotedSession.student_id,
             PromotedSession.id.label("promoted_session_id"),
-            PromotedSession.ROLL.label("promoted_roll"),
+            PromotedSession.ROLL.label("next_roll"),
             PromotedSession.created_at.label("promoted_date")
         )
         .where(
@@ -52,18 +51,27 @@ def get_prv_year_students():
         StudentsDB.STUDENTS_NAME,
         StudentsDB.ADMISSION_NO,
         StudentsDB.IMAGE,
+        StudentsDB.GENDER,
         StudentsDB.FATHERS_NAME,
         StudentsDB.ADMISSION_DATE,
         ClassData.CLASS.label("previous_class"),
         StudentSessions.ROLL.label("previous_roll"),
         StudentSessions.class_id,
 
-        promoted_subq.c.promoted_roll,
+        promoted_subq.c.next_roll,
         promoted_subq.c.promoted_date,
         promoted_subq.c.promoted_session_id,
 
+        # nested subquery to find next class using display_order
         select(ClassData.CLASS)
-            .where(ClassData.id == next_class_id)
+            .where(
+                ClassData.display_order == (
+                    select(ClassData.display_order)
+                    .where(ClassData.id == class_id)
+                    .scalar_subquery()
+                ) + 1,
+                ClassData.school_id == school_id
+            )
             .scalar_subquery()
             .label("next_class")
     ).join(

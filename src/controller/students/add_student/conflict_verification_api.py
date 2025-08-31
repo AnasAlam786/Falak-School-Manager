@@ -49,7 +49,7 @@ def verify_admission():
         if item["field"] == "ROLL":
             roll = item["value"]
 
-
+    # print(f"Received data for conflict verification: {data}")
 
     global_conflict_conditions = []
     school_conflict_conditions = []
@@ -58,8 +58,8 @@ def verify_admission():
         global_conflict_conditions.append(StudentsDB.PEN == pen)
     if apaar:
         global_conflict_conditions.append(StudentsDB.APAAR == apaar)
-    if aadhaar:
-        global_conflict_conditions.append(StudentsDB.AADHAAR == aadhaar)
+    # if aadhaar:    Not working because of encryption
+    #     global_conflict_conditions.append(StudentsDB.AADHAAR == aadhaar)
     
     if sr:
         school_conflict_conditions.append(StudentsDB.SR == sr)
@@ -67,20 +67,25 @@ def verify_admission():
     if admission_no:
         school_conflict_conditions.append(StudentsDB.ADMISSION_NO == admission_no)
     else: return jsonify({'message': 'Please enter Admission Number properly!'}), 400
-    
 
+    
     if len(global_conflict_conditions)>0:
 
-        global_conflict = StudentsDB.query.filter(
-            StudentsDB.school_id == school_id,
-            or_(*global_conflict_conditions)
-        ).first()
+        
 
-        print(aadhaar)
-        print(global_conflict.AADHAAR)
+        global_conflict = (
+            StudentSessions.query
+            .join(StudentsDB, StudentSessions.student_id == StudentsDB.id)
+            .filter(
+                StudentsDB.school_id == school_id,
+                StudentSessions.session_id == current_session_id,
+                # StudentsDB.is_active == True,
+                or_(*global_conflict_conditions)
+            )
+            .first()
+        )
 
-        print(type(aadhaar))
-        print(type(global_conflict.AADHAAR))
+        # print(data)
 
         
         if global_conflict:
@@ -91,11 +96,11 @@ def verify_admission():
                 conflict_fields.append('PEN')
             if apaar and global_conflict.APAAR == apaar:
                 conflict_fields.append('APAAR')
-            if aadhaar and global_conflict.AADHAAR == aadhaar:
-                conflict_fields.append('AADHAAR')
+            # if aadhaar and global_conflict.AADHAAR == aadhaar:
+            #     conflict_fields.append('AADHAAR')
 
             detailed_message = (
-                    f"Student '{global_conflict.STUDENTS_NAME}' already exists in this school "
+                    f"Student '{global_conflict.STUDENTS_NAME}' (admission number: {global_conflict.ADMISSION_NO}), (SR: {global_conflict.SR}) already exists in this school"
                     f"with the same {', '.join(conflict_fields)}. "
                 )
 
@@ -124,6 +129,7 @@ def verify_admission():
         .join(StudentsDB, StudentSessions.student_id == StudentsDB.id)
         .filter(
             StudentsDB.school_id == school_id,
+            # StudentsDB.is_active == True,
             StudentSessions.session_id == current_session_id,
             StudentSessions.class_id == class_id,
             StudentSessions.Section == section,
@@ -131,8 +137,9 @@ def verify_admission():
         )
         .first()
     )
+    print("Session conflict check complete.", session_conflict)
     if session_conflict:
-        return jsonify({'message': 'This class/section/roll is already assigned in the current session.', 'already_student': {}}), 400
+        return jsonify({'message': f'This class/section/roll is already assigned to {session_conflict.student_name}, admission number: {session_conflict.admission_no} in the current session.'}), 400
 
     # If class_id is provided, fetch class name
     return jsonify({'message': 'Admission details are valid.'}), 200

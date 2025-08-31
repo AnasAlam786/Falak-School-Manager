@@ -21,13 +21,21 @@ idcard_bp = Blueprint( 'idcard_bp',   __name__)
 
 @idcard_bp.route('/idcard', methods=['GET'])
 @login_required
-def student_list():
+def idcards_page():
 
     school_id = session['school_id']
-    current_session = 2
+    current_session = session["session_id"]
     user_id = session["user_id"]
 
-    print(current_session)
+    classes_query = (
+        db.session.query(ClassData)
+        .join(ClassAccess, ClassAccess.class_id == ClassData.id)
+        .filter(ClassAccess.staff_id == user_id)
+        .order_by(ClassData.id.asc())
+    )
+
+    classes = classes_query.all()
+    class_ids = [cls.id for cls in classes]
 
     # build your query
     students = db.session.query(
@@ -39,6 +47,7 @@ def student_list():
         StudentsDB.PHONE,
         StudentsDB.ADDRESS,
         StudentSessions.ROLL,
+        StudentSessions.class_id,
         ClassData.CLASS,
         ClassData.Section,
         TeachersLogin.Sign.label('teachers_sign')
@@ -47,13 +56,14 @@ def student_list():
         StudentSessions, StudentSessions.student_id == StudentsDB.id
     ).join(
         ClassData,    StudentSessions.class_id == ClassData.id
-    ).join(
+    ).outerjoin(
         TeachersLogin,    ClassData.class_teacher_id == TeachersLogin.id
     ).filter(
         StudentsDB.school_id    == school_id,
         StudentSessions.session_id == current_session,
-        # StudentSessions.class_id == 6,
-        StudentsDB.IMAGE.isnot(None)
+        # ClassData.id == 11
+        ClassData.id.in_(class_ids),
+        #StudentsDB.IMAGE.isnot(None)
     ).order_by(
         ClassData.id.asc(),
         ClassData.Section.asc(),
@@ -70,10 +80,30 @@ def student_list():
     ).filter(
         Schools.id == school_id
     ).first()
+
+
+    # for student in students:
+    #     print({
+    #         "id": student.id,
+    #         "name": student.STUDENTS_NAME,
+    #         "dob": student.dob,
+    #         "father": student.FATHERS_NAME,
+    #         "image": student.IMAGE,
+    #         "phone": student.PHONE,
+    #         "address": student.ADDRESS,
+    #         "roll": student.ROLL,
+    #         "class": student.CLASS,
+    #         "section": student.Section,
+    #         "teacher_sign": student.teachers_sign
+    #     })
+    #     print("")
+
+
         
 
+    # '/pdf-components/icards/hanging_image_icard.html'
 
 
+    return render_template('/idcard.html',
+                           students=students, school = school, classes=classes)
 
-    return render_template('/pdf-components/icards/hanging_image_icard.html',
-                           students=students, school = school)

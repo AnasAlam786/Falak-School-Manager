@@ -1,0 +1,1158 @@
+{% extends "base.html" %}
+{% block title %}Update Staff{% endblock %}
+{% block content %}
+   
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+
+        .user-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 0.95rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #b0b0b0;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            border-color: rgba(67, 97, 238, 0.5);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #06d6a0 0%, #05a17a 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(6, 214, 160, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(6, 214, 160, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ffbe0b 0%, #fb5607 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 190, 11, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 190, 11, 0.4);
+        }
+
+        .page-title {
+            margin-bottom: 30px;
+        }
+
+        .page-title h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #e0e0e0, #b0b0b0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-title p {
+            color: #8a8a8a;
+            font-size: 1.1rem;
+            max-width: 600px;
+        }
+
+        .staff-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(30, 30, 30, 0.7);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .staff-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 3px solid rgba(67, 97, 238, 0.3);
+        }
+
+        .staff-info h2 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+        }
+
+        .staff-info p {
+            color: #8a8a8a;
+            margin-bottom: 10px;
+        }
+
+        .staff-tags {
+            display: flex;
+            gap: 10px;
+        }
+
+        .staff-tag {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .tag-primary {
+            background: rgba(67, 97, 238, 0.2);
+            color: #4361ee;
+        }
+
+        .tag-success {
+            background: rgba(6, 214, 160, 0.2);
+            color: #06d6a0;
+        }
+
+        .form-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .main-form {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .form-section {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .side-column {
+            width: 350px;
+            min-width: 300px;
+        }
+
+        @media (max-width: 1100px) {
+            .side-column {
+                width: 100%;
+            }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(67, 97, 238, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: #4361ee;
+        }
+
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        /* Improved layout for radio groups */
+        .form-group.radio-group-container {
+            grid-column: 1 / -1;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #b0b0b0;
+        }
+
+        .required::after {
+            content: " *";
+            color: #ff6b6b;
+        }
+        
+        /* Password input wrapper */
+        .password-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px;
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: #e0e0e0;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            padding-right: 45px; /* Space for eye icon */
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #4361ee;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+        
+        /* Password toggle icon */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8a8a8a;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            z-index: 10;
+        }
+
+        .toggle-password:hover {
+            color: #4361ee;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .radio-card {
+            padding: 15px;
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .radio-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .radio-card:hover, 
+        .radio-card.selected {
+            border-color: #4361ee;
+            background: rgba(67, 97, 238, 0.1);
+        }
+
+        .radio-card i {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .radio-card .fa-mars { color: #3a86ff; }
+        .radio-card .fa-venus { color: #ff006e; }
+        .radio-card .fa-chalkboard-teacher { color: #3a86ff; }
+        .radio-card .fa-user-shield { color: #ff006e; }
+        .radio-card .fa-headset { color: #8338ec; }
+        .radio-card .fa-hands-helping { color: #ffbe0b; }
+
+        .image-upload {
+            text-align: center;
+            padding: 25px;
+            background: rgba(20, 20, 20, 0.7);
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .image-upload:hover {
+            border-color: #4361ee;
+            background: rgba(67, 97, 238, 0.05);
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 10px;
+            margin-top: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: block;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-upload {
+            flex: 1;
+            padding: 10px;
+            background: rgba(20, 20, 20, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: #b0b0b0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-upload:hover {
+            background: rgba(67, 97, 238, 0.1);
+            color: #4361ee;
+            border-color: #4361ee;
+        }
+
+        .tips-section {
+            background: rgba(30, 30, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tips-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tips-title i {
+            color: #4361ee;
+        }
+
+        .tip {
+            display: flex;
+            gap: 12px;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .tip:last-child {
+            border-bottom: none;
+        }
+
+        .tip-icon {
+            color: #4361ee;
+            font-size: 1.2rem;
+            min-width: 24px;
+        }
+
+        .tip-content {
+            color: #8a8a8a;
+        }
+
+        .tip-content strong {
+            color: #b0b0b0;
+        }
+
+        /* Error message styling */
+        .error-message {
+            background: rgba(255, 107, 107, 0.1);
+            border: 1px solid rgba(255, 107, 107, 0.3);
+            color: #ff6b6b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Loading state */
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn.loading::after {
+            content: '';
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 10, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: rgba(30, 30, 30, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 800px;
+            width: 100%;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            animation: modalAppear 0.4s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-modal {
+            background: transparent;
+            border: none;
+            color: #8a8a8a;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #ff6b6b;
+        }
+
+        .modal-body {
+            padding: 25px;
+            max-height: 70vh;
+            overflow: auto;
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-crop {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.08);
+            color: #b0b0b0;
+        }
+
+        .btn-cancel:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-confirm {
+            background: linear-gradient(135deg, #4361ee 0%, #3f37c9 100%);
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.4);
+        }
+
+        /* Success Modal */
+        .success-modal-content {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #06d6a0 0%, #05a17a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+        }
+
+        .success-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(to right, #06d6a0, #05a17a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .success-message {
+            color: #b0b0b0;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        .success-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .radio-group {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .radio-group {
+                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            }
+            
+            
+            .page-title h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .staff-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .staff-tags {
+                justify-content: center;
+            }
+            
+            .success-actions {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .user-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <div class="container">
+        {% if error %}
+        <div class="error-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <header>
+            <div class="page-title">
+                <h1>Update Staff Details</h1>
+                <p>Edit and update staff member information as needed</p>
+            </div>
+            <div class="user-actions">
+                <button class="btn btn-outline" id="backButton">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button class="btn btn-primary" id="updateButton">
+                    <i class="fas fa-save"></i> Update Staff
+                </button>
+            </div>
+        </header>
+
+        <div class="staff-header">
+            {% if staff.image_id %}
+                {% set image_url = 'https://lh3.googleusercontent.com/d/' + staff.image + '=s100' %}
+            {% else %}
+                {% if staff.gender == "Male" %}
+                    {% set image_url = sample_male_image %}
+                {% else %}
+                    {% set image_url = sample_female_image %}
+                {% endif %}
+            {% endif %}
+            <div class="staff-avatar" style="background-image: url('{{ image_url }}')"></div>
+            <div class="staff-info">
+                <h2>{{ staff.Name }}</h2>
+                <p>{{ staff.role_data.role_name if staff.role_data else 'Staff' }} | {{ staff.email or 'No email' }}</p>
+                <div class="staff-tags">
+                    <div class="staff-tag tag-primary">ID: STAFF-{{ staff.id }}</div>
+                    <div class="staff-tag tag-success">{{ staff.status }}</div>
+                </div>
+            </div>
+        </div>
+
+        <form id="updateStaffForm">
+            <input type="hidden" id="staffId" value="{{ staff.id }}">
+            
+            <div class="form-container">
+                <div class="main-form">
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h2 class="section-title">Personal Information</h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required">Full Name</label>
+                                <input type="text" class="form-input" id="fullName" name="name" placeholder="Staff Name" value="{{ staff.Name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Email</label>
+                                <input type="email" class="form-input" id="email" name="email" placeholder="Email ID" value="{{ staff.email or '' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Phone Number</label>
+                                <input type="tel" class="form-input" id="phone" name="phone" placeholder="Mobile Number" value="{{ staff.phone or '' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label required">Date of Birth</label>
+                                <input type="date" class="form-input" id="dob" name="dob" placeholder="Date of Birth" value="{{ staff.dob.strftime('%Y-%m-%d') if staff.dob else '' }}" required>
+                            </div>
+                            <div class="form-group radio-group-container">
+                                <label class="form-label required">Gender</label>
+                                <div class="radio-group">
+                                    <label class="radio-card {% if staff.gender == 'Male' %}selected{% endif %}">
+                                        <input type="radio" name="gender" value="Male" {% if staff.gender == 'Male' %}checked{% endif %}>
+                                        <i class="fas fa-mars"></i>
+                                        <div>Male</div>
+                                    </label>
+                                    <label class="radio-card {% if staff.gender == 'Female' %}selected{% endif %}">
+                                        <input type="radio" name="gender" value="Female" {% if staff.gender == 'Female' %}checked{% endif %}>
+                                        <i class="fas fa-venus"></i>
+                                        <div>Female</div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Address</label>
+                                <textarea class="form-input" rows="3" id="address" placeholder="Address" name="address">{{ staff.address or '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h2 class="section-title">Account Information</h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required">Username</label>
+                                <input type="text" class="form-input" id="username" name="username" placeholder="User ID" value="{{ staff.User }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Current Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-input" id="password" name="password" placeholder="Currenr Password" value="{{ password }}">
+                                    <button class="toggle-password" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <h2 class="section-title">Professional Information</h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label required">Date of Joining</label>
+                                <input type="date" class="form-input" id="joinDate" name="date_of_joining" value="{{ staff.date_of_joining.strftime('%Y-%m-%d') if staff.date_of_joining else '' }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Qualification</label>
+                                <input type="text" class="form-input" id="qualification" name="qualification" value="{{ staff.qualification or '' }}">
+                            </div>
+                            <div class="form-group radio-group-container">
+                                <label class="form-label required">Role</label>
+                                <div class="radio-group">
+                                    <label class="radio-card">
+                                        <input type="radio" name="role" value="teacher">
+                                        <i class="fas fa-chalkboard-teacher"></i>
+                                        <div>Teacher</div>
+                                    </label>
+                                    <label class="radio-card">
+                                        <input type="radio" name="role" value="admin">
+                                        <i class="fas fa-user-shield"></i>
+                                        <div>Admin</div>
+                                    </label>
+                                    <label class="radio-card">
+                                        <input type="radio" name="role" value="support">
+                                        <i class="fas fa-headset"></i>
+                                        <div>Support</div>
+                                    </label>
+                                    <label class="radio-card selected">
+                                        <input type="radio" name="role" value="manager" checked>
+                                        <i class="fas fa-hands-helping"></i>
+                                        <div>Manager</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="side-column">
+                    <!-- Profile Photo -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                            <h2 class="section-title">Profile Photo</h2>
+                        </div>
+                        <div class="image-upload" id="profileUpload">
+                            <div class="image-preview" id="profilePreview" style="background-image: url('{{ staff.image or '' }}')"></div>
+                            <div class="btn-group">
+                                <button class="btn-upload" id="uploadProfile">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                                <button class="btn-upload" id="captureProfile">
+                                    <i class="fas fa-camera"></i> Capture
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="profileImage" name="image" value="{{ staff.image or '' }}">
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-signature"></i>
+                            </div>
+                            <h2 class="section-title">Digital Signature</h2>
+                        </div>
+                        <div class="image-upload" id="signatureUpload">
+                            <div class="image-preview" id="signaturePreview" style="background-image: url('{{ staff.Sign or '' }}')"></div>
+                            <div class="btn-group">
+                                <button class="btn-upload" id="uploadSignature">
+                                    <i class="fas fa-upload"></i> Upload
+                                </button>
+                                <button class="btn-upload" id="captureSignature">
+                                    <i class="fas fa-camera"></i> Capture
+                                </button>
+                            </div>
+                        </div>
+                        <input type="hidden" id="signatureImage" name="sign" value="{{ staff.Sign or '' }}">
+                    </div>
+
+                    <!-- Password Update -->
+                    <div class="form-section">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <h2 class="section-title">Update Password</h2>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">New Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-input" id="newPassword" placeholder="Enter new password">
+                                    <button class="toggle-password" id="toggleNewPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm Password</label>
+                                <div class="password-wrapper">
+                                    <input type="password" class="form-input" id="confirmNewPassword" placeholder="Confirm new password">
+                                    <button class="toggle-password" id="toggleConfirmNewPassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-warning" style="width: 100%;" id="changePasswordBtn">
+                                    <i class="fas fa-key"></i> Change Password
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tips Section -->
+                    <div class="tips-section">
+                        <h3 class="tips-title"><i class="fas fa-lightbulb"></i> Update Tips</h3>
+                        <div class="tip">
+                            <div class="tip-icon"><i class="fas fa-info-circle"></i></div>
+                            <div class="tip-content"><strong>Profile Updates:</strong> Changes are saved immediately when you click Update</div>
+                        </div>
+                        <div class="tip">
+                            <div class="tip-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="tip-content"><strong>Password Security:</strong> Changing password will log out all active sessions</div>
+                        </div>
+                        <div class="tip">
+                            <div class="tip-icon"><i class="fas fa-image"></i></div>
+                            <div class="tip-content"><strong>Profile Photos:</strong> Use square images for best results</div>
+                        </div>
+                        <div class="tip">
+                            <div class="tip-icon"><i class="fas fa-history"></i></div>
+                            <div class="tip-content"><strong>Audit Log:</strong> All changes are recorded in the audit log</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-content">
+            <div class="success-modal-content">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2 class="success-title">Update Successful!</h2>
+                <p class="success-message" id="successMessage">Staff details have been successfully updated.</p>
+                
+                <div class="success-actions">
+                    <button class="btn btn-success" id="viewStaff">
+                        <i class="fas fa-user"></i> View Staff Profile
+                    </button>
+                    <button class="btn btn-primary" id="continueEditing">
+                        <i class="fas fa-edit"></i> Continue Editing
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal elements
+        const successModal = document.getElementById('successModal');
+        const closeButtons = document.querySelectorAll('.close-modal, .btn-cancel');
+        
+        // Form elements
+        const updateButton = document.getElementById('updateButton');
+        const viewStaffButton = document.getElementById('viewStaff');
+        const continueEditingButton = document.getElementById('continueEditing');
+        const updateStaffForm = document.getElementById('updateStaffForm');
+        
+        // Password toggle functionality
+        const passwordField = document.getElementById('password');
+        const newPasswordField = document.getElementById('newPassword');
+        const confirmNewPasswordField = document.getElementById('confirmNewPassword');
+        
+        const togglePassword = document.getElementById('togglePassword');
+        const toggleNewPassword = document.getElementById('toggleNewPassword');
+        const toggleConfirmNewPassword = document.getElementById('toggleConfirmNewPassword');
+        
+        // Toggle password visibility
+        function togglePasswordVisibility(field, button) {
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
+            
+            // Toggle eye icon
+            if (type === 'text') {
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                button.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+        
+        togglePassword.addEventListener('click', () => {
+            togglePasswordVisibility(passwordField, togglePassword);
+        });
+        
+        toggleNewPassword.addEventListener('click', () => {
+            togglePasswordVisibility(newPasswordField, toggleNewPassword);
+        });
+        
+        toggleConfirmNewPassword.addEventListener('click', () => {
+            togglePasswordVisibility(confirmNewPasswordField, toggleConfirmNewPassword);
+        });
+
+        // Handle form submission
+        updateButton.addEventListener('click', async function() {
+            if (updateButton.classList.contains('loading')) return;
+            
+            // Validate form
+            if (!updateStaffForm.checkValidity()) {
+                updateStaffForm.reportValidity();
+                return;
+            }
+            
+            // Validate new password if provided
+            if (newPasswordField.value || confirmNewPasswordField.value) {
+                if (newPasswordField.value !== confirmNewPasswordField.value) {
+                    alert('New passwords do not match!');
+                    return;
+                }
+                if (newPasswordField.value.length < 6) {
+                    alert('New password must be at least 6 characters long!');
+                    return;
+                }
+            }
+            
+            updateButton.classList.add('loading');
+            updateButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            
+            try {
+                // Collect form data
+                const formData = new FormData(updateStaffForm);
+                
+                // Add new password if provided
+                if (newPasswordField.value) {
+                    formData.set('password', newPasswordField.value);
+                }
+                
+                // Convert to JSON
+                const jsonData = {};
+                formData.forEach((value, key) => {
+                    jsonData[key] = value;
+                });
+                
+                // Add staff ID
+                jsonData.staff_id = document.getElementById('staffId').value;
+                
+                // Send update request
+                const response = await fetch('/api/update_staff', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(jsonData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    // Show success modal
+                    document.getElementById('successMessage').textContent = `${jsonData.name}'s details have been successfully updated.`;
+                    successModal.style.display = 'flex';
+                    
+                    // Clear new password fields
+                    newPasswordField.value = '';
+                    confirmNewPasswordField.value = '';
+                } else {
+                    alert(`Error: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while updating staff. Please try again.');
+            } finally {
+                updateButton.classList.remove('loading');
+                updateButton.innerHTML = '<i class="fas fa-save"></i> Update Staff';
+            }
+        });
+
+        // Close modals
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                successModal.style.display = 'none';
+            });
+        });
+
+        // View staff profile
+        viewStaffButton.addEventListener('click', function() {
+            window.location.href = '/staff_view?id=' + document.getElementById('staffId').value;
+        });
+
+        // Continue editing
+        continueEditingButton.addEventListener('click', function() {
+            successModal.style.display = 'none';
+        });
+
+        // Back button
+        document.getElementById('backButton').addEventListener('click', function() {
+            window.location.href = '/staff_view';
+        });
+
+        // Gender and role selection
+        document.querySelectorAll('.radio-card').forEach(card => {
+            card.addEventListener('click', function() {
+                const radioInput = this.querySelector('input[type="radio"]');
+                
+                // For gender
+                if (radioInput.name === 'gender') {
+                    document.querySelectorAll('.radio-card').forEach(c => {
+                        if (c.querySelector('input[name="gender"]')) {
+                            c.classList.remove('selected');
+                        }
+                    });
+                    this.classList.add('selected');
+                    radioInput.checked = true;
+                }
+                
+                // For role
+                if (radioInput.name === 'role_id') {
+                    document.querySelectorAll('.radio-card').forEach(c => {
+                        if (c.querySelector('input[name="role_id"]')) {
+                            c.classList.remove('selected');
+                        }
+                    });
+                    this.classList.add('selected');
+                    radioInput.checked = true;
+                }
+            });
+        });
+
+        // Close modal if clicked outside
+        window.addEventListener('click', function(event) {
+            if (event.target === successModal) {
+                successModal.style.display = 'none';
+            }
+        });
+
+        // Simulate image upload buttons
+        document.querySelectorAll('.btn-upload').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('Image upload/capture functionality would be implemented here');
+            });
+        });
+
+        // Password update button
+        document.getElementById('changePasswordBtn').addEventListener('click', function() {
+            if (newPasswordField.value !== confirmNewPasswordField.value) {
+                alert('Passwords do not match!');
+                return;
+            }
+            if (newPasswordField.value.length < 6) {
+                alert('Password must be at least 6 characters long!');
+                return;
+            }
+            
+            // Update the password field in the form
+            passwordField.value = newPasswordField.value;
+            
+            // Clear the new password fields
+            newPasswordField.value = '';
+            confirmNewPasswordField.value = '';
+            
+            alert('Password updated! Click "Update Staff" to save all changes.');
+        });
+    </script>
+{% endblock %}
