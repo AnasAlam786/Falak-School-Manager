@@ -77,9 +77,6 @@ def student_list():
     total_girls = sum(1 for s in data if s.GENDER.lower() == 'female')
     total_boys = total_students - total_girls  # faster than looping again
 
-    # New and old students
-    # get admission year of student
-
     # Assuming new students have ADMISSION_NO containing selected_session
     old_students = sum(1 for s in data if str(s.ADMISSION_NO)[:2] != str(selected_session)[-2:])
     new_students = total_students - old_students
@@ -103,15 +100,17 @@ def student_list():
         StudentSessions.session_id == selected_session - 1
     ).one()
 
-    print("previous_year_students_total, old_students_prv", previous_year_students_total, old_students_prv)
-
+    if previous_year_students_total is None:
+        previous_year_students_total = 0
+    if old_students_prv is None:
+        old_students_prv = 0
 
     new_students_prev = previous_year_students_total - old_students_prv
 
     increased_students = total_students - previous_year_students_total
     total_growth_percentage = increased_students / previous_year_students_total * 100 if previous_year_students_total else 0
     new_students_growth_percentage = (new_students - new_students_prev) / new_students_prev * 100 if new_students_prev else 0
-
+    
 
     return render_template('student_list.html',
                            data=data, classes=classes,

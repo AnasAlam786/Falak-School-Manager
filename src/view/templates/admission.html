@@ -66,6 +66,11 @@
     border-color: #ff6b6b !important;
     box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2) !important;
   }
+
+  
+select option {
+  color: #1d212b; /* may work in some browsers */
+}
 </style>
 
 <!-- Hidden Success Alert -->
@@ -745,7 +750,6 @@
       }
 
     } catch (error) {
-      showAlert(400, "A problem occurred while submitting the form.");
       console.error('Error:', error);
     }
 

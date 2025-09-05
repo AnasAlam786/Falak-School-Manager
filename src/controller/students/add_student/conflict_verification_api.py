@@ -69,23 +69,20 @@ def verify_admission():
     else: return jsonify({'message': 'Please enter Admission Number properly!'}), 400
 
     
-    if len(global_conflict_conditions)>0:
+    if len(global_conflict_conditions)>0:        
 
-        
-
-        global_conflict = (
-            StudentSessions.query
-            .join(StudentsDB, StudentSessions.student_id == StudentsDB.id)
-            .filter(
-                StudentsDB.school_id == school_id,
-                StudentSessions.session_id == current_session_id,
-                # StudentsDB.is_active == True,
-                or_(*global_conflict_conditions)
+        if len(global_conflict_conditions)>0:        
+            global_conflict = (
+                StudentsDB.query
+                .join(StudentSessions, StudentsDB.id == StudentSessions.student_id)
+                .filter(
+                    StudentsDB.school_id == school_id,
+                    StudentSessions.session_id == current_session_id,
+                    # StudentsDB.is_active == True,
+                    or_(*global_conflict_conditions)
+                )
+                .first()
             )
-            .first()
-        )
-
-        # print(data)
 
         
         if global_conflict:
@@ -117,7 +114,23 @@ def verify_admission():
     ).first()
 
     if school_conflict:
-        return jsonify({'message': 'SR or Admission no already exists.'}), 400
+        conflict_fields = []
+        if sr and school_conflict.SR == sr:
+            conflict_fields.append('SR')
+        if admission_no and school_conflict.ADMISSION_NO == admission_no:
+            conflict_fields.append('Admission number')
+
+    if conflict_fields:
+        conflict_list = ', '.join(conflict_fields)
+        return jsonify({
+            'message': (
+                f"The following field(s) already exist for student "
+                f"'{school_conflict.STUDENTS_NAME}': {conflict_list}. "
+                "Please provide unique values."
+            ),
+            'conflicting_fields': conflict_fields,
+            'conflicting_student': school_conflict.STUDENTS_NAME
+        }), 400
 
     # Ensure class_id, Section, ROLL exist in request
     if not class_id or not section or not roll:

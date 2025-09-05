@@ -26,9 +26,6 @@
     border-top-right-radius: 15px;
   }
 
-
-
-
   .toggle-switch {
     position: relative;
     display: inline-block;
@@ -504,7 +501,7 @@
   }
 </style>
 <!-- Modal CSS END-->
-<div class="p-3 mx-auto">
+<div class="mx-auto">
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row justify-between items-center mb-6">
     <div>
@@ -580,9 +577,9 @@
             <h3 class="stat-title text-[#a0a7ff] font-medium mb-2 text-lg">Total Students</h3>
             <div class="stat-value text-white text-3xl font-bold mb-2">{{ total_students }}</div>
 
-            <div class="stat-meta flex items-center font-bold text-sm  mb-4 {% if total_growth_percentage > 0 %}text-green-500{% else %}text-red-500{% endif %}">
-              <span>{% if total_growth_percentage > 0 %}+{% endif %}{{ increased_students }} students YoY</span>
-              <i class="fas fa-chart-line ml-2 {% if total_growth_percentage > 0 %}text-green-500{% else %}text-red-500{% endif %}"></i>
+            <div class="stat-meta flex items-center font-bold text-sm  mb-4 {% if increased_students > 0 %}text-green-500{% else %}text-red-500{% endif %}">
+              <span>{% if increased_students > 0 %}+{% endif %}{{ increased_students }} students YoY</span>
+              <i class="fas fa-chart-line ml-2 {% if increased_students > 0 %}text-green-500{% else %}text-red-500{% endif %}"></i>
             </div>
 
             <ul class="stat-details text-[#8a92b2] text-sm border-t border-[#333] pt-4 space-y-2">
