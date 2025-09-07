@@ -171,7 +171,8 @@ class PersonalInfoModel(CleanBaseModel):
                 "id": "STUDENTS_NAME", "type": "text", "inputmode": "text",
                 "label": "Student's Name", "data-short_label": "Name", "placeholder": "",
                 "required": True, "data-description": "Full name of the student",
-                "name": "STUDENTS_NAME"
+                "name": "STUDENTS_NAME",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
 
             "DOB": {
@@ -198,7 +199,8 @@ class PersonalInfoModel(CleanBaseModel):
             "Caste": {
                 "id": "Caste", "type": "text", "label": "Caste", "placeholder": "",
                 "data-short_label": "Caste", "data-description": "Caste of the student",
-                "name": "Caste"
+                "name": "Caste",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
 
             "Caste_Type": {
@@ -323,9 +325,9 @@ class GuardianInfoModel(CleanBaseModel):
     FATHERS_AADHAR: Optional[constr(max_length=12, min_length=12)] = Field(None) # type: ignore
     MOTHERS_AADHAR: Optional[constr(max_length=12, min_length=12)] = Field(None) # type: ignore
     
-    FATHERS_EDUCATION: EducationTypeEnum = Field(...)
+    FATHERS_EDUCATION: EducationTypeEnum = Field(None)
 
-    FATHERS_OCCUPATION: FatherOccupationEnum = Field(...)
+    FATHERS_OCCUPATION: FatherOccupationEnum = Field(None)
 
     MOTHERS_EDUCATION: Optional[EducationTypeEnum] = Field(None)
 
@@ -347,12 +349,14 @@ class GuardianInfoModel(CleanBaseModel):
             "FATHERS_NAME": {
                 "id": "FATHERS_NAME", "type": "text", "label": "Father Name", "placeholder": "",
                 "data-short_label": "Father", "required": True, "data-description": "Full name of the father",
-                "name": "FATHERS_NAME"
+                "name": "FATHERS_NAME",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
             "MOTHERS_NAME": {
                 "id": "MOTHERS_NAME", "type": "text", "label": "Mother Name", "placeholder": "",
                 "data-short_label": "Mother", "required": True, "data-description": "Full name of the mother",
-                "name": "MOTHERS_NAME"
+                "name": "MOTHERS_NAME",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
             "FATHERS_AADHAR": {
                 "id": "FATHERS_AADHAR", "type": "numeric", "label": "Father Aadhar",
@@ -368,14 +372,14 @@ class GuardianInfoModel(CleanBaseModel):
             },
             "FATHERS_EDUCATION": {
                 "id": "FATHERS_EDUCATION", "type": "select", "value": "Select Father Qualification",
-                "data-short_label": "Father Edu.", "required": True,
+                "data-short_label": "Father Edu.",
                 "options": {"": "Select Father's Qualification", **{e: e for e in StudentsDBEnums.EDUCATION_TYPE.enums}},
                 "data-description": "Education qualification of the father",
                 "name": "FATHERS_EDUCATION"
             },
             "FATHERS_OCCUPATION": {
                 "id": "FATHERS_OCCUPATION", "type": "select", "value": "Select Father Occupation",
-                "data-short_label": "F Occupation", "required": True,
+                "data-short_label": "F Occupation",
                 "options": {"": "Select Father's Occupation", **{e: e for e in StudentsDBEnums.FATHERS_OCCUPATION.enums}},
                 "data-description": "Occupation of the father",
                 "name": "FATHERS_OCCUPATION"
@@ -410,7 +414,8 @@ class ContactInfoModel(CleanBaseModel):
                 "id": "ADDRESS", "name": "ADDRESS",
                 "label": "Home Address", "data-short_label": "Address",
                 "type": "text", "required": True,
-                "data-description": "Complete home address", "placeholder": ""
+                "data-description": "Complete home address", "placeholder": "",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
             "PHONE": {
                 "id": "PHONE", "name": "PHONE",
@@ -452,6 +457,16 @@ class AdditionalInfoModel(CleanBaseModel):
     Previous_School_Name: Optional[constr(min_length=2)] = Field(None) # type: ignore
     Due_Amount: Optional[float] = Field(None)
 
+    # --- RTE fields ---
+    is_RTE: bool = Field(default=False)
+    account_number: Optional[constr(min_length=9, max_length=18)] = Field(None)
+    RTE_registered_year: Optional[conint(gt=2000, lt=2100)] = Field(None)
+    ifsc: Optional[constr(min_length=11, max_length=11)] = Field(None)
+    bank_name: Optional[str] = Field(None)
+    bank_branch: Optional[str] = Field(None)
+    account_holder: Optional[str] = Field(None)
+
+
     class Config:
         json_schema_extra = {
             "Previous_School_Marks": {
@@ -475,7 +490,8 @@ class AdditionalInfoModel(CleanBaseModel):
                 "label": "Previous School Name",
                 "data-short_label": "Prv. School",
                 "type": "text", "placeholder": "",
-                "data-description": "Name of the previous school attended"
+                "data-description": "Name of the previous school attended",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             },
             "Due_Amount": {
                 "id": "Due_Amount", "name": "Due_Amount",
@@ -483,6 +499,58 @@ class AdditionalInfoModel(CleanBaseModel):
                 "data-short_label": "Due",
                 "type": "numeric", "placeholder": "",
                 "data-description": "Enter if any due fees remains"
+            },
+
+            "is_RTE": {
+                "id": "is_RTE",
+                "name": "is_RTE", "label": "Student in RTE ?",
+                "data-short_label": "Is RTE",
+                "type": "checkbox", "placeholder": "",
+                "data-description": "Select if the student is admitted under RTE"
+            },
+            "account_number": {
+                "id": "account_number",
+                "name": "account_number",
+                "label": "Bank Account Number",
+                "data-short_label": "Account No.",
+                "type": "text", "placeholder": "",
+                "data-description": "RTE student bank account number"
+            },
+            "RTE_registered_year": {
+                "id": "RTE_registered_year",
+                "name": "RTE_registered_year",
+                "label": "RTE Registered Year (i.e 2026)",
+                "data-short_label": "Registered Year",
+                "type": "number", "placeholder": "in YYYY format",
+                "data-description": "Year in which student was registered under RTE"
+            },
+            "ifsc": {
+                "id": "ifsc", "data-short_label": "IFSC",
+                "name": "ifsc", "label": "IFSC Code",
+                "type": "text", "placeholder": "",
+                "data-description": "Bank IFSC code of RTE student's account",
+                "oninput":"this.value = this.value.toUpperCase()"
+            },
+            "bank_name": {
+                "id": "bank_name", "name": "bank_name",
+                "label": "Bank Name", "data-short_label": "Bank",
+                "type": "text", "placeholder": "",
+                "data-description": "Name of the bank of RTE student's account",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
+            },
+            "bank_branch": {
+                "id": "bank_branch", "name": "bank_branch",
+                "label": "Bank Branch",
+                "data-short_label": "Branch", "type": "text", "placeholder": "",
+                "data-description": "Branch of the bank for RTE student's account",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
+            },
+            "account_holder": {
+                "id": "account_holder", "name": "account_holder",
+                "label": "Account Holder Name", "data-short_label": "Holder",
+                "type": "text", "placeholder": "",
+                "data-description": "Name of the RTE student or guardian who holds the account",
+                "oninput": r"this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
             }
         }
 

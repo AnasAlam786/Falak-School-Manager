@@ -5,7 +5,6 @@ from sqlalchemy import func
 
 from src.model import StudentsDB
 from src.model import ClassData
-from src.model import StudentsMarks
 from src.model import Schools
 from src.model import StudentSessions
 from src.model import ClassAccess

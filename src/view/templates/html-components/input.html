@@ -29,21 +29,49 @@
     Please select valid {{ InputDetails['data-description'] }}.
   </div>
 
+  <!-- ******************************************************************************************* -->
 
-  {% else %}
+  {% elif InputDetails['type'] == "checkbox" %}
 
-
-  <label class="form-label block mb-2 ml-2 font-medium text-gray-light">
-    {{ InputDetails["label"] }}
+  <label for="{{ InputDetails['id'] }}" class="form-label block mb-2 ml-2 font-medium text-gray-light">
+    {{ InputDetails['data-description'] }}
     {% if InputDetails.get('required') %}
-    <span class="text-red-600 font-bold" aria-hidden="true">*</span>
+      
+      <span class="text-red-600 font-bold" aria-hidden="true"> * </span>
     {% endif %}
   </label>
 
-  <input oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase())"
+  <input type="checkbox" id="{{ InputDetails['id'] }}" name="{{section}}-{{ InputDetails['id'] }}"
+    data-label="{{ InputDetails.get('value') }}"
+    class="w-full p-3 custom-bg-gray-darker custom-border rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+      {% for attribute_name, attribute_value in InputDetails.items() %} 
+      
+        {% if attribute_name=='name' %} 
+          name="{{ section }}-{{ attribute_value }}" 
+        {% elif InputDetails.get('value') %} 
+          checked
+        {% else %} 
+          {{ attribute_name }}="{{ attribute_value }}" 
+        {% endif %} 
+
+      {% endfor %} />
+
+  <!-- ******************************************************************************************* -->
+
+  {% else %}
+  <label class="form-label block mb-2 ml-2 font-medium text-gray-light">
+    {{ InputDetails["label"] }}
+    {% if InputDetails.get('required') %}
+    <span class="text-red-600 font-bold" aria-hidden="true"> * </span>
+    {% endif %}
+    
+  </label>
+
+  <input
     class="w-full p-3 custom-bg-gray-darker custom-border rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
     {% set input_value=InputDetails.get('value') %} 
     {% for attribute_name, attribute_value in InputDetails.items() %} 
+
       {% if attribute_name=='name' %} 
         name="{{ section }}-{{ attribute_value }}" 
       {% elif attribute_name=='value' %} 
@@ -53,6 +81,7 @@
       {% else %} 
         {{ attribute_name }}="{{ attribute_value }}" 
       {% endif %} 
+      
     {% endfor %} />
   <div class="error-message text-danger text-sm mt-1 hidden" id="">
     Please enter valid {{ InputDetails["label"] }}.

@@ -3,7 +3,7 @@
 from flask import render_template, session, url_for, redirect, request, jsonify, Blueprint
 
 
-from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks, StudentsMarks_duplicate, Subjects, TeachersLogin
+from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks_duplicate, Subjects, TeachersLogin
 from src.model.ClassAccess import ClassAccess
 from src import db
 

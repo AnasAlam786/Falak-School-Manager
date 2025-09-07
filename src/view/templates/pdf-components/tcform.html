@@ -6,29 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Transfer Certificate</title>
   <style>
-@media print {
-  @page {
-    size: A4 portrait;
-    margin: 0; /* keep control over margins */
-  }
+    @media print {
+      @page {
+        size: A4 portrait;
+        margin: 0;
+        /* keep control over margins */
+      }
 
-  body {
-    margin: 0;
-    padding: 0;
-  }
-}
+      body {
+        margin: 0;
+        padding: 10px;
+      }
+    }
 
-.container {
-  position: relative;
-  width: 210mm;
-  height: 297mm;      /* always full A4 */
-  font-family: Arial, sans-serif;
-  box-sizing: border-box;
-  overflow: hidden;   /* prevents pushing the page larger */
-}
+    .container {
+      position: relative;
+      width: 210mm;
+      height: 297mm;
+      /* always full A4 */
+      font-family: Arial, sans-serif;
+      box-sizing: border-box;
+      overflow: hidden;
+      /* prevents pushing the page larger */
+    }
 
-.header {
-  margin-top: 8px;
+    .header {
+      margin-top: 8px;
       text-align: center;
       border-bottom: 2px solid black;
     }
@@ -42,13 +45,21 @@
 
       position: relative;
       margin-top: 20px;
-      margin-right: 15px;
-      margin-left: 35px;
+      padding: 20px;
+    }
+
+    .detail-block {
+
+      margin-top: 20px;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 17px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
 
     .center-logo {
       position: absolute;
-      top: 37%;
+      top: 55%;
       left: 50%;
       transform: translate(-50%, -50%);
       width: 80%;
@@ -59,15 +70,7 @@
       /* Sends it behind other content */
     }
 
-    .detail-block {
 
-      /*border: 1px dotted black;*/
-      margin-top: 20px;
-      border-radius: 10px;
-      padding: 10px;
-      font-size: 17px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
 
     td {
       padding: 7px;
@@ -88,14 +91,13 @@
       border: 1px solid #c7c7c7;
     }
 
-.signature-block {
-  position: absolute;
-  bottom: 0;   /* adjust as needed */
-  left: 0;
-  width: 100%;
-}
-
-    
+    .signature-block {
+      position: absolute;
+      bottom: 0;
+      /* adjust as needed */
+      left: 0;
+      width: 100%;
+    }
   </style>
 
 </head>
@@ -106,8 +108,7 @@
       <div style="display: flex; justify-content: space-between;">
 
         <!-- First Image (Left) -->
-        <img style="margin-top: 5px; margin-left: 15px;width: 110px; height: 110px; "
-          src="{{ student.school_logo }}">
+        <img style="margin-top: 5px; margin-left: 15px;width: 110px; height: 110px; " src="{{ student.school_logo }}">
 
         <!-- Middle Text (Centered) -->
         <img style="height: 120px; width: 525px;" src="{{ student.school_heading_image }}">
@@ -161,7 +162,7 @@
             <td><strong>Date of Birth:</strong></td>
             <td>{{ student.DOB }}</td>
             <td><strong>Aadhaar No:</strong></td>
-            <td>{{ student.AADHAAR }}</td>
+            <td>{{ "********" + student.AADHAAR[-4:] }}</td>
           </tr>
 
           <tr>
@@ -181,9 +182,9 @@
           <tr>
             <td><strong>APAAR No:</strong></td>
             {% if student.APAAR %}
-              <td>{{ student.APAAR }}</td>
+            <td>{{ student.APAAR }}</td>
             {% else %}
-              <td>N/A</td>
+            <td>N/A</td>
             {% endif %}
             <td><strong>Nationality:</strong></td>
             <td>Indian</td>
@@ -199,16 +200,16 @@
           <tr>
             <td><strong>Height:</strong></td>
             {% if student.Height %}
-              <td>{{ student.Height }} cm</td>
+            <td>{{ student.Height }} cm</td>
             {% else %}
-              <td>N/A</td>
+            <td>N/A</td>
             {% endif %}
 
             <td><strong>Weight:</strong></td>
             {% if student.Weight %}
-              <td>{{ student.Weight }} kg</td>
+            <td>{{ student.Weight }} kg</td>
             {% else %}
-              <td>N/A</td>
+            <td>N/A</td>
             {% endif %}
           </tr>
 
@@ -252,9 +253,9 @@
           <tr>
             <td><strong>Any Other Remark:</strong></td>
             {% if other_remarks == "" %}
-              <td>N/A</td>
+            <td>N/A</td>
             {% else %}
-              <td>{{ other_remarks }}</td>
+            <td>{{ other_remarks }}</td>
             {% endif %}
           </tr>
 
@@ -268,7 +269,7 @@
 
     </div>
 
-      <!-- <div class="detail-block">
+    <!-- <div class="detail-block">
 
         <table
           style="width: 100%; font-size: 14px; table-layout: fixed; border-collapse: collapse; text-align: center; border: 1px solid #c7c7c7;">
@@ -296,20 +297,20 @@
     </div> -->
 
     <!-- Signature Section Start -->
-<div class="signature-block">
-  <table style="width: 100%;">
-    <tr>
-      <td style="text-align: center;"><strong>_______________________</strong></td>
-      <td style="text-align: center;"><strong>_______________________</strong></td>
-      <td style="text-align: center;"><strong>_______________________</strong></td>
-    </tr>
-    <tr>
-      <td style="text-align: center;"><strong>Teacher's Sign</strong></td>
-      <td style="text-align: center;"><strong>Checked by</strong></td>
-      <td style="text-align: center;"><strong>Principal Sign</strong></td>
-    </tr>
-  </table>
-</div>
+    <div class="signature-block">
+      <table style="width: 100%;">
+        <tr>
+          <td style="text-align: center;"><strong>_______________________</strong></td>
+          <td style="text-align: center;"><strong>_______________________</strong></td>
+          <td style="text-align: center;"><strong>_______________________</strong></td>
+        </tr>
+        <tr>
+          <td style="text-align: center;"><strong>Teacher's Sign</strong></td>
+          <td style="text-align: center;"><strong>Checked by</strong></td>
+          <td style="text-align: center;"><strong>Principal Sign</strong></td>
+        </tr>
+      </table>
+    </div>
 
     <!-- Signature Section End -->
   </div>

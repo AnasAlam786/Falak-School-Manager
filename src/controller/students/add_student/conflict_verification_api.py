@@ -69,20 +69,19 @@ def verify_admission():
     else: return jsonify({'message': 'Please enter Admission Number properly!'}), 400
 
     
-    if len(global_conflict_conditions)>0:        
 
-        if len(global_conflict_conditions)>0:        
-            global_conflict = (
-                StudentsDB.query
-                .join(StudentSessions, StudentsDB.id == StudentSessions.student_id)
-                .filter(
-                    StudentsDB.school_id == school_id,
-                    StudentSessions.session_id == current_session_id,
-                    # StudentsDB.is_active == True,
-                    or_(*global_conflict_conditions)
-                )
-                .first()
+    if len(global_conflict_conditions)>0:        
+        global_conflict = (
+            StudentsDB.query
+            .join(StudentSessions, StudentsDB.id == StudentSessions.student_id)
+            .filter(
+                StudentsDB.school_id == school_id,
+                StudentSessions.session_id == current_session_id,
+                # StudentsDB.is_active == True,
+                or_(*global_conflict_conditions)
             )
+            .first()
+        )
 
         
         if global_conflict:
@@ -120,17 +119,17 @@ def verify_admission():
         if admission_no and school_conflict.ADMISSION_NO == admission_no:
             conflict_fields.append('Admission number')
 
-    if conflict_fields:
-        conflict_list = ', '.join(conflict_fields)
-        return jsonify({
-            'message': (
-                f"The following field(s) already exist for student "
-                f"'{school_conflict.STUDENTS_NAME}': {conflict_list}. "
-                "Please provide unique values."
-            ),
-            'conflicting_fields': conflict_fields,
-            'conflicting_student': school_conflict.STUDENTS_NAME
-        }), 400
+        if conflict_fields:
+            conflict_list = ', '.join(conflict_fields)
+            return jsonify({
+                'message': (
+                    f"The following field(s) already exist for student "
+                    f"'{school_conflict.STUDENTS_NAME}': {conflict_list}. "
+                    "Please provide unique values."
+                ),
+                'conflicting_fields': conflict_fields,
+                'conflicting_student': school_conflict.STUDENTS_NAME
+            }), 400
 
     # Ensure class_id, Section, ROLL exist in request
     if not class_id or not section or not roll:
@@ -150,7 +149,6 @@ def verify_admission():
         )
         .first()
     )
-    print("Session conflict check complete.", session_conflict)
     if session_conflict:
         return jsonify({'message': f'This class/section/roll is already assigned to {session_conflict.student_name}, admission number: {session_conflict.admission_no} in the current session.'}), 400
 

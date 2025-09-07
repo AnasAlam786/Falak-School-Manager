@@ -3,6 +3,7 @@
 
 from flask import session, Blueprint, request, jsonify
 
+from src.model.RTEInfo import RTEInfo
 from src.model.Schools import Schools
 from src.model.StudentsDB import StudentsDB
 from src.model.StudentSessions import StudentSessions
@@ -58,12 +59,16 @@ def final_student_update_api():
     # Prepare updates for StudentsDB and StudentSessions
     studentsdb_columns = {column.name for column in StudentsDB.__table__.columns}
     sessions_columns = {column.name for column in StudentSessions.__table__.columns}
+    rte_info = {column.name for column in RTEInfo.__table__.columns}
 
     studentsdb_updates = {
         key: value for key, value in verified_map.items() if key in studentsdb_columns
     }
     sessions_updates = {
         key: value for key, value in verified_map.items() if key in sessions_columns
+    }
+    rte_info_updates = {
+        key: value for key, value in verified_map.items() if key in rte_info
     }
 
     # Maintain special mappings similar to admission flow
@@ -89,6 +94,7 @@ def final_student_update_api():
             )
             .first()
         )
+
         if not session_row:
             session_row = StudentSessions(
                 student_id=student.id,
@@ -98,6 +104,22 @@ def final_student_update_api():
 
         for key, value in sessions_updates.items():
             setattr(session_row, key, value)
+
+        # Update or create RTE row
+        RTE_row: RTEInfo | None = (
+            db.session.query(RTEInfo)
+            .filter(
+                RTEInfo.student_id == student.id,
+            )
+            .first()
+        )
+        if not RTE_row:
+            RTE_row = RTEInfo(
+                student_id=student.id,
+            )
+            db.session.add(RTE_row)
+        for key, value in rte_info_updates.items():
+            setattr(RTE_row, key, value)
 
         # 6) Image handling
         deleted_images_folder_id = "1e8iHskcj2Vtv_Mg_Mtp4BzdHocuhLd_f"

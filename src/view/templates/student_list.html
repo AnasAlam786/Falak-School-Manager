@@ -643,7 +643,7 @@
       data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
       <!-- Badges - Always visible -->
       <div class="absolute top-4 right-4 flex flex-col items-end z-10">
-        {% if row.Free_Scheme and row.Free_Scheme["Scheme"] == "RTE" %}
+        {% if row.is_RTE and row.is_RTE == true %}
         <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded">RTE</span>
         {% endif %}
       </div>

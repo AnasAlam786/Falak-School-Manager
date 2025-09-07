@@ -3,6 +3,7 @@
 from flask import render_template, session, Blueprint
 from sqlalchemy import String, case, cast, func
 
+from src.model.RTEInfo import RTEInfo
 from src.model.StudentsDB import StudentsDB
 from src.model.StudentSessions import StudentSessions
 from src.model.ClassData import ClassData
@@ -54,10 +55,13 @@ def student_list():
         StudentSessions.ROLL,
         ClassData.CLASS,
         ClassData.Section,
+        RTEInfo.is_RTE,
     ).join(
         StudentSessions, StudentSessions.student_id == StudentsDB.id
     ).join(
         ClassData, StudentSessions.class_id == ClassData.id
+    ).outerjoin(
+        RTEInfo, RTEInfo.student_id == StudentsDB.id
     ).filter(
         StudentsDB.school_id    == school_id,
         StudentSessions.session_id == selected_session,
@@ -67,8 +71,6 @@ def student_list():
         ClassData.Section.asc(),
         StudentSessions.ROLL.asc()
     ).all()
-
-
 
     # Total students
     total_students = len(data)

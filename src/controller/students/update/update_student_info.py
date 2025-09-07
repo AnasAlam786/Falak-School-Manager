@@ -2,6 +2,7 @@
 
 from flask import jsonify, render_template, session, Blueprint, request
 
+from src.model.RTEInfo import RTEInfo
 from src.model.StudentsDB import StudentsDB
 from src.model.ClassData import ClassData
 from src.model.StudentsDB import StudentsDB
@@ -52,9 +53,10 @@ def update_student_info():
 
     class_ids = [cls.id for cls in classes]
     student = (
-        db.session.query(StudentsDB, StudentSessions)
+        db.session.query(StudentsDB, StudentSessions, RTEInfo)
         .join(StudentSessions, StudentSessions.student_id == StudentsDB.id)
         .join(ClassData, StudentSessions.class_id == ClassData.id)
+        .outerjoin(RTEInfo, RTEInfo.student_id == StudentsDB.id)
         .filter(
             StudentsDB.id == student_id,
             StudentSessions.session_id == current_session,
@@ -66,7 +68,7 @@ def update_student_info():
     if not student:
         return jsonify({"message": "Student not found"}), 404
 
-    studentDB, sessionDB = student
+    studentDB, sessionDB, rte_info = student
     student_data = {}
 
     # Add StudentSessions data
@@ -75,10 +77,19 @@ def update_student_info():
         for col in sessionDB.__table__.columns
     })
 
+    # Add studentDB data
     student_data.update({
         f"{col.name}": getattr(studentDB, col.name)
         for col in studentDB.__table__.columns
     })
+
+    # Add rte_info data
+    if rte_info:
+        student_data.update({
+            f"{col.name}": getattr(rte_info, col.name)
+            for col in rte_info.__table__.columns
+        })
+
 
     student_data.update({
         "id": studentDB.id,

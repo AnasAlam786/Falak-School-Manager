@@ -105,6 +105,7 @@ class StudentsDB(db.Model):
     marks = db.relationship("StudentsMarks_duplicate", back_populates="students")
     # students_marks = db.relationship("StudentsMarks", back_populates="students")
     fee_data = db.relationship("FeeData", back_populates="students")
+    RTE_info = db.relationship("RTEInfo", back_populates="students")
 
 
     __table_args__ = (

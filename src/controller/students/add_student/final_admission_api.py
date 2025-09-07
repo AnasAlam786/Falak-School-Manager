@@ -14,6 +14,7 @@ from src.controller.students.utils.upload_image import upload_image, delete_imag
 
 from src.controller.auth.login_required import login_required
 from src.controller.permissions.permission_required import permission_required
+from src.model.RTEInfo import RTEInfo
 
 final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 
@@ -49,9 +50,11 @@ def final_admission_api():
 
     StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
     StudentsSession_colums = {column.name for column in StudentSessions.__table__.columns}
+    RTEInfo_colums = {column.name for column in RTEInfo.__table__.columns}
 
     StudentDB_data = {key: value for key, value in data.items() if key in StudentDB_colums}    
     StudentsSession_data = {key: value for key, value in data.items() if key in StudentsSession_colums}
+    rte_info_data = {key: value for key, value in data.items() if key in RTEInfo_colums}
 
 
     
@@ -65,46 +68,46 @@ def final_admission_api():
     StudentsSession_data["created_at"] = StudentDB_data["ADMISSION_DATE"]
     StudentsSession_data["Section"] = data["Section"]
     
-
-    if image:
-        try:
-        
-            encoded_image = image.split(",")[1]
-
-            school = Schools.query.filter_by(id=school_id).first()
-            if not school:
-                return jsonify({"message": "School not found"}), 404
-
-            folder_id = school.students_image_folder_id
-            image_id = upload_image(encoded_image, data["ADMISSION_NO"], folder_id)
-
-            StudentDB_data["IMAGE"] = image_id
-            print('Uploaded image Drive ID:', image_id)
-        except Exception as e:
-            print(f"Error uploading image: {e}")
-            return jsonify({"message": f"Error uploading image: {e}"}), 400
-
-    try:    
-        # Adding new rows in StudentsDB and StudentSessions tables
+    try:
+        # Step 1: Insert student (without image yet)
         new_student = StudentsDB(**StudentDB_data)
         db.session.add(new_student)
-        db.session.flush()  # Flush to get new_student.id
+        db.session.flush()  # assign new_student.id (but not committed yet)
 
+        # Step 2: Prepare student session + RTE row
         student_session = StudentSessions(
-            student_id=new_student.id, 
+            student_id=new_student.id,
             **StudentsSession_data
         )
+        rte_row = RTEInfo(
+            student_id=new_student.id,
+            **rte_info_data
+        )
         db.session.add(student_session)
-        db.session.flush()
+        db.session.add(rte_row)
+
+        # Step 3: Upload image using admission no or student id
+        if image:
+            encoded_image = image.split(",")[1]
+            school = Schools.query.filter_by(id=school_id).first()
+            folder_id = school.students_image_folder_id
+            image_id = upload_image(encoded_image, data.get("ADMISSION_NO"), folder_id)
+
+            # update field before commit
+            new_student.IMAGE = image_id
+
+        # Step 4: Commit everything together
         db.session.commit()
 
-        return jsonify({"message": "Data submitted successfully", "student_id": new_student.id}), 200
+        return jsonify({
+            "message": "Data submitted successfully",
+            "student_id": new_student.id,
+            "image_id": new_student.IMAGE
+        }), 200
 
     except Exception as e:
-        db.session.rollback()  # Undo everything
-
-        if 'image_id' in locals():  # If image upload was successful, delete the image
-             (image_id)
-
+        db.session.rollback()
+        if 'image_id' in locals():
+            delete_image(image_id)  # cleanup orphan image
         print('Error while adding student:', str(e))
-        return jsonify({"message": "Failed to add student"}), 500
+        return jsonify({"message": f"Failed to add student: {str(e)}"}), 500

@@ -1,14 +1,14 @@
 # src/model/__init__.py
 
 # Import all model classes
-from .Schools import   Schools
+from .Schools import Schools
 from .Sessions import  Sessions
 from .ClassData import ClassData
 from .ClassAccess import ClassAccess
 
 from .StudentsDB import StudentsDB
 from .StudentSessions import StudentSessions
-# from .StudentsMarks import StudentsMarks
+from .RTEInfo import RTEInfo
 from .TeachersLogin import TeachersLogin
 
 from .StudentsMarks_duplicate import StudentsMarks_duplicate
@@ -32,7 +32,7 @@ __all__ = [
     
     "StudentsDB",
     "StudentSessions",
-    # "StudentsMarks",
+    "RTEInfo",
     "TeachersLogin",
 
     "StudentsMarks_duplicate",
