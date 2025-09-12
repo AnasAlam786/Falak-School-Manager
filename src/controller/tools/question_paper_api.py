@@ -22,7 +22,7 @@ def question_paper_api():
         std =  payload.get('std')
         MM =  payload.get('MM')
         hrs =  payload.get('hrs')
-        school="Falak Public School"
+        school=session["school_name"]
 
         #questions = [{"marks": "10", "type": "singleWord", "qText": "Define the following:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"]},
                     # {"marks": "10", "type": "match", "qText": "Match the following countries with their capitals:", "subQuestion": ["India", "France", "Japan", "Germany", "Brazil", "Canada"], "options": ["New Delhi", "Paris", "Tokyo", "Berlin", "Brasília", "Ottawa"]}, 
