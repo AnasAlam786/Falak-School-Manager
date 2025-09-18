@@ -1,6 +1,6 @@
 # src/controller/marks/fill_marks.py
 
-from flask import render_template, session, url_for, redirect, request, jsonify, Blueprint
+from flask import render_template, session, request, jsonify, Blueprint
 
 
 from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks_duplicate, Subjects, TeachersLogin
@@ -8,7 +8,8 @@ from src.model.ClassAccess import ClassAccess
 from src import db
 
 from bs4 import BeautifulSoup
-from ..auth.login_required import login_required
+from src.controller.auth.login_required import login_required
+
 
 fill_marks_bp = Blueprint( 'fill_marks_bp',   __name__)
 

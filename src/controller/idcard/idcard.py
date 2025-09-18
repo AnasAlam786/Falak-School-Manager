@@ -21,6 +21,7 @@ idcard_bp = Blueprint( 'idcard_bp',   __name__)
 
 @idcard_bp.route('/idcard', methods=['GET'])
 @login_required
+@permission_required('idcard')
 def idcards_page():
 
     school_id = session['school_id']

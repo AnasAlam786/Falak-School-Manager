@@ -319,11 +319,19 @@
         </div>
 
         <!-- Logout Button -->
+        {% if not session['school_name'] %}
         <a href="/logout"
           class="flex items-center justify-center w-full py-2 px-4 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200">
           <i class="fas fa-sign-out-alt mr-2"></i>
           Logout
         </a>
+        {% else %}
+        <a href="/login"
+          class="flex items-center justify-center w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200">
+          <i class="fas fa-sign-in-alt mr-2"></i>
+          Login
+        </a>
+        {% endif %}
       </div>
     </div>
   </div>

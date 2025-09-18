@@ -21,6 +21,7 @@ from ..permissions.permission_required import permission_required
 update_staff_bp = Blueprint( 'update_staff_bp',   __name__)
 
 @update_staff_bp.route('/update_staff', methods=['GET'])
+@permission_required('update_staff')
 @login_required
 def update_staff():
     # Get staff ID from query parameter

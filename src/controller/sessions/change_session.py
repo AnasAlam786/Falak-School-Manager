@@ -1,6 +1,8 @@
 from flask import session, jsonify, Blueprint, request, redirect, url_for
+from src.controller.permissions.permission_required import permission_required
 from src.model import Sessions
-from ..auth.login_required import login_required
+from src.controller.auth.login_required import login_required
+
 
 
 change_session_bp = Blueprint( 'change_session_bp',   __name__)
@@ -8,6 +10,7 @@ change_session_bp = Blueprint( 'change_session_bp',   __name__)
 
 @change_session_bp.route('/change_session', methods=["POST"])
 @login_required
+@permission_required('change_session')
 def change_session():
     
     data = request.json

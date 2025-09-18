@@ -4,6 +4,8 @@ from flask import render_template, session, request, Blueprint, jsonify
 
 from sqlalchemy import func, case
 
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 from src.model import StudentsDB
 from src.model import ClassData
 from src.model import StudentSessions
@@ -15,6 +17,8 @@ student_modal_data_api_bp = Blueprint( 'student_modal_data_api_bp',   __name__)
 
 
 @student_modal_data_api_bp.route('/student_modal_data_api', methods=["POST"])
+@login_required
+@permission_required('student_details')
 def student_modal_data_api():
     data = request.json
     
