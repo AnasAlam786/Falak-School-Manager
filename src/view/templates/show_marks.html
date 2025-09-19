@@ -1,150 +1,160 @@
 {% extends "base.html" %}
 {% block content %}
 
+
+
 <!-- START: Main Container -->
-<div class="container my-5">
-  <div class="row mb-4">
-    <!-- START: Class Selector -->
-    <div class="col-md-6 mb-2">
-      <label for="classView" class="form-label fs-4 fw-bold">Select Class</label>
-      <select class="form-select form-select-lg fs-4" id="classView" name="selectClass"
-              onchange="updatePage('/get_marks_api', 'results', { 'class_id': this.value });">
-        <option value="All" selected disabled hidden>Select Class</option>
+<div class="mx-auto px-4">
+
+  <!-- Page Header -->
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div>
+      <h1 class="text-2xl md:text-3xl font-bold text-white">View Marksheet</h1>
+      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">View and download marksheet of students</p>
+    </div>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="flex flex-col gap-4 mb-6 md:mb-10">
+    
+    <!-- Search Box -->
+    <div class="search-box p-3 rounded-lg md:rounded-xl bg-gray-800">
+      <div class="flex items-center">
+        <i class="fas fa-search text-gray-400 mr-3"></i>
+        <input type="text" id="search-input" oninput="searchFunction()"
+          placeholder="Search by Name, Class, or Roll Number"
+          class="w-full bg-transparent border-none text-white placeholder-gray-400 focus:outline-none text-sm md:text-base">
+      </div>
+    </div>
+
+    <!-- Dropdown -->
+    <div class="relative">
+      <select
+        class="w-full p-3 pr-10 rounded-lg md:rounded-xl bg-gray-800 text-gray-200 appearance-none cursor-pointer text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        id="classView" name="selectClass" onchange="updatePage('/get_marks_api', 'results', { 'class_id': this.value });">
+        <option value="" selected disabled hidden>Select Class</option>
         {% if classes %}
           {% for class in classes %}
             <option value="{{ class.id }}">{{ class.CLASS }}</option>
           {% endfor %}
         {% endif %}
       </select>
+      <i
+        class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
     </div>
-    <!-- END: Class Selector -->
 
-    <!-- START: Search Input -->
-    <div class="col-md-6">
-      <label for="search-input" class="form-label fs-4 fw-bold">Search</label>
-      <input type="text" id="search-input" class="form-control form-control-lg fs-4"
-             placeholder="Search by Name, Class, or Roll Number" onkeyup="searchFunction()">
-    </div>
-    <!-- END: Search Input -->
   </div>
 
-  <!-- START: Results List -->
-  <div id="results">
-    {% if student_marks %}
-      {% for student in student_marks %}
-        <!-- START: Single Result Card -->
-        <div class="card shadow-lg mb-4 result-card">
-          <div class="card-body">
 
-            <!-- START: Student Header Table -->
-            <div class="table-responsive mb-3 border rounded">
-              <table class="table table-borderless text-center fs-4" style="border: 1px solid #dee2e6;">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Roll</th>
-                    <th>Class</th>
-                    <th>F's Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr class="student-summary">
-                    <td>{{ student["STUDENTS_NAME"] }}</td>
-                    <td>{{ student["ROLL"] }}</td>
-                    <td>{{ student["CLASS"] }}</td>
-                    <td>{{ student["FATHERS_NAME"] }}</td>
-                  </tr>
-                </tbody>
-                  <tr>
-                    <td colspan="5" class="text-end">
-                      <button class="btn btn-primary btn-lg fs-4 mt-2" onclick="getResult('{{ student['student_id'] }}')">
-                        <i class="bi bi-printer-fill"></i> Print Result
-                      </button>
-                    </td>
-                  </tr>
-              </table>
-            </div>
-            <!-- END: Student Header Table -->
+<!-- START: Results List -->
+<div id="results">
+  {% if student_marks %}
+    {% for student in student_marks %}
+      <!-- START: Single Result Card -->
+      <div class="bg-gray-800 shadow-lg rounded-lg mb-4">
+        <div class="p-4 md:p-6">
 
-            <!-- START: Subjects Table -->
-            <div class="table-responsive">
-              <table class="table table-hover table-striped align-middle fs-5">
-
-                {% set marks = student.marks %}
-                
-                {% set exam_names = marks.keys() | list %}
-                {% set subjects = student.marks[exam_names[0]].subject_marks_dict.keys() | list %}
-                {% set special_colums = ["G. Total", "Grades", "Percentage", "Total"] %}
-
-                <thead class="text-center">
-                  <tr style="border: 1px solid #ffffff; font-weight: bold;" >
-                    <th class="fs-5">Sub.</th>
-                    {# Loop through exams sorted by exam_display_order #}
-                    {% for exam_name, exam_data in student.marks.items() %}
-                      <!-- <th class="fs-5 lh-1">FA1 <span class="text-secondary small d-block" style="font-size: 0.9rem;">(20)</span></th> -->
-                      <th class="fs-5 lh-1">
-                        {{ exam_name }} 
-                        <span class="text-secondary small d-block" style="font-size: 0.9rem;">
-                          ({{ exam_data.weightage }})
-                        </span>
-                      </th>
-                    {% endfor %}
-                  </tr>
-                </thead>
-
-                  <tbody>
-                    {# Subject-wise marks #}
-                    {% for subject in subjects %}
-
-                    
-
-                        <tr class="text-center fs-5" >
-                            <th class="text-start" style="border-left: 1px solid #ffffff;">{{ subject }}</th>
-                            {% for exam_name in exam_names %}
-                                {% set exam_data = marks[exam_name] %}
-                                <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
-                                    {{ exam_data.subject_marks_dict.get(subject, '') }}
-                                </td>
-                            {% endfor %}
-                        </tr>
-                    {% endfor %}
-                
-                    {# Grand Total row #}
-                    <tr class="text-center fs-5" style="border: 2px solid #ffffff; font-weight: bold;">
-                        <th class="text-start" style="border-left: 1px solid #ffffff;">G.Total</th>
-                        {% for exam_name in exam_names %}
-                            <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
-                              {{ marks[exam_name].exam_total }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                
-                    {# Percentage row #}
-                    <tr class="text-center fs-5" style="border: 2px solid #ffffff; font-weight: bold;">
-                        <th class="text-start" style="border-left: 1px solid #ffffff;">Percentage</th>
-                        {% for exam_name in exam_names %}
-                            <td {% if exam_name in special_colums %} style="border-left: 1px solid #ffffff; border-right: 1px solid #ffffff; font-weight: bold;" {% endif %}>
-                              {{ marks[exam_name].percentage }}
-                            </td>
-                        {% endfor %}
-                    </tr>
-                </tbody>
-                
-              </table>
-            </div>
-            <!-- END: Subjects Table -->
-
+          <!-- Student Header Table -->
+          <div class="overflow-x-auto mb-3 border border-gray-700 rounded">
+            <table class="min-w-full text-center text-gray-200 border-collapse">
+              <thead class="bg-gray-700 text-white">
+                <tr>
+                  <th class="py-2 px-3 border-b border-gray-600">Name</th>
+                  <th class="py-2 px-3 border-b border-gray-600">Roll</th>
+                  <th class="py-2 px-3 border-b border-gray-600">Class</th>
+                  <th class="py-2 px-3 border-b border-gray-600">F's Name</th>
+                  <th class="py-2 px-3 border-b border-gray-600 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr class="bg-gray-800 hover:bg-gray-700">
+                  <td class="py-2 px-3 border-b border-gray-600">{{ student["STUDENTS_NAME"] }}</td>
+                  <td class="py-2 px-3 border-b border-gray-600">{{ student["ROLL"] }}</td>
+                  <td class="py-2 px-3 border-b border-gray-600">{{ student["CLASS"] }}</td>
+                  <td class="py-2 px-3 border-b border-gray-600">{{ student["FATHERS_NAME"] }}</td>
+                  <td class="py-2 px-3 border-b border-gray-600 text-right">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-base flex items-center gap-2"
+                      onclick="getResult('{{ student['student_id'] }}')">
+                      <i class="bi bi-printer-fill"></i> Print Result
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+          <!-- END: Student Header Table -->
+
+          <!-- Subjects Table -->
+          <div class="overflow-x-auto">
+            <table class="min-w-full text-gray-200 border border-gray-700 border-collapse table-auto">
+              {% set marks = student.marks %}
+              {% set exam_names = marks.keys() | list %}
+              {% set subjects = student.marks[exam_names[0]].subject_marks_dict.keys() | list %}
+              {% set special_columns = ["G. Total", "Grades", "Percentage", "Total"] %}
+
+              <thead class="bg-gray-700 text-center font-semibold">
+                <tr>
+                  <th class="py-2 px-3 border border-gray-600 text-left">Sub.</th>
+                  {% for exam_name, exam_data in student.marks.items() %}
+                    <th class="py-2 px-3 border border-gray-600">
+                      {{ exam_name }}
+                      <div class="text-gray-400 text-xs">{{ exam_data.weightage }}</div>
+                    </th>
+                  {% endfor %}
+                </tr>
+              </thead>
+
+              <tbody>
+                {% for subject in subjects %}
+                  <tr class="text-center hover:bg-gray-700">
+                    <th class="py-2 px-3 border border-gray-600 text-left">{{ subject }}</th>
+                    {% for exam_name in exam_names %}
+                      {% set exam_data = marks[exam_name] %}
+                      <td class="py-2 px-3 border border-gray-600 {% if exam_name in special_columns %}font-bold{% endif %}">
+                        {{ exam_data.subject_marks_dict.get(subject, '') }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                {% endfor %}
+
+                <!-- Grand Total -->
+                <tr class="bg-gray-700 font-bold text-center">
+                  <th class="py-2 px-3 border border-gray-600 text-left">G.Total</th>
+                  {% for exam_name in exam_names %}
+                    <td class="py-2 px-3 border border-gray-600">
+                      {{ marks[exam_name].exam_total }}
+                    </td>
+                  {% endfor %}
+                </tr>
+
+                <!-- Percentage -->
+                <tr class="bg-gray-700 font-bold text-center">
+                  <th class="py-2 px-3 border border-gray-600 text-left">Percentage</th>
+                  {% for exam_name in exam_names %}
+                    <td class="py-2 px-3 border border-gray-600">
+                      {{ marks[exam_name].percentage }}
+                    </td>
+                  {% endfor %}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- END: Subjects Table -->
+
         </div>
-        <!-- END: Single Result Card -->
-      {% endfor %}
-    {% else %}
-      <!-- START: Empty State -->
-      <div class="alert alert-info text-center fs-4">No data available to display.</div>
-      <!-- END: Empty State -->
-    {% endif %}
-  </div>
-  <!-- END: Results List -->
+      </div>
+      <!-- END: Single Result Card -->
+    {% endfor %}
+  {% else %}
+    <!-- Empty State -->
+    <div class="text-center text-gray-400 text-lg py-10">No data available. Please select a class.</div>
+  {% endif %}
+</div>
+<!-- END: Results List -->
+
+
+
+
 </div>
 <!-- END: Main Container -->
 

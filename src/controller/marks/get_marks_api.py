@@ -1,6 +1,5 @@
 # src/controller/get_marks_api.py
 
-from collections import OrderedDict
 from sqlalchemy import exists, true
 from flask import session, request, jsonify, Blueprint, render_template 
 
@@ -12,45 +11,25 @@ from src.controller.marks.utils.calc_grades import get_grade
 from src.controller.marks.utils.marks_processing import result_data
 
 from bs4 import BeautifulSoup
-# from pandas import pandas as pd
+import requests
+
+import json
+from decimal import Decimal
+import datetime
 
 
 get_marks_api_bp = Blueprint('get_marks_api_bp',   __name__)
 
-
-def add_grand_total(group):
-
-    group["student_id"] = group.name
-    total_subject_marks = OrderedDict()
-
-    for subj_dict in group["subject_marks_dict"]:
-        for subj, mark in subj_dict.items():
-            try:
-                mark = float(mark)
-                total_subject_marks[subj] = total_subject_marks.get(subj, 0) + mark
-            except:
-                pass
-
-    grand_total_row = group.iloc[0].copy()
-    
-    grand_total_row["exam_name"] = "G. Total"
-    grand_total_row["exam_display_order"] = len(group)+1
-    grand_total_row["exam_total"] = sum(total_subject_marks.values())
-    grand_total_row["weightage"] = sum(group.weightage.values)
-    grand_total_row["subject_marks_dict"] = total_subject_marks
-
-    max_marks = int(grand_total_row["weightage"]) * len(grand_total_row["subject_marks_dict"])
-
-    grand_total_row["percentage"] = int(
-        (grand_total_row["exam_total"] / max_marks) * 100 if max_marks > 0 else 0
-    )
-
-    # Concatenate both
-    return pd.concat([group, pd.DataFrame([grand_total_row])], ignore_index=True)
-
-
-
-
+def convert_serializable(obj):
+    if isinstance(obj, Decimal):
+        return float(obj)   # Convert Decimal to float
+    elif isinstance(obj, datetime.date):
+        return obj.isoformat()  # Convert date to string
+    elif isinstance(obj, dict):
+        return {k: convert_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_serializable(i) for i in obj]
+    return obj
 
 @get_marks_api_bp.route('/get_marks_api', methods=["POST"])
 def get_marks_api():
@@ -79,13 +58,33 @@ def get_marks_api():
 
     if not has_access:
         return jsonify({"message": "You are not authorized to access this class."}), 403
+    
+    student_marks_data = result_data(school_id, current_session_id, class_id)
 
 
-    # student_marks_data = result_data(school_id, current_session_id, class_id)
+    if not student_marks_data:
+        return jsonify({"message": "No Data Found"}), 400
+
+    
+    serializable_data = convert_serializable(student_marks_data)
+    try:
+        response = requests.post(
+            'https://marks-processing.onrender.com/process-marks',
+            json={"student_marks_data": serializable_data},
+            headers={"X-API-Key": 'Falak@12345'},
+            timeout=10
+        )
+        response.raise_for_status()
+
+        # ✅ Store processed result in variable instead of returning
+        student_marks = response.json()
 
 
-    # if not student_marks_data:
-    #     return jsonify({"message": "No Data Found"}), 400
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
     # student_marks_df = pd.DataFrame(student_marks_data)
 
@@ -122,11 +121,11 @@ def get_marks_api():
     # pprint.pprint(student_marks)
    
 
-    # html = render_template('show_marks.html', student_marks=student_marks)
-    # soup = BeautifulSoup(html,"lxml")
-    # content = soup.body.find('div',{'id':'results'}).decode_contents()
+    html = render_template('show_marks.html', student_marks=student_marks)
+    soup = BeautifulSoup(html,"lxml")
+    content = soup.body.find('div',{'id':'results'}).decode_contents()
 
 
 
-    return jsonify({"html":str('content')})
+    return jsonify({"html":str(content)})
     
