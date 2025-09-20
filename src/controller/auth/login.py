@@ -38,44 +38,44 @@ def login():
                 .first()
         )
 
+        if not user:
+            return render_template('login.html', error="No user found with this email")
+
         decrypted_password = cipher_suite.decrypt(user.Password).decode()
 
-        if user and (decrypted_password == password):
+        if not decrypted_password == password:
+            return render_template('login.html', error="Wrong email or password")
 
-
-            school = Schools.query.filter_by(id=user.school_id).first()
-            sessions = Sessions.query.with_entities(Sessions.id, Sessions.session, Sessions.current_session
-                                                    ).order_by(Sessions.session.desc()).all()
-            
-            session.permanent = True
+        school = Schools.query.filter_by(id=user.school_id).first()
+        sessions = Sessions.query.with_entities(Sessions.id, Sessions.session, Sessions.current_session
+                                                ).order_by(Sessions.session.desc()).all()
         
-            
-            session["role"] = user.role_data.role_name
-            session["all_sessions"] = [sessi.session for sessi in sessions]
-            session["school_name"] = school.School_Name
-            session["user_id"] = user.id
-            session['logo'] = school.Logo
-            session["email"] = user.email
-            session["school_id"] = user.school_id
+        session.permanent = True
+    
+        
+        session["role"] = user.role_data.role_name
+        session["all_sessions"] = [sessi.session for sessi in sessions]
+        session["school_name"] = school.School_Name
+        session["user_id"] = user.id
+        session['logo'] = school.Logo
+        session["email"] = user.email
+        session["school_id"] = user.school_id
 
-            permissions = get_permissions(user.id)
-            session["permissions"] = permissions
+        permissions = get_permissions(user.id)
+        session["permissions"] = permissions
 
-            current_running_session = None
-            for s in sessions:
-                if s.current_session:
-                    current_running_session = s.id
-                    break
+        current_running_session = None
+        for s in sessions:
+            if s.current_session:
+                current_running_session = s.id
+                break
 
-            session["session_id"]      = current_running_session
-            session['current_running_session'] = current_running_session  # can be changed if user switches  to another session
+        session["session_id"]      = current_running_session
+        session['current_running_session'] = current_running_session  # can be changed if user switches  to another session
 
-            print(session)
+        print(session)
 
 
-            return redirect(url_for('student_list_bp.student_list'))
-               
-        else: error="Wrong email or password"
-                
-
+        return redirect(url_for('student_list_bp.student_list'))
+    
     return render_template('login.html', error=error)

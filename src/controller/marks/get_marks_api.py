@@ -2,7 +2,7 @@
 
 
 from typing import OrderedDict
-from sqlalchemy import exists, true
+from sqlalchemy import exists
 from flask import session, request, jsonify, Blueprint, render_template 
 
 
@@ -15,22 +15,9 @@ from src.controller.marks.utils.marks_processing import result_data
 from bs4 import BeautifulSoup
 
 import pandas as pd
-from decimal import Decimal
-import datetime
 
 
 get_marks_api_bp = Blueprint('get_marks_api_bp',   __name__)
-
-def convert_serializable(obj):
-    if isinstance(obj, Decimal):
-        return float(obj)   # Convert Decimal to float
-    elif isinstance(obj, datetime.date):
-        return obj.isoformat()  # Convert date to string
-    elif isinstance(obj, dict):
-        return {k: convert_serializable(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
-        return [convert_serializable(i) for i in obj]
-    return obj
 
 def add_grand_total(group):
 
@@ -95,27 +82,6 @@ def get_marks_api():
 
     if not student_marks_data:
         return jsonify({"message": "No Data Found"}), 400
-
-    
-    # serializable_data = convert_serializable(student_marks_data)
-    # try:
-    #     response = requests.post(
-    #         'http://127.0.0.1:5000/process-marks',
-    #         json={"student_marks_data": serializable_data},
-    #         headers={"X-API-Key": 'Falak@12345'},
-    #         timeout=10
-    #     )
-    #     print(response.json())
-    #     response.raise_for_status()
-
-    #     # ✅ Store processed result in variable instead of returning
-    #     student_marks = response.json()
-
-
-
-    # except requests.exceptions.RequestException as e:
-    #     return jsonify({"error": str(e)}), 500
-
 
 
     student_marks_df = pd.DataFrame(student_marks_data)
