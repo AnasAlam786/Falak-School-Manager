@@ -25,3 +25,4 @@ class ClassData(db.Model):
     student_sessions =  db.relationship("StudentSessions", back_populates="class_data")
     fee_amount = db.relationship("FeeAmount", back_populates="class_data")
     class_access = db.relationship("ClassAccess", back_populates="class_data")
+    class_exams = db.relationship("ClassExams", back_populates="class_data")

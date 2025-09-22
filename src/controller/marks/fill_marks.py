@@ -3,7 +3,7 @@
 from flask import render_template, session, request, jsonify, Blueprint
 
 
-from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks_duplicate, Subjects, TeachersLogin
+from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks_duplicate, Subjects, TeachersLogin, ClassExams
 from src.model.ClassAccess import ClassAccess
 from src import db
 
@@ -51,8 +51,19 @@ def fill_marks():
             unique_subjects.append(subject.subject)
 
 
-    exams =  db.session.query(Exams.exam_name, Exams.id).filter_by(school_id=school_id).order_by(Exams.display_order.asc()).all()
-    
+    exams = (
+        db.session.query(Exams.exam_name, Exams.id)
+        .join(ClassExams, ClassExams.exam_id == Exams.id)
+        .filter(ClassExams.class_id.in_(class_ids),
+                Exams.school_id == school_id
+        )
+        .group_by(Exams.id)
+        .order_by(Exams.display_order.asc())
+        .all()
+    )
+    for exam_name, exam_id in exams:
+        print(f"Exam ID: {exam_id}, Exam Name: {exam_name}")
+        
     data = None
 
     if request.method == "POST":
@@ -105,7 +116,8 @@ def fill_marks():
             .filter(
                 ClassData.id == class_id,
                 StudentsDB.school_id == school_id,
-                StudentSessions.session_id == current_session_id
+                StudentSessions.session_id == current_session_id,
+                StudentsMarks_duplicate.session_id == current_session_id
             )
 
             # Sort by roll number

@@ -7,6 +7,7 @@ Compatibility wrapper `result_data()` is provided for existing controllers.
 """
 
 from src import db
+from src.model.ClassExams import ClassExams
 from src.model.StudentsDB import StudentsDB
 from src.model.StudentSessions import StudentSessions
 from src.model.ClassData import ClassData
@@ -14,30 +15,39 @@ from src.model.Subjects import Subjects
 from src.model.Exams import Exams
 from src.model.StudentsMarks_duplicate import StudentsMarks_duplicate
 
-from sqlalchemy.orm import aliased
-from sqlalchemy import func, case, cast, Float, literal, null
+from sqlalchemy import func, case, cast, Float, literal, func, desc
+from sqlalchemy.sql import over
 from sqlalchemy.dialects.postgresql import aggregate_order_by
 from collections import OrderedDict
 
-def result_data(school_id, session_id, class_id):
+
+def result_data(school_id, session_id, class_id, student_ids=None):
+
     # Step A: students in this session+class (limit scope for performance)
     students_subq = (
         db.session.query(StudentSessions.student_id)
         .filter(StudentSessions.session_id == session_id)
         .filter(StudentSessions.class_id == class_id)
-        .subquery()
     )
+
+    if student_ids:
+        students_subq = students_subq.filter(StudentSessions.student_id.in_(student_ids))
+    students_subq = students_subq.subquery()
+    
 
     # Step B: exams for the school
     exams_subq = (
         db.session.query(
-            Exams.id.label('exam_id'),
-            Exams.exam_code.label('exam_name'),
-            Exams.term.label('exam_term'),
+            Exams.id.label("exam_id"),
+            Exams.exam_code.label("exam_name"),   # or exam_code if you prefer
+            Exams.term.label("exam_term"),
             Exams.weightage,
-            Exams.display_order.label('exam_display_order')
+            Exams.display_order.label("exam_display_order")
         )
-        .filter(Exams.school_id == school_id)
+        .join(ClassExams, ClassExams.exam_id == Exams.id)
+        .filter(ClassExams.class_id == class_id,
+                Exams.school_id == school_id)
+        .distinct()  # ensure uniqueness
         .subquery()
     )
 
@@ -53,35 +63,22 @@ def result_data(school_id, session_id, class_id):
         .subquery()
     )
 
-    # Step D: CROSS JOIN students × exams
-    student_exam_pairs = (
+    ses = (
         db.session.query(
             students_subq.c.student_id,
             exams_subq.c.exam_id,
             exams_subq.c.exam_name,
             exams_subq.c.weightage,
             exams_subq.c.exam_term,
-            exams_subq.c.exam_display_order
-        )
-        .join(exams_subq, literal(True))   # cross join
-        .subquery()
-    )
-
-    # Step E: CROSS JOIN (student × exam) × subjects  -> every student/exam gets every subject
-    ses = (
-        db.session.query(
-            student_exam_pairs.c.student_id,
-            student_exam_pairs.c.exam_id,
-            student_exam_pairs.c.exam_name,
-            student_exam_pairs.c.weightage,
-            student_exam_pairs.c.exam_term,
-            student_exam_pairs.c.exam_display_order,
+            exams_subq.c.exam_display_order,
             subjects_subq.c.subject_id,
             subjects_subq.c.subject_name,
             subjects_subq.c.evaluation_type,
             subjects_subq.c.subject_display_order
         )
-        .join(subjects_subq, literal(True))  # cross join
+        .select_from(students_subq)              # explicit starting table
+        .join(exams_subq, literal(True))         # cross join students × exams
+        .join(subjects_subq, literal(True))      # cross join × subjects
         .subquery()
     )
 
@@ -170,6 +167,8 @@ def result_data(school_id, session_id, class_id):
         .subquery()
     )
 
+
+
     # Step H: join student details and return
     final_query = (
         db.session.query(
@@ -187,13 +186,15 @@ def result_data(school_id, session_id, class_id):
             StudentsDB.FATHERS_NAME,
 
             ClassData.CLASS,
+            StudentSessions.class_id.label('class_id'),
             StudentSessions.ROLL,
         )
         .join(StudentSessions, StudentSessions.student_id == subq.c.student_id)
         .join(StudentsDB, StudentsDB.id == StudentSessions.student_id)
         .join(ClassData, ClassData.id == StudentSessions.class_id)
-        .filter(StudentSessions.session_id == session_id)
-        .filter(StudentSessions.class_id == class_id)
+        .filter(StudentSessions.session_id == session_id,
+                
+                StudentSessions.class_id == class_id)
         .order_by(subq.c.exam_display_order, StudentSessions.ROLL)
     )
 
@@ -207,6 +208,7 @@ def result_data(school_id, session_id, class_id):
             for kv in mj:
                 ordered_marks.update(kv)
             row_dict["subject_marks_dict"] = ordered_marks
+
         return row_dict
 
     return [result_to_dict(r) for r in result]

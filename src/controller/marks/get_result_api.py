@@ -1,6 +1,8 @@
 # src/controller/get_result_api.py
 
+from typing import OrderedDict
 from flask import session, request, jsonify, Blueprint, render_template 
+import pandas as pd
 from sqlalchemy import func
 
 from src.model.StudentsDB import StudentsDB
@@ -18,147 +20,105 @@ from ..permissions.permission_required import permission_required
 get_result_api_bp = Blueprint('get_result_api_bp',   __name__)
 
 
+def add_grand_total(group):
+    group["student_id"] = group.name
+
+    # --- Step 1: sum numeric marks per subject ---
+    total_subject_marks = OrderedDict()
+    for subj_dict in group["subject_marks_dict"]:
+        for subj, mark in subj_dict.items():
+            try:
+                mark = float(mark)
+                total_subject_marks[subj] = total_subject_marks.get(subj, 0) + mark
+            except:
+                pass
+
+    grand_total_row = group.iloc[0].copy()
+    
+    grand_total_row["exam_name"] = "G. Total"
+    grand_total_row["exam_display_order"] = group["exam_display_order"].max() + 1
+    grand_total_row["exam_total"] = sum(total_subject_marks.values())
+    grand_total_row["weightage"] = group["weightage"].sum()
+    grand_total_row["subject_marks_dict"] = total_subject_marks
+
+    max_marks = int(grand_total_row["weightage"]) * len(grand_total_row["subject_marks_dict"])
+
+    grand_total_row["percentage"] = int(
+        (grand_total_row["exam_total"] / max_marks) * 100 if max_marks > 0 else 0
+    )
+
+
+    # Concatenate both
+    return pd.concat([group, pd.DataFrame([grand_total_row])], ignore_index=True)
+
+
 @get_result_api_bp.route('/get_result_api', methods=["POST"])
 @login_required
 @permission_required('get_result')
 def get_result_api():
-    if "email" not in session:
-        return jsonify({"message": "Unauthorized access. Login required"}), 401
-    
 
     current_session_id = session["session_id"]
     user_id = session["user_id"]
+    school_id = session["school_id"]
+
+    print("Request JSON:", request.json)
 
     try:
         student_id = int(request.json.get("id"))
     except (TypeError, ValueError):
         return jsonify({"message": "Invalid student ID."}), 400
+    
+    try:
+        class_id = int(request.json.get("class_id"))
+    except (TypeError, ValueError):
+        return jsonify({"message": "Invalid class ID."}), 400
 
     # Session checks
     if not student_id or not current_session_id or not user_id:
         return jsonify({"message": "Session data missing. Please logout and login again!"}), 403
 
-    # Authorization: find student's class
-    student_session = db.session.query(StudentSessions).filter_by(
-        student_id=student_id,
-        session_id=current_session_id
-    ).first()
-    if not student_session:
-        return jsonify({"message": "Student not found in current session."}), 404
+    student_marks_data = result_data(school_id, current_session_id, class_id, student_ids=[student_id])
+    print(student_marks_data)
 
-    class_id = student_session.class_id
-    allowed = (
-        db.session.query(ClassAccess.class_id)
-        .filter(ClassAccess.staff_id == user_id)
-        .all()
-    )
-    allowed_class_ids = {c.class_id for c in allowed}
-    if class_id not in allowed_class_ids:
-        return jsonify({"message": "You are not authorized to access this class."}), 403
+    if not student_marks_data:
+        return jsonify({"message": "No Data Found"}), 400
 
-    students_obj = StudentsDB.query.with_entities(
-                        StudentsDB.STUDENTS_NAME, StudentsDB.PHONE, StudentsDB.id,
-                        StudentsDB.FATHERS_NAME, StudentsDB.IMAGE, 
-                        StudentsDB.MOTHERS_NAME, StudentsDB.ADDRESS,StudentsDB.GENDER,
-                        StudentsDB.PEN,
+    student_marks_df = pd.DataFrame(student_marks_data)
 
-                        ClassData.Numeric_Subjects,ClassData.Grading_Subjects, 
-                        ClassData.exam_format,ClassData.CLASS, 
-                        StudentSessions.Attendance,
-                        StudentSessions.ROLL,
-                        TeachersLogin.Sign,
-                        func.to_char(StudentsDB.DOB, 'Day, DD Month YYYY').label('DOB'),
-                    ).join(
-                        StudentSessions, StudentSessions.student_id == StudentsDB.id  # Join using the foreign key
-                    ).join(
-                        ClassData, StudentSessions.class_id == ClassData.id  # Join using the foreign key
-                    ).join(
-                        TeachersLogin, ClassData.class_teacher_id == TeachersLogin.id
-                    ).filter(
-                        StudentsDB.id == student_id,
-                        StudentSessions.session_id == current_session_id
-                    ).first()
+    student_marks_df = student_marks_df.groupby("student_id", group_keys=False).apply(add_grand_total, include_groups=False).reset_index(drop=True)    
+    student_marks_df['percentage'] = student_marks_df['percentage'].astype(int)
 
-    if not students_obj:
-        return jsonify({"message": "Student not found"}), 404
+
+    all_columns = student_marks_df.columns.tolist()
+    non_common_colums = ['exam_name', 'subject_marks_dict', 'exam_total', 'percentage', 'exam_display_order', 'weightage', "exam_term"]
+    common_columns = [col for col in all_columns if col not in non_common_colums]
+
+    def exam_info_group(df):
+        df_sorted = df.sort_values('exam_display_order', na_position='last')
+        
+        ordered_exams = OrderedDict()
+        for _, row in df_sorted.iterrows():
+            ordered_exams[row['exam_name']] = {
+                'subject_marks_dict': row['subject_marks_dict'],
+                'exam_total': row['exam_total'],
+                'percentage': row['percentage'],
+                'weightage': row['weightage'],
+                'exam_term': row['exam_term'],
+            }
+        return ordered_exams
+
+
     
-    students_id = [students_obj.id]
+    student_marks_df = student_marks_df.groupby(common_columns).apply(exam_info_group, include_groups=False).reset_index(name = "marks")
+    student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
+    student_marks = student_marks_df.to_dict(orient='records')
 
-    # Dynamic exam names based on this student's class exam_format
-    exam_names = None
-    try:
-        exam_names = list(students_obj.exam_format.keys())
-    except Exception:
-        exam_names = None
-
-    result = result_data(current_session_id, students_id, exam_names=exam_names)
-    if not result:
-        return jsonify({
-            "html": '<div class="alert alert-warning text-center mt-5"><h5>No Result Found</h5></div>'
-        })
-    
-    Data=[]
-
-    student_data = students_obj._asdict()
-
-    #student_data ={'STUDENTS_NAME': 'Faiz Raza', 'PHONE': '7866952', 'FATHERS_NAME': 'Ham Raza', 'id': 782, 
-    #               'Numeric_Subjects': ['English', 'Hindi', 'Math', 'Urdu', 'SST/EVS', 'Computer', 'GK', 'Deeniyat'], 
-    #               'Grading_Subjects': ['Drawing', 'Craft'], 'exam_format': {'FA1': '20', 'SA1': '80', 'FA2': '20', 'SA2': '80'}, 
-    #               'CLASS': '2nd', 'ROLL': 201}
-
-
-
-    numeric_subjects = student_data['Numeric_Subjects']
-    grading_subjects = student_data['Grading_Subjects']
-    exam_format = student_data['exam_format']
-
-    # Recompute dynamic totals
-    ordered_exams = list(exam_format.keys())
-    outofs = [int(exam_format[name]) for name in ordered_exams]
-    Grand_Total_Outof = sum(outofs)
-
-    no_of_subjects = len(numeric_subjects)
-    extended_subjects = numeric_subjects + ["Total", "Percentage"]
-    all_subjects = extended_subjects + grading_subjects
-
-    student_data["Subjects"] = all_subjects
-    student_data.update(result[student_id])
-
-
-    student_data["Percentage"] = {}
-
-    # Dynamic per-exam percentages
-    for idx, name in enumerate(ordered_exams):
-        denom = (outofs[idx] * no_of_subjects) if outofs[idx] else 1
-        value = student_data["Total"].get(name) or 0
-        student_data["Percentage"][name] = round((float(value) / denom) * 100, 1)
-    student_data["Percentage"]["Grand_Total"] = round((float(student_data["Total"]["Grand_Total"]) / (Grand_Total_Outof * no_of_subjects)) * 100, 1)
-
-
-    for subject in extended_subjects:
-        if subject == "Percentage":
-            continue
-
-        grand_total = int(student_data[subject]["Grand_Total"])
-        if subject == "Total":
-            percentage = (grand_total / (Grand_Total_Outof * no_of_subjects)) * 100
-        else:
-            percentage = (grand_total / Grand_Total_Outof) * 100
-
-        student_data[subject]["Percentage"] = round(percentage, 1)
-        grade, remark = get_grade(percentage)
-        student_data[subject]["Grade"] = grade
-        student_data[subject]["Remark"] = remark
-
-        if subject == "Total":
-            student_data["Percentage"]["Grade"] = grade
-            student_data["Percentage"]["Remark"] = remark
-
-    #print(student_data)
-    Data.append(student_data)
+    # Print the structure of result student_marks_dict
+    import pprint
+    pprint.pprint(student_marks)
 
 
     principle_sign = '14A_2bL47AwZ9ZZyhxsEpCcB1sfInjhe4'
-    html = render_template('pdf-components/tall_result.html', data=Data[0], 
+    html = render_template('pdf-components/tall_result.html', student=student_marks[0], 
                             attandance_out_of = '214', principle_sign = principle_sign)
     return jsonify({"html":str(html)})

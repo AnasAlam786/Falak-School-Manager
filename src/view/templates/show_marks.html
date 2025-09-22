@@ -74,7 +74,7 @@
                   <td class="py-2 px-3 border-b border-gray-600">{{ student["FATHERS_NAME"] }}</td>
                   <td class="py-2 px-3 border-b border-gray-600 text-right">
                     <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-base flex items-center gap-2"
-                      onclick="getResult('{{ student['student_id'] }}')">
+                      onclick="getResult('{{ student['student_id'] }}', '{{ student['class_id'] }}')">
                       <i class="bi bi-printer-fill"></i> Print Result
                     </button>
                   </td>
@@ -106,7 +106,7 @@
 
               <tbody>
                 {% for subject in subjects %}
-                  <tr class="text-center hover:bg-gray-700">
+                  <tr class="text-center">
                     <th class="py-2 px-3 border border-gray-600 text-left">{{ subject }}</th>
                     {% for exam_name in exam_names %}
                       {% set exam_data = marks[exam_name] %}
@@ -160,15 +160,20 @@
 
 <script>
   // START: getResult function
-  async function getResult(id) {
+  async function getResult(id, classId) {
+    console.log("Fetching result for ID:", id, "Class ID:", classId);
     try {
       const response = await fetch('/get_result_api', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: id, task: 'report_card' }),
+        body: JSON.stringify({ id: id, class_id: classId }),
       });
-      if (!response.ok) throw new Error('Failed to generate report.');
-      const { html } = await response.json();
+      const data = await response.json();
+      if (!response.ok) {
+        showAlert(response.status, data.message);
+        return;
+      }
+      const { html } = data;
       const printWindow = window.open('', '_blank');
       printWindow.document.write(html);
       printWindow.document.close();

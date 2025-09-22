@@ -14,6 +14,7 @@ from .TeachersLogin import TeachersLogin
 from .StudentsMarks_duplicate import StudentsMarks_duplicate
 from .Subjects import Subjects
 from .Exams import Exams
+from .ClassExams import ClassExams
 
 from .Roles import Roles
 from .Permissions import Permissions
@@ -37,6 +38,7 @@ __all__ = [
 
     "StudentsMarks_duplicate",
     "Exams",
+    "ClassExams",
     "Subjects",
 
     

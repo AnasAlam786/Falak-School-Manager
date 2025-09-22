@@ -21,6 +21,7 @@ class TeachersLogin(db.Model):
     phone = Column(BigInteger, nullable=True)
     date_of_joining = Column(Date, nullable=True)
     address = Column(Text, nullable=True)
+    permission_number = Column(Numeric, nullable=False, default=1)
     # salary = Column(Numeric, nullable=True)
     gender = Column(db.Enum('Male', 'Female', name='GENDER'), nullable=True)
 

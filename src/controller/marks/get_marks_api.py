@@ -20,10 +20,10 @@ import pandas as pd
 get_marks_api_bp = Blueprint('get_marks_api_bp',   __name__)
 
 def add_grand_total(group):
-
     group["student_id"] = group.name
-    total_subject_marks = OrderedDict()
 
+    # --- Step 1: sum numeric marks per subject ---
+    total_subject_marks = OrderedDict()
     for subj_dict in group["subject_marks_dict"]:
         for subj, mark in subj_dict.items():
             try:
@@ -35,9 +35,9 @@ def add_grand_total(group):
     grand_total_row = group.iloc[0].copy()
     
     grand_total_row["exam_name"] = "G. Total"
-    grand_total_row["exam_display_order"] = len(group)+1
+    grand_total_row["exam_display_order"] = group["exam_display_order"].max() + 1
     grand_total_row["exam_total"] = sum(total_subject_marks.values())
-    grand_total_row["weightage"] = sum(group.weightage.values)
+    grand_total_row["weightage"] = group["weightage"].sum()
     grand_total_row["subject_marks_dict"] = total_subject_marks
 
     max_marks = int(grand_total_row["weightage"]) * len(grand_total_row["subject_marks_dict"])
@@ -82,17 +82,23 @@ def get_marks_api():
 
     if not student_marks_data:
         return jsonify({"message": "No Data Found"}), 400
+    
+    # Convert to DataFrame for easier manipulation
 
 
     student_marks_df = pd.DataFrame(student_marks_data)
 
-    student_marks_df = student_marks_df.groupby("student_id", group_keys=False).apply(add_grand_total, include_groups=False).reset_index(drop=True)    
+
+    # Apply add_grand_total per student
+    student_marks_df = student_marks_df.groupby("student_id", group_keys=False).apply(add_grand_total, include_groups=False).reset_index(drop=True)
+
     student_marks_df['percentage'] = student_marks_df['percentage'].astype(int)
 
 
     all_columns = student_marks_df.columns.tolist()
     non_common_colums = ['exam_name', 'subject_marks_dict', 'exam_total', 'percentage', 'exam_display_order', 'weightage', "exam_term"]
     common_columns = [col for col in all_columns if col not in non_common_colums]
+
 
 
     def exam_info_group(df):
@@ -112,6 +118,7 @@ def get_marks_api():
 
     
     student_marks_df = student_marks_df.groupby(common_columns).apply(exam_info_group, include_groups=False).reset_index(name = "marks")
+    student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
     student_marks = student_marks_df.to_dict(orient='records')
 
     # # Print the structure of result student_marks_dict
