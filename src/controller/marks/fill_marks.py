@@ -109,7 +109,8 @@ def fill_marks():
                 StudentsMarks_duplicate,
                 (StudentsMarks_duplicate.student_id == StudentsDB.id) &
                 (StudentsMarks_duplicate.exam_id == exam_id) &
-                (StudentsMarks_duplicate.subject_id == Subjects.id)
+                (StudentsMarks_duplicate.subject_id == Subjects.id) &
+                (StudentsMarks_duplicate.session_id == current_session_id)   # 🔑 Important
             )
 
             # Filter by class, school, and session
@@ -117,7 +118,6 @@ def fill_marks():
                 ClassData.id == class_id,
                 StudentsDB.school_id == school_id,
                 StudentSessions.session_id == current_session_id,
-                StudentsMarks_duplicate.session_id == current_session_id
             )
 
             # Sort by roll number

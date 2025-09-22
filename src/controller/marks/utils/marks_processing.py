@@ -100,7 +100,8 @@ def result_data(school_id, session_id, class_id, student_ids=None):
             StudentsMarks_duplicate,
             (StudentsMarks_duplicate.student_id == ses.c.student_id) &
             (StudentsMarks_duplicate.exam_id == ses.c.exam_id) &
-            (StudentsMarks_duplicate.subject_id == ses.c.subject_id)
+            (StudentsMarks_duplicate.subject_id == ses.c.subject_id) &
+            (StudentsMarks_duplicate.session_id == session_id)   # 🔑 Important
         )
         .subquery()
     )
@@ -193,7 +194,6 @@ def result_data(school_id, session_id, class_id, student_ids=None):
         .join(StudentsDB, StudentsDB.id == StudentSessions.student_id)
         .join(ClassData, ClassData.id == StudentSessions.class_id)
         .filter(StudentSessions.session_id == session_id,
-                
                 StudentSessions.class_id == class_id)
         .order_by(subq.c.exam_display_order, StudentSessions.ROLL)
     )
