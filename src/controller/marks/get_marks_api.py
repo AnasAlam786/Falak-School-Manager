@@ -77,7 +77,14 @@ def get_marks_api():
     if not has_access:
         return jsonify({"message": "You are not authorized to access this class."}), 403
     
-    student_marks_data = result_data(school_id, current_session_id, class_id)
+    extra_fields = {
+        "StudentsDB": ["STUDENTS_NAME", "DOB", "FATHERS_NAME", "FATHERS_NAME"],
+        "ClassData": ["CLASS"],
+        "StudentSessions": ["ROLL", "class_id"]
+    }
+    
+    student_marks_data = result_data(school_id, current_session_id, class_id, 
+                                     extra_fields=extra_fields)
 
 
     if not student_marks_data:

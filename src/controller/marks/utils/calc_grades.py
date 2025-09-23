@@ -17,10 +17,13 @@ def get_grade(score: Union[int, float]) -> Tuple[str, str]:
     Raises:
         ValueError: If the score is not a number or is outside the range 0–100.
     """
-    if not isinstance(score, (int, float)):
-        raise ValueError("Score must be a number (int or float).")
+    try:
+        score = float(score)
+    except (ValueError, TypeError):
+        raise ValueError(f"Score must be a number (int, float, decimal, or numeric string). {type(score)} given.")
+
     if not (0 <= score <= 100):
-        raise ValueError("Score must be between 0 and 100.")
+        raise ValueError(f"Score must be between 0 and 100. {score} given.")
 
     if score >= 80:
         return "A", "Excellent"

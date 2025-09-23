@@ -176,7 +176,7 @@
             <tr >
               <th class="light-border" style="padding: 10px; font-size: 25px; font-weight: 800;">Subjects</th>
               {% for exam_name, exam_data in student.marks.items() %}
-                <th class="red light-border">
+                <th class="red light-border" style="font-size: 18px;">
                   {{ exam_name }}
                   <div class="exam-base-text">Out of {{ exam_data.weightage }}</div>
                 </th>
@@ -198,10 +198,12 @@
                 {% for exam_name in exam_names %}
                   {% set exam_data = marks[exam_name] %}
                   <td class="light-border text-center ">
-                    {{ exam_data.subject_marks_dict.get(subject, 'AB') }}
+                    {{ exam_data.subject_marks_dict.get(subject, "") }}
                   </td>
                 {% endfor %}
               </tr>
+
+              {% endfor %}
 
               <!-- Grand Total -->
               <tr style="font-weight: 800; color: red;">
@@ -222,7 +224,6 @@
                   </td>
                 {% endfor %}
               </tr>
-              {% endfor %}
             
             <tr>
           </tbody>
@@ -230,17 +231,19 @@
           
   </div>
 
-  {% if data["Total"]["Grand_Rank"] <= 10 %}
+  {% set overall_rank = student["overall_rank"] %}
+
+  {% if overall_rank <= 10 %}
     {% set grid_columns = 4 %}
   {% else %}
     {% set grid_columns = 3 %}
   {% endif %}
 
-  {% if data["Total"]["Grand_Rank"] == 1 %}
+  {% if overall_rank == 1 %}
     {% set rank_image = '1st-rank-gold-outline.png' %}
-  {% elif data["Total"]["Grand_Rank"] == 2 %}
+  {% elif overall_rank == 2 %}
     {% set rank_image = '2nd-rank-badge.png' %}
-  {% elif data["Total"]["Grand_Rank"] == 3 %}
+  {% elif overall_rank == 3 %}
     {% set rank_image = '3rd-rank-badge.png' %}
   {% endif %}
 
@@ -249,14 +252,14 @@
 
   <div style="border-top: 1px solid #000000; font-weight: bold; display: grid; grid-template-columns: repeat({{ grid_columns }}, 1fr); font-size: 20px; padding: 10px 0;">
 
-    {% if data["Total"]["Grand_Rank"] <= 10 %}
+    {% if overall_rank <= 10 %}
     <div style="padding: 0 10px; text-align: center; position: relative;">
-      {% if data["Total"]["Grand_Rank"] <= 3 %} 
+      {% if overall_rank <= 3 %} 
       <div>
         <img src="{{ url_for('static', filename=rank_image) }}" style="width: 70px; margin-bottom: -5px; margin-top: -5px;">
       </div>
       {% else %}
-      <div style="color:rgb(0, 159, 207); font-size: 36px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Grand_Rank"] }}<sup>th</sup></div>
+      <div style="color:rgb(0, 159, 207); font-size: 36px; font-weight: 800; margin-bottom: 4px;">{{ overall_rank }}<sup>th</sup></div>
       {% endif %}
 
       <div style="font-size: 14px; letter-spacing: 0.5px;">RANK</div>
@@ -264,13 +267,13 @@
     {% endif %}
 
     <div style="text-align: center">
-      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Attendance"] }}<span style="color: black">/214</span>
+      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ student["Attendance"] }}<span style="color: black">/214</span>
       </div>
       <div style="font-size: 14px;letter-spacing: 0.5px;">ATTENDANCE</div>
     </div>
 
     <div style="text-align: center;">
-      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">{{ data["Total"]["Remark"] }}</div>
+      <div style="color: green; font-size: 28px; font-weight: 800; margin-bottom: 4px;">Very Good</div>
       <div style="font-size: 14px; letter-spacing: 0.5px;">REMARK</div>
     </div>
 
@@ -291,16 +294,20 @@
 
     <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
       Teacher's Sign
-      <img src="https://lh3.googleusercontent.com/d/{{ data['Sign']}}"
+      {% if teacher_sign %}
+      <img src="https://lh3.googleusercontent.com/d/{{ teacher_sign }}"
           style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 max-width: 100%; max-height: 100%; object-fit: contain;">
+      {% endif %}
     </div>
 
     <div class="XYcenter" style="position: relative; flex: 1; font-weight: 700; color: rgba(0, 0, 0, 0.1); border-left: 2px solid #000000;">
       Principal's Sign
+      {% if principle_sign %}
       <img src="https://lh3.googleusercontent.com/d/{{ principle_sign }}"
           style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                 max-width: 100%; max-height: 100%; object-fit: contain;">
+      {% endif %}
     </div>
 
 </div>

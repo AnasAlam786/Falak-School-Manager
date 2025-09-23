@@ -63,6 +63,7 @@
                   <th class="py-2 px-3 border-b border-gray-600">Roll</th>
                   <th class="py-2 px-3 border-b border-gray-600">Class</th>
                   <th class="py-2 px-3 border-b border-gray-600">F's Name</th>
+                  <th class="py-2 px-3 border-b border-gray-600">Rank</th>
                   <th class="py-2 px-3 border-b border-gray-600 text-right">Action</th>
                 </tr>
               </thead>
@@ -72,6 +73,7 @@
                   <td class="py-2 px-3 border-b border-gray-600">{{ student["ROLL"] }}</td>
                   <td class="py-2 px-3 border-b border-gray-600">{{ student["CLASS"] }}</td>
                   <td class="py-2 px-3 border-b border-gray-600">{{ student["FATHERS_NAME"] }}</td>
+                  <td class="py-2 px-3 border-b border-gray-600">{{ student["overall_rank"] }}</td>
                   <td class="py-2 px-3 border-b border-gray-600 text-right">
                     <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-base flex items-center gap-2"
                       onclick="getResult('{{ student['student_id'] }}', '{{ student['class_id'] }}')">
