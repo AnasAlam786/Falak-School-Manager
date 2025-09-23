@@ -123,7 +123,7 @@ def get_marks_api():
         return ordered_exams
 
 
-    
+    student_marks_df[common_columns] = student_marks_df[common_columns].fillna("NA")
     student_marks_df = student_marks_df.groupby(common_columns).apply(exam_info_group, include_groups=False).reset_index(name = "marks")
     student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
     student_marks = student_marks_df.to_dict(orient='records')

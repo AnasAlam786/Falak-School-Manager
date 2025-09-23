@@ -72,7 +72,6 @@ def add_grades(group, exams):
 
             percentage = (subject_totals[subj] / max_subject_marks) * 100 if max_subject_marks > 0 else 0
             grade, _ = get_grade(percentage)
-            print(f"Subject: {subj}, Mark: {subject_totals[subj]}, Max: {max_subject_marks}, Percentage: {percentage}, Grade: {grade}")
             subject_grades[subj] = grade
 
     grade_row = df.iloc[0].copy()
@@ -115,7 +114,7 @@ def get_result_api():
     
     extra_fields = {
         "StudentsDB": ["STUDENTS_NAME", "FATHERS_NAME", "FATHERS_NAME", "IMAGE",
-                       "MOTHERS_NAME", "SIGN", "ADDRESS", "PHONE", 'GENDER', "PEN"],
+                       "MOTHERS_NAME", "ADDRESS", "PHONE", 'GENDER', "PEN"],
         "expr": [func.to_char(StudentsDB.DOB, 'Dy, DD Mon YYYY').label("DOB")],
         "ClassData": ["CLASS"],
         "StudentSessions": ["ROLL", "class_id", "Attendance"],
@@ -174,21 +173,18 @@ def get_result_api():
                 'percentage': row['percentage'],
                 'weightage': row['weightage'],
                 'exam_term': row['exam_term'],
-                # 'grade': get_grade(row['percentage'])[0],
-                # 'remark': get_grade(row['percentage'])[1],
             }
         return ordered_exams
 
-
-    
+    student_marks_df[common_columns] = student_marks_df[common_columns].fillna("")
     student_marks_df = student_marks_df.groupby(common_columns).apply(exam_info_group, include_groups=False).reset_index(name = "marks")
 
     student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
     student_marks = student_marks_df.to_dict(orient='records')
 
-    # Print the structure of result student_marks_dict
-    import pprint
-    pprint.pprint(student_marks)
+    # # Print the structure of result student_marks_dict
+    # import pprint
+    # pprint.pprint(student_marks)
 
     # get principal and class teacher sign from database
     principle_sign = (
