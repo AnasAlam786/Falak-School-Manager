@@ -99,7 +99,9 @@ def get_marks_api():
     # Apply add_grand_total per student
     student_marks_df = student_marks_df.groupby("student_id", group_keys=False).apply(add_grand_total, include_groups=False).reset_index(drop=True)
 
-    student_marks_df['percentage'] = student_marks_df['percentage'].astype(int)
+
+    student_marks_df['percentage'] = student_marks_df['percentage'].fillna(0).round(1)
+    student_marks_df['exam_total'] = pd.to_numeric(student_marks_df['exam_total'], errors='coerce').fillna(0).round(1)
 
 
     all_columns = student_marks_df.columns.tolist()
@@ -123,7 +125,7 @@ def get_marks_api():
         return ordered_exams
 
 
-    student_marks_df[common_columns] = student_marks_df[common_columns].fillna("NA")
+    student_marks_df[common_columns] = student_marks_df[common_columns].fillna("Not Provided")
     student_marks_df = student_marks_df.groupby(common_columns).apply(exam_info_group, include_groups=False).reset_index(name = "marks")
     student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
     student_marks = student_marks_df.to_dict(orient='records')

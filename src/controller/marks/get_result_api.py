@@ -155,7 +155,8 @@ def get_result_api():
     )
     
 
-    student_marks_df['percentage'] = student_marks_df['percentage'].fillna(0).astype(int)
+    student_marks_df['percentage'] = student_marks_df['percentage'].fillna(0).round(1)
+    student_marks_df['exam_total'] = pd.to_numeric(student_marks_df['exam_total'], errors='coerce').fillna(0).round(1)
 
 
     all_columns = student_marks_df.columns.tolist()
