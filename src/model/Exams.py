@@ -1,6 +1,6 @@
 from src import db
 from sqlalchemy import (
-    Column, Text, ForeignKey,BigInteger, Numeric
+    Boolean, Column, Text, ForeignKey,BigInteger, Numeric
 )
 class Exams(db.Model):
     __tablename__ = 'Exams'
@@ -12,6 +12,7 @@ class Exams(db.Model):
     weightage = Column(Numeric, nullable=False)
     term = Column(Numeric, nullable=False)
     display_order = Column(Numeric, nullable=False)
+    is_enabled = Column(Boolean, nullable=False, default=True)
 
     # Optional relationship
     school = db.relationship('Schools', back_populates='exams')

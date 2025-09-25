@@ -27,7 +27,7 @@ class StaffVerification(BaseModel):
     sign: Optional[str] = Field(None, description="Digital signature URL or base64")
 
 
-        # Custom validators for error messages
+    # Custom validators for error messages
     @field_validator('name')
     def validate_name(cls, v):
         if not v or len(v.strip()) < 2:
