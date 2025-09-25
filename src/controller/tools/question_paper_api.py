@@ -8,7 +8,7 @@ question_paper_api_bp = Blueprint( 'question_paper_api_bp',   __name__)
 
 
 @question_paper_api_bp.route('/question_paper_api', methods=["POST"])
-@login_required
+# @login_required
 def question_paper_api():
 
        

@@ -99,13 +99,19 @@
                 text-align: center;
                 margin: 0;">
 
-            {% if hrs %}
-            <p style="font-weight: bold; margin: 0; text-align: left;">Time: {{ hrs }} Hrs</p>
-            {% endif %}
-            <p style="font-size: 1em; font-weight: bold; margin: 0;">Class - {{ std }}</p>
-            {% if MM %}
-            <p style="font-weight: bold; margin: 0; text-align: right;">M.M: {{ MM }}</p>
-            {% endif %}
+            
+            <p style="font-weight: bold; margin: 0; text-align: left;">
+                {% if hrs %}Time: {{ hrs }} Hrs{% endif %}
+            </p>
+            
+            <p style="font-size: 1em; font-weight: bold; margin: 0;">
+                Class - {{ std }}
+            </p>
+            
+            <p style="font-weight: bold; margin: 0; text-align: right;">
+               {% if MM %}M.M: {{ MM }}{% endif %}
+            </p>
+            
         </div>
     </div>
 
