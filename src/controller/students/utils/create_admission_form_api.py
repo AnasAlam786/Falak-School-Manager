@@ -35,11 +35,15 @@ def create_admission_form_api():
             Schools.id == school_id,
             StudentsDB.id == student_id,
             StudentSessions.session_id == current_session_id,
-        ).first()
+    ).first()
 
     if not student_data:
         print(f"No student data found for student_id: {student_id} in school_id: {school_id} for session_id: {current_session_id}")
         return jsonify({"message": "Student not found"}), 404
+    
+
+    print(student_data.StudentsDB.dob_indian)          # 17-02-2020
+    print(student_data.StudentsDB.admission_date_indian)  # 31-07-2025
 
     phone_number = student_data.StudentsDB.PHONE
     siblings = db.session.query(
@@ -48,7 +52,7 @@ def create_admission_form_api():
     ).join(
         StudentSessions, StudentsDB.id == StudentSessions.student_id
     ).join(
-        ClassData, ClassData.id == StudentsDB.Admission_Class
+        ClassData, ClassData.id == StudentSessions.class_id
     ).filter(
         StudentsDB.PHONE == phone_number,
         StudentsDB.id != student_data.StudentsDB.id,  # exclude self
@@ -57,15 +61,20 @@ def create_admission_form_api():
 
     
     student = {
-        **student_data.StudentsDB.__dict__,
-        **student_data.StudentSessions.__dict__,
-        **student_data.ClassData.__dict__,
-        **student_data.Schools.__dict__
+        **{k: v for k, v in student_data.StudentsDB.__dict__.items() if not k.startswith('_')},
+        "dob": student_data.StudentsDB.dob_indian,
+        "admission_date": student_data.StudentsDB.admission_date_indian,
+        **{k: v for k, v in student_data.StudentSessions.__dict__.items() if not k.startswith('_')},
+        **{k: v for k, v in student_data.ClassData.__dict__.items() if not k.startswith('_')},
+        **{k: v for k, v in student_data.Schools.__dict__.items() if not k.startswith('_')}
     }
+    
     if siblings:
         student["siblings"] = [{"name": s.STUDENTS_NAME, "class": s.CLASS} for s in siblings]
     else:
         student["siblings"] = []
+
+    print(student)
 
     html = render_template('pdf-components/admission_form.html', student=student)
 

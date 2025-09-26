@@ -49,6 +49,14 @@ class StudentsDB(db.Model):
     id = Column(BigInteger, unique=True, primary_key=True)
     STUDENTS_NAME = Column(Text, nullable=False)
     DOB = Column(Date, nullable=True)
+    ADMISSION_DATE = Column(Date, nullable=True)
+
+    @property
+    def dob_indian(self):
+        return self.DOB.strftime("%d-%m-%Y") if self.DOB else None
+    @property
+    def admission_date_indian(self):
+        return self.ADMISSION_DATE.strftime("%d-%m-%Y") if self.ADMISSION_DATE else None
 
 
     FATHERS_NAME = Column(Text, nullable=True)
@@ -70,7 +78,7 @@ class StudentsDB(db.Model):
     Caste = Column(Text, nullable=True)
 
     PIN = Column(Text, nullable=True)
-    ADMISSION_DATE = Column(Date, nullable=True)
+
     SR = Column(Integer, nullable=True, unique=True)
     IMAGE = Column(Text, unique=True, nullable=True)
     Previous_School_Marks = Column(Integer, nullable=True)  # smallint in DB; using Integer here

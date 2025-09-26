@@ -872,15 +872,18 @@
             document.getElementById('verifyEmail').textContent = document.getElementById('email').value;
             document.getElementById('verifyPhone').textContent = document.getElementById('phone').value;
             document.getElementById('verifyUsername').textContent = document.getElementById('username').value;
-            document.getElementById('verifyQualification').textContent = document.getElementById('qualification').value;
-            document.getElementById('verifySalary').textContent = document.getElementById('salary').value;
-            
+
+            const qualificationValue = document.getElementById('qualification').value.trim();
+            const salaryValue = document.getElementById('salary').value.trim();
+            document.getElementById('verifyQualification').textContent = qualificationValue ? qualificationValue : 'Not Provided';
+            document.getElementById('verifySalary').textContent = salaryValue ? salaryValue : 'Not Provided';
+
             // Update profile preview in verification modal
             const finalProfilePreview = document.getElementById('finalProfilePreview');
             if (profilePreview.style.backgroundImage) {
                 finalProfilePreview.style.backgroundImage = profilePreview.style.backgroundImage;
             } else {
-                finalProfilePreview.style.backgroundImage = "url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80')";
+                finalProfilePreview.style.backgroundImage = "url('https://p7.hiclipart.com/preview/782/114/405/5bbc3519d674c.jpg')";
             }
             
             // Format join date

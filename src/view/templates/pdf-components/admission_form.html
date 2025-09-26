@@ -113,7 +113,7 @@
                 <td><strong>Ad. No:</strong></td>
                 <td>{{ student.ADMISSION_NO }}</td>
                 <td><strong>Ad. Date:</strong></td>
-                <td>{{ student.ADMISSION_DATE }}</td>
+                <td>{{ student.admission_date }}</td>
                 <td><strong>SR No:</strong></td>
                 <td>{{ student.SR }}</td>
               </tr>
@@ -138,7 +138,7 @@
                 <td><strong>Aadhar:</strong></td>
                 <td>{{ student.AADHAAR }}</td>
                 <td><strong>DOB:</strong></td>
-                <td>{{ student.DOB }}</td>
+                <td>{{ student.dob }}</td>
               </tr>
 
               <tr>
@@ -158,9 +158,9 @@
               </tr>
               <tr>
                 <td><strong>Height:</strong></td>
-                <td>{% if student.HEIGHT %}{{ student.HEIGHT }} cm{% endif %}</td>
+                <td>{% if student.Height %}{{ student.Height }} cm{% endif %}</td>
                 <td><strong>Weight:</strong></td>
-                <td>{% if student.WEIGHT %}{{ student.WEIGHT }} kg{% endif %}</td>
+                <td>{% if student.Weight %}{{ student.Weight }} kg{% endif %}</td>
                 <td><strong>Blood Type:</strong></td>
                 <td>{% if student.BLOOD_TYPE %}{{ student.BLOOD_TYPE }}{% endif %}</td>
               </tr>

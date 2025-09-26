@@ -10,7 +10,7 @@ cipher = Fernet(FERNET_KEY)
 
 def encrypt_password(raw_password: str) -> bytes:
     """Encrypt a password (can be decrypted later)."""
-    return cipher.encrypt(raw_password.encode())
+    return cipher.encrypt(raw_password.encode()).decode()
 
 def decrypt_password(encrypted_password: bytes) -> str:
     """Decrypt the password back to string."""

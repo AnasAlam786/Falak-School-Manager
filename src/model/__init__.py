@@ -19,6 +19,7 @@ from .ClassExams import ClassExams
 from .Roles import Roles
 from .Permissions import Permissions
 from .RolePermissions import RolePermissions
+from .StaffPermissions import StaffPermissions
 
 from .FeeData import  FeeData
 from .FeeAmount import FeeAmount
@@ -45,6 +46,7 @@ __all__ = [
     "Roles",
     "Permissions",
     "RolePermissions",
+    "StaffPermissions",
 
     "FeeData",
     "FeeAmount",

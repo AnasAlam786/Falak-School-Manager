@@ -176,7 +176,7 @@ class PersonalInfoModel(CleanBaseModel):
             },
 
             "DOB": {
-                "id": "DOB", "type": "numeric", "label": "Date of Birth", "placeholder": "",
+                "id": "DOB", "type": "date", "label": "Date of Birth", "placeholder": "",
                 "data-short_label": "DOB", "required": True, "data-description": "Date of Birth of the student",
                 "name": "DOB"
             },

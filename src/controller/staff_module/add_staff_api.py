@@ -90,7 +90,7 @@ def add_staff():
             IP=None,
             Sign=model.sign,
             User=model.username,
-            status='Active',
+            status='active',
             school_id=session.get('school_id'),
             role_id=model.role_id,
             image=model.image,
