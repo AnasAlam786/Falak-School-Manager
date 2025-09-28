@@ -1,6 +1,6 @@
 # src/controller/tools/question_paper.py
 
-from flask import session, render_template, redirect, url_for, Blueprint
+from flask import session, render_template, Blueprint
 from ..auth.login_required import login_required
 
 

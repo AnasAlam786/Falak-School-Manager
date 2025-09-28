@@ -3,157 +3,306 @@
 {% block content %}
 
 <style>
-  /* Custom borders */
-  .form-section, .tips-section {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  
-  .section-header {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  
-  .form-input, .radio-card, .image-upload, .btn-upload {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .image-upload {
-    border: 2px dashed rgba(255, 255, 255, 0.1);
-  }
-  
-  .validation-summary {
-    border: 1px solid rgba(255, 107, 107, 0.3);
-  }
-  
-  .modal-content {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .modal-header, .modal-footer {
-    border-color: rgba(255, 255, 255, 0.08);
-  }
-  
-  .tip {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  }
-  
-  .verification-item {
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  /* Required field asterisk */
-  .required::after {
-    content: " *";
-    color: #ff6b6b;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 1024px) {
-    .form-grid {
-      grid-template-columns: 1fr 1fr !important;
-    }
-    
-    .radio-group {
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .form-grid {
-      grid-template-columns: 1fr !important;
-    }
-    
-    .radio-group {
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
-    }
-    
-    .page-title h1 {
-      font-size: 1.8rem !important;
-    }
-    
-    .btn {
-      padding: 8px 15px !important;
-      font-size: 0.9rem !important;
-    }
-    
-    .verification-grid {
-      grid-template-columns: 1fr !important;
-    }
-    
-    .success-actions {
-      flex-direction: column !important;
+    .p-3.mx-auto {
+        background: transparent !important;
     }
 
-    .cropper-controls {
-      flex-direction: column !important;
+    /* Custom borders */
+    .form-section,
+    .tips-section {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(30, 30, 30, 0.7);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
-  }
 
-  @media (max-width: 480px) {
-    .user-actions {
-      flex-direction: column !important;
-      gap: 8px !important;
+    .section-header {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
-    
-    .btn {
-      width: 100% !important;
-      justify-content: center !important;
-    }
-    
-    .radio-group {
-      grid-template-columns: 1fr !important;
-    }
-  }
-  
-  /* Animation for modal */
-  @keyframes modalAppear {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
-  
-  .animate-modal {
-    animation: modalAppear 0.4s ease-out;
-  }
-  
-  /* Error state for inputs */
-  .form-input.error {
-    border-color: #ff6b6b !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2) !important;
-  }
-  
-  /* Radio card selection states */
-  .radio-card:hover, 
-  .radio-card.selected {
-    border-color: #4361ee !important;
-    background: rgba(67, 97, 238, 0.1) !important;
-  }
 
-  .radio-card.error {
-    border-color: #ff6b6b !important;
-    background: rgba(255, 107, 107, 0.1) !important;
-  }
-  
-  /* Image upload hover state */
-  .image-upload:hover {
-    border-color: #4361ee !important;
-    background: rgba(67, 97, 238, 0.05) !important;
-  }
-  
-  /* Button upload hover state */
-  .btn-upload:hover {
-    background: rgba(67, 97, 238, 0.1) !important;
-    color: #4361ee !important;
-    border-color: #4361ee !important;
-  }
+    .form-input,
+    .radio-card,
+    .image-upload,
+    .btn-upload {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(20, 20, 20, 0.7);
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #4361ee;
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+    }
+
+    .image-upload {
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.7) !important;
+    }
+
+    .validation-summary {
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        background: rgba(254, 226, 226, 0.1) !important;
+    }
+
+    .modal-content {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(30, 41, 59, 0.95) !important;
+        backdrop-filter: blur(20px);
+    }
+
+    .modal-header,
+    .modal-footer {
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .tip {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .verification-item {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.7) !important;
+    }
+
+    /* Card hover effects */
+    .form-section {
+        transition: all 0.3s ease;
+    }
+
+    .form-section:hover {
+        border-color: rgba(67, 97, 238, 0.3);
+    }
+
+    /* Input field specific styling */
+    .form-input {
+        color: #e2e8f0 !important;
+        transition: all 0.3s ease;
+    }
+
+    .form-input::placeholder {
+        color: #94a3b8 !important;
+    }
+
+    /* Radio card backgrounds */
+    .radio-card {
+        background: rgba(20, 20, 20, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .radio-card:hover {
+        background: rgba(30, 41, 59, 0.9) !important;
+        border-color: rgba(67, 97, 238, 0.5);
+    }
+
+    .radio-card.selected {
+        background: rgba(67, 97, 238, 0.1);
+        border-color: #4361ee;
+    }
+
+    /* Button styling */
+    .btn-upload {
+        background: rgba(15, 23, 42, 0.9) !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-upload:hover {
+        background: rgba(67, 97, 238, 0.2) !important;
+        border-color: #4361ee;
+    }
+
+    /* Checkbox items */
+    .checkbox-item {
+        background: rgba(15, 23, 42, 0.7) !important;
+        transition: all 0.3s ease;
+    }
+
+    .checkbox-item:hover {
+        background: rgba(67, 97, 238, 0.1) !important;
+        border-color: rgba(67, 97, 238, 0.5);
+    }
+
+    .checkbox-item.checked {
+        background: rgba(67, 97, 238, 0.15) !important;
+        border-color: #4361ee;
+    }
+
+    /* Permission cards */
+    .permission-card {
+        background: rgba(15, 23, 42, 0.7) !important;
+        transition: all 0.3s ease;
+    }
+
+    .permission-card:hover {
+        background: rgba(30, 41, 59, 0.9) !important;
+        transform: translateY(-2px);
+    }
+
+    .permission-card.checked {
+        background: rgba(67, 97, 238, 0.1) !important;
+        border-color: #4361ee;
+    }
+
+    /* Class tags */
+    .class-tag {
+        background: rgba(67, 97, 238, 0.15) !important;
+        border: 1px solid rgba(67, 97, 238, 0.3);
+        color: #e2e8f0;
+    }
+
+    /* Permission category buttons */
+    .permission-category-btn {
+        background: rgba(15, 23, 42, 0.7) !important;
+        transition: all 0.3s ease;
+    }
+
+    .permission-category-btn.active {
+        background: rgba(67, 97, 238, 0.2) !important;
+        color: #4361ee;
+    }
+
+    /* Modal backgrounds */
+    .modal {
+        background: rgba(3, 7, 17, 0.9) !important;
+    }
+
+    /* Success modal */
+    .success-modal-content {
+        background: transparent !important;
+    }
+
+    /* Text colors for better contrast */
+    .text-gray-light {
+        color: #e2e8f0 !important;
+    }
+
+    .text-gray-lighter {
+        color: #cbd5e1 !important;
+    }
+
+    /* Required field asterisk */
+    .required::after {
+        content: " *";
+        color: #ff6b6b;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .form-grid {
+            grid-template-columns: 1fr 1fr !important;
+        }
+
+        .radio-group {
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)) !important;
+        }
+
+        .classes-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        .permissions-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .radio-group {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+        }
+
+        .classes-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .permissions-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .page-title h1 {
+            font-size: 1.8rem !important;
+        }
+
+        .btn {
+            padding: 8px 15px !important;
+            font-size: 0.9rem !important;
+        }
+
+        .verification-grid {
+            grid-template-columns: 1fr !important;
+        }
+
+        .success-actions {
+            flex-direction: column !important;
+        }
+
+        .cropper-controls {
+            flex-direction: column !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .user-actions {
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+
+        .btn {
+            width: 100% !important;
+            justify-content: center !important;
+        }
+
+        .radio-group {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* Animation for modal */
+    @keyframes modalAppear {
+        from {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    .animate-modal {
+        animation: modalAppear 0.4s ease-out;
+    }
+
+    /* Error state for inputs */
+    .form-input.error {
+        border-color: #ff6b6b !important;
+        box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2) !important;
+        background: rgba(254, 226, 226, 0.1) !important;
+    }
+
+    .radio-card.error {
+        border-color: #ff6b6b !important;
+        background: rgba(254, 226, 226, 0.1) !important;
+    }
 </style>
 
+
 <div class="p-3 mx-auto">
-    <header class="flex justify-between items-center py-5 border-b border-border-light mb-[30px]">
+    <header
+        class="flex justify-between items-center py-5 border-b border-border-light mb-[30px] bg-gradient-to-r from-slate-800/50 to-slate-900/50 rounded-xl p-6">
         <div class="mb-[30px]">
-            <h1 class="text-[2.2rem] font-bold mb-2 bg-title-gradient bg-clip-text text-transparent">Add New Staff Member</h1>
-            <p class="text-gray-lighter text-[1.1rem] max-w-[600px]">Fill in all required details to add a new staff member to your organization</p>
+            <h1 class="text-[2.2rem] font-bold mb-2 bg-title-gradient bg-clip-text">Add New Staff Member</h1>
+            <p class="text-gray-lighter text-[1.1rem] max-w-[600px]">Fill in all required details to add a new staff
+                member to your organization</p>
         </div>
         <div class="user-actions flex gap-4">
-            <button class="btn btn-primary flex items-center gap-2 px-5 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white shadow-primary-glow hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(67,97,238,0.4)]" id="saveButton">
+            <button
+                class="btn btn-primary flex items-center gap-2 px-5 py-3 rounded-xl font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white shadow-primary-glow hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(67,97,238,0.4)]"
+                id="saveButton">
                 <i class="fas fa-save"></i> Save Staff
             </button>
         </div>
@@ -161,7 +310,8 @@
 
     <!-- Validation Summary -->
     <div class="validation-summary hidden bg-danger/10 rounded-xl p-4 mb-5" id="validationSummary">
-        <h4 class="text-danger mb-2 flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> Please fix the following errors:</h4>
+        <h4 class="text-danger mb-2 flex items-center gap-2"><i class="fas fa-exclamation-circle"></i> Please fix the
+            following errors:</h4>
         <ul class="pl-5 text-[#ff9f9f]" id="errorList"></ul>
     </div>
 
@@ -170,7 +320,8 @@
             <!-- Personal Information -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
-                    <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
                         <i class="fas fa-user"></i>
                     </div>
                     <h2 class="section-title text-[1.4rem] font-semibold">Personal Information</h2>
@@ -178,51 +329,64 @@
                 <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Full Name</label>
-                        <input 
-                            type="text" 
-                            class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="name" 
-                            placeholder="John Smith"
+                        <input type="text"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="name" placeholder="John Smith"
                             oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="fullNameError">Please enter a full name</div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="fullNameError">Please enter a
+                            full name</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Email</label>
-                        <input type="email" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="email" placeholder="john.smith@example.com">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="emailError">Please enter a valid email address</div>
+                        <input type="email"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="email" placeholder="john.smith@example.com">
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="emailError">Please enter a valid
+                            email address</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Phone Number</label>
-                        <input type="tel" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="phone" placeholder="+91 98765543210">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="phoneError">Please enter a valid phone number</div>
+                        <input type="tel"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="phone" placeholder="+91 98765543210">
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="phoneError">Please enter a valid
+                            phone number</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Date of Birth</label>
-                        <input type="date" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="dob">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="dobError">Please select a date of birth</div>
+                        <input type="date"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="dob">
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="dobError">Please select a date of
+                            birth</div>
                     </div>
 
                     <div class="form-group radio-group-container mb-4 mt-2 mb-5 col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Gender</label>
                         <div class="radio-group grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
                                 <input type="radio" name="gender" value="male" class="absolute opacity-0 w-0 h-0">
                                 <i class="fas fa-mars text-[1.8rem] mb-2 text-[#3a86ff]"></i>
                                 <div>Male</div>
                             </label>
-                            <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
                                 <input type="radio" name="gender" value="female" class="absolute opacity-0 w-0 h-0">
                                 <i class="fas fa-venus text-[1.8rem] mb-2 text-[#ff006e]"></i>
                                 <div>Female</div>
                             </label>
                         </div>
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="genderError">Please select a gender</div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="genderError">Please select a
+                            gender</div>
                     </div>
-                    
+
                     <div class="form-group col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light">Address</label>
-                        <textarea class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" rows="3" id="address" placeholder="123 Main Street, City, Country"
-                        oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());"></textarea>
+                        <textarea
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            rows="3" id="address" placeholder="123 Main Street, City, Country"
+                            oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());"></textarea>
                     </div>
                 </div>
             </div>
@@ -230,7 +394,8 @@
             <!-- Account Information -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
-                    <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
                         <i class="fas fa-lock"></i>
                     </div>
                     <h2 class="section-title text-[1.4rem] font-semibold">Account Information</h2>
@@ -238,28 +403,42 @@
                 <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Username</label>
-                        <input type="text" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="username" placeholder="john.smith">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="usernameError">Please enter a username</div>
+                        <input type="text"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="username" placeholder="john.smith">
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="usernameError">Please enter a
+                            username</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12" id="password" placeholder="••••••••">
-                            <button class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-lighter cursor-pointer bg-transparent border-none text-lg z-10" id="togglePassword">
+                            <input type="password"
+                                class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
+                                id="password" placeholder="••••••••">
+                            <button
+                                class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-lighter cursor-pointer bg-transparent border-none text-lg z-10"
+                                id="togglePassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="passwordError">Please enter a password (min 8 characters)</div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="passwordError">Please enter a
+                            password (min 8 characters)</div>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light required">Confirm Password</label>
+                        <label class="form-label block mb-2 font-medium text-gray-light required">Confirm
+                            Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12" id="confirmPassword" placeholder="••••••••">
-                            <button class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-lighter cursor-pointer bg-transparent border-none text-lg z-10" id="toggleConfirmPassword">
+                            <input type="password"
+                                class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
+                                id="confirmPassword" placeholder="••••••••">
+                            <button
+                                class="toggle-password absolute right-3 top-1/2 -translate-y-1/2 text-gray-lighter cursor-pointer bg-transparent border-none text-lg z-10"
+                                id="toggleConfirmPassword">
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="confirmPasswordError">Passwords do not match</div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="confirmPasswordError">Passwords
+                            do not match</div>
                     </div>
                 </div>
             </div>
@@ -267,51 +446,389 @@
             <!-- Professional Information -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
-                    <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
                         <i class="fas fa-briefcase"></i>
                     </div>
                     <h2 class="section-title text-[1.4rem] font-semibold">Professional Information</h2>
                 </div>
                 <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light required">Date of Joining</label>
-                        <input type="date" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="date_of_joining">
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="joinDateError">Please select a join date</div>
+                        <label class="form-label block mb-2 font-medium text-gray-light required">Date of
+                            Joining</label>
+                        <input type="date"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="date_of_joining">
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="joinDateError">Please select a
+                            join date</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Qualification</label>
-                        <input type="text" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="qualification" placeholder="MSc, BEd, PhD, etc.">
+                        <input type="text"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="qualification" placeholder="MSc, BEd, PhD, etc.">
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Salary</label>
-                        <input type="text" class="form-input w-full p-3 bg-gray-darker/70 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]" id="salary" placeholder="In rupees">
+                        <input type="text"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="salary" placeholder="In rupees">
                     </div>
-                    <div class="form-group radio-group-container mb-4 col-span-full"> 
+                    <div class="form-group radio-group-container mb-4 col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Role</label>
                         <div class="radio-group grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                          <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
-                            <input type="radio" name="role_id" value="{{ roles['Teacher'] }}" class="absolute opacity-0 w-0 h-0">
-                            <i class="fas fa-chalkboard-teacher text-[1.8rem] mb-2 text-[#3a86ff]"></i>
-                            <div>Teacher</div>
-                          </label>
-                          <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
-                            <input type="radio" name="role_id" value="{{ roles['Support Staff'] }}" class="absolute opacity-0 w-0 h-0">
-                            <i class="fas fa-headset text-[1.8rem] mb-2 text-[#8338ec]"></i>
-                            <div>Support Staff</div>
-                          </label>
-                          <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
-                            <input type="radio" name="role_id" value="{{ roles['Principal'] }}" class="absolute opacity-0 w-0 h-0">
-                            <i class="fas fa-user-shield text-[1.8rem] mb-2 text-[#ff006e]"></i>
-                            <div>Principal</div>
-                          </label>
-                          <label class="radio-card p-4 bg-gray-darker/70 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
-                            <input type="radio" name="role_id" value="{{ roles['Vice Principal'] }}" class="absolute opacity-0 w-0 h-0">
-                            <i class="fas fa-hands-helping text-[1.8rem] mb-2 text-[#ffbe0b]"></i>
-                            <div>Vice Principal</div>
-                          </label>
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                                <input type="radio" name="role_id" value="{{ roles['Teacher'] }}"
+                                    class="absolute opacity-0 w-0 h-0">
+                                <i class="fas fa-chalkboard-teacher text-[1.8rem] mb-2 text-[#3a86ff]"></i>
+                                <div>Teacher</div>
+                            </label>
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                                <input type="radio" name="role_id" value="{{ roles['Support Staff'] }}"
+                                    class="absolute opacity-0 w-0 h-0">
+                                <i class="fas fa-headset text-[1.8rem] mb-2 text-[#8338ec]"></i>
+                                <div>Support Staff</div>
+                            </label>
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                                <input type="radio" name="role_id" value="{{ roles['Principal'] }}"
+                                    class="absolute opacity-0 w-0 h-0">
+                                <i class="fas fa-user-shield text-[1.8rem] mb-2 text-[#ff006e]"></i>
+                                <div>Principal</div>
+                            </label>
+                            <label
+                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative">
+                                <input type="radio" name="role_id" value="{{ roles['Vice Principal'] }}"
+                                    class="absolute opacity-0 w-0 h-0">
+                                <i class="fas fa-hands-helping text-[1.8rem] mb-2 text-[#ffbe0b]"></i>
+                                <div>Vice Principal</div>
+                            </label>
                         </div>
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="roleError">Please select a role</div>
-                      </div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="roleError">Please select a role
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Class Assignment (Visible only for Teachers) -->
+            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section"
+                id="classAssignmentSection">
+                <div class="section-header flex items-center mb-6 pb-4">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                        <i class="fas fa-chalkboard"></i>
+                    </div>
+                    <h2 class="section-title text-[1.4rem] font-semibold">Class Assignment</h2>
+                </div>
+                <div class="form-content">
+                    <p class="text-gray-lighter mb-4">Assign classes to this teacher. You can select multiple classes.
+                    </p>
+
+                    <!-- Search and Filter -->
+                    <div class="search-filter mb-4">
+                        <input type="text" id="classSearch" placeholder="Search classes..."
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]">
+                    </div>
+
+                    <!-- Selected Classes Preview -->
+                    <div class="selected-classes-preview mb-4 hidden" id="selectedClassesPreview">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-light font-medium">Selected Classes:</span>
+                            <span class="text-primary text-sm" id="selectedCount">0 classes</span>
+                        </div>
+                        <div class="selected-classes-tags flex flex-wrap gap-2" id="selectedClassesTags">
+                            <!-- Selected classes will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Classes Grid -->
+                    <div class="classes-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto p-2"
+                        id="classesContainer">
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 1A</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 1 • Mathematics</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 1B</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 1 • Science</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 2A</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 2 • English</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 3A</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 3 • Mathematics</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 5A</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 5 • Mathematics</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">Class 5B</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Grade 5 • Science</div>
+                                </div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- No results message -->
+                    <div class="no-results hidden text-center py-8 text-gray-lighter" id="noClassesMessage">
+                        <i class="fas fa-search text-3xl mb-2 opacity-50"></i>
+                        <p>No classes found matching your search</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissions Assignment -->
+            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
+                <div class="section-header flex items-center mb-6 pb-4">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2 class="section-title text-[1.4rem] font-semibold">System Permissions</h2>
+                </div>
+                <div class="form-content">
+                    <p class="text-gray-lighter mb-4">Select permissions to control access within the ERP system.</p>
+
+                    <!-- Permission Categories -->
+                    <div class="permission-categories mb-6">
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                class="permission-category-btn active px-3 py-2 rounded-lg bg-primary/20 text-primary font-medium"
+                                data-category="all">All Permissions</button>
+                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
+                                data-category="academic">Academic</button>
+                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
+                                data-category="student">Student Management</button>
+                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
+                                data-category="attendance">Attendance</button>
+                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
+                                data-category="reports">Reports</button>
+                        </div>
+                    </div>
+
+                    <!-- Selected Permissions Preview -->
+                    <div class="selected-permissions-preview mb-4 hidden" id="selectedPermissionsPreview">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-gray-light font-medium">Selected Permissions:</span>
+                            <span class="text-primary text-sm" id="selectedPermissionsCount">0 permissions</span>
+                        </div>
+                        <div class="selected-permissions-tags flex flex-wrap gap-2" id="selectedPermissionsTags">
+                            <!-- Selected permissions will appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Permissions Grid -->
+                    <div class="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2"
+                        id="permissionsContainer">
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">View Student Profiles</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Access to view student information and profiles</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                student</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Edit Student Records</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Ability to update student information and records
+                            </div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                student</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Manage Attendance</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Record and manage student attendance</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                attendance</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">View Attendance Reports</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Access to view attendance reports and analytics</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                attendance</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Create Assignments</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Ability to create and assign homework/tasks</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                academic</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Grade Assignments</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Ability to grade student assignments and tests</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                academic</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">View Academic Reports</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Access to student academic performance reports</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                reports</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Generate Progress Reports</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Ability to generate student progress reports</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                reports</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Send Notifications</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Send notifications to students and parents</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                academic</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Manage Class Schedule</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Ability to view and manage class schedules</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                academic</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">Access Library</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Access to digital library resources</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                academic</div>
+                        </div>
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="font-medium text-gray-light">View Financial Reports</div>
+                                <div
+                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
+
+                                </div>
+                            </div>
+                            <div class="text-sm text-gray-lighter">Access to view basic financial reports</div>
+                            <div
+                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                reports</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -320,22 +837,29 @@
             <!-- Profile Photo -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
-                    <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
                         <i class="fas fa-camera"></i>
                     </div>
                     <h2 class="section-title text-[1.4rem] font-semibold">Profile Photo</h2>
                 </div>
-                <div class="image-upload text-center p-6 bg-gray-darker/70 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative" id="profileUpload">
+                <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative"
+                    id="profileUpload">
                     <div class="upload-icon text-primary text-[3rem] mb-4">
                         <i class="fas fa-cloud-upload-alt"></i>
                     </div>
                     <div class="upload-text text-gray-lighter mb-4">Click to upload profile photo</div>
-                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden" id="profilePreview"></div>
+                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
+                        id="profilePreview"></div>
                     <div class="btn-group flex gap-3 mt-4">
-                        <button class="btn-upload flex-1 p-3 bg-gray-darker/70 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" id="uploadProfile">
+                        <button
+                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
+                            id="uploadProfile">
                             <i class="fas fa-upload mr-2"></i> Upload
                         </button>
-                        <button class="btn-upload flex-1 p-3 bg-gray-darker/70 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" id="captureProfile">
+                        <button
+                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
+                            id="captureProfile">
                             <i class="fas fa-camera mr-2"></i> Capture
                         </button>
                     </div>
@@ -346,22 +870,29 @@
             <!-- Signature -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
-                    <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
                         <i class="fas fa-signature"></i>
                     </div>
                     <h2 class="section-title text-[1.4rem] font-semibold">Digital Signature</h2>
                 </div>
-                <div class="image-upload text-center p-6 bg-gray-darker/70 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative" id="signatureUpload">
+                <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative"
+                    id="signatureUpload">
                     <div class="upload-icon text-primary text-[3rem] mb-4">
                         <i class="fas fa-file-signature"></i>
                     </div>
                     <div class="upload-text text-gray-lighter mb-4">Upload or capture signature</div>
-                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden" id="signaturePreview"></div>
+                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
+                        id="signaturePreview"></div>
                     <div class="btn-group flex gap-3 mt-4">
-                        <button class="btn-upload flex-1 p-3 bg-gray-darker/70 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" id="uploadSignature">
+                        <button
+                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
+                            id="uploadSignature">
                             <i class="fas fa-upload mr-2"></i> Upload
                         </button>
-                        <button class="btn-upload flex-1 p-3 bg-gray-darker/70 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" id="captureSignature">
+                        <button
+                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
+                            id="captureSignature">
                             <i class="fas fa-camera mr-2"></i> Capture
                         </button>
                     </div>
@@ -371,26 +902,44 @@
 
             <!-- Tips Section -->
             <div class="tips-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 shadow-section">
-                <h3 class="tips-title text-[1.3rem] mb-5 flex items-center gap-2"><i class="fas fa-lightbulb text-primary"></i> Adding Staff Tips</h3>
+                <h3 class="tips-title text-[1.3rem] mb-5 flex items-center gap-2"><i
+                        class="fas fa-lightbulb text-primary"></i> Adding Staff Tips</h3>
                 <div class="tip flex gap-3 py-4">
                     <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-info-circle"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Required Fields:</strong> Make sure to fill all fields marked with asterisk (*)</div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Required Fields:</strong>
+                        Make sure to fill all fields marked with asterisk (*)</div>
                 </div>
                 <div class="tip flex gap-3 py-4">
                     <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-shield-alt"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Password Strength:</strong> Use a strong password with uppercase, lowercase, numbers and symbols</div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Password
+                            Strength:</strong> Use a strong password with uppercase, lowercase, numbers and symbols
+                    </div>
                 </div>
                 <div class="tip flex gap-3 py-4">
                     <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-image"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Profile Photos:</strong> Use square images for best results. Minimum 300x300 pixels recommended</div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Profile Photos:</strong>
+                        Use square images for best results. Minimum 300x300 pixels recommended</div>
                 </div>
                 <div class="tip flex gap-3 py-4">
                     <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-signature"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Digital Signature:</strong> Capture on white background for best results</div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Digital
+                            Signature:</strong> Capture on white background for best results</div>
                 </div>
                 <div class="tip flex gap-3 py-4">
                     <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-user-tag"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Role Assignment:</strong> Assign appropriate role for correct system permissions</div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Role Assignment:</strong>
+                        Assign appropriate role for correct system permissions</div>
+                </div>
+                <div class="tip flex gap-3 py-4">
+                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Class
+                            Assignment:</strong> Teachers can be assigned to multiple classes for subject teaching</div>
+                </div>
+                <div class="tip flex gap-3 py-4">
+                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-user-shield"></i></div>
+                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Permissions:</strong>
+                        Grant only necessary permissions based on staff responsibilities</div>
                 </div>
             </div>
         </div>
@@ -398,49 +947,69 @@
 </div>
 
 <!-- Cropper Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5" id="cropperModal">
-    <div class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
+<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
+    id="cropperModal">
+    <div
+        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
         <div class="modal-header p-5 flex justify-between items-center">
-            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i class="fas fa-crop-alt"></i> Crop Image</h3>
-            <button class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
+            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i class="fas fa-crop-alt"></i>
+                Crop Image</h3>
+            <button
+                class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
         </div>
         <div class="modal-body p-6 max-h-[70vh] overflow-auto">
-            <div class="cropper-image-container w-full h-[400px] bg-gray-darker/70 rounded-xl overflow-hidden mb-5">
+            <div class="cropper-image-container w-full h-[400px] rounded-xl overflow-hidden mb-5">
                 <img id="cropperImage" src="" class="block max-w-full" loading="lazy">
             </div>
-            
+
             <div class="cropper-controls flex flex-wrap gap-3 mb-5">
-                <button class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2" id="rotateLeft">
+                <button
+                    class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
+                    id="rotateLeft">
                     <i class="fas fa-undo"></i> Rotate Left
                 </button>
-                <button class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2" id="rotateRight">
+                <button
+                    class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
+                    id="rotateRight">
                     <i class="fas fa-redo"></i> Rotate Right
                 </button>
-                <button class="cropper-btn ai px-4 py-3 bg-success/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2" id="removeBackground">
+                <button
+                    class="cropper-btn ai px-4 py-3 bg-success/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
+                    id="removeBackground">
                     <i class="fas fa-magic"></i> AI Remove Background
                 </button>
-                <button class="cropper-btn undo px-4 py-3 bg-danger/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2" id="undoEdit">
+                <button
+                    class="cropper-btn undo px-4 py-3 bg-danger/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
+                    id="undoEdit">
                     <i class="fas fa-undo"></i> Undo
                 </button>
             </div>
         </div>
         <div class="modal-footer p-4 flex justify-end gap-3">
-            <button class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
-            <button class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow" id="cropImage">Crop & Apply</button>
+            <button
+                class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
+            <button
+                class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow"
+                id="cropImage">Crop & Apply</button>
         </div>
     </div>
 </div>
 
 <!-- Verification Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5" id="verificationModal">
-    <div class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
+<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
+    id="verificationModal">
+    <div
+        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
         <div class="modal-header p-5 flex justify-between items-center">
-            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i class="fas fa-shield-alt"></i> Verify Staff Details</h3>
-            <button class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
+            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i
+                    class="fas fa-shield-alt"></i> Verify Staff Details</h3>
+            <button
+                class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
         </div>
         <div class="modal-body p-6 max-h-[70vh] overflow-auto">
-            <div class="profile-preview w-32 h-32 rounded-full mx-auto mb-5 bg-cover bg-center border-3 border-primary/30" id="finalProfilePreview"></div>
-            
+            <div class="profile-preview w-32 h-32 rounded-full mx-auto mb-5 bg-cover bg-center border-3 border-primary/30"
+                id="finalProfilePreview"></div>
+
             <div class="verification-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
                     <div class="verification-label text-sm text-gray-lighter mb-1">Full Name</div>
@@ -468,44 +1037,66 @@
                 </div>
                 <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
                     <div class="verification-label text-sm text-gray-lighter mb-1">Qualification</div>
-                    <div class="verification-value font-medium text-lg" id="verifyQualification">MSc in Computer Science</div>
+                    <div class="verification-value font-medium text-lg" id="verifyQualification">MSc in Computer Science
+                    </div>
                 </div>
                 <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
                     <div class="verification-label text-sm text-gray-lighter mb-1">Salary</div>
                     <div class="verification-value font-medium text-lg" id="verifySalary">5000</div>
+                </div>
+                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2" id="verifyClassesItem">
+                    <div class="verification-label text-sm text-gray-lighter mb-1">Assigned Classes</div>
+                    <div class="verification-value font-medium text-lg" id="verifyClasses">None</div>
+                </div>
+                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2"
+                    id="verifyPermissionsItem">
+                    <div class="verification-label text-sm text-gray-lighter mb-1">Assigned Permissions</div>
+                    <div class="verification-value font-medium text-lg" id="verifyPermissions">None</div>
                 </div>
                 <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2">
                     <div class="verification-label text-sm text-gray-lighter mb-1">Date of Joining</div>
                     <div class="verification-value font-medium text-lg" id="verifyJoinDate">Jan 15, 2023</div>
                 </div>
             </div>
-            
+
             <div class="mt-6 bg-gray-darker/50 p-4 rounded-xl">
-                <div class="verification-label text-sm text-gray-lighter">Please verify all details carefully before adding to the system.</div>
+                <div class="verification-label text-sm text-gray-lighter">Please verify all details carefully before
+                    adding to the system.</div>
             </div>
         </div>
         <div class="modal-footer p-4 flex justify-end gap-3">
-            <button class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
-            <button class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow" id="verifyConfirm">Verify & Add Staff</button>
+            <button
+                class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
+            <button
+                class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow"
+                id="verifyConfirm">Verify & Add Staff</button>
         </div>
     </div>
 </div>
 
 <!-- Success Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5" id="successModal">
-    <div class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
+<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
+    id="successModal">
+    <div
+        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
         <div class="success-modal-content text-center p-8">
-            <div class="success-icon w-20 h-20 bg-success-gradient rounded-full flex items-center justify-center mx-auto mb-5 text-4xl">
+            <div
+                class="success-icon w-20 h-20 bg-success-gradient rounded-full flex items-center justify-center mx-auto mb-5 text-4xl">
                 <i class="fas fa-check"></i>
             </div>
             <h2 class="success-title text-3xl mb-4 bg-success-gradient bg-clip-text text-transparent">Success!</h2>
-            <p class="success-message text-gray-light mb-6 text-lg" id="successMessage">Sarah Johnson has been successfully added to the staff database.</p>
-            
+            <p class="success-message text-gray-light mb-6 text-lg" id="successMessage">Sarah Johnson has been
+                successfully added to the staff database.</p>
+
             <div class="success-actions flex justify-center gap-4 mt-6">
-                <button class="btn btn-success px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-success-gradient text-white hover:-translate-y-0.5 hover:shadow-success-glow" id="goToStaff" onclick="location.href='/staff'">
+                <button
+                    class="btn btn-success px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-success-gradient text-white hover:-translate-y-0.5 hover:shadow-success-glow"
+                    id="goToStaff" onclick="location.href='/staff'">
                     <i class="fas fa-users"></i> Go to Staff Module
                 </button>
-                <button class="btn btn-whatsapp px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-whatsapp-gradient text-white hover:-translate-y-0.5 hover:shadow-whatsapp-glow" id="sendWhatsApp">
+                <button
+                    class="btn btn-whatsapp px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-whatsapp-gradient text-white hover:-translate-y-0.5 hover:shadow-whatsapp-glow"
+                    id="sendWhatsApp">
                     <i class="fab fa-whatsapp"></i> Send WhatsApp Message
                 </button>
             </div>
@@ -515,20 +1106,20 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
-    // The JavaScript remains exactly the same as in the original code
-    document.addEventListener('DOMContentLoaded', function() {
+
+    document.addEventListener('DOMContentLoaded', function () {
         // Modal elements
         const verificationModal = document.getElementById('verificationModal');
         const successModal = document.getElementById('successModal');
         const cropperModal = document.getElementById('cropperModal');
         const closeButtons = document.querySelectorAll('.close-modal, .btn-cancel');
-        
+
         // Form elements
         const saveButton = document.getElementById('saveButton');
         const verifyConfirm = document.getElementById('verifyConfirm');
         const goToStaffButton = document.getElementById('goToStaff');
         const sendWhatsAppButton = document.getElementById('sendWhatsApp');
-        
+
         // Image upload elements
         const profileUpload = document.getElementById('profileUpload');
         const signatureUpload = document.getElementById('signatureUpload');
@@ -540,7 +1131,7 @@
         const signatureFileInput = document.getElementById('signatureFileInput');
         const profilePreview = document.getElementById('profilePreview');
         const signaturePreview = document.getElementById('signaturePreview');
-        
+
         // Cropper elements
         const cropperImage = document.getElementById('cropperImage');
         const rotateLeftBtn = document.getElementById('rotateLeft');
@@ -548,11 +1139,27 @@
         const removeBackgroundBtn = document.getElementById('removeBackground');
         const undoEditBtn = document.getElementById('undoEdit');
         const cropImageBtn = document.getElementById('cropImage');
-        
+
         // Validation elements
         const validationSummary = document.getElementById('validationSummary');
         const errorList = document.getElementById('errorList');
-        
+
+        // Class Assignment elements
+        const classAssignmentSection = document.getElementById('classAssignmentSection');
+        const classSearch = document.getElementById('classSearch');
+        const classesContainer = document.getElementById('classesContainer');
+        const selectedClassesPreview = document.getElementById('selectedClassesPreview');
+        const selectedClassesTags = document.getElementById('selectedClassesTags');
+        const selectedCount = document.getElementById('selectedCount');
+        const noClassesMessage = document.getElementById('noClassesMessage');
+
+        // Permissions elements
+        const permissionCategoryBtns = document.querySelectorAll('.permission-category-btn');
+        const permissionsContainer = document.getElementById('permissionsContainer');
+        const selectedPermissionsPreview = document.getElementById('selectedPermissionsPreview');
+        const selectedPermissionsTags = document.getElementById('selectedPermissionsTags');
+        const selectedPermissionsCount = document.getElementById('selectedPermissionsCount');
+
         // Variables
         let cropper;
         let currentImageType = null; // 'profile' or 'signature'
@@ -560,36 +1167,261 @@
         let editedImageData = null;
         let profileDataUrl = null;
         let signatureDataUrl = null;
-        
-        // Required fields
-        const requiredFields = [
-            { id: 'name', name: 'Full Name', type: 'text', errorId: 'fullNameError' },
-            { id: 'email', name: 'Email', type: 'email', errorId: 'emailError' },
-            { id: 'phone', name: 'Phone Number', type: 'tel', errorId: 'phoneError' },
-            { id: 'dob', name: 'Date of Birth', type: 'date', errorId: 'dobError' },
-            { id: 'username', name: 'Username', type: 'text', errorId: 'usernameError' },
-            { id: 'password', name: 'Password', type: 'password', errorId: 'passwordError' },
-            { id: 'confirmPassword', name: 'Confirm Password', type: 'password', errorId: 'confirmPasswordError' },
-            { id: 'date_of_joining', name: 'Date of Joining', type: 'date', errorId: 'joinDateError' }
-        ];
-        
-        // Radio button groups
-        const radioGroups = [
-            { name: 'gender', errorId: 'genderError' },
-            { name: 'role_id', errorId: 'roleError' }
-        ];
-        
+        let selectedClasses = [];
+        let selectedPermissions = [];
+
+        // --- Classes and Permissions Functionality for Jinja-rendered HTML ---
+        // Helper: get class info from element
+        function getClassInfo(el) {
+            return {
+                id: el.getAttribute('data-id'),
+                name: el.getAttribute('data-name')
+            };
+        }
+        // Helper: get permission info from element
+        function getPermissionInfo(el) {
+            return {
+                id: el.getAttribute('data-id'),
+                name: el.getAttribute('data-name')
+            };
+        }
+
+        // --- CLASS SELECTION ---
+        selectedClasses = [];
+        classesContainer.addEventListener('click', function (e) {
+            const el = e.target.closest('.class-tag');
+            if (!el) return;
+            const info = getClassInfo(el);
+            const idx = selectedClasses.findIndex(c => c.id === info.id);
+            if (idx === -1) {
+                selectedClasses.push(info);
+                el.classList.add('selected');
+            } else {
+                selectedClasses.splice(idx, 1);
+                el.classList.remove('selected');
+            }
+            selectedCount.textContent = `${selectedClasses.length} ${selectedClasses.length === 1 ? 'class' : 'classes'}`;
+            if (selectedClasses.length > 0) {
+                selectedClassesPreview.style.display = 'block';
+                selectedClassesTags.innerHTML = '';
+                selectedClasses.forEach(cls => {
+                    const tag = document.createElement('span');
+                    tag.className = 'class-tag px-2 py-1 rounded mr-2 mb-1 inline-block';
+                    tag.textContent = cls.name;
+                    selectedClassesTags.appendChild(tag);
+                });
+            } else {
+                selectedClassesPreview.style.display = 'none';
+            }
+        });
+
+        // --- PERMISSION SELECTION ---
+        selectedPermissions = [];
+        permissionsContainer.addEventListener('click', function (e) {
+            const el = e.target.closest('.permission-card');
+            if (!el) return;
+            const info = getPermissionInfo(el);
+            const idx = selectedPermissions.findIndex(p => p.id === info.id);
+            if (idx === -1) {
+                selectedPermissions.push(info);
+                el.classList.add('checked');
+            } else {
+                selectedPermissions.splice(idx, 1);
+                el.classList.remove('checked');
+            }
+            selectedPermissionsCount.textContent = `${selectedPermissions.length} ${selectedPermissions.length === 1 ? 'permission' : 'permissions'}`;
+            if (selectedPermissions.length > 0) {
+                selectedPermissionsPreview.style.display = 'block';
+                selectedPermissionsTags.innerHTML = '';
+                selectedPermissions.forEach(perm => {
+                    const tag = document.createElement('span');
+                    tag.className = 'permission-card px-2 py-1 rounded mr-2 mb-1 inline-block';
+                    tag.textContent = perm.name;
+                    selectedPermissionsTags.appendChild(tag);
+                });
+            } else {
+                selectedPermissionsPreview.style.display = 'none';
+            }
+        });
+
+        // --- RADIO BUTTONS ---
+        document.querySelectorAll('.radio-card input[type="radio"]').forEach(input => {
+            input.addEventListener('change', function () {
+                document.querySelectorAll(`.radio-card input[name="${input.name}"]`).forEach(i => {
+                    i.parentElement.classList.remove('selected');
+                    i.parentElement.classList.remove('error');
+                });
+                input.parentElement.classList.add('selected');
+                const errorEl = document.getElementById(input.name + 'Error');
+                if (errorEl) errorEl.style.display = 'none';
+            });
+        });
+
+        // --- REQUIRED FIELDS ---
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            const errorElement = document.getElementById(field.errorId);
+            if (!element) return;
+            element.addEventListener('blur', function () {
+                if (!this.value.trim()) {
+                    this.classList.add('error');
+                    errorElement.style.display = 'block';
+                } else {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+            });
+            element.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+                if (field.id === 'confirmPassword' && this.value === passwordField.value) {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+            });
+        });
+
+        // --- SAVE BUTTON VALIDATION ---
+        saveButton.addEventListener('click', function () {
+            let isValid = true;
+            const errors = [];
+            errorList.innerHTML = '';
+            validationSummary.style.display = 'none';
+
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                const errorElement = document.getElementById(field.errorId);
+                if (!element.value.trim()) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.style.display = 'block';
+                    errors.push(`${field.name} is required`);
+                }
+                if (field.type === 'email' && element.value && !isValidEmail(element.value)) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.textContent = 'Please enter a valid email address';
+                    errorElement.style.display = 'block';
+                    errors.push('Please enter a valid email address');
+                }
+                if (field.id === 'password' && element.value.length > 0 && element.value.length < 8) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.textContent = 'Password must be at least 8 characters';
+                    errorElement.style.display = 'block';
+                    errors.push('Password must be at least 8 characters');
+                }
+                if (field.id === 'confirmPassword' && element.value !== passwordField.value) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.textContent = 'Passwords do not match';
+                    errorElement.style.display = 'block';
+                    errors.push('Passwords do not match');
+                }
+            });
+
+            radioGroups.forEach(group => {
+                const selected = document.querySelector(`input[name="${group.name}"]:checked`);
+                const errorElement = document.getElementById(group.errorId);
+                document.querySelectorAll(`.radio-card input[name="${group.name}"]`).forEach(input => {
+                    input.parentElement.classList.remove('error');
+                });
+                if (!selected) {
+                    isValid = false;
+                    document.querySelectorAll(`.radio-card input[name="${group.name}"]`).forEach(input => {
+                        input.parentElement.classList.add('error');
+                    });
+                    errorElement.style.display = 'block';
+                    errors.push(`Please select a ${group.name}`);
+                }
+            });
+
+            if (!isValid) {
+                validationSummary.style.display = 'block';
+                errors.forEach(error => {
+                    const li = document.createElement('li');
+                    li.textContent = error;
+                    errorList.appendChild(li);
+                });
+                validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
+        // Toggle permission selection
+        function togglePermissionSelection(perm) {
+            const index = selectedPermissions.findIndex(selected => selected.id === perm.id);
+
+            if (index === -1) {
+                selectedPermissions.push(perm);
+            } else {
+                selectedPermissions.splice(index, 1);
+            }
+
+            updateSelectedPermissionsUI();
+
+            // Re-render permissions to update checkboxes
+            const activeCategory = document.querySelector('.permission-category-btn.active').getAttribute('data-category');
+            const filteredPermissions = activeCategory === 'all'
+                ? samplePermissions
+                : samplePermissions.filter(p => p.category === activeCategory);
+
+            renderPermissions(filteredPermissions);
+        }
+
+        // Update selected permissions UI
+        function updateSelectedPermissionsUI() {
+            selectedPermissionsCount.textContent = `${selectedPermissions.length} ${selectedPermissions.length === 1 ? 'permission' : 'permissions'}`;
+
+            if (selectedPermissions.length > 0) {
+                selectedPermissionsPreview.style.display = 'block';
+                selectedPermissionsTags.innerHTML = '';
+
+                // Show only first 5 permissions as tags, show count for rest
+                const displayPermissions = selectedPermissions.slice(0, 5);
+                const extraCount = selectedPermissions.length - 5;
+
+                displayPermissions.forEach(perm => {
+                    const tag = document.createElement('div');
+                    tag.className = 'class-tag px-3 py-1 rounded-full text-sm flex items-center gap-2';
+                    tag.innerHTML = `
+                        <span>${perm.name}</span>
+                        <button class="remove-permission text-xs opacity-70 hover:opacity-100" data-id="${perm.id}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+
+                    tag.querySelector('.remove-permission').addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        togglePermissionSelection(perm);
+                    });
+
+                    selectedPermissionsTags.appendChild(tag);
+                });
+
+                if (extraCount > 0) {
+                    const extraTag = document.createElement('div');
+                    extraTag.className = 'class-tag px-3 py-1 rounded-full text-sm';
+                    extraTag.textContent = `+${extraCount} more`;
+                    selectedPermissionsTags.appendChild(extraTag);
+                }
+            } else {
+                selectedPermissionsPreview.style.display = 'none';
+            }
+        }
+
         // Password toggle functionality
         const passwordField = document.getElementById('password');
         const confirmPasswordField = document.getElementById('confirmPassword');
         const togglePassword = document.getElementById('togglePassword');
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
-        
+
         // Toggle password visibility
         function togglePasswordVisibility(field, button) {
             const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
             field.setAttribute('type', type);
-            
+
             // Toggle eye icon
             if (type === 'text') {
                 button.innerHTML = '<i class="fas fa-eye-slash"></i>';
@@ -597,11 +1429,11 @@
                 button.innerHTML = '<i class="fas fa-eye"></i>';
             }
         }
-        
+
         togglePassword.addEventListener('click', () => {
             togglePasswordVisibility(passwordField, togglePassword);
         });
-        
+
         toggleConfirmPassword.addEventListener('click', () => {
             togglePasswordVisibility(confirmPasswordField, toggleConfirmPassword);
         });
@@ -609,60 +1441,60 @@
         // Image upload functionality
         function setupImageUpload(uploadElement, fileInput, previewElement, type) {
             // Click on upload area
-            uploadElement.addEventListener('click', function(e) {
+            uploadElement.addEventListener('click', function (e) {
                 // Don't trigger if clicking on buttons inside
                 if (!e.target.closest('.btn-upload')) {
                     fileInput.click();
                 }
             });
-            
+
             // Click on upload button
             const uploadBtn = type === 'profile' ? uploadProfileBtn : uploadSignatureBtn;
-            uploadBtn.addEventListener('click', function(e) {
+            uploadBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 fileInput.click();
             });
-            
+
             // Click on capture button
             const captureBtn = type === 'profile' ? captureProfileBtn : captureSignatureBtn;
-            captureBtn.addEventListener('click', function(e) {
+            captureBtn.addEventListener('click', function (e) {
                 e.stopPropagation();
                 alert('Camera functionality would open here. This requires additional permissions and APIs.');
                 // In a real implementation, we would use:
                 // fileInput.setAttribute('capture', 'environment');
                 // fileInput.click();
             });
-            
+
             // File input change
-            fileInput.addEventListener('change', function() {
+            fileInput.addEventListener('change', function () {
                 if (this.files && this.files[0]) {
                     const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
+
+                    reader.onload = function (e) {
                         // Set current image type
                         currentImageType = type;
-                        
+
                         // Show image in cropper
                         cropperImage.src = e.target.result;
                         cropperModal.style.display = 'flex';
-                        
+
                         // Initialize cropper
                         setTimeout(initCropper, 100);
                     }
-                    
+
                     reader.readAsDataURL(this.files[0]);
                 }
             });
         }
-        
+
         // Initialize cropper
         function initCropper() {
             if (cropper) {
                 cropper.destroy();
             }
-            
+
             cropper = new Cropper(cropperImage, {
-                aspectRatio: currentImageType === 'profile' ? 1 : 4/3,
+                aspectRatio: currentImageType === 'profile' ? 1 : 4 / 3,
                 viewMode: 1,
                 guides: true,
                 movable: true,
@@ -670,64 +1502,64 @@
                 rotatable: true,
                 scalable: true
             });
-            
+
             // Store original image data
             originalImageData = cropper.getCroppedCanvas().toDataURL();
         }
-        
+
         // Rotate left
-        rotateLeftBtn.addEventListener('click', function() {
+        rotateLeftBtn.addEventListener('click', function () {
             cropper.rotate(-90);
         });
-        
+
         // Rotate right
-        rotateRightBtn.addEventListener('click', function() {
+        rotateRightBtn.addEventListener('click', function () {
             cropper.rotate(90);
         });
-        
+
         // Remove background (simulated)
-        removeBackgroundBtn.addEventListener('click', function() {
+        removeBackgroundBtn.addEventListener('click', function () {
             // Store current state for undo
             editedImageData = cropper.getCroppedCanvas().toDataURL();
-            
+
             // Simulate AI background removal (in a real app, this would call an API)
             removeBackgroundBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             removeBackgroundBtn.disabled = true;
-            
-            setTimeout(function() {
+
+            setTimeout(function () {
                 // This would be replaced with actual API call
                 alert('In a real application, this would send the image to an AI background removal API and return the processed image.');
-                
+
                 // For demo purposes, we'll just add a blue background
                 const canvas = cropper.getCroppedCanvas();
                 const ctx = canvas.getContext('2d');
-                
+
                 // Store current image data
                 const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                
+
                 // Create new canvas with blue background
                 const newCanvas = document.createElement('canvas');
                 newCanvas.width = canvas.width;
                 newCanvas.height = canvas.height;
                 const newCtx = newCanvas.getContext('2d');
-                
+
                 // Fill with blue background
                 newCtx.fillStyle = '#4361ee';
                 newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-                
+
                 // Draw original image on top
                 newCtx.drawImage(canvas, 0, 0);
-                
+
                 // Replace cropper image
                 cropper.replace(newCanvas.toDataURL());
-                
+
                 removeBackgroundBtn.innerHTML = '<i class="fas fa-magic"></i> AI Remove Background';
                 removeBackgroundBtn.disabled = false;
             }, 2000);
         });
-        
+
         // Undo edit
-        undoEditBtn.addEventListener('click', function() {
+        undoEditBtn.addEventListener('click', function () {
             if (editedImageData) {
                 cropper.replace(editedImageData);
                 editedImageData = null;
@@ -735,12 +1567,12 @@
                 cropper.replace(originalImageData);
             }
         });
-        
+
         // Crop and apply
-        cropImageBtn.addEventListener('click', function() {
+        cropImageBtn.addEventListener('click', function () {
             const canvas = cropper.getCroppedCanvas();
             const dataURL = canvas.toDataURL('image/jpeg', 0.8);
-            
+
             // Set preview based on current image type
             if (currentImageType === 'profile') {
                 profilePreview.style.backgroundImage = `url(${dataURL})`;
@@ -751,45 +1583,45 @@
                 signaturePreview.style.display = 'block';
                 signatureDataUrl = dataURL;
             }
-            
+
             // Close cropper modal
             cropperModal.style.display = 'none';
-            
+
             // Clean up cropper
             if (cropper) {
                 cropper.destroy();
                 cropper = null;
             }
         });
-        
+
         // Setup image upload for profile and signature
         setupImageUpload(profileUpload, profileFileInput, profilePreview, 'profile');
         setupImageUpload(signatureUpload, signatureFileInput, signaturePreview, 'signature');
-        
+
         // Validate form function
         function validateForm() {
             let isValid = true;
             const errors = [];
-            
+
             // Clear previous errors
             errorList.innerHTML = '';
             validationSummary.style.display = 'none';
-            
+
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
                 const errorElement = document.getElementById(field.errorId);
-                
+
                 // Remove previous error styling
                 element.classList.remove('error');
                 errorElement.style.display = 'none';
-                
+
                 // Check if field is empty
                 if (!element.value.trim()) {
                     isValid = false;
                     element.classList.add('error');
                     errorElement.style.display = 'block';
                     errors.push(`${field.name} is required`);
-                } 
+                }
                 // Validate email format
                 else if (field.type === 'email' && !isValidEmail(element.value)) {
                     isValid = false;
@@ -814,19 +1646,19 @@
                     errors.push('Passwords do not match');
                 }
             });
-            
+
             // Validate radio groups
             radioGroups.forEach(group => {
                 const selected = document.querySelector(`input[name="${group.name}"]:checked`);
                 const errorElement = document.getElementById(group.errorId);
-                
+
                 // Remove error from all cards in group
                 document.querySelectorAll(`.radio-card input[name="${group.name}"]`).forEach(input => {
                     input.parentElement.classList.remove('error');
                 });
-                
+
                 errorElement.style.display = 'none';
-                
+
                 if (!selected) {
                     isValid = false;
                     // Add error to all cards in group
@@ -837,7 +1669,7 @@
                     errors.push(`Please select a ${group.name}`);
                 }
             });
-            
+
             // Display validation summary if there are errors
             if (errors.length > 0) {
                 validationSummary.style.display = 'block';
@@ -846,27 +1678,27 @@
                     li.textContent = error;
                     errorList.appendChild(li);
                 });
-                
+
                 // Scroll to validation summary
                 validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
-            
+
             return isValid;
         }
-        
+
         // Email validation function
         function isValidEmail(email) {
             const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return re.test(email);
         }
-        
+
         // Open verification modal when save is clicked
-        saveButton.addEventListener('click', function() {
+        saveButton.addEventListener('click', function () {
             // Validate form before proceeding
             if (!validateForm()) {
                 return;
             }
-            
+
             // Update verification modal with form data
             document.getElementById('verifyName').textContent = document.getElementById('name').value;
             document.getElementById('verifyEmail').textContent = document.getElementById('email').value;
@@ -885,25 +1717,47 @@
             } else {
                 finalProfilePreview.style.backgroundImage = "url('https://p7.hiclipart.com/preview/782/114/405/5bbc3519d674c.jpg')";
             }
-            
+
             // Format join date
             const joinDate = new Date(document.getElementById('date_of_joining').value);
             document.getElementById('verifyJoinDate').textContent = joinDate.toLocaleDateString('en-US', {
-                year: 'numeric', 
-                month: 'short', 
+                year: 'numeric',
+                month: 'short',
                 day: 'numeric'
             });
-            
+
             // Get selected role
             const selectedRole = document.querySelector('input[name="role_id"]:checked');
             document.getElementById('verifyRole').textContent = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : 'Not selected';
-            
+
+            // Update classes in verification modal
+            const verifyClassesItem = document.getElementById('verifyClassesItem');
+            const verifyClasses = document.getElementById('verifyClasses');
+            if (selectedClasses.length > 0) {
+                verifyClasses.textContent = selectedClasses.map(cls => cls.name).join(', ');
+                verifyClassesItem.style.display = 'block';
+            } else {
+                verifyClasses.textContent = 'None';
+                verifyClassesItem.style.display = 'block';
+            }
+
+            // Update permissions in verification modal
+            const verifyPermissionsItem = document.getElementById('verifyPermissionsItem');
+            const verifyPermissions = document.getElementById('verifyPermissions');
+            if (selectedPermissions.length > 0) {
+                verifyPermissions.textContent = selectedPermissions.map(perm => perm.name).join(', ');
+                verifyPermissionsItem.style.display = 'block';
+            } else {
+                verifyPermissions.textContent = 'None';
+                verifyPermissionsItem.style.display = 'block';
+            }
+
             verificationModal.style.display = 'flex';
         });
 
         // Close modals
         closeButtons.forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 verificationModal.style.display = 'none';
                 successModal.style.display = 'none';
                 cropperModal.style.display = 'none';
@@ -911,7 +1765,7 @@
         });
 
         // Verify and add staff
-        verifyConfirm.addEventListener('click', async function() {
+        verifyConfirm.addEventListener('click', async function () {
             verifyConfirm.disabled = true;
             verifyConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             const selectedGender = document.querySelector('input[name="gender"]:checked');
@@ -931,6 +1785,8 @@
                 salary: document.getElementById('salary').value.trim() || null,
                 role_id: selectedRole ? selectedRole.value : null,
                 role_name: roleLabel,
+                assigned_classes: selectedClasses.map(cls => cls.id),
+                permissions: selectedPermissions.map(perm => perm.id),
                 image: profileDataUrl,
                 sign: signatureDataUrl
             };
@@ -967,10 +1823,10 @@
         });
 
         // Send WhatsApp message
-        sendWhatsAppButton.addEventListener('click', function() {
+        sendWhatsAppButton.addEventListener('click', function () {
             const phone = document.getElementById('phone').value.replace(/\D/g, '');
             const name = document.getElementById('name').value;
-            
+
             if (phone) {
                 const whatsappUrl = `https://wa.me/${phone}?text=Welcome%20${encodeURIComponent(name)}%20to%20our%20staff%20team!%20Your%20account%20has%20been%20successfully%20created.`;
                 window.open(whatsappUrl, '_blank');
@@ -981,9 +1837,9 @@
 
         // Gender and role selection
         document.querySelectorAll('.radio-card').forEach(card => {
-            card.addEventListener('click', function() {
+            card.addEventListener('click', function () {
                 const radioInput = this.querySelector('input[type="radio"]');
-                
+
                 // For gender
                 if (radioInput.name === 'gender') {
                     document.querySelectorAll('.radio-card').forEach(c => {
@@ -994,11 +1850,11 @@
                     });
                     this.classList.add('selected');
                     radioInput.checked = true;
-                    
+
                     // Clear error
                     document.getElementById('genderError').style.display = 'none';
                 }
-                
+
                 // For role
                 if (radioInput.name === 'role_id') {
                     document.querySelectorAll('.radio-card').forEach(c => {
@@ -1009,15 +1865,19 @@
                     });
                     this.classList.add('selected');
                     radioInput.checked = true;
-                    
+
                     // Clear error
                     document.getElementById('roleError').style.display = 'none';
+
+                    // Show/hide class assignment based on role
+                    const isTeacher = this.querySelector('div').textContent === 'Teacher';
+                    classAssignmentSection.style.display = isTeacher ? 'block' : 'none';
                 }
             });
         });
 
         // Close modal if clicked outside
-        window.addEventListener('click', function(event) {
+        window.addEventListener('click', function (event) {
             if (event.target === verificationModal) {
                 verificationModal.style.display = 'none';
             }
@@ -1028,26 +1888,26 @@
                 cropperModal.style.display = 'none';
             }
         });
-        
+
         // Real-time validation for inputs
         requiredFields.forEach(field => {
             const element = document.getElementById(field.id);
             const errorElement = document.getElementById(field.errorId);
-            
-            element.addEventListener('input', function() {
+
+            element.addEventListener('input', function () {
                 if (this.value.trim()) {
                     this.classList.remove('error');
                     errorElement.style.display = 'none';
                 }
-                
+
                 // Special validation for confirm password
                 if (field.id === 'confirmPassword' && this.value === passwordField.value) {
                     this.classList.remove('error');
                     errorElement.style.display = 'none';
                 }
             });
-            
-            element.addEventListener('blur', function() {
+
+            element.addEventListener('blur', function () {
                 if (!this.value.trim()) {
                     this.classList.add('error');
                     errorElement.style.display = 'block';

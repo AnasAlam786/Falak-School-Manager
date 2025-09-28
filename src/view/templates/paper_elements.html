@@ -1,94 +1,9 @@
-<div id="Question" class="d-flex flex-column align-items-end mb-4">
-    <div class="d-flex flex-column align-items-end mb-4" id="Question-{{ index }}">
-        <div class="question input-group mb-2">
-            <select class="form-select fw-bold " rows="1" style="overflow: hidden; resize: none;"
-                onchange="addQuestion(this)">
-                <option selected>Select Question Type</option>
-                <option value="mcq">Multiple Choice Questions</option>
-                <option value="fillUp">Fill In The Blanks</option>
-                <option value="T-F">True or False</option>
-                <option value="match">Matching</option>
-                <option value="QnA">Question & Answers</option>
-                <option value="singleWord">Single Word Questions</option>
-            </select>
-
-            <button class="btn btn-success ms-1" onclick="addQuestion(this)"
-                style="width: 35px; height: 40px;">+</button>
-            <button class="btn btn-danger ms-1" onclick="remove(this)" style="width: 35px; height: 40px;">-</button>
-        </div>
-    </div>
-</div>
-
-<div id="mcq" class="mcq input-group mb-4" style="width: 98%;">
-
-    <!-- Textarea and Buttons on the same line with spacing -->
-    <textarea class="sub-question form-control me-1 mb-2" placeholder="MCQ Question" rows="1"
-        style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-
-    <!-- Option Inputs shifted to the right with margin -->
-    <div class="input-group mb-1 ms-auto" style="width: 98%;">
-        <input type="text" class="option rounded-pill form-control" placeholder="Option 1" required>
-        <input type="text" class="option rounded-pill form-control ms-2" placeholder="Option 2" required>
-    </div>
-    <div class="input-group ms-auto" style="width: 98%;">
-        <input type="text" class="option rounded-pill form-control" placeholder="Option 3" required>
-        <input type="text" class="option rounded-pill form-control ms-2" placeholder="Option 4" required>
-    </div>
-</div>
-
-<div id="match" class="match input-group mb-1" style="width: 98%;">
-    <input type="text" class="sub-question rounded-pill form-control" placeholder="Match 1" required>
-    <input type="text" class="option rounded-pill form-control" placeholder="Match 2" required>
-
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-</div>
-
-
-<div id="singleWord" class="singleWord input-group mb-1" style="width: 98%;">
-
-    <input type="text" class="sub-question rounded-pill form-control" placeholder="Enter the word" required>
-    <input type="text" class="sub-question rounded-pill form-control" placeholder="Enter the word" required>
-
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-</div>
-
-<div id="fillUp" class="fillUp input-group mb-1" style="width: 98%;">
-
-    <textarea class="sub-question form-control mb-1" placeholder="Fill Up Question" rows="1"
-        style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-</div>
-
-<div id="QnA" class="QnA input-group mb-1" style="width: 98%;">
-    <textarea class="sub-question form-control mb-1" placeholder="Question and Answers" rows="1"
-        style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-</div>
-
-<div id="T-F" class="T-F input-group mb-1" style="width: 98%;">
-    <textarea class="sub-question form-control mb-1" placeholder="True/False Question" rows="1"
-        style="overflow-y: hidden; resize: none;" oninput="resizeTextHeight(this)" required></textarea>
-    <button class="btn btn-outline-success ms-1" onclick="addQuestion(this)"
-        style="width: 35px; height: 38px;">+</button>
-    <button class="btn btn-outline-danger ms-1" onclick="remove(this)" style="width: 35px; height: 38px;">-</button>
-</div>
 
 
 <div id="a4PDF">
-    <div style="text-align: center; border-bottom: 1px solid #464646;">
-        <p style="font-size: 1.5em; font-weight: bold; margin: 0;">{{ school }}</p>
-        <p style="font-size: 1.25em; font-weight: bold; margin: 0;">{{ event }}</p>
+    <div style="text-align: center; border-bottom: 1px solid #464646;" class="paperHeader">
+        <p style="font-size: 1.6em; font-weight: bold; margin: 0;">{{ school }}</p>
+        <p style="font-size: 1.2em; font-weight: bold; margin: 0;">{{ event }}</p>
         {% if subject %}
         <p style="font-size: 1em; font-weight: bold; margin: 0;">Subject - {{ subject }}</p>
         {% endif %}
@@ -143,7 +58,7 @@
         </div>
         {% endif %}
 
-        {% if question.type in ["QnA", "fillUp", "T-F"] and question.subQuestion|length != 0 %}
+        {% if question.type in ["QnA", "fillUp", "TF"] and question.subQuestion|length != 0 %}
         <div style="display: flex; justify-content: space-between; margin-bottom: 0; width: 100%;">
             <p style="margin: 0; line-height: 1.4; padding-left: 35px; text-indent: -35px;"><strong>Q{{ loop.index }}. {{ question.qText }}</strong></p>
             <span style="font-weight: bold;">{{ question.marks }}</span>
