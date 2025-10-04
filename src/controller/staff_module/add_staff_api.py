@@ -1,10 +1,10 @@
 # src/controller/staff_module/add_staff.py
 
-from collections import Counter
-import datetime
-from flask import jsonify, render_template, session, Blueprint, request
+from datetime import datetime, timezone
+from flask import jsonify, session, Blueprint, request
 from pydantic import ValidationError
-from sqlalchemy import distinct, func
+from sqlalchemy import func
+from psycopg2.errors import UniqueViolation
 
 
 from src.model.TeachersLogin import TeachersLogin
@@ -27,6 +27,7 @@ add_staff_api_bp = Blueprint( 'add_staff_api_bp',   __name__)
 def add_staff():
 
     data = request.get_json(silent=True) or (request.form.to_dict() if request.form else {})
+    school_id = session['school_id']
 
     # Normalize gender to match Pydantic Literal and DB Enum
     gender = data.get('gender')
@@ -57,25 +58,33 @@ def add_staff():
         else:
             return jsonify({'message': 'Role name is required'}), 400
 
+
     try:
         model = StaffVerification(**{
             'name': data.get('name'),
             'email': data.get('email'),
-            'phone': data.get('phone'),
-            'dob': data.get('dob'),
+            'phone': data.get('phone') or None,
+            'dob': data.get('dob') or None,
             'gender': gender_norm,
             'address': data.get('address') or None,
             'username': data.get('username'),
             'password': data.get('password'),
-            'date_of_joining': data.get('date_of_joining'),
+            'date_of_joining': data.get('date_of_joining') or None,
             'qualification': data.get('qualification') or None,
             'salary': data.get('salary') or None,
             'role_id': resolved_role_id,
             'image': data.get('image') or None,
             'sign': data.get('sign') or None,
         })
-    except Exception as e:
-        return jsonify({'message': str(e)}), 400
+    except ValidationError as e:
+        errors = []
+        for err in e.errors():
+            field = err["loc"][0]
+            msg = err["msg"]
+            # Make error messages user-friendly
+            errors.append(f"{field.capitalize()}: {msg}")
+        return jsonify({'success': False, 'errors': errors}), 400
+    
 
     # Email unique check
     if model.email and TeachersLogin.query.filter_by(email=str(model.email)).first():
@@ -102,9 +111,48 @@ def add_staff():
             gender=model.gender,
         )
         db.session.add(teacher)
+        db.session.flush()  # 👈 flush so teacher.id is available before commit
+
+        assigned_classes = data.get("assigned_classes")
+        if assigned_classes is None:
+            assigned_classes = []  # leave blank (no access added)
+
+        elif not isinstance(assigned_classes, list):
+            db.session.rollback()
+            return jsonify({'message': 'assigned_classes must be a list of class IDs. Please relode and try again'}), 400
+        
+        else:
+            # validate each class_id
+            valid_class_ids = {
+                c.id for c in ClassData.query.with_entities(ClassData.id).filter_by(school_id=school_id).all()
+            }
+            today = datetime.now(timezone.utc).date()
+
+            for class_id in assigned_classes:
+                try:
+                    class_id_int = int(class_id)
+                except ValueError:
+                    db.session.rollback()
+                    return jsonify({'message': f'Invalid class_id: {class_id}. Please relode and try again'}, ), 400
+                
+                if class_id_int not in valid_class_ids:
+                    db.session.rollback()
+                    return jsonify({'message': f'class_id {class_id_int} does not exist. Please relode and try again'}), 400
+
+            access = ClassAccess(
+                class_id=class_id_int,
+                staff_id=teacher.id, granted_at=today
+            )
+            db.session.add(access)
+                
         db.session.commit()
+
     except Exception as e:
         db.session.rollback()
-        return jsonify({'message': 'Error occurred while adding staff', 'error': str(e)}), 500
+        print(e)
+        if isinstance(e.orig, UniqueViolation):
+            return jsonify({'message': 'Cannot add staff: duplicate record detected. Please check the data and try again.'}), 400
+        else:
+            return jsonify({'message': 'An unexpected database error occurred while adding staff.'}), 500
 
     return jsonify({'message': 'Staff added successfully', 'id': teacher.id}), 200

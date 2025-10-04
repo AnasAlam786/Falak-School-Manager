@@ -5,7 +5,7 @@ from src import db
 
 class ClassAccess(db.Model):
     __tablename__ = 'ClassAccess'
-    id = Column(BigInteger, primary_key=True)
+    id = Column(BigInteger, primary_key=True, autoincrement=True)  # ✅ add autoincrement
     granted_at = Column(Date, nullable=True)
     access_role = Column(Text, nullable=True)
 

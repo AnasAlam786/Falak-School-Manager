@@ -113,34 +113,48 @@
 
     /* Checkbox items */
     .checkbox-item {
-        background: rgba(15, 23, 42, 0.7) !important;
+        background: rgba(20, 20, 20, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
     }
 
     .checkbox-item:hover {
-        background: rgba(67, 97, 238, 0.1) !important;
-        border-color: rgba(67, 97, 238, 0.5);
+        transform: translateY(-2px);
     }
 
-    .checkbox-item.checked {
-        background: rgba(67, 97, 238, 0.15) !important;
+    .checkbox-item.selected {
+        background: #000000;
         border-color: #4361ee;
+    }
+    .checkbox-item input[type="checkbox"] {
+        accent-color: #4361ee;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 
     /* Permission cards */
     .permission-card {
-        background: rgba(15, 23, 42, 0.7) !important;
+        background: rgba(20, 20, 20, 0.7) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1);
         transition: all 0.3s ease;
     }
 
     .permission-card:hover {
-        background: rgba(30, 41, 59, 0.9) !important;
         transform: translateY(-2px);
     }
 
     .permission-card.checked {
-        background: rgba(67, 97, 238, 0.1) !important;
+        background: #000000;
         border-color: #4361ee;
+    }
+    .permission-card input[type="checkbox"] {
+        accent-color: #4361ee;
+        width: 18px;
+        height: 18px;
+        margin-right: 8px;
+        vertical-align: middle;
     }
 
     /* Class tags */
@@ -161,16 +175,6 @@
         color: #4361ee;
     }
 
-    /* Modal backgrounds */
-    .modal {
-        background: rgba(3, 7, 17, 0.9) !important;
-    }
-
-    /* Success modal */
-    .success-modal-content {
-        background: transparent !important;
-    }
-
     /* Text colors for better contrast */
     .text-gray-light {
         color: #e2e8f0 !important;
@@ -184,6 +188,76 @@
     .required::after {
         content: " *";
         color: #ff6b6b;
+    }
+
+    /* Modal CSS */
+    .bg-primary-gradient {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+    
+    .bg-success-gradient {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .bg-whatsapp-gradient {
+        background: linear-gradient(135deg, #25d366 0%, #128c7e 100%);
+    }
+    
+    .bg-dark-gradient {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+    }
+    
+    .shadow-primary-glow {
+        box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    .shadow-success-glow {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+    
+    .shadow-whatsapp-glow {
+        box-shadow: 0 0 20px rgba(37, 211, 102, 0.4);
+    }
+    
+    .shadow-modal {
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    
+    .animate-modal-enter {
+        animation: modal-enter 0.3s ease-out;
+    }
+    
+    .animate-scale-in {
+        animation: scale-in 0.2s ease-out;
+    }
+    
+    @keyframes modal-enter {
+        0% { opacity: 0; transform: translateY(-10px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes scale-in {
+        0% { opacity: 0; transform: scale(0.95); }
+        100% { opacity: 1; transform: scale(1); }
+    }
+    
+    /* Custom scrollbar for modal */
+    .modal-scrollbar::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-track {
+        background: rgba(30, 41, 59, 0.5);
+        border-radius: 10px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-thumb {
+        background: rgba(100, 116, 139, 0.5);
+        border-radius: 10px;
+    }
+    
+    .modal-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(100, 116, 139, 0.8);
     }
 
     /* Responsive adjustments */
@@ -260,23 +334,6 @@
         }
     }
 
-    /* Animation for modal */
-    @keyframes modalAppear {
-        from {
-            transform: translateY(50px);
-            opacity: 0;
-        }
-
-        to {
-            transform: translateY(0);
-            opacity: 1;
-        }
-    }
-
-    .animate-modal {
-        animation: modalAppear 0.4s ease-out;
-    }
-
     /* Error state for inputs */
     .form-input.error {
         border-color: #ff6b6b !important;
@@ -315,7 +372,7 @@
         <ul class="pl-5 text-[#ff9f9f]" id="errorList"></ul>
     </div>
 
-    <div class="form-container flex gap-[30px] flex-wrap">
+    <div class="form-container flex flex-col gap-[30px] flex-wrap">
         <div class="main-form flex-1 min-w-[300px]">
             <!-- Personal Information -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
@@ -345,7 +402,7 @@
                             email address</div>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light required">Phone Number</label>
+                        <label class="form-label block mb-2 font-medium text-gray-light">Phone Number</label>
                         <input type="tel"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
                             id="phone" placeholder="+91 98765543210">
@@ -353,7 +410,7 @@
                             phone number</div>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light required">Date of Birth</label>
+                        <label class="form-label block mb-2 font-medium text-gray-light">Date of Birth</label>
                         <input type="date"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
                             id="dob">
@@ -454,7 +511,7 @@
                 </div>
                 <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light required">Date of
+                        <label class="form-label block mb-2 font-medium text-gray-light">Date of
                             Joining</label>
                         <input type="date"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
@@ -546,78 +603,20 @@
                     <!-- Classes Grid -->
                     <div class="classes-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto p-2"
                         id="classesContainer">
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 1A</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 1 • Mathematics</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 1B</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 1 • Science</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
+                        {% for cls in classes %}
+                            <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300" data-id="{{ cls.id }}" data-name="{{ cls.CLASS }}">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <div class="font-medium text-gray-light">{{ cls.CLASS }}</div>
+                                        <div class="text-sm text-gray-lighter mt-1">Grade 1 • Mathematics</div>
+                                    </div>
+                                    <div class="checkbox-indicator">
+                                        <input type="checkbox" 
+                                            class="w-4 h-4 rounded-sm border border-gray-400 bg-gray-600 checked:bg-green-500 checked:border-green-500 text-green-500 focus:ring-2 focus:ring-green-400 appearance-none relative">
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 2A</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 2 • English</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 3A</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 3 • Mathematics</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 5A</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 5 • Mathematics</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <div class="font-medium text-gray-light">Class 5B</div>
-                                    <div class="text-sm text-gray-lighter mt-1">Grade 5 • Science</div>
-                                </div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                        </div>
+                        {% endfor %}
                     </div>
 
                     <!-- No results message -->
@@ -646,15 +645,12 @@
                             <button
                                 class="permission-category-btn active px-3 py-2 rounded-lg bg-primary/20 text-primary font-medium"
                                 data-category="all">All Permissions</button>
-                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
-                                data-category="academic">Academic</button>
-                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
-                                data-category="student">Student Management</button>
-                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
-                                data-category="attendance">Attendance</button>
-                            <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
-                                data-category="reports">Reports</button>
+                            {% for cateogory in permission_cateogory %}
+                                <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
+                                    data-category="{{ cateogory }}">{{ cateogory|capitalize }}</button>
+                            {% endfor %}
                         </div>
+                        
                     </div>
 
                     <!-- Selected Permissions Preview -->
@@ -669,173 +665,31 @@
                     </div>
 
                     <!-- Permissions Grid -->
-                    <div class="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2"
-                        id="permissionsContainer">
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
+                     
+                    <div class="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2" id="permissionsContainer">
+                        {% for permission in permissions %}
+                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300" data-id="{{ permission.id }}" data-name="{{ permission.title }}">
                             <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">View Student Profiles</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
+                                <div class="font-medium text-gray-light">{{ permission.title }}</div>
+                                <div class="checkbox-indicator">
+                                    <input type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
                                 </div>
                             </div>
-                            <div class="text-sm text-gray-lighter">Access to view student information and profiles</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                student</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Edit Student Records</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
+                            <div class="text-sm text-gray-lighter">{{ permission.description }}</div>
+                            <div class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
+                                {{ permission.action }}
                             </div>
-                            <div class="text-sm text-gray-lighter">Ability to update student information and records
-                            </div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                student</div>
                         </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Manage Attendance</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Record and manage student attendance</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                attendance</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">View Attendance Reports</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Access to view attendance reports and analytics</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                attendance</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Create Assignments</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Ability to create and assign homework/tasks</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                academic</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Grade Assignments</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Ability to grade student assignments and tests</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                academic</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">View Academic Reports</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Access to student academic performance reports</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                reports</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Generate Progress Reports</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Ability to generate student progress reports</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                reports</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Send Notifications</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Send notifications to students and parents</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                academic</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Manage Class Schedule</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Ability to view and manage class schedules</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                academic</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">Access Library</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Access to digital library resources</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                academic</div>
-                        </div>
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 ">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">View Financial Reports</div>
-                                <div
-                                    class="checkbox-indicator w-5 h-5 rounded border-2 border-gray-lighter flex items-center justify-center ">
-
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">Access to view basic financial reports</div>
-                            <div
-                                class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                reports</div>
-                        </div>
+                        {% endfor %}
                     </div>
+
                 </div>
             </div>
         </div>
 
-        <div class="side-column w-full md:w-[350px] min-w-[300px]">
+        <div class="w-full flex flex-col lg:flex-row gap-6">
             <!-- Profile Photo -->
-            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
+            <div class="form-section flex-1 bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
                     <div
                         class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
@@ -868,7 +722,7 @@
             </div>
 
             <!-- Signature -->
-            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
+            <div class="form-section flex-1 bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
                 <div class="section-header flex items-center mb-6 pb-4">
                     <div
                         class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
@@ -898,49 +752,6 @@
                     </div>
                 </div>
                 <input type="file" accept="image/*" class="hidden" id="signatureFileInput">
-            </div>
-
-            <!-- Tips Section -->
-            <div class="tips-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 shadow-section">
-                <h3 class="tips-title text-[1.3rem] mb-5 flex items-center gap-2"><i
-                        class="fas fa-lightbulb text-primary"></i> Adding Staff Tips</h3>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-info-circle"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Required Fields:</strong>
-                        Make sure to fill all fields marked with asterisk (*)</div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-shield-alt"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Password
-                            Strength:</strong> Use a strong password with uppercase, lowercase, numbers and symbols
-                    </div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-image"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Profile Photos:</strong>
-                        Use square images for best results. Minimum 300x300 pixels recommended</div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-signature"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Digital
-                            Signature:</strong> Capture on white background for best results</div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-user-tag"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Role Assignment:</strong>
-                        Assign appropriate role for correct system permissions</div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-chalkboard-teacher"></i>
-                    </div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Class
-                            Assignment:</strong> Teachers can be assigned to multiple classes for subject teaching</div>
-                </div>
-                <div class="tip flex gap-3 py-4">
-                    <div class="tip-icon text-primary text-lg min-w-[24px]"><i class="fas fa-user-shield"></i></div>
-                    <div class="tip-content text-gray-lighter"><strong class="text-gray-light">Permissions:</strong>
-                        Grant only necessary permissions based on staff responsibilities</div>
-                </div>
             </div>
         </div>
     </div>
@@ -996,109 +807,133 @@
 </div>
 
 <!-- Verification Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
-    id="verificationModal">
-    <div
-        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
-        <div class="modal-header p-5 flex justify-between items-center">
-            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i
-                    class="fas fa-shield-alt"></i> Verify Staff Details</h3>
-            <button
-                class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
-        </div>
-        <div class="modal-body p-6 max-h-[70vh] overflow-auto">
-            <div class="profile-preview w-32 h-32 rounded-full mx-auto mb-5 bg-cover bg-center border-3 border-primary/30"
-                id="finalProfilePreview"></div>
-
-            <div class="verification-grid grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Full Name</div>
-                    <div class="verification-value font-medium text-lg" id="verifyName">Sarah Johnson</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Email</div>
-                    <div class="verification-value font-medium text-lg" id="verifyEmail">sarah.j@example.com</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Phone</div>
-                    <div class="verification-value font-medium text-lg" id="verifyPhone">+1 (555) 789-0123</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Role</div>
-                    <div class="verification-value font-medium text-lg" id="verifyRole">Manager</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Username</div>
-                    <div class="verification-value font-medium text-lg" id="verifyUsername">sarahj</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Status</div>
-                    <div class="verification-value font-medium text-lg" id="verifyStatus">Active</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Qualification</div>
-                    <div class="verification-value font-medium text-lg" id="verifyQualification">MSc in Computer Science
+<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="verificationModal">
+    <div class="modal-content bg-slate-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-modal animate-modal-enter">
+        <!-- Modal Header -->
+        <div class="modal-header p-6 pb-4 border-b border-slate-700">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-indigo-500"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white">Verify Staff Details</h3>
+                        <p class="text-sm text-slate-400 mt-1">Review all information before adding to system</p>
                     </div>
                 </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Salary</div>
-                    <div class="verification-value font-medium text-lg" id="verifySalary">5000</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2" id="verifyClassesItem">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Assigned Classes</div>
-                    <div class="verification-value font-medium text-lg" id="verifyClasses">None</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2"
-                    id="verifyPermissionsItem">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Assigned Permissions</div>
-                    <div class="verification-value font-medium text-lg" id="verifyPermissions">None</div>
-                </div>
-                <div class="verification-item p-4 bg-gray-darker/50 rounded-xl md:col-span-2">
-                    <div class="verification-label text-sm text-gray-lighter mb-1">Date of Joining</div>
-                    <div class="verification-value font-medium text-lg" id="verifyJoinDate">Jan 15, 2023</div>
-                </div>
-            </div>
-
-            <div class="mt-6 bg-gray-darker/50 p-4 rounded-xl">
-                <div class="verification-label text-sm text-gray-lighter">Please verify all details carefully before
-                    adding to the system.</div>
+                <button class="close-modal bg-slate-700 hover:bg-slate-600 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors duration-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
-        <div class="modal-footer p-4 flex justify-end gap-3">
-            <button
-                class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
-            <button
-                class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow"
-                id="verifyConfirm">Verify & Add Staff</button>
+        
+        <!-- Modal Body -->
+        <div class="modal-body p-6 max-h-[70vh] overflow-y-auto modal-scrollbar">
+            <!-- Profile Preview -->
+            <div class="flex flex-col items-center mb-6">
+                <div class="profile-preview w-24 h-24 rounded-full mb-4 bg-cover bg-center border-4 border-indigo-500/30 shadow-lg bg-slate-700 flex items-center justify-center text-slate-400" id="finalProfilePreview">
+                    <i class="fas fa-user text-3xl"></i>
+                </div>
+            </div>
+            
+            <!-- Verification Grid -->
+            <div class="verification-grid grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Full Name</div>
+                    <div class="verification-value font-medium text-white" id="verifyName"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Email</div>
+                    <div class="verification-value font-medium text-white" id="verifyEmail"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Phone</div>
+                    <div class="verification-value font-medium text-white" id="verifyPhone"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Role</div>
+                    <div class="verification-value font-medium text-white" id="verifyRole"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Username</div>
+                    <div class="verification-value font-medium text-white" id="verifyUsername"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Status</div>
+                    <div class="verification-value font-medium">
+                        <span class="px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-400">Active</span>
+                    </div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Qualification</div>
+                    <div class="verification-value font-medium text-white" id="verifyQualification"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Salary</div>
+                    <div class="verification-value font-medium text-white" id="verifySalary"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2" id="verifyClassesItem">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Assigned Classes</div>
+                    <div class="verification-value flex flex-wrap gap-1" id="verifyClasses"></div>
+                </div>
+
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2" id="verifyPermissionsItem">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Assigned Permissions</div>
+                    <div class="verification-value flex flex-wrap gap-1" id="verifyPermissions"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2">
+                    <div class="verification-label text-xs text-slate-400 mb-1">Date of Joining</div>
+                    <div class="verification-value font-medium text-white" id="verifyJoinDate"></div>
+                </div>
+            </div>
+            
+            <!-- Verification Note -->
+            <div class="mt-6 bg-slate-700/30 p-4 rounded-xl border border-slate-600">
+                <div class="flex items-start gap-3">
+                    <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
+                    <p class="text-sm text-slate-300">Please verify all details carefully before adding to the system. Once confirmed, the staff member will be added to the database and will receive system access.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal Footer -->
+        <div class="modal-footer p-6 pt-4 border-t border-slate-700 flex flex-col sm:flex-row justify-end gap-3">
+            <button class="btn-crop btn-cancel px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white w-full sm:w-auto">
+                Cancel
+            </button>
+            <button class="btn-crop btn-confirm px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:shadow-primary-glow flex items-center justify-center gap-2 w-full sm:w-auto" id="verifyConfirm">
+                <i class="fas fa-check-circle"></i>
+                Verify & Add Staff
+            </button>
         </div>
     </div>
 </div>
 
 <!-- Success Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
-    id="successModal">
-    <div
-        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
+<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="successModal">
+    <div class="modal-content bg-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-modal animate-scale-in">
         <div class="success-modal-content text-center p-8">
-            <div
-                class="success-icon w-20 h-20 bg-success-gradient rounded-full flex items-center justify-center mx-auto mb-5 text-4xl">
+            <!-- Success Icon -->
+            <div class="success-icon w-20 h-20 bg-success-gradient rounded-full flex items-center justify-center mx-auto mb-5 text-white text-2xl shadow-lg animate-modal-enter">
                 <i class="fas fa-check"></i>
             </div>
-            <h2 class="success-title text-3xl mb-4 bg-success-gradient bg-clip-text text-transparent">Success!</h2>
-            <p class="success-message text-gray-light mb-6 text-lg" id="successMessage">Sarah Johnson has been
-                successfully added to the staff database.</p>
+            
+            <!-- Success Title and Message -->
+            <h2 class="success-title text-2xl font-bold mb-3 text-white">Success!</h2>
+            <p class="success-message text-slate-300 mb-6" id="successMessage">
+                Sarah Johnson has been successfully added to the staff database.
+            </p>
 
-            <div class="success-actions flex justify-center gap-4 mt-6">
-                <button
-                    class="btn btn-success px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-success-gradient text-white hover:-translate-y-0.5 hover:shadow-success-glow"
-                    id="goToStaff" onclick="location.href='/staff'">
-                    <i class="fas fa-users"></i> Go to Staff Module
-                </button>
-                <button
-                    class="btn btn-whatsapp px-5 py-3 rounded-xl font-semibold flex items-center gap-2 cursor-pointer transition-all duration-300 border-none bg-whatsapp-gradient text-white hover:-translate-y-0.5 hover:shadow-whatsapp-glow"
-                    id="sendWhatsApp">
-                    <i class="fab fa-whatsapp"></i> Send WhatsApp Message
-                </button>
+            <!-- Success Actions -->
+            <div class="success-actions flex flex-col sm:flex-row justify-center gap-3 mt-6">
+                <a href="/staff_view" class="btn btn-success px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 border-none bg-success-gradient text-white hover:shadow-success-glow w-full sm:w-auto">
+                    <i class="fas fa-users"></i>
+                    Staff Module
+                </a>
+                <a class="btn btn-whatsapp px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 border-none bg-whatsapp-gradient text-white hover:shadow-whatsapp-glow w-full sm:w-auto" id="sendWhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                    Send WhatsApp
+                </a>
             </div>
         </div>
     </div>
@@ -1106,6 +941,21 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
+
+    // Define required fields for validation
+    const requiredFields = [
+        { id: 'name', errorId: 'fullNameError', name: 'Full Name', type: 'text' },
+        { id: 'email', errorId: 'emailError', name: 'Email', type: 'email' },
+        { id: 'username', errorId: 'usernameError', name: 'Username', type: 'text' },
+        { id: 'password', errorId: 'passwordError', name: 'Password', type: 'password' },
+        { id: 'confirmPassword', errorId: 'confirmPasswordError', name: 'Confirm Password', type: 'password' },
+    ];
+
+    // Define radio groups for validation
+    const radioGroups = [
+        { name: 'gender', errorId: 'genderError' },
+        { name: 'role_id', errorId: 'roleError' }
+    ];
 
     document.addEventListener('DOMContentLoaded', function () {
         // Modal elements
@@ -1153,6 +1003,28 @@
         const selectedCount = document.getElementById('selectedCount');
         const noClassesMessage = document.getElementById('noClassesMessage');
 
+        // --- CLASS SEARCH/FILTER FUNCTIONALITY ---
+        if (classSearch && classesContainer) {
+            classSearch.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                let anyVisible = false;
+                classesContainer.querySelectorAll('.checkbox-item').forEach(item => {
+                    const className = item.getAttribute('data-name') ? item.getAttribute('data-name').toLowerCase() : '';
+                    if (className.includes(searchTerm)) {
+                        item.style.display = '';
+                        anyVisible = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+                if (!anyVisible) {
+                    noClassesMessage.style.display = 'block';
+                } else {
+                    noClassesMessage.style.display = 'none';
+                }
+            });
+        }
+
         // Permissions elements
         const permissionCategoryBtns = document.querySelectorAll('.permission-category-btn');
         const permissionsContainer = document.getElementById('permissionsContainer');
@@ -1189,16 +1061,21 @@
         // --- CLASS SELECTION ---
         selectedClasses = [];
         classesContainer.addEventListener('click', function (e) {
-            const el = e.target.closest('.class-tag');
+            const el = e.target.closest('.checkbox-item');
             if (!el) return;
             const info = getClassInfo(el);
+            const indicator = el.querySelector('.checkbox-indicator');
+            const checkbox = indicator.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
             const idx = selectedClasses.findIndex(c => c.id === info.id);
             if (idx === -1) {
                 selectedClasses.push(info);
                 el.classList.add('selected');
+                checkbox.checked = true;
             } else {
                 selectedClasses.splice(idx, 1);
                 el.classList.remove('selected');
+                checkbox.checked = false;
             }
             selectedCount.textContent = `${selectedClasses.length} ${selectedClasses.length === 1 ? 'class' : 'classes'}`;
             if (selectedClasses.length > 0) {
@@ -1219,15 +1096,24 @@
         selectedPermissions = [];
         permissionsContainer.addEventListener('click', function (e) {
             const el = e.target.closest('.permission-card');
+            
             if (!el) return;
+            
             const info = getPermissionInfo(el);
+            console.log(info)
+            if (!info.id) return;
+            const indicator = el.querySelector('.checkbox-indicator');
+            const checkbox = indicator.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
             const idx = selectedPermissions.findIndex(p => p.id === info.id);
             if (idx === -1) {
                 selectedPermissions.push(info);
                 el.classList.add('checked');
+                checkbox.checked = true;
             } else {
                 selectedPermissions.splice(idx, 1);
                 el.classList.remove('checked');
+                checkbox.checked = false;
             }
             selectedPermissionsCount.textContent = `${selectedPermissions.length} ${selectedPermissions.length === 1 ? 'permission' : 'permissions'}`;
             if (selectedPermissions.length > 0) {
@@ -1282,7 +1168,7 @@
                 }
             });
         });
-
+        
         // --- SAVE BUTTON VALIDATION ---
         saveButton.addEventListener('click', function () {
             let isValid = true;
@@ -1322,6 +1208,36 @@
                 }
             });
 
+            // Only build payload after validation
+            let payload = null;
+            if (isValid) {
+                const selectedGender = document.querySelector('input[name="gender"]:checked');
+                const selectedRole = document.querySelector('input[name="role_id"]:checked');
+                const roleLabel = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : null;
+                const assigned_classes = selectedClasses.map(cls => cls.id);
+                const permissions = selectedPermissions.map(perm => perm.id);
+                payload = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.replace(/\D/g, '') || null,
+                    dob: document.getElementById('dob').value,
+                    gender: selectedGender ? selectedGender.value : null,
+                    address: document.getElementById('address').value.trim() || null,
+                    username: document.getElementById('username').value.trim(),
+                    password: document.getElementById('password').value,
+                    date_of_joining: document.getElementById('date_of_joining').value || null,
+                    qualification: document.getElementById('qualification').value.trim() || null,
+                    salary: document.getElementById('salary').value.trim() || null,
+                    role_id: selectedRole ? selectedRole.value : null,
+                    role_name: roleLabel,
+                    assigned_classes,
+                    permissions,
+                    image: profileDataUrl,
+                    sign: signatureDataUrl
+                };
+                // You can now use payload for further processing (e.g., show modal, send to backend)
+            }
+
             radioGroups.forEach(group => {
                 const selected = document.querySelector(`input[name="${group.name}"]:checked`);
                 const errorElement = document.getElementById(group.errorId);
@@ -1349,67 +1265,6 @@
             }
         });
 
-        // Toggle permission selection
-        function togglePermissionSelection(perm) {
-            const index = selectedPermissions.findIndex(selected => selected.id === perm.id);
-
-            if (index === -1) {
-                selectedPermissions.push(perm);
-            } else {
-                selectedPermissions.splice(index, 1);
-            }
-
-            updateSelectedPermissionsUI();
-
-            // Re-render permissions to update checkboxes
-            const activeCategory = document.querySelector('.permission-category-btn.active').getAttribute('data-category');
-            const filteredPermissions = activeCategory === 'all'
-                ? samplePermissions
-                : samplePermissions.filter(p => p.category === activeCategory);
-
-            renderPermissions(filteredPermissions);
-        }
-
-        // Update selected permissions UI
-        function updateSelectedPermissionsUI() {
-            selectedPermissionsCount.textContent = `${selectedPermissions.length} ${selectedPermissions.length === 1 ? 'permission' : 'permissions'}`;
-
-            if (selectedPermissions.length > 0) {
-                selectedPermissionsPreview.style.display = 'block';
-                selectedPermissionsTags.innerHTML = '';
-
-                // Show only first 5 permissions as tags, show count for rest
-                const displayPermissions = selectedPermissions.slice(0, 5);
-                const extraCount = selectedPermissions.length - 5;
-
-                displayPermissions.forEach(perm => {
-                    const tag = document.createElement('div');
-                    tag.className = 'class-tag px-3 py-1 rounded-full text-sm flex items-center gap-2';
-                    tag.innerHTML = `
-                        <span>${perm.name}</span>
-                        <button class="remove-permission text-xs opacity-70 hover:opacity-100" data-id="${perm.id}">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    `;
-
-                    tag.querySelector('.remove-permission').addEventListener('click', function (e) {
-                        e.stopPropagation();
-                        togglePermissionSelection(perm);
-                    });
-
-                    selectedPermissionsTags.appendChild(tag);
-                });
-
-                if (extraCount > 0) {
-                    const extraTag = document.createElement('div');
-                    extraTag.className = 'class-tag px-3 py-1 rounded-full text-sm';
-                    extraTag.textContent = `+${extraCount} more`;
-                    selectedPermissionsTags.appendChild(extraTag);
-                }
-            } else {
-                selectedPermissionsPreview.style.display = 'none';
-            }
-        }
 
         // Password toggle functionality
         const passwordField = document.getElementById('password');
@@ -1433,6 +1288,7 @@
         togglePassword.addEventListener('click', () => {
             togglePasswordVisibility(passwordField, togglePassword);
         });
+
 
         toggleConfirmPassword.addEventListener('click', () => {
             togglePasswordVisibility(confirmPasswordField, toggleConfirmPassword);
@@ -1489,41 +1345,58 @@
 
         // Initialize cropper
         function initCropper() {
-            if (cropper) {
-                cropper.destroy();
-            }
+            // Improved JS: robust validation, event handling, and AJAX (if needed)
+            document.addEventListener('DOMContentLoaded', function() {
+                var form = document.getElementById('addStaffForm');
+                if (!form) return;
 
-            cropper = new Cropper(cropperImage, {
-                aspectRatio: currentImageType === 'profile' ? 1 : 4 / 3,
-                viewMode: 1,
-                guides: true,
-                movable: true,
-                zoomable: true,
-                rotatable: true,
-                scalable: true
+                form.addEventListener('submit', function(e) {
+                    var name = document.getElementById('staff_name');
+                    var email = document.getElementById('staff_email');
+                    var phone = document.getElementById('staff_phone');
+                    var errorMsg = [];
+
+                    if (!name || !email || !phone) {
+                        alert('Form fields missing in HTML.');
+                        e.preventDefault();
+                        return;
+                    }
+
+                    if (name.value.trim() === '') errorMsg.push('Name is required.');
+                    if (email.value.trim() === '') errorMsg.push('Email is required.');
+                    if (phone.value.trim() === '') errorMsg.push('Phone is required.');
+
+                    var emailPattern = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+                    if (email.value && !emailPattern.test(email.value.trim())) errorMsg.push('Invalid email address.');
+
+                    var phonePattern = /^\d{10}$/;
+                    if (phone.value && !phonePattern.test(phone.value.trim())) errorMsg.push('Invalid 10-digit phone number.');
+
+                    if (errorMsg.length > 0) {
+                        alert(errorMsg.join('\n'));
+                        e.preventDefault();
+                        return;
+                    }
+
+                    // Optional: AJAX submit (uncomment if needed)
+                    /*
+                    e.preventDefault();
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', form.action, true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    xhr.onload = function() {
+                        if (xhr.status === 200) {
+                            alert('Staff added successfully!');
+                            form.reset();
+                        } else {
+                            alert('Error adding staff.');
+                        }
+                    };
+                    var params = 'staff_name=' + encodeURIComponent(name.value) + '&staff_email=' + encodeURIComponent(email.value) + '&staff_phone=' + encodeURIComponent(phone.value);
+                    xhr.send(params);
+                    */
+                });
             });
-
-            // Store original image data
-            originalImageData = cropper.getCroppedCanvas().toDataURL();
-        }
-
-        // Rotate left
-        rotateLeftBtn.addEventListener('click', function () {
-            cropper.rotate(-90);
-        });
-
-        // Rotate right
-        rotateRightBtn.addEventListener('click', function () {
-            cropper.rotate(90);
-        });
-
-        // Remove background (simulated)
-        removeBackgroundBtn.addEventListener('click', function () {
-            // Store current state for undo
-            editedImageData = cropper.getCroppedCanvas().toDataURL();
-
-            // Simulate AI background removal (in a real app, this would call an API)
-            removeBackgroundBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             removeBackgroundBtn.disabled = true;
 
             setTimeout(function () {
@@ -1556,7 +1429,7 @@
                 removeBackgroundBtn.innerHTML = '<i class="fas fa-magic"></i> AI Remove Background';
                 removeBackgroundBtn.disabled = false;
             }, 2000);
-        });
+        };
 
         // Undo edit
         undoEditBtn.addEventListener('click', function () {
@@ -1692,68 +1565,86 @@
             return re.test(email);
         }
 
-        // Open verification modal when save is clicked
-        saveButton.addEventListener('click', function () {
-            // Validate form before proceeding
-            if (!validateForm()) {
-                return;
-            }
 
-            // Update verification modal with form data
-            document.getElementById('verifyName').textContent = document.getElementById('name').value;
-            document.getElementById('verifyEmail').textContent = document.getElementById('email').value;
-            document.getElementById('verifyPhone').textContent = document.getElementById('phone').value;
-            document.getElementById('verifyUsername').textContent = document.getElementById('username').value;
+        // Utility function to create a badge
+        function createBadge(name, bgColor, textColor) {
+            const span = document.createElement('span');
+            span.textContent = name;
+            span.className = `text-sm px-2 py-1 rounded-full font-medium ${bgColor} ${textColor}`; // text-sm = bigger
+            return span;
+        }
 
-            const qualificationValue = document.getElementById('qualification').value.trim();
-            const salaryValue = document.getElementById('salary').value.trim();
-            document.getElementById('verifyQualification').textContent = qualificationValue ? qualificationValue : 'Not Provided';
-            document.getElementById('verifySalary').textContent = salaryValue ? salaryValue : 'Not Provided';
+        // Ensure Save button works and opens verification modal
+        if (saveButton) {
+            saveButton.addEventListener('click', function () {
+                // Validate form before proceeding
+                if (!validateForm()) {
+                    return;
+                }
 
-            // Update profile preview in verification modal
-            const finalProfilePreview = document.getElementById('finalProfilePreview');
-            if (profilePreview.style.backgroundImage) {
-                finalProfilePreview.style.backgroundImage = profilePreview.style.backgroundImage;
-            } else {
-                finalProfilePreview.style.backgroundImage = "url('https://p7.hiclipart.com/preview/782/114/405/5bbc3519d674c.jpg')";
-            }
+                // Update profile preview in verification modal
+                const finalProfilePreview = document.getElementById('finalProfilePreview');
+                if (profilePreview.style.backgroundImage) {
+                    finalProfilePreview
+                    finalProfilePreview.style.backgroundImage = profilePreview.style.backgroundImage;
+                }
 
-            // Format join date
-            const joinDate = new Date(document.getElementById('date_of_joining').value);
-            document.getElementById('verifyJoinDate').textContent = joinDate.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
+                // Update verification modal with form data
+                document.getElementById('verifyName').textContent = document.getElementById('name').value;
+                document.getElementById('verifyEmail').textContent = document.getElementById('email').value;
+                document.getElementById('verifyUsername').textContent = document.getElementById('username').value;
+
+                const qualificationValue = document.getElementById('qualification').value.trim();
+                const salaryValue = document.getElementById('salary').value.trim();
+                const phoneValue = document.getElementById('phone').value.trim();
+
+                document.getElementById('verifyQualification').textContent = qualificationValue ? qualificationValue : 'Not Provided';
+                document.getElementById('verifySalary').textContent = salaryValue ? salaryValue : 'Not Provided';
+                document.getElementById('verifyPhone').textContent = phoneValue ? phoneValue : 'Not Provided';
+                
+
+                const joinDateInput = document.getElementById('date_of_joining').value;
+                const joinDate = new Date(joinDateInput);
+
+                let JoinDateValue = 'Not Provided';
+                if (joinDateInput && !isNaN(joinDate.getTime())) {
+                    JoinDateValue = joinDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric'
+                    });
+                }
+                document.getElementById('verifyJoinDate').textContent = JoinDateValue;
+
+                // Get selected role
+                const selectedRole = document.querySelector('input[name="role_id"]:checked');
+                document.getElementById('verifyRole').textContent = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : 'Not selected';
+
+                // Fill Classes
+                const verifyClasses = document.getElementById('verifyClasses');
+                verifyClasses.innerHTML = ''; // clear previous badges
+                if (selectedClasses.length > 0) {
+                    selectedClasses.forEach(cls => {
+                        verifyClasses.appendChild(createBadge(cls.name, 'bg-blue-500/20', 'text-blue-300'));
+                    });
+                } else {
+                    verifyClasses.appendChild(createBadge('None', 'bg-gray-500/20', 'text-gray-300'));
+                }
+
+                // Fill Permissions
+                const verifyPermissions = document.getElementById('verifyPermissions');
+                verifyPermissions.innerHTML = ''; // clear previous badges
+                if (selectedPermissions.length > 0) {
+                    selectedPermissions.forEach(perm => {
+                        verifyPermissions.appendChild(createBadge(perm.name, 'bg-green-500/20', 'text-green-300'));
+                    });
+                } else {
+                    verifyPermissions.appendChild(createBadge('None', 'bg-gray-500/20', 'text-gray-300'));
+                }
+
+                verificationModal.style.display = 'flex';
             });
-
-            // Get selected role
-            const selectedRole = document.querySelector('input[name="role_id"]:checked');
-            document.getElementById('verifyRole').textContent = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : 'Not selected';
-
-            // Update classes in verification modal
-            const verifyClassesItem = document.getElementById('verifyClassesItem');
-            const verifyClasses = document.getElementById('verifyClasses');
-            if (selectedClasses.length > 0) {
-                verifyClasses.textContent = selectedClasses.map(cls => cls.name).join(', ');
-                verifyClassesItem.style.display = 'block';
-            } else {
-                verifyClasses.textContent = 'None';
-                verifyClassesItem.style.display = 'block';
-            }
-
-            // Update permissions in verification modal
-            const verifyPermissionsItem = document.getElementById('verifyPermissionsItem');
-            const verifyPermissions = document.getElementById('verifyPermissions');
-            if (selectedPermissions.length > 0) {
-                verifyPermissions.textContent = selectedPermissions.map(perm => perm.name).join(', ');
-                verifyPermissionsItem.style.display = 'block';
-            } else {
-                verifyPermissions.textContent = 'None';
-                verifyPermissionsItem.style.display = 'block';
-            }
-
-            verificationModal.style.display = 'flex';
-        });
+        }
 
         // Close modals
         closeButtons.forEach(button => {
@@ -1774,13 +1665,13 @@
             const payload = {
                 name: document.getElementById('name').value.trim(),
                 email: document.getElementById('email').value.trim(),
-                phone: document.getElementById('phone').value.replace(/\D/g, ''),
+                phone: document.getElementById('phone').value.replace(/\D/g, '') || null,
                 dob: document.getElementById('dob').value,
                 gender: selectedGender ? selectedGender.value : null,
                 address: document.getElementById('address').value.trim() || null,
                 username: document.getElementById('username').value.trim(),
                 password: document.getElementById('password').value,
-                date_of_joining: document.getElementById('date_of_joining').value,
+                date_of_joining: document.getElementById('date_of_joining').value || null,
                 qualification: document.getElementById('qualification').value.trim() || null,
                 salary: document.getElementById('salary').value.trim() || null,
                 role_id: selectedRole ? selectedRole.value : null,
@@ -1800,12 +1691,25 @@
                 if (!res.ok) {
                     validationSummary.style.display = 'block';
                     errorList.innerHTML = '';
-                    const li = document.createElement('li');
-                    li.textContent = data.message || 'Failed to add staff. Please review the form.';
-                    errorList.appendChild(li);
+
+                    // Handle multiple error messages from backend
+                    if (data.errors && Array.isArray(data.errors)) {
+                        data.errors.forEach(err => {
+                            const li = document.createElement('li');
+                            li.textContent = err;
+                            errorList.appendChild(li);
+                        });
+                    } else {
+                        // Fallback to single message
+                        const li = document.createElement('li');
+                        li.textContent = data.message || 'Failed to add staff. Please review the form.';
+                        errorList.appendChild(li);
+                    }
+
                     validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
-                    document.querySelector('#successModal .success-message').textContent = `${payload.name} has been successfully added to the staff database.`;
+                    document.querySelector('#successModal .success-message').textContent = 
+                        `${payload.name} has been successfully added to the staff database.`;
                     successModal.style.display = 'flex';
                 }
             } catch (e) {

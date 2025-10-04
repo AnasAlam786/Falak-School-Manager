@@ -5,7 +5,7 @@ from flask import render_template, session, Blueprint, request
 from sqlalchemy import distinct, func, select
 
 
-from src.model.TeachersLogin import TeachersLogin
+from src.model import Permissions
 from src.model.Roles import Roles
 from src.model.ClassData import ClassData
 from src.model.ClassAccess import ClassAccess
@@ -29,15 +29,19 @@ def add_staff():
     user_id = session["user_id"]
 
 
-    classes_query = (
+    classes = (
         db.session.query(ClassData)
         .join(ClassAccess, ClassAccess.class_id == ClassData.id)
         .filter(ClassAccess.staff_id == user_id)
         .order_by(ClassData.id.asc())
-    )
+    ).all()
 
-    classes = classes_query.all()
+    permissions = (
+        db.session.query(Permissions.description, Permissions.title, Permissions.id, Permissions.action)
+        .order_by(Permissions.id.asc())
+    ).all()
 
+    permission_cateogory = list({row.action for row in permissions})
 
     roles_list = ["Teacher", "Support Staff", "Vice Principal", "Vice Principal"]
     roles = db.session.query(Roles.id, Roles.role_name).filter(Roles.role_name.in_(roles_list)).all()
@@ -45,5 +49,8 @@ def add_staff():
     
     return render_template(
         'staff/add_staff.html',
-        roles=roles_dict
+        roles=roles_dict,
+        classes = classes,
+        permissions = permissions,
+        permission_cateogory = permission_cateogory
     )

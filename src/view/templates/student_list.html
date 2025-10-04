@@ -502,16 +502,28 @@
 </style>
 <!-- Modal CSS END-->
 <div class="mx-auto">
+  
   <!-- Page Header -->
   <div class="flex flex-col md:flex-row justify-between items-center mb-6">
     <div>
       <h1 class="text-2xl md:text-3xl font-bold text-white">Student Management</h1>
-      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">Manage all students and their information</p>
+      <p class="text-gray-400 mt-1 md:mt-2 text-sm md:text-base">
+        Manage all students and their information
+      </p>
     </div>
-    <div class="mt-4 md:mt-0">
+
+    <!-- Action Buttons -->
+    <div class="flex flex-col md:flex-row gap-3 mt-4 md:mt-0">
+      <!-- Add New Student -->
       <button onclick="window.location.href='/admission'"
-        class="bg-gradient-to-r from-blue-500 to-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center">
+        class="bg-gradient-to-r from-blue-500 to-indigo-700 text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center">
         <i class="fas fa-plus mr-2"></i> Add New Student
+      </button>
+
+      <!-- Download Students PDF -->
+      <button id="downloadBtn"
+        class="bg-gradient-to-r from-green-500 to-emerald-700 text-white px-6 py-3 rounded-xl font-medium flex items-center justify-center">
+        <i class="fas fa-file-download mr-2"></i> Students Data PDF
       </button>
     </div>
   </div>
@@ -628,6 +640,7 @@
 
   <!-- Student Cards Grid -->
   <div class="students-grid" id="StudentData">
+    
     {% if not data %}
     <div class="col-span-3">
       <div class="bg-yellow-900 bg-opacity-30 border border-yellow-700 rounded-xl p-6 text-center">
@@ -862,24 +875,6 @@
 <script src="{{ url_for('static', filename='students.js') }}"></script>
 <script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const checkbox = document.getElementById('verifyCheckbox');
-    const submitBtn = document.getElementById('finalPay');
-    const dateInput = document.getElementById('paymentDate');
-
-    const today = new Date()
-    currentDate = `${today.getDate()}-${today.getMonth() + 1}-${today.getFullYear()}`
-    dateInput.value = currentDate;
-
-    checkbox.addEventListener('change', function () {
-      if (this.checked) {
-        submitBtn.disabled = false;
-      } else {
-        submitBtn.disabled = true;
-      }
-    });
-  });
-
 
   const header = document.getElementById('statsAccordion');
   const content = header.nextElementSibling;
@@ -890,6 +885,33 @@
     content.style.maxHeight = isOpen ? "0" : content.scrollHeight + "px";
     icon.classList.toggle('rotate-180');
   });
+
+  document.getElementById('downloadBtn').addEventListener('click', async function() {
+    console.log(document.getElementById('downloadBtn'))
+      try {
+          const response = await fetch('/api/get_students_pdf_api');
+          if (!response.ok) throw new Error('Failed to fetch');
+
+          const data = await response.json();
+          const htmlContent = data.html;
+
+          const newWindow = window.open();
+          if (!newWindow) {
+              alert("Pop-up blocked! Please allow pop-ups.");
+              return;
+          }
+          newWindow.document.write(htmlContent);
+          newWindow.document.close();
+
+      } catch (err) {
+          console.error('Fetch failed:', err);
+          alert('Failed to download PDF.');
+      }
+  });
+
+
+
+  
 
 
 </script>

@@ -6,6 +6,9 @@ from .auth.logout import logout_bp
 from .home import home_bp
 from .students_list.student_list import student_list_bp
 from .students_list.student_modal_data_api import student_modal_data_api_bp
+from .students_list.get_students_pdf_api import get_students_pdf_api_bp
+from .students_list.get_admit_cards_api import get_admit_cards_api_bp
+from .students_list.admit_card_view import admit_card_view_bp
 
 from .students.update.update_student_info import update_student_info_bp
 from .students.update.final_student_update_api import final_student_update_api_bp
@@ -26,7 +29,6 @@ from .staff_module.update_staff import update_staff_bp
 from .staff_module.add_staff_api import add_staff_api_bp
 
 from .idcard.idcard import idcard_bp
-
 
 from .sessions.change_session import change_session_bp
 from .RTE.RTE_students import RTE_students_bp
@@ -72,6 +74,10 @@ def register_blueprints(app):
     app.register_blueprint(home_bp)
     app.register_blueprint(student_list_bp)
     app.register_blueprint(student_modal_data_api_bp)
+    app.register_blueprint(get_students_pdf_api_bp)
+    app.register_blueprint(get_admit_cards_api_bp)
+    app.register_blueprint(admit_card_view_bp)
+    
 
     app.register_blueprint(update_student_info_bp)
     app.register_blueprint(final_student_update_api_bp)

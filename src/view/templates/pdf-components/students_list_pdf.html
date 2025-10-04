@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { 
+            size: A4 landscape; 
+            margin: 10px; 
+        }
+
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12px; 
+        }
+
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            page-break-inside: auto; /* allow table to break, but control rows */
+        }
+
+        thead { 
+            display: table-header-group; /* repeat header on each page */ 
+        }
+
+        tfoot { 
+            display: table-footer-group; 
+        }
+
+        tr { 
+            page-break-inside: avoid; /* prevent row from splitting */ 
+        }
+
+        th, td { 
+            border: 1px solid #000; 
+            padding: 5px; 
+            text-align: left; 
+            page-break-inside: avoid; /* prevents cell from splitting */ 
+        }
+
+        .address {
+            white-space: normal;
+            word-wrap: break-word;
+            max-width: 150px; /* adjust as needed */
+        }
+
+        .page-break { 
+            display: block; 
+            page-break-before: always; /* force new page before this div */ 
+        }
+    </style>
+</head>
+<body>
+    {% for year, students in grouped_students.items() %}
+<div class="year-section">
+    <h2 style="text-align: center;">Admission Year: {{ year }}</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>SR</th>
+                <th>Adm. No</th>
+                <th>Name</th>
+                <th>DOB</th>
+                <th>Adm. Class</th>
+                <th>Adm. Date</th>
+                <th>Aadhaar</th>
+                <th>Father Name</th>
+                <th>Mother Name</th>
+                <th>Caste</th>
+                <th>Address</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+            <tr>
+                <td>{{ student.SR or "" }}</td>
+                <td>{{ student.ADMISSION_NO or "" }}</td>
+                <td>{{ student.STUDENTS_NAME or "" }}</td>
+                <td>{{ student.DOB or "" }}</td>
+                <td>{{ student.admission_class or "" }}</td>
+                <td>{{ student.ADMISSION_DATE or "" }}</td>
+                <td>{{ "" if student.AADHAAR is none or student.AADHAAR == '999999999999' else student.AADHAAR }}</td>
+                <td>{{ student.FATHERS_NAME or "" }}</td>
+                <td>{{ student.MOTHERS_NAME or "" }}</td>
+                <td>{{ student.Caste_Type or "" }}</td>
+                <td class="address">{{ student.ADDRESS or "" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if not loop.last %}
+<div class="page-break"></div>
+{% endif %}
+{% endfor %}
+
+</body>
+</html>
