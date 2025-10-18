@@ -23,7 +23,7 @@ def login_required(f):
         session_permission_no = session["permission_no"]
 
         if not redis_permission_no:
-            save_sessions(user_id=session['user_id'])
+            return redirect(url_for('logout_bp.logout'))
 
         if int(session_permission_no) != int(redis_permission_no):
             save_sessions(user_id=session['user_id'])
