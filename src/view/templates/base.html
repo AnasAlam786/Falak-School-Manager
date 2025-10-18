@@ -301,7 +301,7 @@
                 class="nav-link flex items-center p-3 rounded-lg hover:bg-gray-700 text-gray-300"
                 data-route="/admit_and_schema">
                 <i class="fas fa-diagram-project mr-3"></i>
-                Admit & Exam Schema
+                Admit & Schema
               </a>
             </li>
           </ul>
@@ -317,7 +317,7 @@
             class="w-full text-gray-300 py-2 px-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             style="background-color: #111111; border: 1px solid #4a5568;" onchange="changeSession(this.value)">
             {% for year in session['all_sessions'] %}
-              <option value="{{ year }}" {% if year==session['session_id'] %}selected{% endif %}>
+              <option value="{{ year }}" {% if year == session['session_id'] %}selected{% endif %}>
 
                 {{ year }} - {{ year|int + 1 }}{% if year|int == session['current_running_session'] %} (Current){% endif %}
 
@@ -451,7 +451,7 @@
             class="w-full text-gray-300 py-2 px-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             style="background-color: #111111; border: 1px solid #4a5568;" onchange="changeSession(this.value)">
             {% for year in session['all_sessions'] %}
-            <option value="{{ year }}" {% if year==session['session_id'] %}selected{% endif %}>
+            <option value="{{ year }}" {% if year == session['session_id'] %}selected{% endif %}>
 
               {{ year }} - {{ year|int + 1 }}{% if year|int == session['current_running_session'] %} (Current) {% endif %}
 
@@ -551,6 +551,7 @@
         });
         const data = await response.json();
         if (response.ok) {
+          showAlert(response.status, data.message);
           location.reload();
         } else {
           showAlert(response.status, data.message);

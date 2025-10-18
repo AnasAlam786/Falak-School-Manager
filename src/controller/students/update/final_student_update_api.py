@@ -1,6 +1,7 @@
 # src/controller/update/update_student_image.py
 
 
+from datetime import datetime
 from flask import session, Blueprint, request, jsonify
 
 from src.model.RTEInfo import RTEInfo
@@ -78,6 +79,17 @@ def final_student_update_api():
         sessions_updates["Section"] = verified_map["Section"]
     if "ROLL" in verified_map:
         sessions_updates["ROLL"] = verified_map["ROLL"]
+
+    # Convert DD-MM-YYYY → datetime.date
+    for date_field in ["DOB", "ADMISSION_DATE"]:
+        if date_field in studentsdb_updates and isinstance(studentsdb_updates[date_field], str):
+            try:
+                studentsdb_updates[date_field] = datetime.strptime(studentsdb_updates[date_field], "%d-%m-%Y").date()
+            except ValueError:
+                print(f"Invalid date format for {date_field}: {studentsdb_updates[date_field]}")
+                return jsonify({"message": f"Invalid date format for {date_field}: {studentsdb_updates[date_field]}"}), 500
+
+    
 
     # Persist updates (uniqueness already checked upstream)
     try:

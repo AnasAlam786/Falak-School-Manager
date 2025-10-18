@@ -10,6 +10,7 @@ from .students_list.get_students_pdf_api import get_students_pdf_api_bp
 from .students_list.get_admit_cards_api import get_admit_cards_api_bp
 from .students_list.admit_card_view import admit_card_view_bp
 
+
 from .students.update.update_student_info import update_student_info_bp
 from .students.update.final_student_update_api import final_student_update_api_bp
 from .students.update.update_conflic_varification import update_conflict_verification_api_bp
@@ -62,6 +63,8 @@ from .temp.fill_colums_api import fill_colums_api_bp
 
 from .tools.question_paper import question_paper_bp
 from .tools.question_paper_api import question_paper_api_bp
+from .tools.exam_seat_chits import get_seat_chits_bp
+
 
 from .staff_module import staff_bp
 
@@ -124,6 +127,7 @@ def register_blueprints(app):
 
     app.register_blueprint(question_paper_bp)
     app.register_blueprint(question_paper_api_bp)
+    app.register_blueprint(get_seat_chits_bp)
 
 
     app.register_blueprint(temp_page_bp)

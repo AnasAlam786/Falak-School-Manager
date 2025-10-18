@@ -8,6 +8,7 @@ from src.model import ClassData, StudentsDB, StudentSessions
 from src.controller.auth.login_required import login_required
 from src.controller.permissions.permission_required import permission_required
 
+from src.controller.students.utils.str_to_date import str_to_date
 
 
 conflict_verification_api_bp = Blueprint( 'conflict_verification_api_bp',   __name__)
@@ -49,7 +50,23 @@ def verify_admission():
         if item["field"] == "ROLL":
             roll = item["value"]
 
-    # print(f"Received data for conflict verification: {data}")
+        if item["field"] == "admission_session_id":
+            admission_session = str(item["value"])
+
+        if item["field"] == "ADMISSION_DATE":
+            admission_year = str(str_to_date(item["value"]).year)        
+
+
+    if admission_year != admission_session:
+        print("Admission year and Admission session do not match")
+        return jsonify({'message': f"You give Admission year '{admission_year}' and admission session year '{admission_session}-{int(admission_session)+1}'. Admission session and Admission Date must match!"}), 400
+    
+    admission_no_prefix = str(admission_no)[:2]
+    print(admission_no_prefix, str(admission_session)[-2:])
+    if admission_no_prefix != str(admission_session)[-2:]:
+        return jsonify({'message': f"You give Admission number '{admission_no}' and admission session year '{admission_session}-{int(admission_session)+1}'. Last two digits of Admission number and Admission session must match!"}), 400
+
+   
 
     global_conflict_conditions = []
     school_conflict_conditions = []

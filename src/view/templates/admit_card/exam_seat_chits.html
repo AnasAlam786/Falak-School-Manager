@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admit Cards</title>
+    <link rel="icon" href="static/logo.svg" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    /* Page setup */
+
+    @page {
+        size: A4 portrait ; /* or portrait if needed */
+        margin: 2mm; /* safe margin to prevent printer cutoff */
+    }
+    .a4-page {
+        width: 297mm;
+        height: 210mm;
+        padding: 1mm;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px; /* small gap to avoid exact 50% wrapping glitches */
+        justify-content: flex-start; /* prevent uneven spacing that can cause wrapping/overlap */
+        margin: 0 auto;
+        background-color: #fff;
+    }
+
+    /* Card container - 2 rows × 2 columns per page */
+    .card-container {
+        width: calc(32%); /* account for gap */
+        height: 19%;
+        box-sizing: border-box;
+    }
+
+    /* Ensure card content doesn't overflow and push other cards */
+    .card {
+        height: 100%;
+        overflow: hidden; /* prevent content overflow that can overlap siblings */
+    }
+
+    /* Card styling */
+    .card {
+        height: 100%;
+        border-radius: 5px;
+        padding: 5px;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Make all card text black by default */
+    .card, 
+    .card * {
+        color: #000 !important;
+    }
+
+    /* Student info section */
+    .student-section {
+        display: flex;
+        align-items: center;      /* Vertically centers image and table */
+        justify-content: center;  /* Horizontally centers the whole section */
+        gap: 10px;                /* Space between image and table */
+    }
+
+    .student-section img {
+        width: 90px;
+        height: 110px;
+        object-fit: cover;
+        object-position: top;
+        border: 2px solid #808080;
+        margin: 0;            /* Remove top margin so flex centering works */
+    }
+
+    /* Student details table */
+    .student-section table {
+        width: 100%;
+        font-size: 1.2rem;
+        border-collapse: collapse;
+    }
+
+    .student-section td {
+        padding: 3px;
+    }
+
+    /* Print adjustments */
+    @media print {
+
+        html, body {
+            width: 297mm;
+            height: 210mm;
+            background: #fff;
+        }
+        body {
+            margin: 0;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .student-section table {
+            color: #000 !important;
+        }
+        /* Ensure paired admit+schema stays together and occupies a full printed page */
+        .both-wrapper {
+            /* Avoid breaking the pair across pages */
+            page-break-inside: avoid;
+            -webkit-column-break-inside: avoid;
+            break-inside: avoid;
+            /* Force each pair to start on a fresh printed page */
+            page-break-after: always;
+            break-after: page;
+        }
+        /* Prevent an extra blank page after the last pair */
+        .both-wrapper:last-child {
+            page-break-after: auto;
+            break-after: auto;
+        }
+    }
+    </style>
+</head>
+<body>
+        {% for groups in data %}
+        <div class="a4-page">
+            {% for student in groups %}
+                <div class="card-container">
+                    <div class="card" style="border: 2px solid #000;">
+                         <div class="student-section" style="margin-top: 12px;">
+                            <img src="{{ ('https://lh3.googleusercontent.com/d/' + student.IMAGE + '=s200') if student.IMAGE else '' }}">
+                            <div class="ms-1 text-start">
+                                <table>
+                                    <tr><td style="font-weight:600">Name</td><td>{{ student.STUDENTS_NAME }}</td></tr>
+                                    <tr><td style="font-weight:600">F/N</td><td>{{ student.FATHERS_NAME }}</td></tr>
+                                    <tr><td style="font-weight:600">Class</td><td>{{ student.CLASS }} - {{ student.ROLL }}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

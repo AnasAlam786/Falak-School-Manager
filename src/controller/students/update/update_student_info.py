@@ -2,6 +2,9 @@
 
 from flask import jsonify, render_template, session, Blueprint, request
 
+from sqlalchemy.orm import aliased
+from datetime import date, datetime
+
 from src.model.RTEInfo import RTEInfo
 from src.model.StudentsDB import StudentsDB
 from src.model.ClassData import ClassData
@@ -40,7 +43,6 @@ def update_student_info():
     current_session = session["session_id"]
 
     
-    
     classes_query = (
         db.session.query(ClassData)
         .join(ClassAccess, ClassAccess.class_id == ClassData.id)
@@ -51,18 +53,33 @@ def update_student_info():
     classes = classes_query.all()
     
 
+
     class_ids = [cls.id for cls in classes]
+
+    AdmissionClass = aliased(ClassData)
+    CurrentClass = aliased(ClassData)
+
     student = (
         db.session.query(StudentsDB, StudentSessions, RTEInfo)
         .join(StudentSessions, StudentSessions.student_id == StudentsDB.id)
-        .join(ClassData, StudentSessions.class_id == ClassData.id)
+        .join(AdmissionClass, StudentsDB.Admission_Class == AdmissionClass.id)
+        .join(CurrentClass, StudentSessions.class_id == CurrentClass.id)
         .outerjoin(RTEInfo, RTEInfo.student_id == StudentsDB.id)
         .filter(
             StudentsDB.id == student_id,
             StudentSessions.session_id == current_session,
-            ClassData.id.in_(class_ids)
-        ).first()
+            CurrentClass.id.in_(class_ids)
+        )
+        .first()
     )
+
+    if student:
+        student_db, student_session, rte_info = student
+        print(
+            {**student_db.__dict__, **student_session.__dict__, **(rte_info.__dict__ if rte_info else {})}
+        )
+    else:
+        print("No student found.")
 
 
     if not student:
@@ -90,7 +107,6 @@ def update_student_info():
             for col in rte_info.__table__.columns
         })
 
-
     student_data.update({
         "id": studentDB.id,
     })
@@ -110,12 +126,39 @@ def update_student_info():
     PersonalInfo = fill_field_values(PersonalInfo, student_data)
 
 
+
     classes_dict = {str(cls.id): cls.CLASS for cls in classes}
+    
+    admission_session_select = {}
+    for year in session["all_sessions"]:
+        year = int(year)
+        admission_session_select[year] = f"{year}-{year+1}"
+
     for academic_inputfield in AcademicInfo:
         if academic_inputfield["id"] == "CLASS":
             academic_inputfield["options"] = {"": "Select Class", **classes_dict}
-            academic_inputfield["value"] = student_data["class_id"]
-            break
+            academic_inputfield["value"] = student_data.get("class_id")
+            academic_inputfield["disabled"] = True
+
+        if academic_inputfield["id"] == "Admission_Class":
+            academic_inputfield["options"] = {"": "Select Class", **classes_dict}
+            academic_inputfield["value"] = student_data.get("Admission_Class")
+
+        if academic_inputfield["id"] == "admission_session_id":
+            academic_inputfield["options"] = {"": "Select admission session", **admission_session_select}
+            academic_inputfield["disabled"] = True
+
+        if academic_inputfield["id"] == "ADMISSION_DATE":
+            try:
+                academic_inputfield["value"] = academic_inputfield["value"].strftime('%d-%m-%Y') 
+            except: pass
+
+    # Ensure DOB in PersonalInfo (if present as a date/datetime) is formatted to Indian date string dd-mm-YYYY
+    for PersonalInfo_field in PersonalInfo:
+        if PersonalInfo_field["id"] == "DOB":
+            try:
+                PersonalInfo_field["value"] = PersonalInfo_field.get("value").strftime('%d-%m-%Y')
+            except: pass
 
 
     return render_template('edit_student.html', PersonalInfo=PersonalInfo, AcademicInfo=AcademicInfo,

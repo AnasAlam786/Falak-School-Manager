@@ -28,7 +28,6 @@ def add_staff():
     school_id = session['school_id']
     user_id = session["user_id"]
 
-
     classes = (
         db.session.query(ClassData)
         .join(ClassAccess, ClassAccess.class_id == ClassData.id)

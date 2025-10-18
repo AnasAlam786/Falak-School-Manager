@@ -1,4 +1,12 @@
-<div>
+{% macro render_input_field(InputDetails=none, section='') %}
+
+{% if InputDetails['id'] == 'ADDRESS'%}
+  <div class="md:col-span-2">
+{% else %} 
+  <div>
+{% endif %} 
+
+
   {% if InputDetails['type'] == "select" %}
 
   <label for="{{ InputDetails['id'] }}" class="form-label block mb-2 ml-2 font-medium text-gray-light">
@@ -6,15 +14,20 @@
     {% if InputDetails.get('required') %}
     <span class="text-danger fw-bold" aria-hidden="true"> * </span>
     {% endif %}
+
   </label>
 
   <select id="{{ InputDetails['id'] }}" name="{{section}}-{{ InputDetails['id'] }}"
     data-label="{{ InputDetails.get('value') }}" 
-    class="w-full p-3 custom-bg-gray-darker custom-border rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]">
+    class="w-full p-3 custom-bg-gray-darker custom-border rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
 
     {% if InputDetails.get('required') %}
       required='True'
     {% endif %}
+
+    {% if InputDetails.get('disabled') %}
+      disabled='True'
+    {% endif %}>
 
     {% set selected_value = (InputDetails.get('value') ~ '') %}
     {% for value, label in InputDetails["options"].items() %}
@@ -90,3 +103,5 @@
 
   {% endif %}
 </div>
+
+{% endmacro %}

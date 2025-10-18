@@ -39,6 +39,11 @@
     animation: slideIn 0.3s ease-out forwards;
   }
 
+  .section-header {
+    position: relative;
+  }
+
+
   @keyframes slideIn {
     from {
       opacity: 0;
@@ -68,9 +73,13 @@
   }
 
   
-select option {
-  color: #1d212b; /* may work in some browsers */
-}
+  select option {
+    color: #1d212b; /* may work in some browsers */
+  }
+
+  .bottom-border {
+    border-bottom: 1px solid #2A2E32;
+  }
 </style>
 
 <!-- Hidden Success Alert -->
@@ -122,20 +131,22 @@ select option {
 
 <form id="DataForm" class="p-0">
   <!-- Personal Information -->
-  <div
-    class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
-    <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
-      <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-        <i class="fas fa-user"></i>
-      </div>
-      <h2 class="section-title text-[1.4rem] font-semibold">Personal Information</h2>
+  <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
+
+    <div class="section-header flex items-center mb-8 pb-4 bottom-border">
+        <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center mr-4 text-primary">
+            <i class="fas fa-user text-lg"></i>
+        </div>
+        <div>
+            <h2 class="section-title text-xl font-semibold">Personal Information</h2>
+            <p class="text-gray-500 text-sm mt-1">Basic details about the student</p>
+        </div>
     </div>
 
-    <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
-
-      {% set section = 'PersonalInfo' %}
+    <div class="form-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% from "html-components/input.html" import render_input_field %}
       {% for InputDetails in PersonalInfo %}
-      {% include 'html-components/input.html' with context %}
+        {{ render_input_field(InputDetails=InputDetails, section='PersonalInfo') }}
       {% endfor %}
 
     </div>
@@ -143,39 +154,90 @@ select option {
 
   <!-- Academic Details -->
   <div
-    class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
-    <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
-      <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-        <i class="fas fa-graduation-cap"></i>
+    class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-6 mb-2 shadow-[0_4px_15px_rgba(0,0,0,1)]">
+    <div class="section-header flex items-center gap-4  pb-4 bottom-border">
+      <!-- Icon container -->
+      <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-sm">
+        <i class="fas fa-graduation-cap text-lg"></i>
       </div>
-      <h2 class="section-title text-[1.4rem] font-semibold">Academic Details</h2>
+
+      <!-- Title and subtitle -->
+      <div>
+        <h2 class="section-title text-xl font-semibold leading-tight">Academic Details</h2>
+        <p class="text-gray-500 text-sm mt-1">Basic details about the student</p>
+      </div>
     </div>
 
-    <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      {% set section = 'AcademicInfo' %}
+    <div class="form-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Student Status (always full width) -->
+      <div class="col-span-1 md:col-span-2 lg:col-span-3">
+        <!-- Your ultra-modern toggle -->
+        <div class="flex flex-col items-center text-center p-5">
+          <label class="form-label mb-5 font-semibold text-gray-light text-lg">
+            Is the student new or old?
+            <span class="text-red-600 font-bold">*</span>
+          </label>
+
+          <div class="flex items-center justify-center gap-6">
+            <!-- New -->
+            <label class="cursor-pointer">
+              <input type="radio" name="student_status" value="new" class="peer hidden" checked>
+              <div class="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-500 text-gray-light font-medium 
+                          transition-all duration-300 transform peer-checked:bg-gradient-to-r peer-checked:from-primary/80 peer-checked:to-primary 
+                          peer-checked:text-white peer-checked:shadow-2xl peer-checked:scale-105 hover:scale-105 hover:border-primary hover:text-primary">
+                <i class="fas fa-user-plus"></i>
+                <span>New</span>
+              </div>
+            </label>
+
+            <!-- Old -->
+            <label class="cursor-pointer">
+              <input type="radio" name="student_status" value="old" class="peer hidden">
+              <div class="flex items-center gap-2 px-6 py-3 rounded-full border border-gray-500 text-gray-light font-medium 
+                          transition-all duration-300 transform peer-checked:bg-gradient-to-r peer-checked:from-primary/80 peer-checked:to-primary 
+                          peer-checked:text-white peer-checked:shadow-2xl peer-checked:scale-105 hover:scale-105 hover:border-primary hover:text-primary">
+                <i class="fas fa-user-graduate"></i>
+                <span>Old</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Academic Info Fields -->
       {% for InputDetails in AcademicInfo %}
-      {% include 'html-components/input.html' with context %}
+      <div class="col-span-1"> <!-- each input takes 1 column on all devices -->
+        {{ render_input_field(InputDetails=InputDetails, section='AcademicInfo') }}
+      </div>
       {% endfor %}
 
     </div>
+
   </div>
 
   <!-- Guardian Information -->
   <div
     class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
-    <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
-      <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-        <i class="fas fa-user-friends"></i>
+    <div class="section-header flex items-center gap-4 mb-8 pb-4 bottom-border">
+      <!-- Icon container -->
+      <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-sm">
+        <i class="fas fa-user-friends text-lg"></i>
       </div>
-      <h2 class="section-title text-[1.4rem] font-semibold">Guardian Information</h2>
+
+      <!-- Title and optional subtitle -->
+      <div>
+        <h2 class="section-title text-xl font-semibold leading-tight">Guardian Information</h2>
+        <p class="text-gray-500 text-sm mt-1">Parent or guardian contact details</p>
+      </div>
     </div>
 
-    <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      {% set section = 'GuardianInfo' %}
+    <div class="form-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
       {% for InputDetails in GuardianInfo %}
-      {% include 'html-components/input.html' with context %}
+        {{ render_input_field(InputDetails=InputDetails, section='GuardianInfo') }}
       {% endfor %}
 
     </div>
@@ -185,18 +247,17 @@ select option {
   <!-- Contact Information -->
   <div
     class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
-    <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
-      <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+    <div class="section-header flex items-center mb-6 pb-4 bottom-border">
+      <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center mr-4 text-primary">
         <i class="fas fa-address-book"></i>
       </div>
       <h2 class="section-title text-[1.4rem] font-semibold">Contact Information</h2>
     </div>
 
-    <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
+    <div class="form-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-      {% set section = 'ContactInfo' %}
       {% for InputDetails in ContactInfo %}
-      {% include 'html-components/input.html' with context %}
+        {{ render_input_field(InputDetails=InputDetails, section='ContactInfo') }}
       {% endfor %}
 
     </div>
@@ -206,27 +267,31 @@ select option {
   <!-- Additional/Logistical Information -->
   <div
     class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
-    <div class="section-header flex items-center mb-6 pb-4 border-b border-border-gray">
-      <div class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-        <i class="fas fa-info-circle"></i>
+    <div class="section-header flex items-center gap-4 mb-8 pb-4 bottom-border">
+      <!-- Icon container -->
+      <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-sm">
+        <i class="fas fa-info-circle text-lg"></i>
       </div>
-      <h2 class="section-title text-[1.4rem] font-semibold">Additional Information</h2>
+
+      <!-- Title and subtitle -->
+      <div>
+        <h2 class="section-title text-xl font-semibold leading-tight">Additional Information</h2>
+        <p class="text-gray-500 text-sm mt-1">Other relevant details about the student</p>
+      </div>
     </div>
 
-    <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-      {% set section = 'AdditionalInfo' %}
+    <div class="form-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
       {% for InputDetails in AdditionalInfo %}
-      {% include 'html-components/input.html' with context %}
+        {{ render_input_field(InputDetails=InputDetails, section='AdditionalInfo') }}
       {% endfor %}
 
     </div>
   </div>
 
-  <div class="p-4">
-    {% set section = 'PersonalInfo' %}
-    {% include 'html-components/image-uploader.html' with context %}
-  </div>
+  {% from "html-components/image-uploader.html" import render_image_uploader %}
+  {{ render_image_uploader(unique_suffix='new_student', label='Click to upload the image', image_url = '') }}
 
 </form>
 
@@ -485,11 +550,11 @@ select option {
 
   const classSelect = document.getElementById('CLASS');
   const rollInput = document.getElementById('ROLL');
-
-  classSelect.addEventListener('change', async () => {
-    const classId = classSelect.value;
+  // Extracted helper so we can call it both from the visible select and when
+  // the CLASS is mirrored from Admission_Class while disabled.
+  async function updateRollForClass(classId) {
     if (!classId) {
-      rollInput.value = '';
+      if (rollInput) rollInput.value = '';
       return;
     }
 
@@ -503,60 +568,76 @@ select option {
       const result = await resp.json();
 
       if (!resp.ok) {
-        showAlert(resp.status, result.message)
-        console.error(`HTTP ${resp.status}`)
+        showAlert(resp.status, result.message);
+        console.error(`HTTP ${resp.status}`);
         return;
-      };
+      }
 
-
-      rollInput.value = result.next_roll;
+      if (rollInput) rollInput.value = result.next_roll;
 
     } catch (err) {
       console.error('Error fetching next roll:', err);
     }
-  });
+  }
+
+  // wire the visible CLASS select change to update roll
+  if (classSelect) {
+    classSelect.addEventListener('change', async () => {
+      await updateRollForClass(classSelect.value);
+    });
+  }
 
 
   const form = document.getElementById('DataForm');
 
-  document.getElementById('FormSubmit').addEventListener('click', async function () {
-
-    // ✅ Reset everything first
-
-    document.getElementById('validationSummary').classList.add('hidden');
-    document.getElementById('errorList').innerHTML = '';
-
-    const allFields = form.querySelectorAll("input, select, textarea");
-    allFields.forEach(input => {
-      input.classList.remove('red-error-border');
-      const errorElement = input.parentElement.querySelector(".error-message");
-      if (errorElement) {
-        errorElement.style.display = 'none';
-        errorElement.textContent = "";
-      }
+    let avatarUploader;
+    document.addEventListener('DOMContentLoaded', () => {
+      // assign to the outer-scope variable (avoid shadowing with const)
+      avatarUploader = new ImageUploader('new_student');
+      avatarUploader.onChange((blob, status) => console.log('Avatar:', status, blob));
     });
 
-    try {
-      const formData = await getFormData('DataForm');
-      const { ok, pydanticData } = await pydanticVerification(formData);
+  document.getElementById('FormSubmit').addEventListener('click', async function () {
 
-      if (!ok) {
-        console.error("Pydantic validation failed:", pydanticData.errors);
-        return;
+    const formData = new FormData(form);
+    const data = {};
+
+      // ✅ Reset everything first
+      document.getElementById('validationSummary').classList.add('hidden');
+      document.getElementById('errorList').innerHTML = '';
+
+      const allFields = form.querySelectorAll("input, select, textarea");
+      allFields.forEach(input => {
+        input.classList.remove('red-error-border');
+        const errorElement = input.parentElement.querySelector(".error-message");
+        if (errorElement) {
+          errorElement.style.display = 'none';
+          errorElement.textContent = "";
+        }
+      });
+
+      try {
+        const formData = await getFormData('DataForm');
+        const { ok, pydanticData } = await pydanticVerification(formData);
+
+        if (!ok) {
+          console.error("Pydantic validation failed:", pydanticData.errors);
+          return;
+        }
+        // If pydantic verification is successful, open the verification modal
+        let imageURL = null;
+        let croppedBlob = avatarUploader && typeof avatarUploader.getBlob === 'function' ? avatarUploader.getBlob() : null;
+        if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
+          imageURL = URL.createObjectURL(croppedBlob);
+        }
+        const verifiedData = pydanticData.verifiedData
+        openVerificationModal(verifiedData, imageURL);
+
+
+      } catch (error) {
+        showAlert(400, "Unexpected error occured!")
+        console.error("Error occurred while submitting the form:", error);
       }
-      // If pydantic verification is successful, open the verification modal
-      let imageURL = null;
-      if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
-        imageURL = URL.createObjectURL(croppedBlob);
-      }
-      const verifiedData = pydanticData.verifiedData
-      openVerificationModal(verifiedData, imageURL);
-
-
-    } catch (error) {
-      showAlert(400, "Unexpected error occured!")
-      console.error("Error occurred while submitting the form:", error);
-    }
   });
 
   function getFormData(id) {
@@ -597,7 +678,7 @@ select option {
         errorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return { ok: false, pydanticData: pydanticData };
       }
-      // If validation is successful, return the verified data
+      // If validation is successful, return the verified data      
       return { ok: true, pydanticData: pydanticData };
 
 
@@ -639,26 +720,13 @@ select option {
     document.getElementById('modal-section').innerText = verifiedData.find(item => item.field === "Section")?.value;
     document.getElementById('modal-rollNo').innerText = verifiedData.find(item => item.field === "ROLL")?.value;
     document.getElementById('modal-srNo').innerText = verifiedData.find(item => item.field === "SR")?.value;
-    document.getElementById('modal-admissionDate').innerText = verifiedData.find(item => item.field === "ADMISSION_DATE")?.value;
     document.getElementById('modal-fatherName').innerText = verifiedData.find(item => item.field === "FATHERS_NAME")?.value;
     document.getElementById('modal-motherName').innerText = verifiedData.find(item => item.field === "MOTHERS_NAME")?.value;
     document.getElementById('modal-contact').innerText = verifiedData.find(item => item.field === "PHONE")?.value;
     document.getElementById('modal-pin').innerText = verifiedData.find(item => item.field === "PIN")?.value;
     document.getElementById('modal-address').innerText = verifiedData.find(item => item.field === "ADDRESS")?.value;
-
-    const dobString = verifiedData.find(item => item.field === "DOB")?.value;
-    const admissionString = verifiedData.find(item => item.field === "ADMISSION_DATE")?.value;
-
-    if (dobString) {
-      const dob = new Date(dobString); // convert to Date object
-      const formattedDOB = `${dob.getDate().toString().padStart(2, '0')}-${(dob.getMonth()+1).toString().padStart(2,'0')}-${dob.getFullYear()}`;
-      document.getElementById('modal-DOB').innerText = formattedDOB; // e.g., 10-10-2022
-    }
-    if (admissionString) {
-      const admissionDate = new Date(admissionString);
-      const formattedAdmission = `${admissionDate.getDate().toString().padStart(2,'0')}-${(admissionDate.getMonth()+1).toString().padStart(2,'0')}-${admissionDate.getFullYear()}`;
-      document.getElementById('modal-admissionDate').innerText = formattedAdmission;
-    }
+    document.getElementById('modal-DOB').innerText = verifiedData.find(item => item.field === "DOB")?.value;
+    document.getElementById('modal-admissionDate').innerText = verifiedData.find(item => item.field === "ADMISSION_DATE")?.value;;
 
     // showing actual class name, instead of class_id
     const classSelectField = document.getElementById('CLASS'); // your select element
@@ -691,6 +759,7 @@ select option {
 
       const formData = await getFormData('DataForm');
       const { ok, pydanticData } = await pydanticVerification(formData);
+      console.log("Submitting verified data:", pydanticData);
 
 
       if (!ok) {
@@ -701,7 +770,7 @@ select option {
         throw new Error("Pydantic validation failed");
       }
       const verifiedData = pydanticData.verifiedData;
-      console.log("Submitting verified data:", verifiedData);
+      
       const conflictResponse = await conflictVerification(verifiedData);
       const conflictData = await conflictResponse.json();
 
@@ -715,13 +784,12 @@ select option {
         console.error("Conflict verification failed:", conflictData.message);
         throw new Error("Conflict verification failed");
       }
-
       let base64Image = null;
+      let croppedBlob = avatarUploader && typeof avatarUploader.getBlob === 'function' ? avatarUploader.getBlob() : null;
+      
       if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
         base64Image = await convertBlobToBase64(croppedBlob);
       }
-
-      console.log("Submitting verified data:", verifiedData);
 
       const response = await fetch('/final_admission_api', {
         method: 'POST',
@@ -776,8 +844,6 @@ select option {
     }
   }
 
-
-
   // close admission done modal
   document.getElementById('closeAdmissionDoneModel').addEventListener('click', function () {
     document.getElementById('admissionDoneModel').classList.add('hidden');
@@ -797,46 +863,7 @@ select option {
       reader.readAsDataURL(blob);
     });
   }
-  //add DD/MM/YYYY mask to DOB and Admission Date
-  function attachDateMask(selector, format) {
-    const el = document.querySelector(selector);
-    if (!el) return;
 
-    el.addEventListener("input", e => {
-      let value = e.target.value;
-      let numbers = value.replace(/\D/g, "").slice(0, 8);
-      let newValue = "";
-
-      if (format === "DD-MM-YYYY") {
-        if (numbers.length >= 5) {
-          newValue = `${numbers.slice(0, 2)}-${numbers.slice(2, 4)}-${numbers.slice(4)}`;
-        } else if (numbers.length >= 3) {
-          newValue = `${numbers.slice(0, 2)}-${numbers.slice(2)}`;
-        } else {
-          newValue = numbers;
-        }
-      } else if (format === "YYYY-MM-DD") {
-        if (numbers.length >= 7) {
-          newValue = `${numbers.slice(0, 4)}-${numbers.slice(4, 6)}-${numbers.slice(6)}`;
-        } else if (numbers.length >= 5) {
-          newValue = `${numbers.slice(0, 4)}-${numbers.slice(4)}`;
-        } else {
-          newValue = numbers;
-        }
-      }
-
-      // only set value if different to prevent cursor jumping
-      if (newValue !== value) {
-        e.target.value = newValue;
-      }
-    });
-  }
-
-  attachDateMask("#DOB", "DD-MM-YYYY");
-  attachDateMask("#ADMISSION_DATE", "YYYY-MM-DD");
-
-
-  //add DD/MM/YYYY mask to DOB and Admission Date ENDED
 
   function formatAadharNumber(input) {
     // Remove non-numeric chars
@@ -861,9 +888,6 @@ select option {
   });
 
 
-
-
-
   document.querySelectorAll('.cancelModle').forEach(function (element) {
     element.addEventListener('click', function () {
       document.getElementById('verificationModal').classList.add('hidden');
@@ -871,6 +895,141 @@ select option {
     });
   });
 
+</script>
+
+<script>
+  const studentRadios = document.querySelectorAll('input[name="student_status"]');
+  const admission_session_id = document.getElementById('admission_session_id');
+  const admissionClassSelect = document.getElementById('Admission_Class');
+  const currentClassSelect = document.getElementById('CLASS');
+
+  // Generic helpers to create/remove/sync a hidden mirror for a select element.
+  function getMirrorIdFor(selectElem) {
+    return selectElem.id + '_hidden_mirror';
+  }
+
+  function ensureHiddenMirror(selectElem) {
+    if (!selectElem) return null;
+    const form = selectElem.form || document.getElementById('DataForm');
+    if (!form) return null;
+    const MIRROR_ID = getMirrorIdFor(selectElem);
+    let mirror = document.getElementById(MIRROR_ID);
+    if (!mirror) {
+      mirror = document.createElement('input');
+      mirror.type = 'hidden';
+      mirror.id = MIRROR_ID;
+      mirror.name = selectElem.name || selectElem.id;
+      form.appendChild(mirror);
+    }
+    mirror.value = selectElem.value;
+    return mirror;
+  }
+
+  function removeHiddenMirror(selectElem) {
+    if (!selectElem) return;
+    const MIRROR_ID = getMirrorIdFor(selectElem);
+    const mirror = document.getElementById(MIRROR_ID);
+    if (mirror) mirror.remove();
+  }
+
+  function syncMirror(selectElem) {
+    if (!selectElem) return;
+    if (selectElem.disabled) {
+      ensureHiddenMirror(selectElem);
+    } else {
+      removeHiddenMirror(selectElem);
+    }
+  }
+
+  // Handle student status radio changes (new vs old)
+  studentRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      // admission_session handling
+      if (admission_session_id) {
+        if (radio.value === 'old') {
+          admission_session_id.disabled = false;
+        } else {
+          const firstOption = [...admission_session_id.options].find(opt => !opt.hidden);
+          if (firstOption) admission_session_id.value = firstOption.value;
+          admission_session_id.disabled = true;
+        }
+        syncMirror(admission_session_id);
+      }
+
+      // CLASS and Admission_Class handling
+      if (admissionClassSelect && currentClassSelect) {
+        if (radio.value === 'old') {
+          // both should be enabled and independent
+          admissionClassSelect.disabled = false;
+          currentClassSelect.disabled = false;
+        } else {
+          // New: Admission_Class is editable; CLASS reflects it and is disabled
+          admissionClassSelect.disabled = false;
+          // set current class value to admission class selection (or first option fallback)
+          const admissionVal = admissionClassSelect.value || (admissionClassSelect.options[0] && admissionClassSelect.options[0].value) || '';
+          currentClassSelect.value = admissionVal;
+          currentClassSelect.disabled = true;
+        }
+
+        // Sync mirrors accordingly
+        syncMirror(currentClassSelect);
+      }
+    });
+  });
+
+  // When Admission_Class changes while CLASS is disabled (New case), mirror the value
+  if (admissionClassSelect) {
+    admissionClassSelect.addEventListener('change', () => {
+      if (currentClassSelect && currentClassSelect.disabled) {
+        currentClassSelect.value = admissionClassSelect.value;
+        syncMirror(currentClassSelect);
+        // Also update dependent fields (roll) since CLASS change won't fire while disabled
+        if (typeof updateRollForClass === 'function') {
+          updateRollForClass(admissionClassSelect.value);
+        }
+      }
+    });
+  }
+
+  // Also keep admission_session mirror updated on value change
+  if (admission_session_id) {
+    admission_session_id.addEventListener('change', () => syncMirror(admission_session_id));
+  }
+
+  // Initialize on page load: set initial enabled/disabled states and mirrors
+  document.addEventListener('DOMContentLoaded', () => {
+    // Determine currently selected student_status
+    const checked = document.querySelector('input[name="student_status"]:checked');
+    const status = checked ? checked.value : null;
+
+    // admission_session
+    if (admission_session_id) {
+      if (status === 'old') {
+        admission_session_id.disabled = false;
+      } else {
+        const firstOption = [...admission_session_id.options].find(opt => !opt.hidden);
+        if (firstOption) admission_session_id.value = firstOption.value;
+        admission_session_id.disabled = true;
+      }
+      syncMirror(admission_session_id);
+    }
+
+    // CLASS and Admission_Class initial setup
+    if (admissionClassSelect && currentClassSelect) {
+      if (status === 'old') {
+        admissionClassSelect.disabled = false;
+        currentClassSelect.disabled = false;
+        // ensure no mirror if enabled
+        syncMirror(currentClassSelect);
+      } else {
+        admissionClassSelect.disabled = false; // admission class must be selectable
+        const admissionVal = admissionClassSelect.value || (admissionClassSelect.options[0] && admissionClassSelect.options[0].value) || '';
+        currentClassSelect.value = admissionVal;
+        currentClassSelect.disabled = true;
+        syncMirror(currentClassSelect);
+      }
+    }
+  });
 </script>
 
 {% endblock %}

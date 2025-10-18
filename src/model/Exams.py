@@ -1,6 +1,6 @@
 from src import db
 from sqlalchemy import (
-    Boolean, Column, Text, ForeignKey,BigInteger, Numeric
+    Boolean, Column, Date, Text, ForeignKey,BigInteger, Numeric
 )
 class Exams(db.Model):
     __tablename__ = 'Exams'
@@ -13,6 +13,7 @@ class Exams(db.Model):
     term = Column(Numeric, nullable=False)
     display_order = Column(Numeric, nullable=False)
     is_enabled = Column(Boolean, nullable=False, default=True)
+    permission_updated_at = Column(Date, nullable=False)
 
     # Optional relationship
     school = db.relationship('Schools', back_populates='exams')

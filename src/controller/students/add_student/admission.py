@@ -3,6 +3,7 @@
 from flask import render_template, session, Blueprint
 from sqlalchemy import func
 
+from src.model.Sessions import Sessions
 from src.model.StudentsDB import StudentsDB
 from src.model.ClassData import ClassData
 from src.model.StudentsDB import StudentsDB
@@ -42,8 +43,14 @@ def admission():
     )
 
     classes = classes_query.all()
-
     classes = {str(cls.id): cls.CLASS for cls in classes}
+
+    admission_session_select = {}
+
+    for year in session["all_sessions"]:
+        year = int(year)
+        admission_session_select[year] = f"{year}-{year+1}"
+
 
     AcademicInfo = pydantic_model_to_field_dicts(AcademicInfoModel)
     GuardianInfo = pydantic_model_to_field_dicts(GuardianInfoModel)
@@ -78,7 +85,14 @@ def admission():
     current_date = datetime.now().strftime("%Y-%m-%d")
 
     for academic_inputfield in AcademicInfo:
+        if academic_inputfield["id"] == "admission_session_id":
+            academic_inputfield["options"] = {"": "Select admission session", **admission_session_select}
+            academic_inputfield["value"] = session["current_running_session"]
+            academic_inputfield["disabled"] = True
         if academic_inputfield["id"] == "CLASS":
+            academic_inputfield["disabled"] = True
+            academic_inputfield["options"] = {"": "Select Class", **classes}
+        if academic_inputfield["id"] == "Admission_Class":
             academic_inputfield["options"] = {"": "Select Class", **classes}
         if academic_inputfield["id"] == "ADMISSION_DATE":
             academic_inputfield["value"] = current_date

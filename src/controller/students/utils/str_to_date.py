@@ -6,7 +6,9 @@ def str_to_date(value):
     formats = ("%Y-%m-%d", "%d-%m-%Y", "%Y/%m/%d", "%d/%m/%Y")
     for fmt in formats:
         try:
-            return datetime.strptime(value, fmt).date()
+            parsed_date = datetime.strptime(value, fmt)
+            print(parsed_date.strftime('%d-%m-%Y'))
+            return parsed_date.strftime('%d-%m-%Y')
         except ValueError:
             continue
-    raise ValueError("Invalid date format! Please enter a valid date.")
+    raise ValueError(f"'{value}' is an invalid date format! Please enter a valid date.")

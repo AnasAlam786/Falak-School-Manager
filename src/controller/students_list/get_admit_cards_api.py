@@ -93,7 +93,6 @@ def get_admit_cards_api():
         student_objs.append(obj)
 
     # Group students into pages of 2 (1x1 layout for both admit and schema) 
-    print(outputType)
     if outputType == 'both':
         page_size = 2
     else:

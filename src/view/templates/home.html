@@ -1,20 +1,1837 @@
-{% extends "base.html" %}
-{% block title %}Home{% endblock %}
-{% block content %}
-<div class="text-center">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Digify - Revolutionize Your School Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --accent: #8b5cf6;
+            --accent-light: #a78bfa;
+            --dark: #0f172a;
+            --darker: #0a0f1c;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-light: rgba(255, 255, 255, 0.1);
+            --glass-dark: rgba(0, 0, 0, 0.2);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 100%);
+            color: var(--light);
+            overflow-x: hidden;
+            background-attachment: fixed;
+        }
+        
+        .glass {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .glass-light {
+            background: var(--glass-light);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .glass-dark {
+            background: var(--glass-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glow {
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .glow-accent {
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+        }
+        
+        .glow-white {
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1);
+        }
+        
+        .section-padding {
+            padding: 8rem 2rem;
+        }
+        
+        .floating {
+            animation: floating 6s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translate(0, 0px); }
+            50% { transform: translate(0, -20px); }
+            100% { transform: translate(0, 0px); }
+        }
+        
+        .feature-card {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-15px) rotateX(5deg);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        }
+        
+        .feature-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .feature-card:hover .feature-card-inner {
+            transform: rotateY(10deg);
+        }
+        
+        .text-gradient {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+        
+        .bg-gradient-light {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent-light) 100%);
+        }
+        
+        .hero-bg {
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        }
+        
+        .testimonial-slider {
+            overflow: hidden;
+            position: relative;
+            mask: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+        }
+        
+        .testimonial-track {
+            display: flex;
+            animation: scroll 40s linear infinite;
+            width: calc(350px * 14);
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(calc(-350px * 7)); }
+        }
+        
+        .step-line {
+            position: relative;
+        }
+        
+        .step-line::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            z-index: -1;
+        }
+        
+        @media (max-width: 768px) {
+            .step-line::after {
+                display: none;
+            }
+        }
+        
+        .pricing-card {
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-10px) scale(1.03);
+        }
+        
+        .premium-glow {
+            box-shadow: 0 0 40px rgba(139, 92, 246, 0.6);
+        }
+        
+        .counter {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        .morph {
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            animation: morph 8s ease-in-out infinite;
+        }
+        
+        @keyframes morph {
+            0% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+            50% { border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%; }
+            100% { border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .typing {
+            overflow: hidden;
+            border-right: 2px solid var(--primary);
+            white-space: nowrap;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--primary) }
+        }
+        
+        .scroll-indicator {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .scroll-indicator::before {
+            content: '';
+            position: absolute;
+            top: 10px;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: scroll 2s infinite;
+        }
+        
+        @keyframes scroll {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(20px); opacity: 0; }
+        }
+        
+        .flip-card {
+            perspective: 1000px;
+        }
+        
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            pointer-events: none;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .hover-lift {
+            transition: transform 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+        
+        .animated-border {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .animated-border::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            animation: border-animation 2s linear infinite;
+        }
+        
+        @keyframes border-animation {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .text-shimmer {
+            background: linear-gradient(90deg, #fff, #a5b4fc, #fff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        
+        .magnetic {
+            transition: transform 0.3s ease;
+        }
+        
+        .magnetic:hover {
+            transform: scale(1.05);
+        }
+        
+        .glitch {
+            position: relative;
+        }
+        
+        .glitch::before, .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 #ff00c1;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        
+        .glitch::after {
+            left: -2px;
+            text-shadow: -2px 0 #00fff9;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        
+        @keyframes glitch-anim {
+            0% { clip: rect(42px, 9999px, 44px, 0); }
+            5% { clip: rect(12px, 9999px, 59px, 0); }
+            10% { clip: rect(48px, 9999px, 29px, 0); }
+            15% { clip: rect(42px, 9999px, 73px, 0); }
+            20% { clip: rect(63px, 9999px, 27px, 0); }
+            25% { clip: rect(34px, 9999px, 55px, 0); }
+            30% { clip: rect(86px, 9999px, 73px, 0); }
+            35% { clip: rect(20px, 9999px, 20px, 0); }
+            40% { clip: rect(26px, 9999px, 60px, 0); }
+            45% { clip: rect(25px, 9999px, 66px, 0); }
+            50% { clip: rect(57px, 9999px, 98px, 0); }
+            55% { clip: rect(5px, 9999px, 46px, 0); }
+            60% { clip: rect(82px, 9999px, 31px, 0); }
+            65% { clip: rect(54px, 9999px, 27px, 0); }
+            70% { clip: rect(28px, 9999px, 99px, 0); }
+            75% { clip: rect(45px, 9999px, 69px, 0); }
+            80% { clip: rect(23px, 9999px, 85px, 0); }
+            85% { clip: rect(54px, 9999px, 84px, 0); }
+            90% { clip: rect(45px, 9999px, 47px, 0); }
+            95% { clip: rect(37px, 9999px, 20px, 0); }
+            100% { clip: rect(4px, 9999px, 91px, 0); }
+        }
+        
+        @keyframes glitch-anim2 {
+            0% { clip: rect(65px, 9999px, 100px, 0); }
+            5% { clip: rect(52px, 9999px, 74px, 0); }
+            10% { clip: rect(79px, 9999px, 85px, 0); }
+            15% { clip: rect(75px, 9999px, 5px, 0); }
+            20% { clip: rect(67px, 9999px, 61px, 0); }
+            25% { clip: rect(14px, 9999px, 79px, 0); }
+            30% { clip: rect(1px, 9999px, 66px, 0); }
+            35% { clip: rect(86px, 9999px, 30px, 0); }
+            40% { clip: rect(23px, 9999px, 98px, 0); }
+            45% { clip: rect(85px, 9999px, 72px, 0); }
+            50% { clip: rect(71px, 9999px, 75px, 0); }
+            55% { clip: rect(2px, 9999px, 48px, 0); }
+            60% { clip: rect(30px, 9999px, 16px, 0); }
+            65% { clip: rect(59px, 9999px, 50px, 0); }
+            70% { clip: rect(41px, 9999px, 62px, 0); }
+            75% { clip: rect(2px, 9999px, 82px, 0); }
+            80% { clip: rect(47px, 9999px, 73px, 0); }
+            85% { clip: rect(3px, 9999px, 27px, 0); }
+            90% { clip: rect(26px, 9999px, 55px, 0); }
+            95% { clip: rect(42px, 9999px, 97px, 0); }
+            100% { clip: rect(38px, 9999px, 49px, 0); }
+        }
+        
+        .floating-icons {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .floating-icon {
+            position: absolute;
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.2);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #3b82f6;
+        }
+        
+        .step-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #8b5cf6;
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            animation: float-shape 15s ease-in-out infinite;
+        }
+        
+        @keyframes float-shape {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, -20px) rotate(5deg); }
+            50% { transform: translate(-15px, 15px) rotate(-5deg); }
+            75% { transform: translate(10px, -10px) rotate(3deg); }
+        }
+        
+        .counter-container {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .counter-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            min-width: 150px;
+        }
+        
+        .counter-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+        
+        .counter-label {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+        
+        .interactive-demo {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin: 3rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .demo-screen {
+            width: 100%;
+            height: 300px;
+            background: #1e293b;
+            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+        }
+        
+        .demo-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+        
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .demo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .demo-stats {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .demo-stat {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+        }
+        
+        .demo-stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #3b82f6;
+        }
+        
+        .demo-stat-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        .demo-chart {
+            flex-grow: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 30px;
+            background: linear-gradient(to top, #3b82f6, #8b5cf6);
+            border-radius: 0.25rem 0.25rem 0 0;
+            animation: chart-grow 2s ease-out;
+        }
+        
+        @keyframes chart-grow {
+            from { height: 0; }
+        }
+        
+        .demo-features {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+        
+        .demo-feature {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-feature:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .demo-feature-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #3b82f6;
+        }
+        
+        .demo-feature-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .demo-feature-desc {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
 
 
-  <h1 class="display-1 fw-bold">Welcome to
-    <a href="/" class="text-decoration-none text-primary">
-      Falak Public School
-    </a>
-    Website.
-  </h1>
 
-  <p class="fw-bold">(Site under devlopment.)</p>
+/* Login Modal */
+        .magnetic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+        
+        .bg-gradient {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(5px);
+        }
+        
+        .input-field {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(71, 85, 105, 0.5);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        
+        .login-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .form-container {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 100%);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass py-4 transition-all duration-500">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center magnetic">
+                <div class="w-10 h-10 rounded-full bg-gradient flex items-center justify-center mr-3 glow">
+                    <span class="font-bold text-white">SD</span>
+                </div>
+                <span class="text-xl font-bold">School <span class="text-gradient">Digify</span></span>
+            </div>
+            
+            <div class="hidden md:flex space-x-8">
+                <a href="#features" class="hover:text-primary transition-colors duration-300 hover-lift">Features</a>
+                <a href="#testimonials" class="hover:text-primary transition-colors duration-300 hover-lift">Testimonials</a>
+                <a href="#how-it-works" class="hover:text-primary transition-colors duration-300 hover-lift">How It Works</a>
+                <a href="#pricing" class="hover:text-primary transition-colors duration-300 hover-lift">Pricing</a>
+            </div>
+            
+            <div class="flex space-x-4">
+                {% if user_logged_in %}
+                    <button 
+                        class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all duration-300 magnetic" 
+                        onclick="window.location.href='/student_list'">
+                        Dashboard
+                    </button>
+                {% else %}
+                    <button 
+                        class="px-4 py-2 rounded-lg hover:bg-white hover:bg-opacity-10 transition-all duration-300 magnetic" 
+                        id="loginBtn">
+                        Login
+                    </button>
+                {% endif %}
+                <button class="px-6 py-2 bg-gradient rounded-lg font-medium glow hover:opacity-90 transition-all duration-300 magnetic pulse"  onclick="window.location.href='/student_list'">Get Started</button>
+            </div>
+        </div>
+    </nav>
 
 
-    <a href="/login" class="btn btn-outline-primary btn-lg mt-4 text-center">login</a>
-</div>
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 z-50 hidden">
+        <div class="modal-overlay absolute inset-0 flex items-center justify-center p-4">
+            <div class="form-container rounded-2xl w-full max-w-md overflow-hidden animate-slide-up">
+                <!-- Header -->
+                <div class="bg-dark-800 p-6 flex justify-between items-center">
+                    <h2 class="text-xl font-bold text-white">Login to School ERP</h2>
+                    <button id="closeModal" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <!-- Form -->
+                <form class="p-6 space-y-6" action="{{ url_for('login_bp.login') }}"  method="POST">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-envelope text-gray-500"></i>
+                            </div>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email"
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white focus:outline-none" 
+                                placeholder="name@school.edu"
+                                required
+                            >
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-300 mb-2">Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-500"></i>
+                            </div>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                type="password" 
+                                class="input-field w-full pl-10 pr-4 py-3 rounded-lg text-white focus:outline-none" 
+                                placeholder="••••••••"
+                                required
+                            >
+                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-300" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input 
+                                type="checkbox" 
+                                id="remember" 
+                                class="h-4 w-4 rounded border-gray-600 bg-dark-700 text-primary focus:ring-primary"
+                            >
+                            <label for="remember" class="ml-2 block text-sm text-gray-300">Remember me</label>
+                        </div>
+                        
+                        <a href="#" class="text-sm text-primary hover:underline">Forgot password?</a>
+                    </div>
+                    
+                    <button type="submit" class="login-btn w-full py-3 rounded-lg text-white font-medium">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Sign In
+                    </button>
+                </form>
+                
+                <!-- Footer -->
+                <div class="bg-dark-800 p-4 text-center text-sm text-gray-400">
+                    Secure login with AES-256 encryption
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% endblock %}
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center section-padding hero-bg relative overflow-hidden">
+        <!-- Floating Shapes -->
+        <div class="floating-shapes">
+            <div class="floating-shape" style="width: 300px; height: 300px; top: 10%; left: 5%; animation-delay: 0s;"></div>
+            <div class="floating-shape" style="width: 200px; height: 200px; top: 60%; left: 80%; animation-delay: 2s;"></div>
+            <div class="floating-shape" style="width: 250px; height: 250px; top: 30%; left: 70%; animation-delay: 4s;"></div>
+            <div class="floating-shape" style="width: 150px; height: 150px; top: 70%; left: 10%; animation-delay: 6s;"></div>
+        </div>
+        
+        <!-- Floating Icons -->
+        <div class="floating-icons">
+            <div class="floating-icon" style="top: 20%; left: 10%; animation-delay: 0s;"><i class="fas fa-graduation-cap"></i></div>
+            <div class="floating-icon" style="top: 70%; left: 85%; animation-delay: 1s;"><i class="fas fa-book"></i></div>
+            <div class="floating-icon" style="top: 40%; left: 90%; animation-delay: 2s;"><i class="fas fa-chart-line"></i></div>
+            <div class="floating-icon" style="top: 80%; left: 15%; animation-delay: 3s;"><i class="fas fa-users"></i></div>
+            <div class="floating-icon" style="top: 15%; left: 80%; animation-delay: 4s;"><i class="fas fa-laptop"></i></div>
+            <div class="floating-icon" style="top: 60%; left: 5%; animation-delay: 5s;"><i class="fas fa-clock"></i></div>
+        </div>
+        
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="inline-block mb-6 px-4 py-2 glass rounded-full text-sm font-medium">
+                <span class="text-gradient font-bold">NEW</span> AI-powered analytics now available
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black mb-6">
+                <span class="gradient-text">Revolutionize School Management</span>
+            </h1>
+            
+            <p class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-10">All-in-One Platform to Manage Admissions, Fees, Exams, Students, and Staff Seamlessly</p>
+            
+            <div class="mb-12">
+                <h2 class="text-3xl md:text-4xl font-bold text-shimmer">Make Your School Digify</h2>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4 mb-20">
+                <button 
+                    class="px-8 py-4 bg-gradient rounded-xl font-bold text-lg glow hover:opacity-90 transition-all transform hover:scale-105 magnetic">
+                    Get Started
+                </button>
+                <button class="px-8 py-4 glass rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-10 transition-all magnetic">
+                    <span class="flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2"></i> Watch Demo
+                    </span>
+                </button>
+            </div>
+            
+            <!-- Animated Stats -->
+            <div class="counter-container">
+                <div class="counter-item">
+                    <div class="counter-number" data-target="500">0</div>
+                    <div class="counter-label">Schools Transformed</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" data-target="150000">0</div>
+                    <div class="counter-label">Students Managed</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" data-target="98">0</div>
+                    <div class="counter-label">Satisfaction Rate</div>
+                </div>
+                <div class="counter-item">
+                    <div class="counter-number" data-target="24">0</div>
+                    <div class="counter-label">/7 Support</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="scroll-indicator"></div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section-padding relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-blue-500/5 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-purple-500/5 to-transparent"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">
+                    <span class="gradient-text">Powerful Features</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">Everything you need to manage your educational institution efficiently and effectively</p>
+            </div>
+            
+            <!-- Interactive Demo -->
+            <div class="interactive-demo">
+                <h3 class="text-2xl font-bold mb-4 text-center">Interactive Dashboard Preview</h3>
+                <div class="demo-screen">
+                    <div class="demo-content">
+                        <div class="demo-header">
+                            <div class="demo-title">School Analytics Dashboard</div>
+                            <div class="demo-stats">
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value">94%</div>
+                                    <div class="demo-stat-label">Attendance</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value">87%</div>
+                                    <div class="demo-stat-label">Performance</div>
+                                </div>
+                                <div class="demo-stat">
+                                    <div class="demo-stat-value">₹2.4L</div>
+                                    <div class="demo-stat-label">Revenue</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="demo-chart">
+                            <!-- Chart bars -->
+                            <div class="chart-bar" style="left: 10%; height: 70%; animation-delay: 0.2s;"></div>
+                            <div class="chart-bar" style="left: 20%; height: 85%; animation-delay: 0.4s;"></div>
+                            <div class="chart-bar" style="left: 30%; height: 60%; animation-delay: 0.6s;"></div>
+                            <div class="chart-bar" style="left: 40%; height: 90%; animation-delay: 0.8s;"></div>
+                            <div class="chart-bar" style="left: 50%; height: 75%; animation-delay: 1s;"></div>
+                            <div class="chart-bar" style="left: 60%; height: 80%; animation-delay: 1.2s;"></div>
+                            <div class="chart-bar" style="left: 70%; height: 65%; animation-delay: 1.4s;"></div>
+                            <div class="chart-bar" style="left: 80%; height: 95%; animation-delay: 1.6s;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="demo-features">
+                    <div class="demo-feature">
+                        <div class="demo-feature-icon"><i class="fas fa-user-graduate"></i></div>
+                        <div class="demo-feature-title">Student Management</div>
+                        <div class="demo-feature-desc">Track performance & attendance</div>
+                    </div>
+                    <div class="demo-feature">
+                        <div class="demo-feature-icon"><i class="fas fa-chart-pie"></i></div>
+                        <div class="demo-feature-title">Analytics</div>
+                        <div class="demo-feature-desc">Real-time insights & reports</div>
+                    </div>
+                    <div class="demo-feature">
+                        <div class="demo-feature-icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div class="demo-feature-title">Finance</div>
+                        <div class="demo-feature-desc">Fee management & tracking</div>
+                    </div>
+                    <div class="demo-feature">
+                        <div class="demo-feature-icon"><i class="fas fa-comments"></i></div>
+                        <div class="demo-feature-title">Communication</div>
+                        <div class="demo-feature-desc">Parent & staff messaging</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature Card 1 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Admissions Management</h3>
+                        <p class="text-gray-300 mb-4">Online forms, Aadhaar validation, document uploads, and application tracking with AI-powered processing.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 2 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Student & Staff Management</h3>
+                        <p class="text-gray-300 mb-4">Profiles, ID cards, role-based access, and comprehensive directory management with biometric integration.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 3 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Exams & Marks Management</h3>
+                        <p class="text-gray-300 mb-4">Custom exams, automatic grading, PDF report generation, and progress tracking with predictive analytics.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 4 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Fee & Finance Management</h3>
+                        <p class="text-gray-300 mb-4">Monthly fees, receipts, due alerts, invoices, and financial reporting with automated reconciliation.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 5 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Reports & Analytics</h3>
+                        <p class="text-gray-300 mb-4">Dashboard, performance charts, attendance tracking, and insights with AI-powered recommendations.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature Card 6 -->
+                <div class="feature-card glass rounded-2xl p-6 animated-border">
+                    <div class="feature-card-inner">
+                        <div class="feature-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3 class="text-xl font-bold mb-3">Communication Tools</h3>
+                        <p class="text-gray-300 mb-4">SMS, email, parent notifications, and announcement broadcasting with multi-language support.</p>
+                        <div class="flex justify-between items-center mt-4">
+                            <span class="text-sm text-gray-400">Learn more <i class="fas fa-arrow-right ml-1"></i></span>
+                            <div class="w-8 h-8 rounded-full bg-gradient flex items-center justify-center">
+                                <i class="fas fa-plus text-white text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="section-padding bg-gradient-to-b from-transparent to-black/20 relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">
+                    <span class="gradient-text">Trusted by Leading Schools</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">See what school administrators are saying about School Digify</p>
+            </div>
+            
+            <!-- Testimonial Slider -->
+            <div class="testimonial-slider mb-16">
+                <div class="testimonial-track">
+                    <!-- Duplicate testimonials for seamless loop -->
+                    <div class="flex space-x-8">
+                        <!-- Testimonial 1 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">AS</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Anita Sharma</h4>
+                                    <p class="text-gray-400 text-sm">Principal, Delhi Public School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"School Digify has transformed how we manage our institution. The admission process is now seamless and parent communication has improved dramatically."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 2 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">RK</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Rajesh Kumar</h4>
+                                    <p class="text-gray-400 text-sm">Administrator, St. Mary's Academy</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"The financial management module has saved us countless hours. Fee collection is now automated and we have complete visibility into our finances."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 3 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">PM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Priya Mehta</h4>
+                                    <p class="text-gray-400 text-sm">Director, Global International School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"Exam management used to be our biggest challenge. With School Digify, we can create custom exams, automate grading, and generate reports effortlessly."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 4 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">SM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Sanjay Mehra</h4>
+                                    <p class="text-gray-400 text-sm">Principal, Modern Public School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"The analytics dashboard gives us insights we never had before. We can track student performance trends and make data-driven decisions."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 5 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">NM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Neha Malhotra</h4>
+                                    <p class="text-gray-400 text-sm">Administrator, Bright Future School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"Implementation was smooth and the support team was exceptional. Our staff adapted quickly to the new system thanks to the intuitive interface."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Duplicate for seamless loop -->
+                    <div class="flex space-x-8">
+                        <!-- Testimonial 1 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">AS</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Anita Sharma</h4>
+                                    <p class="text-gray-400 text-sm">Principal, Delhi Public School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"School Digify has transformed how we manage our institution. The admission process is now seamless and parent communication has improved dramatically."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 2 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">RK</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Rajesh Kumar</h4>
+                                    <p class="text-gray-400 text-sm">Administrator, St. Mary's Academy</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"The financial management module has saved us countless hours. Fee collection is now automated and we have complete visibility into our finances."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 3 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">PM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Priya Mehta</h4>
+                                    <p class="text-gray-400 text-sm">Director, Global International School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"Exam management used to be our biggest challenge. With School Digify, we can create custom exams, automate grading, and generate reports effortlessly."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 4 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">SM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Sanjay Mehra</h4>
+                                    <p class="text-gray-400 text-sm">Principal, Modern Public School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"The analytics dashboard gives us insights we never had before. We can track student performance trends and make data-driven decisions."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Testimonial 5 -->
+                        <div class="glass rounded-2xl p-6 min-w-[350px] hover-lift">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-gradient flex items-center justify-center mr-4 glow">
+                                    <span class="font-bold text-white">NM</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold">Neha Malhotra</h4>
+                                    <p class="text-gray-400 text-sm">Administrator, Bright Future School</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-300">"Implementation was smooth and the support team was exceptional. Our staff adapted quickly to the new system thanks to the intuitive interface."</p>
+                            <div class="flex mt-4">
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                                <i class="fas fa-star text-yellow-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- School Logos -->
+            <div class="flex flex-wrap justify-center gap-12 opacity-70">
+                <div class="text-2xl font-bold hover-lift">Delhi Public School</div>
+                <div class="text-2xl font-bold hover-lift">St. Mary's Academy</div>
+                <div class="text-2xl font-bold hover-lift">Global International</div>
+                <div class="text-2xl font-bold hover-lift">Modern Public School</div>
+                <div class="text-2xl font-bold hover-lift">Bright Future</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section id="how-it-works" class="section-padding relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-blue-500/5 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 w-1/2 h-full bg-gradient-to-r from-purple-500/5 to-transparent"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">
+                    <span class="gradient-text">How It Works</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">Get started with School Digify in just a few simple steps</p>
+            </div>
+            
+            <div class="flex flex-col md:flex-row justify-between items-center relative">
+                <!-- Step 1 -->
+                <div class="step-line flex flex-col items-center text-center mb-12 md:mb-0 md:w-1/5 stagger-item">
+                    <div class="step-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-gradient flex items-center justify-center mb-4 glow pulse">
+                        <span class="text-white font-bold text-xl">1</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Registration</h3>
+                    <p class="text-gray-300">Sign up and set up your school profile with basic information</p>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="step-line flex flex-col items-center text-center mb-12 md:mb-0 md:w-1/5 stagger-item">
+                    <div class="step-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-gradient flex items-center justify-center mb-4 glow pulse">
+                        <span class="text-white font-bold text-xl">2</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Add Students</h3>
+                    <p class="text-gray-300">Import or manually add student records and staff information</p>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="step-line flex flex-col items-center text-center mb-12 md:mb-0 md:w-1/5 stagger-item">
+                    <div class="step-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-gradient flex items-center justify-center mb-4 glow pulse">
+                        <span class="text-white font-bold text-xl">3</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Manage Exams/Fees</h3>
+                    <p class="text-gray-300">Set up academic sessions, exams, and fee structures</p>
+                </div>
+                
+                <!-- Step 4 -->
+                <div class="step-line flex flex-col items-center text-center mb-12 md:mb-0 md:w-1/5 stagger-item">
+                    <div class="step-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-gradient flex items-center justify-center mb-4 glow pulse">
+                        <span class="text-white font-bold text-xl">4</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Generate Reports</h3>
+                    <p class="text-gray-300">Create performance reports, attendance records, and analytics</p>
+                </div>
+                
+                <!-- Step 5 -->
+                <div class="flex flex-col items-center text-center md:w-1/5 stagger-item">
+                    <div class="step-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <div class="w-20 h-20 rounded-full bg-gradient flex items-center justify-center mb-4 glow pulse">
+                        <span class="text-white font-bold text-xl">5</span>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Communicate</h3>
+                    <p class="text-gray-300">Send notifications, announcements, and reports to parents</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section-padding bg-gradient-to-b from-black/20 to-transparent relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-1/3 left-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-1/3 right-1/4 w-80 h-80 bg-purple-500/5 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">
+                    <span class="gradient-text">Simple, Transparent Pricing</span>
+                </h2>
+                <p class="text-xl text-gray-300 max-w-3xl mx-auto">Choose the plan that fits your institution's needs</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                <!-- Basic Plan -->
+                <div class="pricing-card glass rounded-2xl p-8 animated-border">
+                    <h3 class="text-2xl font-bold mb-4">Basic</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">₹9,999</span>
+                        <span class="text-gray-400">/year</span>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Up to 500 students
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Student & Staff Management
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Basic Reports
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-500 mr-3"></i>
+                            Advanced Analytics
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-500 mr-3"></i>
+                            Multi-school Support
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 glass rounded-lg font-medium hover:bg-white hover:bg-opacity-10 transition-colors magnetic">Get Started</button>
+                </div>
+                
+                <!-- Premium Plan -->
+                <div class="pricing-card glass rounded-2xl p-8 premium-glow relative animated-border">
+                    <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                        <span class="bg-gradient text-white px-4 py-1 rounded-full text-sm font-medium pulse">Most Popular</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Premium</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">₹19,999</span>
+                        <span class="text-gray-400">/year</span>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Up to 2000 students
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            All Basic Features
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Advanced Analytics
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Custom Reports
+                        </li>
+                        <li class="flex items-center text-gray-500">
+                            <i class="fas fa-times text-gray-500 mr-3"></i>
+                            Multi-school Support
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 bg-gradient rounded-lg font-medium glow hover:opacity-90 transition-opacity magnetic">Get Started</button>
+                </div>
+                
+                <!-- Enterprise Plan -->
+                <div class="pricing-card glass rounded-2xl p-8 animated-border">
+                    <h3 class="text-2xl font-bold mb-4">Enterprise</h3>
+                    <div class="mb-6">
+                        <span class="text-4xl font-bold">Custom</span>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Unlimited Students
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            All Premium Features
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Multi-school Support
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Dedicated Support
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-check text-green-500 mr-3"></i>
+                            Custom Development
+                        </li>
+                    </ul>
+                    <button class="w-full py-3 glass rounded-lg font-medium hover:bg-white hover:bg-opacity-10 transition-colors magnetic">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section-padding relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/10 to-purple-500/10"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <h2 class="text-4xl md:text-5xl font-black mb-6">
+                <span class="gradient-text">Ready to Digify Your School?</span>
+            </h2>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto mb-10">Join hundreds of schools that have transformed their management with our platform</p>
+            
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button class="px-8 py-4 bg-gradient rounded-xl font-bold text-lg glow hover:opacity-90 transition-all transform hover:scale-105 magnetic">Start Free Trial</button>
+                <button class="px-8 py-4 glass rounded-xl font-bold text-lg hover:bg-white hover:bg-opacity-10 transition-all magnetic">
+                    <span class="flex items-center justify-center">
+                        <i class="fas fa-calendar-alt mr-2"></i> Schedule a Demo
+                    </span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="glass py-12 relative overflow-hidden">
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full bg-gradient flex items-center justify-center mr-3 glow">
+                            <span class="font-bold text-white">SD</span>
+                        </div>
+                        <span class="text-xl font-bold">School <span class="text-gradient">Digify</span></span>
+                    </div>
+                    <p class="text-gray-400">Revolutionizing school management with cutting-edge technology and intuitive design.</p>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Product</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Features</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Pricing</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Integrations</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Updates</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Company</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">About</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Blog</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Careers</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors hover-lift">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Stay Connected</h3>
+                    <p class="text-gray-400 mb-4">Subscribe to our newsletter for the latest updates</p>
+                    <div class="flex">
+                        <input type="email" placeholder="Your email" class="px-4 py-2 bg-black bg-opacity-30 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-primary w-full">
+                        <button class="px-4 py-2 bg-gradient rounded-r-lg font-medium magnetic">Subscribe</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 mb-4 md:mb-0">© 2023 School Digify. All rights reserved.</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors magnetic">
+                        <i class="fab fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors magnetic">
+                        <i class="fab fa-facebook text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors magnetic">
+                        <i class="fab fa-instagram text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors magnetic">
+                        <i class="fab fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize GSAP and ScrollTrigger
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Hero section animations
+        gsap.from('nav', { 
+            duration: 1, 
+            y: -100, 
+            opacity: 0, 
+            ease: "power3.out" 
+        });
+        
+        gsap.from('h1', { 
+            duration: 1.5, 
+            y: 50, 
+            opacity: 0, 
+            delay: 0.5, 
+            ease: "power3.out" 
+        });
+        
+        gsap.from('.hero-bg p', { 
+            duration: 1.5, 
+            y: 30, 
+            opacity: 0, 
+            delay: 1, 
+            ease: "power3.out" 
+        });
+        
+        gsap.from('.hero-bg h2', { 
+            duration: 1.5, 
+            y: 30, 
+            opacity: 0, 
+            delay: 1.5, 
+            ease: "power3.out" 
+        });
+        
+        gsap.from('.hero-bg button', { 
+            duration: 1, 
+            y: 30, 
+            opacity: 0, 
+            delay: 2, 
+            stagger: 0.2, 
+            ease: "power3.out" 
+        });
+        
+        // Feature cards animation
+        gsap.from('.feature-card', {
+            scrollTrigger: {
+                trigger: '#features',
+                start: 'top 80%',
+                end: 'bottom 20%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.15,
+            ease: "power2.out"
+        });
+        
+        // Testimonials animation
+        gsap.from('.testimonial-track', {
+            scrollTrigger: {
+                trigger: '#testimonials',
+                start: 'top 80%',
+                end: 'bottom 20%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1.5,
+            y: 50,
+            opacity: 0,
+            ease: "power2.out"
+        });
+        
+        // How it works animation
+        gsap.from('.stagger-item', {
+            scrollTrigger: {
+                trigger: '#how-it-works',
+                start: 'top 80%',
+                end: 'bottom 20%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power2.out"
+        });
+        
+        // Pricing cards animation
+        gsap.from('.pricing-card', {
+            scrollTrigger: {
+                trigger: '#pricing',
+                start: 'top 80%',
+                end: 'bottom 20%',
+                toggleActions: 'play none none reverse'
+            },
+            duration: 1,
+            y: 50,
+            opacity: 0,
+            stagger: 0.2,
+            ease: "power2.out"
+        });
+        
+        // Counter animation
+        const counters = document.querySelectorAll('.counter-number');
+        counters.forEach(counter => {
+            const target = +counter.getAttribute('data-target');
+            const increment = target / 100;
+            let current = 0;
+            
+            const updateCounter = () => {
+                if (current < target) {
+                    current += increment;
+                    counter.innerText = Math.ceil(current);
+                    setTimeout(updateCounter, 20);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+            
+            ScrollTrigger.create({
+                trigger: counter,
+                start: 'top 80%',
+                onEnter: updateCounter,
+                once: true
+            });
+        });
+        
+        // Magnetic buttons effect
+        const magneticButtons = document.querySelectorAll('.magnetic');
+        magneticButtons.forEach(button => {
+            button.addEventListener('mousemove', (e) => {
+                const rect = button.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                gsap.to(button, {
+                    x: x * 0.2,
+                    y: y * 0.2,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
+            });
+            
+            button.addEventListener('mouseleave', () => {
+                gsap.to(button, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.5,
+                    ease: "power2.out"
+                });
+            });
+        });
+        
+        // Navbar background on scroll
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('glass-dark');
+                nav.classList.remove('glass');
+            } else {
+                nav.classList.remove('glass-dark');
+                nav.classList.add('glass');
+            }
+        });
+        
+        // Scroll to sections
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                if (targetId === '#') return;
+                
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    gsap.to(window, {
+                        duration: 1,
+                        scrollTo: {
+                            y: targetElement,
+                            offsetY: 80
+                        },
+                        ease: "power2.inOut"
+                    });
+                }
+            });
+        });
+
+    </script>
+
+    <script>
+        // Modal functionality
+        const loginBtn = document.getElementById('loginBtn');
+        const loginModal = document.getElementById('loginModal');
+        const closeModal = document.getElementById('closeModal');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        
+        // Open modal
+        loginBtn.addEventListener('click', () => {
+            loginModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        });
+        
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Close modal when clicking outside
+        loginModal.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Toggle password visibility
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            togglePassword.querySelector('i').classList.toggle('fa-eye');
+            togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+        
+
+    </script>
+</body>
+</html>

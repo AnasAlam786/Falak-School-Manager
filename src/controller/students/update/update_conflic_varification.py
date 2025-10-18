@@ -1,11 +1,14 @@
+import re
 from flask import session, request, jsonify, Blueprint
 from sqlalchemy import or_
 
+from src.controller.students.utils.str_to_date import str_to_date
 from src.model import StudentsDB, StudentSessions
 from src import db
 
 from src.controller.auth.login_required import login_required
 from src.controller.permissions.permission_required import permission_required
+from src.model.ClassData import ClassData
 
 
 update_conflict_verification_api_bp = Blueprint('update_conflict_verification_api_bp', __name__)
@@ -38,8 +41,55 @@ def verify_update_conflicts():
     values = {item['field']: str(item['value']).strip() for item in verified_items}
 
     # ----------------------------
+    # 0. validate Admission Year and Admission Session consistency
+    # ----------------------------
+
+    admission_no = values.get('ADMISSION_NO')
+    admission_session = str(values.get('admission_session_id'))
+    admission_year = re.split(r'[-/]', values.get('ADMISSION_DATE'))[-1]
+
+    if admission_year != admission_session:
+        print("Admission year and Admission session do not match")
+        return jsonify({'message': f"You give Admission year '{admission_year}' and admission session year '{admission_session}-{int(admission_session)+1}'. Admission session and Admission Date must match!"}), 400
+    
+    asmission_no_prefix = str(admission_no)[:2]
+    if asmission_no_prefix != str(admission_session)[-2:]:
+        return jsonify({'message': f"You give Admission number '{admission_no}' and admission session year '{admission_session}-{int(admission_session)+1}'. Last two digits of Admission number and Admission session must match!"}), 400
+    
+    # ----------------------------
+    # 0. validate Admission_Class should be less than or equal to Current CLASS
+    # ----------------------------
+
+    adm_id = values.get("Admission_Class")
+    cur_id = values.get("CLASS")
+    if adm_id is None or cur_id is None:
+        return jsonify({"message": "Admission Class and Current Class are required for existing students."}), 400
+
+    try:
+        adm_id_int = int(adm_id)
+        cur_id_int = int(cur_id)
+    except (ValueError, TypeError):
+        return jsonify({"message": "Invalid class identifiers provided."}), 400
+
+    # Now fetch only the display_order scalar values
+    adm_order = db.session.query(ClassData.display_order).filter(ClassData.id == adm_id_int).scalar()
+    cur_order = db.session.query(ClassData.display_order).filter(ClassData.id == cur_id_int).scalar()
+
+    adm_order = adm_order if adm_order is not None else 0
+    cur_order = cur_order if cur_order is not None else 0
+
+    # admission display_order must be strictly less than current class display_order
+    if not (adm_order <= cur_order):
+        return jsonify({"message": "For existing students, Admission class must be of less than or equal to Current class."}), 400
+
+
+
+
+    # ----------------------------
     # 1. Global-Session Unique Check: AADHAAR, PEN, APAAR
     # ----------------------------
+
+
     session_unique_fields = ['AADHAAR', 'PEN', 'APAAR']
     session_filters = []
     for field in session_unique_fields:
@@ -104,7 +154,6 @@ def verify_update_conflicts():
     school_filters = []
     for field in school_unique_fields:
         val = values.get(field)
-        print(val)
         if not val or val == "":
             return jsonify({'message': f'{field} is required'}), 400
         school_filters.append(getattr(StudentsDB, field) == val)
@@ -129,7 +178,7 @@ def verify_update_conflicts():
                     conflicting_fields.append(field)
 
             return jsonify({
-                'message': f"Conflict in school for field(s): {', '.join(conflicting_fields)} with student '{existing.STUDENTS_NAME}' \nAdmission number: {existing.ADMISSION_NO}, SR: {existing.SR}"
+                'message': f"Conflict in school for field(s): {', '.join(conflicting_fields)} Student '{existing.STUDENTS_NAME}' already exists with same Admission No or SR!"
             }), 409
 
     # ----------------------------

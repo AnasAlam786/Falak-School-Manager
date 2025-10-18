@@ -1,14 +1,10 @@
 # src/controller/staff_module/update_staff.py
 
-from collections import Counter
 from flask import render_template, session, Blueprint, request, jsonify
-from sqlalchemy import distinct, func
-from pydantic import ValidationError
+from sqlalchemy import func
 
 from src.model.TeachersLogin import TeachersLogin
 from src.model.Roles import Roles
-from src.model.ClassData import ClassData
-from src.model.ClassAccess import ClassAccess
 
 from src.controller.staff_module.utils import hash_password
 from src.controller.staff_module.utils.pydantic_verification import StaffVerification
@@ -37,7 +33,11 @@ def update_staff():
     
     # Get staff data
     staff = TeachersLogin.query.filter_by(id=staff_id, school_id=session.get('school_id')).first()
-    
+
+    # Print all attributes of the staff object
+    print("Staff attributes:")
+    for column in staff.__table__.columns:
+        print(f"{column.name}: {getattr(staff, column.name)}")    
     if not staff:
         return render_template('staff/update_staff.html', error="Staff not found")
     
@@ -51,8 +51,7 @@ def update_staff():
     
     return render_template(
         'staff/update_staff.html',
-        staff=staff,
-        roles=roles,
+        staff=staff, roles=roles,
         sample_female_image=sample_female_image,
         sample_male_image=sample_male_image,
         password=password

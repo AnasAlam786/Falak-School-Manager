@@ -106,7 +106,7 @@ class StudentsDB(db.Model):
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=True)
     school = db.relationship("Schools", back_populates="students")
 
-    session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
+    admission_session_id = Column(BigInteger, ForeignKey('Sessions.id', onupdate="CASCADE"), nullable=False)
     session = db.relationship("Sessions", back_populates="students")
     
     student_sessions = db.relationship("StudentSessions", back_populates="students")

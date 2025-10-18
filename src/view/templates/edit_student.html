@@ -91,9 +91,10 @@
 
       <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {% set section = 'PersonalInfo' %}
+        {% from "html-components/input.html" import render_input_field %}
+
         {% for InputDetails in PersonalInfo %}
-        {% include 'html-components/input.html' with context %}
+          {{ render_input_field(InputDetails=InputDetails, section='PersonalInfo') }}
         {% endfor %}
 
       </div>
@@ -110,10 +111,10 @@
 
       <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {% set section = 'AcademicInfo' %}
         {% for InputDetails in AcademicInfo %}
-        {% include 'html-components/input.html' with context %}
+          {{ render_input_field(InputDetails=InputDetails, section='AcademicInfo') }}
         {% endfor %}
+
 
       </div>
     </div>
@@ -129,9 +130,8 @@
 
       <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {% set section = 'GuardianInfo' %}
         {% for InputDetails in GuardianInfo %}
-        {% include 'html-components/input.html' with context %}
+          {{ render_input_field(InputDetails=InputDetails, section='GuardianInfo') }}
         {% endfor %}
 
       </div>
@@ -149,10 +149,9 @@
 
       <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {% set section = 'ContactInfo' %}
-        {% for InputDetails in ContactInfo %}
-        {% include 'html-components/input.html' with context %}
-        {% endfor %}
+      {% for InputDetails in ContactInfo %}
+        {{ render_input_field(InputDetails=InputDetails, section='ContactInfo') }}
+      {% endfor %}
 
       </div>
     </div>
@@ -169,19 +168,18 @@
 
       <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
 
-        {% set section = 'AdditionalInfo' %}
-        {% for InputDetails in AdditionalInfo %}
-        {% include 'html-components/input.html' with context %}
-        {% endfor %}
+      {% for InputDetails in AdditionalInfo %}
+        {{ render_input_field(InputDetails=InputDetails, section='AdditionalInfo') }}
+      {% endfor %}
 
       </div>
     </div>
      
-    <div class="p-4">
-        {% set section = 'PersonalInfo' %}
-        {% set image_url = 'https://lh3.googleusercontent.com/d/' ~ student.IMAGE if student.IMAGE else '' %}
-        {% include 'html-components/image-uploader.html' with context %}
-    </div>
+    {% set section = 'PersonalInfo' %}
+    {% set image_url = 'https://lh3.googleusercontent.com/d/' ~ student.IMAGE if student.IMAGE else '' %}
+    {% from "html-components/image-uploader.html" import render_image_uploader %}
+
+    {{ render_image_uploader(unique_suffix='studentUpdate', label='Click to upload the image', image_url = image_url) }}
 
   </form>
 
@@ -239,15 +237,38 @@
       console.error('Error fetching next roll:', err);
     }
   });
+  
+  let avatarUploader;
+  document.addEventListener('DOMContentLoaded', () => {
+    // assign to the outer-scope variable (avoid shadowing with const)
+    avatarUploader = new ImageUploader('studentUpdate');
+    avatarUploader.onChange((blob, status) => console.log('Avatar:', status, blob));
+  });
+
+  
 
 
   
   document.getElementById('FormSubmit').addEventListener('click', async function () {
-    const form = document.getElementById('DataForm');
-    studentId = document.getElementById('FormSubmit').getAttribute('student-id');
 
-    document.getElementById('validationSummary').classList.add('hidden');
-    document.getElementById('errorList').innerHTML = '';
+    const form = document.getElementById('DataForm');
+
+      // ✅ Reset everything first
+      document.getElementById('validationSummary').classList.add('hidden');
+      document.getElementById('errorList').innerHTML = '';
+
+      const allFields = form.querySelectorAll("input, select, textarea");
+      allFields.forEach(input => {
+        input.classList.remove('red-error-border');
+        const errorElement = input.parentElement.querySelector(".error-message");
+        if (errorElement) {
+          errorElement.style.display = 'none';
+          errorElement.textContent = "";
+        }
+      });
+
+    
+    studentId = document.getElementById('FormSubmit').getAttribute('student-id');
 
     // Handle DataForm Button
     var imageUpload = document.getElementById('imageInput');
@@ -265,6 +286,21 @@
     try {
       const formData = await getFormData('DataForm');
 
+      // Include values of disabled selects (they are not submitted by the browser).
+      // Only add them when the element is disabled (enabled elements are included automatically).
+      // Cover both possible id and name variants for admission session and class.
+      const extraFieldNames = ['admission_session_id', 'CLASS'];
+      for (const fieldName of extraFieldNames) {
+        const elByName = document.querySelector(`[name="${fieldName}"]`);
+        const elById = document.getElementById(fieldName);
+        const el = elByName || elById;
+        if (el && el.disabled) {
+          // Use the field's name if present otherwise fallback to id as the key
+          const key = el.name || el.id || fieldName;
+          formData.set(key, el.value);
+        }
+      }
+
       const formObject = {};
       for (const [key, value] of formData.entries()) {
         formObject[key] = value;
@@ -277,7 +313,7 @@
       
       if (!ok) {
         console.error("Pydantic validation failed:", pydanticData.errors);
-        showAlert(pydanticResponse.status, pydanticData.message || "Something went wrong");
+        showAlert(pydanticData.status, pydanticData.message || "Something went wrong");
         return;
       }
       
@@ -293,8 +329,11 @@
         return;
       }
 
-
       let base64Image = null;
+      // defensive checks in case avatarUploader wasn't initialized
+      let imageStatus = avatarUploader && typeof avatarUploader.getStatus === 'function' ? avatarUploader.getStatus() : 'unchanged';
+      let croppedBlob = avatarUploader && typeof avatarUploader.getBlob === 'function' ? avatarUploader.getBlob() : null;
+
       if (typeof croppedBlob !== 'undefined' && croppedBlob !== null && imageStatus === 'updated') {
         base64Image = await convertBlobToBase64(croppedBlob);
       }
@@ -307,9 +346,6 @@
         // Handle case where no image is uploaded or removed
         base64Image = null;
       }
-
-
-      
 
       const response = await fetch("/api/final_student_update_api", {
         method: "POST",
@@ -326,8 +362,6 @@
       }
 
       showAlert(response.status, data.message);
-
-
     }
 
      catch (err) {
@@ -454,7 +488,7 @@
     }
 
     attachDateMask("#DOB", "DD-MM-YYYY");
-    attachDateMask("#ADMISSION_DATE", "YYYY-MM-DD");
+    attachDateMask("#ADMISSION_DATE", "DD-MM-DD");
 
 
     //add DD/MM/YYYY mask to DOB and Admission Date ENDED
@@ -480,9 +514,6 @@
       }
     });
   });
-
-
-
 
 
   document.querySelectorAll('.cancelModle').forEach(function(element) {

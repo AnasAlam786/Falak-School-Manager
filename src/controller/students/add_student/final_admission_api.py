@@ -1,5 +1,6 @@
 # src/controller/final_admission_api.py
 
+from datetime import datetime
 from flask import session, request, jsonify, Blueprint
 
 from src.model import (
@@ -35,19 +36,6 @@ def final_admission_api():
     for input_data in verified_data:
         data[input_data["field"]] = input_data["value"]
 
-    # if not password:
-    #     return jsonify({"message": "Missing password"}), 400
-
-    # 2) Lookup school
-    # school = Schools.query.filter_by(id=school_id).first()
-    # if not school:
-    #     return jsonify({"message": "School not found"}), 404
-
-    # 3) Verify password
-    # if not check_password_hash(school.Password, password):
-    #     return jsonify({"message": "Wrong password"}), 401
-      
-
     StudentDB_colums = {column.name for column in StudentsDB.__table__.columns}
     StudentsSession_colums = {column.name for column in StudentSessions.__table__.columns}
     RTEInfo_colums = {column.name for column in RTEInfo.__table__.columns}
@@ -56,11 +44,22 @@ def final_admission_api():
     StudentsSession_data = {key: value for key, value in data.items() if key in StudentsSession_colums}
     rte_info_data = {key: value for key, value in data.items() if key in RTEInfo_colums}
 
+    
+    
+    # Convert DD-MM-YYYY → datetime.date
+    for date_field in ["DOB", "ADMISSION_DATE"]:
+        if date_field in StudentDB_data and isinstance(StudentDB_data[date_field], str):
+            try:
+                StudentDB_data[date_field] = datetime.strptime(StudentDB_data[date_field], "%Y-%m-%d").date()
+            except ValueError:
+                print(f"Invalid date format for {date_field}: {StudentDB_data[date_field]}")
+                return jsonify({"message": f"Invalid date format for {date_field}: {StudentDB_data[date_field]}"}), 500
+
 
     
     StudentDB_data["school_id"] = school_id
     StudentDB_data["Admission_Class"] = data["CLASS"]
-    StudentDB_data["session_id"] = session["session_id"]
+    # StudentDB_data["session_id"] = session["session_id"]
 
 
     StudentsSession_data["class_id"] = data["CLASS"]
