@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field, EmailStr, field_validator, ValidationErro
 class StaffVerification(BaseModel):
     name: str = Field(..., min_length=2, max_length=100, description="Full name of the staff member")
     email: Optional[EmailStr] = Field(None, description="Official email ID (optional)")
-    phone: Optional[str] = Field(None, pattern=r"^[6-9]\d{9}$", description="10-digit Indian phone number")
+    phone: Optional[str] = Field(None, description="10-digit Indian phone number")
     
     dob: Optional[date] = Field(None, description="Date of birth in YYYY-MM-DD format")
     gender: Literal["Male", "Female", "Other"] = Field(..., description="Gender of the staff member")
@@ -26,6 +26,8 @@ class StaffVerification(BaseModel):
     role_id: int = Field(..., description="Foreign key ID of role in roles table")
     image: Optional[str] = Field(None, description="Profile image URL or base64")
     sign: Optional[str] = Field(None, description="Digital signature URL or base64")
+    national_id: Optional[str] = Field(None, description="National ID (e.g., UDISE Teacher ID)")
+
 
 
     # Custom validators for error messages
@@ -59,4 +61,10 @@ class StaffVerification(BaseModel):
     def validate_address(cls, v):
         if v is not None and len(v.strip()) < 5:
             raise ValueError("Address must have at least 5 characters")
+        return v
+    
+    @field_validator("national_id")
+    def validate_udise_id(cls, v):
+        if v and not re.match(r"^[A-Z]{2}\d{12,13}$", v):
+            raise ValueError("Invalid UDISE Teacher ID format")
         return v

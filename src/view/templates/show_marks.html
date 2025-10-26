@@ -31,7 +31,7 @@
     <div class="relative">
       <select
         class="w-full p-3 pr-10 rounded-lg md:rounded-xl bg-gray-800 text-gray-200 appearance-none cursor-pointer text-sm md:text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-        id="classView" name="selectClass" onchange="updatePage('/get_marks_api', 'results', { 'class_id': this.value });">
+        id="classView" name="selectClass" onchange="updatePageWithLoader('/get_marks_api', 'results', { 'class_id': this.value });">
         <option value="" selected disabled hidden>Select Class</option>
         {% if classes %}
           {% for class in classes %}
@@ -46,122 +46,142 @@
   </div>
 
 
-<!-- START: Results List -->
-<div id="results">
-  {% if student_marks %}
-    {% for student in student_marks %}
-      <!-- START: Single Result Card -->
-      <div class="bg-gray-800 shadow-lg rounded-lg mb-4">
-        <div class="p-4 md:p-6">
+  <!-- START: Results List -->
+  <!-- Loader & skeleton (hidden by default) -->
+  <div id="marks-loader" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div class="w-11/12 max-w-3xl p-6 bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 rounded-xl shadow-xl border border-gray-700">
+      <div class="flex items-center gap-4">
+  <div class="w-14 h-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center animate-spin shadow-lg" style="animation-duration:1500ms;">
+          <svg class="w-8 h-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v4m0 8v4m8-8h-4M4 12H0" />
+          </svg>
+        </div>
+        <div class="flex-1">
+          <div class="h-4 bg-gray-700 rounded w-3/4 mb-3 animate-pulse"></div>
+          <div class="h-3 bg-gray-700 rounded w-1/2 animate-pulse"></div>
+        </div>
+      </div>
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- skeleton cards -->
+        <div class="h-24 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg animate-pulse"></div>
+        <div class="h-24 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg animate-pulse"></div>
+        <div class="h-24 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg animate-pulse"></div>
+        <div class="h-24 bg-gradient-to-r from-gray-800 to-gray-700 rounded-lg animate-pulse"></div>
+      </div>
+    </div>
+  </div>
 
-          <!-- Student Header Table -->
-          <div class="overflow-x-auto mb-3 border border-gray-700 rounded">
-            <table class="min-w-full text-center text-gray-200 border-collapse">
-              <thead class="bg-gray-700 text-white">
-                <tr>
-                  <th class="py-2 px-3 border-b border-gray-600">Name</th>
-                  <th class="py-2 px-3 border-b border-gray-600">Roll</th>
-                  <th class="py-2 px-3 border-b border-gray-600">Class</th>
-                  <th class="py-2 px-3 border-b border-gray-600">F's Name</th>
-                  <th class="py-2 px-3 border-b border-gray-600">Rank</th>
-                  <th class="py-2 px-3 border-b border-gray-600 text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="bg-gray-800 hover:bg-gray-700">
-                  <td class="py-2 px-3 border-b border-gray-600">{{ student["STUDENTS_NAME"] }}</td>
-                  <td class="py-2 px-3 border-b border-gray-600">{{ student["ROLL"] }}</td>
-                  <td class="py-2 px-3 border-b border-gray-600">{{ student["CLASS"] }}</td>
-                  <td class="py-2 px-3 border-b border-gray-600">{{ student["FATHERS_NAME"] }}</td>
-                  <td class="py-2 px-3 border-b border-gray-600">{{ student["overall_rank"] }}</td>
-                  <td class="py-2 px-3 border-b border-gray-600 text-right">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-base flex items-center gap-2"
-                      onclick="getResult('{{ student['student_id'] }}', '{{ student['class_id'] }}')">
-                      <i class="bi bi-printer-fill"></i> Print Result
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <!-- END: Student Header Table -->
+  <div id="results">
+    {% if student_marks %}
+      {% for student in student_marks %}
+        <!-- START: Single Result Card -->
+        <div class="marks-card bg-gray-800 shadow-lg rounded-lg mb-4">
+          <div class="p-4 md:p-6">
 
-          <!-- Subjects Table -->
-          <div class="overflow-x-auto">
-            <table class="min-w-full text-gray-200 border border-gray-700 border-collapse table-auto">
-              {% set marks = student.marks %}
-              {% set exam_names = marks.keys() | list %}
-              {% set subjects = student.marks[exam_names[0]].subject_marks_dict.keys() | list %}
-              {% set special_columns = ["G. Total", "Grades", "Percentage", "Total"] %}
+            <!-- Student Header Table -->
+            <div class="overflow-x-auto mb-3 border border-gray-700 rounded">
+              <table class="min-w-full text-center text-gray-200 border-collapse">
+                <thead class="bg-gray-700 text-white">
+                  <tr>
+                    <th class="py-2 px-3 border-b border-gray-600">Name</th>
+                    <th class="py-2 px-3 border-b border-gray-600">Roll</th>
+                    <th class="py-2 px-3 border-b border-gray-600">Class</th>
+                    <th class="py-2 px-3 border-b border-gray-600">F's Name</th>
+                    <th class="py-2 px-3 border-b border-gray-600">Rank</th>
+                    <th class="py-2 px-3 border-b border-gray-600 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="bg-gray-800 hover:bg-gray-700">
+                    <td class="name py-2 px-3 border-b border-gray-600">{{ student["STUDENTS_NAME"] }}</td>
+                    <td class="roll py-2 px-3 border-b border-gray-600">{{ student["ROLL"] }}</td>
+                    <td class="py-2 px-3 border-b border-gray-600">{{ student["CLASS"] }}</td>
+                    <td class="f-name py-2 px-3 border-b border-gray-600">{{ student["FATHERS_NAME"] }}</td>
+                    <td class="py-2 px-3 border-b border-gray-600">{{ student["overall_rank"] }}</td>
+                    <td class="py-2 px-3 border-b border-gray-600 text-right">
+                      <button class="bg-blue-600 hover:bg-blue-700 text-white py-1 px-3 rounded-lg text-base flex items-center gap-2"
+                        onclick="getResult('{{ student['student_id'] }}', '{{ student['class_id'] }}')">
+                        <i class="bi bi-printer-fill"></i> Print Result
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- END: Student Header Table -->
 
-              <thead class="bg-gray-700 text-center font-semibold">
-                <tr>
-                  <th class="py-2 px-3 border border-gray-600 text-left">Sub.</th>
-                  {% for exam_name, exam_data in student.marks.items() %}
-                    <th class="py-2 px-3 border border-gray-600">
-                      {{ exam_name }}
-                      <div class="text-gray-400 text-xs">{{ exam_data.weightage }}</div>
-                    </th>
+            <!-- Subjects Table -->
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-gray-200 border border-gray-700 border-collapse table-auto">
+                {% set marks = student.marks %}
+                {% set exam_names = marks.keys() | list %}
+                {% set subjects = student.marks[exam_names[0]].subject_marks_dict.keys() | list %}
+                {% set special_columns = ["G. Total", "Grades", "Percentage", "Total"] %}
+
+                <thead class="bg-gray-700 text-center font-semibold">
+                  <tr>
+                    <th class="py-2 px-3 border border-gray-600 text-left">Sub.</th>
+                    {% for exam_name, exam_data in student.marks.items() %}
+                      <th class="py-2 px-3 border border-gray-600">
+                        {{ exam_name }}
+                        <div class="text-gray-400 text-xs">{{ exam_data.weightage }}</div>
+                      </th>
+                    {% endfor %}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {% for subject in subjects %}
+                    <tr class="text-center">
+                      <th class="py-2 px-3 border border-gray-600 text-left">{{ subject }}</th>
+                      {% for exam_name in exam_names %}
+                        {% set exam_data = marks[exam_name] %}
+                        <td class="py-2 px-3 border border-gray-600 {% if exam_name in special_columns %}font-bold{% endif %}">
+                          {{ exam_data.subject_marks_dict.get(subject, '') }}
+                        </td>
+                      {% endfor %}
+                    </tr>
                   {% endfor %}
-                </tr>
-              </thead>
 
-              <tbody>
-                {% for subject in subjects %}
-                  <tr class="text-center">
-                    <th class="py-2 px-3 border border-gray-600 text-left">{{ subject }}</th>
+                  <!-- Grand Total -->
+                  <tr class="bg-gray-700 font-bold text-center">
+                    <th class="py-2 px-3 border border-gray-600 text-left">G.Total</th>
                     {% for exam_name in exam_names %}
-                      {% set exam_data = marks[exam_name] %}
-                      <td class="py-2 px-3 border border-gray-600 {% if exam_name in special_columns %}font-bold{% endif %}">
-                        {{ exam_data.subject_marks_dict.get(subject, '') }}
+                      <td class="py-2 px-3 border border-gray-600">
+                        {{ marks[exam_name].exam_total }}
                       </td>
                     {% endfor %}
                   </tr>
-                {% endfor %}
 
-                <!-- Grand Total -->
-                <tr class="bg-gray-700 font-bold text-center">
-                  <th class="py-2 px-3 border border-gray-600 text-left">G.Total</th>
-                  {% for exam_name in exam_names %}
-                    <td class="py-2 px-3 border border-gray-600">
-                      {{ marks[exam_name].exam_total }}
-                    </td>
-                  {% endfor %}
-                </tr>
+                  <!-- Percentage -->
+                  <tr class="bg-gray-700 font-bold text-center">
+                    <th class="py-2 px-3 border border-gray-600 text-left">Percentage</th>
+                    {% for exam_name in exam_names %}
+                      <td class="py-2 px-3 border border-gray-600">
+                        {{ marks[exam_name].percentage }}
+                      </td>
+                    {% endfor %}
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <!-- END: Subjects Table -->
 
-                <!-- Percentage -->
-                <tr class="bg-gray-700 font-bold text-center">
-                  <th class="py-2 px-3 border border-gray-600 text-left">Percentage</th>
-                  {% for exam_name in exam_names %}
-                    <td class="py-2 px-3 border border-gray-600">
-                      {{ marks[exam_name].percentage }}
-                    </td>
-                  {% endfor %}
-                </tr>
-              </tbody>
-            </table>
           </div>
-          <!-- END: Subjects Table -->
-
         </div>
-      </div>
-      <!-- END: Single Result Card -->
-    {% endfor %}
-  {% else %}
-    <!-- Empty State -->
-    <div class="text-center text-gray-400 text-lg py-10">No data available. Please select a class.</div>
-  {% endif %}
-</div>
-<!-- END: Results List -->
-
-
-
-
+        <!-- END: Single Result Card -->
+      {% endfor %}
+    {% else %}
+      <!-- Empty State -->
+      <div class="text-center text-gray-400 text-lg py-10">No data available. Please select a class.</div>
+    {% endif %}
+  </div>
+  <!-- END: Results List -->
 </div>
 <!-- END: Main Container -->
 
 <script>
-  // START: getResult function
+  // START: getResult function (unchanged behavior)
   async function getResult(id, classId) {
     console.log("Fetching result for ID:", id, "Class ID:", classId);
     try {
@@ -172,7 +192,8 @@
       });
       const data = await response.json();
       if (!response.ok) {
-        showAlert(response.status, data.message);
+        if (typeof showAlert === 'function') showAlert(response.status, data.message);
+        else alert(data.message || 'Failed to fetch result');
         return;
       }
       const { html } = data;
@@ -186,14 +207,186 @@
   }
   // END: getResult function
 
-  // START: searchFunction
+  // START: updatePageWithLoader
+  async function updatePageWithLoader(url, targetId, data = {}) {
+    const loader = document.getElementById('marks-loader');
+    const target = document.getElementById(targetId);
+
+    // Show loader overlay
+    loader.classList.remove('hidden');
+
+    // Show lightweight skeleton while loading
+    const skeleton = `
+     <div class="space-y-6">
+      <!-- START: Skeleton Marksheet Card -->
+      <div class="bg-gray-800 rounded-xl p-6 animate-pulse space-y-4">
+        
+        <!-- Header Skeleton -->
+        <div class="border border-gray-700 rounded p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <div class="h-5 bg-gray-700 rounded w-1/5"></div>
+            <div class="h-5 bg-gray-700 rounded w-12"></div>
+          </div>
+          <div class="grid grid-cols-5 gap-3 mt-2">
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+          </div>
+        </div>
+
+        <!-- Table Skeleton -->
+        <div class="border border-gray-700 rounded p-4 space-y-2">
+          <div class="flex justify-between">
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+          </div>
+
+          <!-- Repeat rows -->
+          <div class="space-y-2 mt-3">
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+          </div>
+
+          <div class="h-4 bg-gray-700 rounded mt-4 w-1/3"></div>
+          <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+        </div>
+      </div>
+
+      <!-- Duplicate for multiple cards -->
+      <div class="bg-gray-800 rounded-xl p-6 animate-pulse space-y-4">
+        <div class="border border-gray-700 rounded p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <div class="h-5 bg-gray-700 rounded w-1/5"></div>
+            <div class="h-5 bg-gray-700 rounded w-12"></div>
+          </div>
+          <div class="grid grid-cols-5 gap-3 mt-2">
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+          </div>
+        </div>
+
+        <div class="border border-gray-700 rounded p-4 space-y-2">
+          <div class="flex justify-between">
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+            <div class="h-4 bg-gray-700 rounded w-1/6"></div>
+          </div>
+
+          <div class="space-y-2 mt-3">
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+            <div class="h-4 bg-gray-700 rounded"></div>
+          </div>
+
+          <div class="h-4 bg-gray-700 rounded mt-4 w-1/3"></div>
+          <div class="h-4 bg-gray-700 rounded w-1/4"></div>
+        </div>
+      </div>
+    </div>
+    `;
+    if (target) target.innerHTML = skeleton;
+
+    try {
+      let response;
+      updatePage(url, targetId, data);
+  
+      // after injecting new content, re-run search to update any visible state
+      searchFunction();
+
+    } catch (err) {
+      if (target) target.innerHTML = `<div class="text-red-400 p-4">Network error: ${err.message}</div>`;
+    } finally {
+      // hide loader
+      loader.classList.add('hidden');
+    }
+  }
+  // END: updatePageWithLoader
+
+  // START: Fancy No Results UI helper
+  function createNoResultsElement(id = 'no-results-message') {
+    const wrapper = document.createElement('div');
+    wrapper.id = id;
+    wrapper.className = 'flex flex-col items-center justify-center py-8 gap-4 text-center text-gray-200';
+
+    wrapper.innerHTML = `
+      <div class="w-40 h-40 rounded-full bg-gradient-to-tr from-gray-800 to-gray-700 flex items-center justify-center shadow-inner">
+        <svg class="w-20 h-20 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4M7.5 4.5h9a2.5 2.5 0 012.5 2.5v9A2.5 2.5 0 0116.5 19.5h-9A2.5 2.5 0 015 17V8A3.5 3.5 0 018.5 4.5z" />
+        </svg>
+      </div>
+      <div class="max-w-xl">
+        <h3 class="text-2xl font-semibold text-white">No students found</h3>
+        <p class="text-gray-400 mt-2">We couldn't find any marksheets that match your search. Try a different name, roll number, or clear the search.</p>
+      </div>
+      <div class="flex gap-3 mt-3">
+        <button id="clear-search-btn" class="px-4 py-2 rounded-md bg-indigo-600 hover:bg-indigo-700 text-white">Clear search</button>
+        <button id="choose-class-btn" class="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-600 text-gray-200">Choose class</button>
+      </div>
+    `;
+
+    // attach events after insertion
+    wrapper.addEventListener('click', (e) => { e.stopPropagation(); });
+    return wrapper;
+  }
+  // END: Fancy No Results UI helper
+
+  // START: searchFunction (enhanced)
   function searchFunction() {
-    const filter = document.getElementById('search-input').value.toLowerCase();
-    document.querySelectorAll('.result-card').forEach(card => {
-      const cells = card.querySelector('.student-summary').getElementsByTagName('td');
-      const match = Array.from(cells).some(td => td.textContent.toLowerCase().includes(filter));
-      card.style.display = match ? '' : 'none';
+    const inputEl = document.getElementById("search-input");
+    const input = inputEl.value.toLowerCase().trim();
+    const cards = Array.from(document.querySelectorAll(".marks-card"));
+
+    cards.forEach(card => {
+      const name = card.querySelector(".name")?.innerText.toLowerCase() || "";
+      const roll = card.querySelector(".roll")?.innerText.toLowerCase() || "";
+      const father = card.querySelector(".f-name")?.innerText.toLowerCase() || "";
+
+      const isMatch = name.includes(input) || roll.includes(input) || father.includes(input);
+      card.style.display = isMatch ? "block" : "none";
     });
+
+    const visibleCards = cards.filter(c => c.style.display !== "none").length;
+    const resultsContainer = document.getElementById("results");
+    let emptyMessage = document.getElementById("no-results-message");
+
+    if (visibleCards === 0 && input !== "") {
+      if (!emptyMessage) {
+        const el = createNoResultsElement('no-results-message');
+        resultsContainer.appendChild(el);
+
+        // wire up the buttons
+        document.getElementById('clear-search-btn').addEventListener('click', () => {
+          inputEl.value = '';
+          searchFunction();
+          inputEl.focus();
+        });
+
+        document.getElementById('choose-class-btn').addEventListener('click', () => {
+          document.getElementById('classView')?.focus();
+        });
+      }
+    } else {
+      if (emptyMessage) emptyMessage.remove();
+    }
   }
   // END: searchFunction
 </script>

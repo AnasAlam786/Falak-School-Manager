@@ -1,6 +1,6 @@
 # src/controller/auth.py
 
-from flask import render_template, session, url_for, redirect, Blueprint, request, make_response
+from flask import render_template, session, url_for, redirect, Blueprint, request, jsonify
 
 from cryptography.fernet import Fernet
 
@@ -20,8 +20,7 @@ FERNET_KEY = os.environ.get('FERNET_KEY')
 
 @login_bp.route('/login', methods=["GET", "POST"])
 def login():
-    if "user_id" in session:
-        return redirect(url_for('student_list_bp.student_list'))
+
 
     if request.method == "POST":
         email = request.form.get('email')
@@ -40,7 +39,16 @@ def login():
 
         return redirect(url_for('student_list_bp.student_list'))
 
-    return render_template('login.html', error=None)
+    required_keys = ["user_id","role","school_id","session_id","current_running_session","permissions","school_name", "permission_no", "logo", "role"]
+    for key in required_keys:
+        if key not in session:
+            session.clear()
+            return render_template('login.html', error=None)
+
+    return redirect(url_for('student_list_bp.student_list'))
+    
+
+    
 
 
 

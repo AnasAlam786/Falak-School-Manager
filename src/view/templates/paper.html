@@ -470,7 +470,6 @@ function saveCurrentState() {
                     color: black;
                     background: rgb(255, 555, 255);
                     line-height: 1.2;
-                    border: 2px solid black;
                 }
 
                 .content {
@@ -481,11 +480,15 @@ function saveCurrentState() {
                 .paperHeader {
                     font-size: 20px;
                 }
+                /* ✅ Prevent question from splitting across pages */
+                .question-block {
+                    page-break-inside: avoid;
+                    break-inside: avoid;
+                }
 
                 @media print {
                     body {
                         page-break-after: always;
-                        border: 0px solid black;
                     }
                 }
                 </style>

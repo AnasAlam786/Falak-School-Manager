@@ -54,7 +54,7 @@ def verify_admission():
             admission_session = str(item["value"])
 
         if item["field"] == "ADMISSION_DATE":
-            admission_year = str(str_to_date(item["value"]).year)        
+            admission_year = str(str_to_date(item["value"]).split("-")[-1])        
 
 
     if admission_year != admission_session:
@@ -62,7 +62,6 @@ def verify_admission():
         return jsonify({'message': f"You give Admission year '{admission_year}' and admission session year '{admission_session}-{int(admission_session)+1}'. Admission session and Admission Date must match!"}), 400
     
     admission_no_prefix = str(admission_no)[:2]
-    print(admission_no_prefix, str(admission_session)[-2:])
     if admission_no_prefix != str(admission_session)[-2:]:
         return jsonify({'message': f"You give Admission number '{admission_no}' and admission session year '{admission_session}-{int(admission_session)+1}'. Last two digits of Admission number and Admission session must match!"}), 400
 

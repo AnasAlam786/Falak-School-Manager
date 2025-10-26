@@ -7,7 +7,6 @@ def str_to_date(value):
     for fmt in formats:
         try:
             parsed_date = datetime.strptime(value, fmt)
-            print(parsed_date.strftime('%d-%m-%Y'))
             return parsed_date.strftime('%d-%m-%Y')
         except ValueError:
             continue

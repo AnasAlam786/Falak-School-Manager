@@ -75,6 +75,7 @@ def add_staff():
             'role_id': resolved_role_id,
             'image': data.get('image') or None,
             'sign': data.get('sign') or None,
+            'national_id': data.get('national_id') or None,
         })
     except ValidationError as e:
         errors = []
@@ -109,6 +110,7 @@ def add_staff():
             date_of_joining=model.date_of_joining,
             address=model.address,
             gender=model.gender,
+            national_id=model.national_id,
         )
         db.session.add(teacher)
         db.session.flush()  # 👈 flush so teacher.id is available before commit

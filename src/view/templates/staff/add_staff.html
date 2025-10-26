@@ -531,6 +531,12 @@
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
                             id="salary" placeholder="In rupees">
                     </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label block mb-2 font-medium text-gray-light">UDISE National ID</label>
+                        <input type="text"
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="national_id" placeholder="e.g: UP2021123456789" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()">
+                    </div>
                     <div class="form-group radio-group-container mb-4 col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Role</label>
                         <div class="radio-group grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -871,6 +877,10 @@
                 <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
                     <div class="verification-label text-xs text-slate-400 mb-1">Salary</div>
                     <div class="verification-value font-medium text-white" id="verifySalary"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">National ID</div>
+                    <div class="verification-value font-medium text-white" id="verifyNational_id"></div>
                 </div>
                 <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2" id="verifyClassesItem">
                     <div class="verification-label text-xs text-slate-400 mb-1">Assigned Classes</div>
@@ -1228,6 +1238,7 @@
                     date_of_joining: document.getElementById('date_of_joining').value || null,
                     qualification: document.getElementById('qualification').value.trim() || null,
                     salary: document.getElementById('salary').value.trim() || null,
+                    national_id: document.getElementById('national_id').value.trim() || null,
                     role_id: selectedRole ? selectedRole.value : null,
                     role_name: roleLabel,
                     assigned_classes,
@@ -1597,9 +1608,11 @@
                 const qualificationValue = document.getElementById('qualification').value.trim();
                 const salaryValue = document.getElementById('salary').value.trim();
                 const phoneValue = document.getElementById('phone').value.trim();
+                const nationalID = document.getElementById('national_id').value.trim();
 
                 document.getElementById('verifyQualification').textContent = qualificationValue ? qualificationValue : 'Not Provided';
                 document.getElementById('verifySalary').textContent = salaryValue ? salaryValue : 'Not Provided';
+                document.getElementById('verifyNational_id').textContent = nationalID ? nationalID : 'Not Provided';
                 document.getElementById('verifyPhone').textContent = phoneValue ? phoneValue : 'Not Provided';
                 
 
@@ -1674,6 +1687,7 @@
                 date_of_joining: document.getElementById('date_of_joining').value || null,
                 qualification: document.getElementById('qualification').value.trim() || null,
                 salary: document.getElementById('salary').value.trim() || null,
+                national_id: document.getElementById('national_id').value.trim() || null,
                 role_id: selectedRole ? selectedRole.value : null,
                 role_name: roleLabel,
                 assigned_classes: selectedClasses.map(cls => cls.id),

@@ -15,6 +15,7 @@ from src.controller.marks.utils.marks_processing import result_data
 from bs4 import BeautifulSoup
 
 import pandas as pd
+import time
 
 
 get_marks_api_bp = Blueprint('get_marks_api_bp',   __name__)
@@ -82,9 +83,14 @@ def get_marks_api():
         "ClassData": ["CLASS"],
         "StudentSessions": ["ROLL", "class_id"]
     }
+
+    start_time = time.time()  # start timer
     
     student_marks_data = result_data(school_id, current_session_id, class_id, 
                                      extra_fields=extra_fields)
+    
+    end_time = time.time()  # end timer
+    print(f"login_required decorator took {end_time - start_time:.6f} seconds to run")
 
 
     if not student_marks_data:
@@ -130,6 +136,8 @@ def get_marks_api():
     student_marks_df = student_marks_df.sort_values(["CLASS", "ROLL"]).reset_index(drop=True)
     student_marks = student_marks_df.to_dict(orient='records')
 
+
+
     # # Print the structure of result student_marks_dict
     # import pprint
     # pprint.pprint(student_marks)
@@ -138,8 +146,6 @@ def get_marks_api():
     html = render_template('show_marks.html', student_marks=student_marks)
     soup = BeautifulSoup(html,"lxml")
     content = soup.body.find('div',{'id':'results'}).decode_contents()
-
-
 
     return jsonify({"html":str(content)})
     

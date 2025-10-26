@@ -34,6 +34,11 @@ def update_staff():
     # Get staff data
     staff = TeachersLogin.query.filter_by(id=staff_id, school_id=session.get('school_id')).first()
 
+    print("permissions: ", list(staff.permissions))
+    print("permissions count: ", staff.permissions.count())
+
+
+
     # Print all attributes of the staff object
     print("Staff attributes:")
     for column in staff.__table__.columns:
@@ -122,6 +127,7 @@ def update_staff_api():
             'role_id': resolved_role_id,
             'image': data.get('image') or None,
             'sign': data.get('sign') or None,
+            'national_id': data.get('national_id') or None,
         })
     except Exception as e:
         return jsonify({'message': str(e)}), 400
@@ -144,6 +150,7 @@ def update_staff_api():
         staff.address = model.address
         staff.gender = model.gender
         staff.role_id = model.role_id
+        staff.national_id = model.national_id
         
         # Update password only if provided
         if model.password:

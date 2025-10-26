@@ -6,6 +6,7 @@ compose SQLAlchemy queries for marks with a fluent API.
 Compatibility wrapper `result_data()` is provided for existing controllers.
 """
 
+# import time
 from src import db
 from src.model.ClassExams import ClassExams
 from src.model.StudentsDB import StudentsDB
@@ -265,7 +266,11 @@ def result_data(school_id, session_id, class_id, student_ids=None, extra_fields=
         StudentSessions.ROLL
     )
 
+    # start_time = time.time()  # start timer
+
     result = final_query.all()
+    # end_time = time.time()  # end timer
+    # print(f"request took {end_time - start_time:.6f} seconds to run")
 
     # Convert to dict with ordered marks
     def result_to_dict(row):

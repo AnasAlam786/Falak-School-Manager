@@ -405,7 +405,7 @@
                         <label class="form-label block mb-2 font-medium text-gray-light required">Full Name</label>
                         <input type="text"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="name" placeholder="John Smith" value="{{ staff.name }}"
+                            id="name" placeholder="John Smith" value="{{ staff.Name }}"
                             oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="fullNameError">Please enter a
                             full name</div>
@@ -440,13 +440,13 @@
                         <div class="radio-group grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <label
                                 class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.gender == 'male' %}selected{% endif %}">
-                                <input type="radio" name="gender" value="male" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'male' %}checked{% endif %}>
+                                <input type="radio" name="gender" value="male" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'Male' %}checked{% endif %}>
                                 <i class="fas fa-mars text-[1.8rem] mb-2 text-[#3a86ff]"></i>
                                 <div>Male</div>
                             </label>
                             <label
                                 class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.gender == 'female' %}selected{% endif %}">
-                                <input type="radio" name="gender" value="female" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'female' %}checked{% endif %}>
+                                <input type="radio" name="gender" value="female" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'Female' %}checked{% endif %}>
                                 <i class="fas fa-venus text-[1.8rem] mb-2 text-[#ff006e]"></i>
                                 <div>Female</div>
                             </label>
@@ -479,14 +479,14 @@
                         <label class="form-label block mb-2 font-medium text-gray-light required">Username</label>
                         <input type="text"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="username" placeholder="john.smith" value="{{ staff.username }}">
+                            id="username" placeholder="john.smith" value="{{ staff.User }}">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="usernameError">Please enter a
                             username</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password"
+                            <input type="password" value = "{{ password }}"
                                 class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
                                 id="password" placeholder="••••••••">
                             <button
@@ -502,7 +502,7 @@
                         <label class="form-label block mb-2 font-medium text-gray-light">Confirm
                             Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password"
+                            <input type="password" value = "{{ password }}"
                                 class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
                                 id="confirmPassword" placeholder="••••••••">
                             <button
@@ -691,7 +691,7 @@
                     <div class="selected-permissions-preview mb-4 {% if not staff.permissions %}hidden{% endif %}" id="selectedPermissionsPreview">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-gray-light font-medium">Selected Permissions:</span>
-                            <span class="text-primary text-sm" id="selectedPermissionsCount">{{ staff.permissions|length }} permissions</span>
+                            <span class="text-primary text-sm" id="selectedPermissionsCount">{{ staff.permissions.count() }} permissions</span>
                         </div>
                         <div class="selected-permissions-tags flex flex-wrap gap-2" id="selectedPermissionsTags">
                             {% for perm_id in staff.permissions %}

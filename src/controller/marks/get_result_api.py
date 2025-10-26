@@ -15,6 +15,8 @@ from .utils.marks_processing import result_data
 from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
 
+# import time
+
 get_result_api_bp = Blueprint('get_result_api_bp',   __name__)
 
 
@@ -94,6 +96,8 @@ def add_grades(group, exams):
 @permission_required('get_result')
 def get_result_api():
 
+    
+
     current_session_id = session["session_id"]
     user_id = session["user_id"]
     school_id = session["school_id"]
@@ -121,9 +125,12 @@ def get_result_api():
         
     }
 
+    
+
     student_marks_data = result_data(school_id, current_session_id, 
                                      class_id, student_ids=[student_id],
                                      extra_fields=extra_fields)
+
     # print(student_marks_data)
 
     if not student_marks_data:

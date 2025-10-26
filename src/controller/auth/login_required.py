@@ -10,10 +10,11 @@ def login_required(f):
     
     def decorated_function(*args, **kwargs):
         # start_time = time.time()  # start timer
-
-        required_keys = ["user_id","role","school_id","session_id","current_running_session","permissions","school_name", "permission_no"]
+        required_keys = ["user_id","role","school_id","session_id","current_running_session","permissions","school_name", "permission_no", "logo", "role"]
+        
         for key in required_keys:
             if key not in session:
+                session.clear()
                 if request.blueprint and 'api' in request.blueprint.lower():
                     return jsonify({"message": "You have to login first!"}), 403
                 else:

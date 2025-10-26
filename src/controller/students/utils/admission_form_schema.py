@@ -280,13 +280,13 @@ class AcademicInfoModel(CleanBaseModel):
             "Admission_Class": {
                 "id": "Admission_Class", "type": "select", "value": "Admission Class",
                 "data-short_label": "Adm. Class", "options": {}, 
-                "required": True, "data-description": "Class in which the student is admitted",
+                "required": True, "data-description": "Admission Class",
                 "name": "Admission_Class"
             },
             "CLASS": {
                 "id": "CLASS", "type": "select", "value": "Current Class",
                 "data-short_label": "Class", "options": {}, 
-                "required": True, "data-description": "Select Current class",
+                "required": True, "data-description": "Current class",
                 "name": "CLASS"
             },
             "Section": {

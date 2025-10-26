@@ -26,7 +26,7 @@ final_admission_api_bp = Blueprint( 'final_admission_api_bp',   __name__)
 def final_admission_api():
     data = request.get_json()
 
-    password = data.get("password")
+    # password = data.get("password")
     image = data.get("image", None)
     verified_data = data.get("verifiedData", None)
     school_id=session["school_id"]
@@ -50,7 +50,7 @@ def final_admission_api():
     for date_field in ["DOB", "ADMISSION_DATE"]:
         if date_field in StudentDB_data and isinstance(StudentDB_data[date_field], str):
             try:
-                StudentDB_data[date_field] = datetime.strptime(StudentDB_data[date_field], "%Y-%m-%d").date()
+                StudentDB_data[date_field] = datetime.strptime(StudentDB_data[date_field], "%d-%m-%Y").date()
             except ValueError:
                 print(f"Invalid date format for {date_field}: {StudentDB_data[date_field]}")
                 return jsonify({"message": f"Invalid date format for {date_field}: {StudentDB_data[date_field]}"}), 500
