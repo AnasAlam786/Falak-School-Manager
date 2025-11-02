@@ -12,7 +12,7 @@ get_admit_cards_api_bp = Blueprint('get_admit_cards_api_bp', __name__)
 
 @get_admit_cards_api_bp.route('/admit_cards_api', methods=['POST', 'GET'])
 @login_required
-@permission_required('admission')
+@permission_required('admit_card')
 def get_admit_cards_api():
     """Fetch students for admit cards and render `admit.html`.
 

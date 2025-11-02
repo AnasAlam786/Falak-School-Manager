@@ -110,7 +110,7 @@ class StudentsDB(db.Model):
     session = db.relationship("Sessions", back_populates="students")
     
     student_sessions = db.relationship("StudentSessions", back_populates="students")
-    marks = db.relationship("StudentsMarks_duplicate", back_populates="students")
+    marks = db.relationship("StudentMarks", back_populates="students")
     # students_marks = db.relationship("StudentsMarks", back_populates="students")
     fee_data = db.relationship("FeeData", back_populates="students")
     RTE_info = db.relationship("RTEInfo", back_populates="students")

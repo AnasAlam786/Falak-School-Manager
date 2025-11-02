@@ -23,7 +23,7 @@ class TeachersLogin(db.Model):
     address = Column(Text, nullable=True)
     permission_number = Column(Numeric, nullable=False, default=1)
     national_id = Column(Text, nullable=True)
-    # salary = Column(Numeric, nullable=True)
+    salary = Column(Numeric, nullable=True)
     gender = Column(db.Enum('Male', 'Female', name='GENDER'), nullable=True)
 
     school_id = Column(Text, ForeignKey('Schools.id', onupdate="CASCADE"), nullable=False)

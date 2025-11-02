@@ -94,42 +94,7 @@ def generate_tc_form_api():
 
     if not student_data:
         return jsonify({"message": "Student not found."}), 404
-    
-    print(type(leaving_reason), type(leaving_date), type(general_conduct))
-
-    
-
-    # Single query for all marks, skipping "Craft"
-    # marks = (
-    #     db.session.query(
-    #         StudentsMarks.Subject,
-    #         StudentsMarks.FA1,
-    #         StudentsMarks.SA1,
-    #         StudentsMarks.FA2,
-    #         StudentsMarks.SA2
-    #     )
-    #     .filter(
-    #         StudentsMarks.student_id == student_id,
-    #         StudentsMarks.Subject != 'Craft'
-    #     )
-    #     .all()
-    # )
-
-    # # Process totals and grades
-    # results = []
-    # grades = []
-    # for subj, fa1, sa1, fa2, sa2 in marks:
-    #     scores = [fa1, sa1, fa2, sa2]
-    #     # if any non-numeric, treat as grade
-    #     if any(not str(s).isdigit() for s in scores if s is not None):
-    #         grades.append({ 'subject': subj, 'total': next(s for s in scores if not str(s).isdigit()) })
-    #     else:
-    #         total = sum(int(s or 0) for s in scores)
-    #         results.append({ 'subject': subj, 'total': total })
-    # results.extend(grades)
-
-    # Determine promoted class
-    
+        
     current_class_id = student_data.class_id
     next_id = current_class_id + 1
     

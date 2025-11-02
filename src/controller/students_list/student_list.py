@@ -21,6 +21,7 @@ student_list_bp = Blueprint( 'student_list_bp',   __name__)
 
 @student_list_bp.route('/student_list', methods=['GET'])
 @login_required
+@permission_required('student_list')
 def student_list():
 
     school_id = session['school_id']

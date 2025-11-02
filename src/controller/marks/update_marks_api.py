@@ -4,7 +4,7 @@ from flask import request, jsonify, Blueprint, session
 from sqlalchemy.orm.attributes import flag_modified
 
 from src import db
-from src.model import StudentsMarks_duplicate
+from src.model import StudentMarks
 
 update_marks_api_bp = Blueprint('update_marks_api_bp',   __name__)
 
@@ -30,7 +30,7 @@ def update_marks_api():
     # 🟩 CASE 1: Update existing mark
     if marks_id and marks_id != "":
         
-        student_marks = StudentsMarks_duplicate.query.filter_by(id=marks_id).first()
+        student_marks = StudentMarks.query.filter_by(id=marks_id).first()
         print("Received data for update:", data)
         if student_marks:
             student_marks.score = score
@@ -40,7 +40,7 @@ def update_marks_api():
             return jsonify({"message": "Unable to find student record in database"}), 400
 
     # 🟩 CASE 2: Try to find an existing record to update (by student + subject + exam)
-    existing = StudentsMarks_duplicate.query.filter_by(
+    existing = StudentMarks.query.filter_by(
         student_id=student_id,
         subject_id=subject_id,
         exam_id=exam_id,
@@ -53,7 +53,7 @@ def update_marks_api():
         return jsonify({"message": "Updated existing marks by composite key", "new_mark_id": existing.id}), 200
 
     # 🟩 CASE 3: Create new record
-    new_mark = StudentsMarks_duplicate(
+    new_mark = StudentMarks(
         student_id=student_id,
         subject_id=subject_id,
         exam_id=exam_id,

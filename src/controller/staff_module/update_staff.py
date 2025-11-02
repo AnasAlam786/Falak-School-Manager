@@ -1,11 +1,16 @@
 # src/controller/staff_module/update_staff.py
 
 from flask import render_template, session, Blueprint, request, jsonify
+from pydantic_core import ValidationError
 from sqlalchemy import func
 
+from src.controller.staff_module.utils.class_permission_validator import staff_specific_permission, validate_class, validate_permissions
+from src.model import ClassData, Permissions, RolePermissions, StaffPermissions
+from src.model.ClassAccess import ClassAccess
 from src.model.TeachersLogin import TeachersLogin
 from src.model.Roles import Roles
 
+from src.controller.staff_module.utils.icons import permission_icons, ROLE_ICONS
 from src.controller.staff_module.utils import hash_password
 from src.controller.staff_module.utils.pydantic_verification import StaffVerification
 
@@ -33,138 +38,94 @@ def update_staff():
     
     # Get staff data
     staff = TeachersLogin.query.filter_by(id=staff_id, school_id=session.get('school_id')).first()
-
-    print("permissions: ", list(staff.permissions))
-    print("permissions count: ", staff.permissions.count())
-
-
-
-    # Print all attributes of the staff object
-    print("Staff attributes:")
-    for column in staff.__table__.columns:
-        print(f"{column.name}: {getattr(staff, column.name)}")    
     if not staff:
         return render_template('staff/update_staff.html', error="Staff not found")
+
+    classes = (
+        db.session.query(
+            ClassData.id.label("id"),
+            ClassData.CLASS,
+            ClassAccess.id.label("access_id")   # It will be none if staff don't have access to that class
+        )
+        .outerjoin(
+            ClassAccess, (ClassAccess.class_id == ClassData.id) & (ClassAccess.staff_id == staff_id)
+        )
+        .filter(ClassData.school_id == session.get('school_id'))
+        .order_by(ClassData.display_order)
+    ).all()
+
+    selected_classes = [
+        {"id": str(c.id), "name": c.CLASS}
+        for c in classes if c.access_id
+    ]
+
+
+    # Get all the permissions staff have also accounting role permissions and exception staff permissions
+    permissions_list = []
+    permissions = (
+        db.session.query(
+            # Select permission details
+            Permissions.description, Permissions.title,
+            Permissions.id, Permissions.action,
+            # RolePermissions.id will be None if the role doesn't have this permission
+            RolePermissions.id.label("role_permission_id")
+        )
+        # Outer join to include all permissions,
+        # even if not assigned to the current role
+        .outerjoin(
+            RolePermissions,
+            (RolePermissions.permission_id == Permissions.id) &
+            (RolePermissions.role_id == staff.role_id)
+        )
+        # Only include permissions that are marked as assignable
+        .filter(Permissions.assignable.is_(True))
+        .all()  # Fetch all results
+    )
+
     
-    # Get all roles for the form
-    roles = Roles.query.all()
+    staff_specific_permission = StaffPermissions.query.filter_by(staff_id=staff_id).all()
+    staff_specific_permission_map = {p.permission_id: p.is_granted for p in staff_specific_permission}
+
+    for permission in permissions:
+        role_has_permission = permission.role_permission_id is not None
+        staff_override = staff_specific_permission_map.get(permission.id)
+
+            # Determine final access
+        if staff_override is not None:
+            is_granted = staff_override  # Explicit staff override
+        else:
+            is_granted = role_has_permission  # Default from role
+
+        permissions_list.append({
+            "id": permission.id,
+            "title": permission.title,
+            "description": permission.description,
+            "action": permission.action,
+            "icon": permission_icons.get(permission.title, "fa-cog"),  # default fallback icon
+            "selected": is_granted,
+            "role_permission_id": permission.role_permission_id,
+            
+        })
+    
+    roles = (
+        db.session.query(
+            Roles.id,
+            Roles.role_name,
+        )
+        .filter(Roles.assignable == True)
+        .order_by(Roles.display_order.asc())
+        .all()
+    )
     password = hash_password.decrypt_password(staff.Password)
 
-    sample_male_image = 'https://static.vecteezy.com/system/resources/previews/024/183/538/non_2x/male-avatar-portrait-of-a-business-man-in-a-suit-illustration-of-male-character-in-modern-color-style-vector.jpg'
-    sample_female_image = 'https://static.vecteezy.com/system/resources/previews/025/030/083/non_2x/businesswoman-portrait-beautiful-woman-in-business-suit-employee-of-business-institution-in-uniform-lady-office-worker-woman-business-avatar-profile-picture-illustration-vector.jpg'
-
-    
     return render_template(
         'staff/update_staff.html',
         staff=staff, roles=roles,
-        sample_female_image=sample_female_image,
-        sample_male_image=sample_male_image,
-        password=password
-
+        password=password,
+        ROLE_ICONS=ROLE_ICONS,
+        permissions_list=permissions_list,
+        classes=classes,
+        selected_classes=selected_classes
     )
 
-@update_staff_bp.route('/api/update_staff', methods=['POST'])
-@login_required
-@permission_required('update_staff')
-def update_staff_api():
-    data = request.get_json(silent=True) or (request.form.to_dict() if request.form else {})
-    
-    staff_id = data.get('staff_id')
-    if not staff_id:
-        return jsonify({'message': 'Staff ID is required'}), 400
-    
-    try:
-        staff_id = int(staff_id)
-    except ValueError:
-        return jsonify({'message': 'Invalid Staff ID'}), 400
-    
-    # Get existing staff
-    staff = TeachersLogin.query.filter_by(id=staff_id, school_id=session.get('school_id')).first()
-    if not staff:
-        return jsonify({'message': 'Staff not found'}), 404
-    
-    # Normalize gender to match Pydantic Literal and DB Enum
-    gender = data.get('gender')
-    if isinstance(gender, str):
-        gender_norm = gender.strip().title()  # male -> Male
-        if gender_norm not in {"Male", "Female"}:
-            gender_norm = None
-    else:
-        gender_norm = None
 
-    # Resolve role_id: accept numeric id or map from role_name/value label
-    role_id_raw = data.get('role_id')
-    resolved_role_id = None
-    if isinstance(role_id_raw, (int,)):
-        resolved_role_id = role_id_raw
-    elif isinstance(role_id_raw, str) and role_id_raw.isdigit():
-        resolved_role_id = int(role_id_raw)
-    else:
-        # Try to map by role_name from payload label or value
-        role_name = (data.get('role_name') or str(role_id_raw or '')).strip()
-        if role_name:
-            role = Roles.query.filter(func.lower(Roles.role_name) == role_name.lower()).first()
-            if role:
-                resolved_role_id = int(role.id)
-            else:
-                return jsonify({'message': 'Invalid role'}), 400
-        else:
-            return jsonify({'message': 'Role name is required'}), 400
-
-    try:
-        model = StaffVerification(**{
-            'name': data.get('name'),
-            'email': data.get('email'),
-            'phone': data.get('phone'),
-            'dob': data.get('dob'),
-            'gender': gender_norm,
-            'address': data.get('address') or None,
-            'username': data.get('username'),
-            'password': data.get('password'),
-            'date_of_joining': data.get('date_of_joining'),
-            'qualification': data.get('qualification') or None,
-            'salary': data.get('salary') or None,
-            'role_id': resolved_role_id,
-            'image': data.get('image') or None,
-            'sign': data.get('sign') or None,
-            'national_id': data.get('national_id') or None,
-        })
-    except Exception as e:
-        return jsonify({'message': str(e)}), 400
-
-    # Email unique check (exclude current staff)
-    if model.email and model.email != staff.email:
-        existing_staff = TeachersLogin.query.filter_by(email=str(model.email)).first()
-        if existing_staff and existing_staff.id != staff_id:
-            return jsonify({'message': f'Email ({model.email}) already exists'}), 400
-
-    # Update staff data
-    try:
-        staff.Name = model.name
-        staff.email = str(model.email) if model.email else None
-        staff.User = model.username
-        staff.qualification = model.qualification
-        staff.dob = model.dob
-        staff.phone = int(model.phone) if model.phone else None
-        staff.date_of_joining = model.date_of_joining
-        staff.address = model.address
-        staff.gender = model.gender
-        staff.role_id = model.role_id
-        staff.national_id = model.national_id
-        
-        # Update password only if provided
-        if model.password:
-            staff.Password = hash_password.encrypt_password(model.password)
-        
-        # Update image and signature if provided
-        if model.image:
-            staff.image = model.image
-        if model.sign:
-            staff.Sign = model.sign
-            
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'message': 'Error occurred while updating staff', 'error': str(e)}), 500
-
-    return jsonify({'message': 'Staff updated successfully', 'id': staff.id}), 200

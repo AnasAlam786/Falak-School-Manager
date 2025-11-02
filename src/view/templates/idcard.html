@@ -678,7 +678,7 @@
                     school-name="{{ school.School_Name }}"
                     school-UDISE="{{ school.UDISE }}"
                     school-logo="{{ school.Logo }}"
-                    session-logo="https://lh3.googleusercontent.com/d/1tJnm5i4GgSyb4HIULAb2tvbejXfrz5HZ=s200"
+                    session-logo="{{ session_logo }}"
                     student-image="{% if student.IMAGE %}https://lh3.googleusercontent.com/d/{{ student.IMAGE }}=s220{% else %}''{% endif %}"
                     student-name="{{ student.STUDENTS_NAME }}"
                     student-father="C/O Mr. {{ student.FATHERS_NAME }}"
@@ -687,7 +687,7 @@
                     student-phone="{{ student.PHONE }}"
                     student-address="{{ student.ADDRESS }}"
                     teacher-sign="https://lh3.googleusercontent.com/d/{{ student.teachers_sign }}=s200"
-                    principal-sign="https://lh3.googleusercontent.com/d/14A_2bL47AwZ9ZZyhxsEpCcB1sfInjhe4=s200"
+                    principal-sign="{{ principal_sign }}"
                     school-address="{{ school.Address }}"
                     school-phone="{{ school.Phone }}">
                 </hanging-image-icard>

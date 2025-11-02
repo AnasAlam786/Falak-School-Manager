@@ -92,7 +92,7 @@ def save_sessions(user = None, user_id = None):
     session["school_id"] = user.school_id
     session["permission_no"] = user.permission_number
 
-    permissions = get_permissions(user.id)
+    permissions = get_permissions(user.id, user.role_id)
     session["permissions"] = permissions
 
     current_running_session = None

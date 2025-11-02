@@ -12,5 +12,3 @@ if __name__ == "__main__":
     # To activate your virtual environment, run the following command in your terminal (not in this Python file):
     # On Windows:
     #   .\venv\Scripts\activate
-    # On macOS/Linux:P
-    #   source venv/bin/activateP

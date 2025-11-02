@@ -1,4 +1,4 @@
-"""Marks processing utilities built around the new StudentsMarks_duplicate model.
+"""Marks processing utilities built around the new StudentMarks model.
 
 This module exposes a reusable query-builder that can be used across the app to
 compose SQLAlchemy queries for marks with a fluent API.
@@ -14,7 +14,7 @@ from src.model.StudentSessions import StudentSessions
 from src.model.ClassData import ClassData
 from src.model.Subjects import Subjects
 from src.model.Exams import Exams
-from src.model.StudentsMarks_duplicate import StudentsMarks_duplicate
+from src.model.StudentMarks import StudentMarks
 
 from sqlalchemy import func, case, cast, Float, literal, func
 from sqlalchemy.dialects.postgresql import aggregate_order_by
@@ -114,13 +114,13 @@ def result_data(school_id, session_id, class_id, student_ids=None, extra_fields=
             ses.c.subject_name,
             ses.c.evaluation_type,
             ses.c.subject_display_order,
-            StudentsMarks_duplicate.score
+            StudentMarks.score
         )
         .outerjoin(
-            StudentsMarks_duplicate,
-            (StudentsMarks_duplicate.student_id == ses.c.student_id) &
-            (StudentsMarks_duplicate.exam_id == ses.c.exam_id) &
-            (StudentsMarks_duplicate.subject_id == ses.c.subject_id)
+            StudentMarks,
+            (StudentMarks.student_id == ses.c.student_id) &
+            (StudentMarks.exam_id == ses.c.exam_id) &
+            (StudentMarks.subject_id == ses.c.subject_id)
         )
         .subquery()
     )

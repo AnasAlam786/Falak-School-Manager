@@ -2,13 +2,16 @@
 
 from flask import session, render_template, request, jsonify, Blueprint
 from bs4 import BeautifulSoup
+
+from src.controller.permissions.permission_required import permission_required
 from ..auth.login_required import login_required
 
 question_paper_api_bp = Blueprint( 'question_paper_api_bp',   __name__)
 
 
 @question_paper_api_bp.route('/question_paper_api', methods=["POST"])
-# @login_required
+@login_required
+@permission_required('create_paper')
 def question_paper_api():
 
        

@@ -1,36 +1,43 @@
-# src/controller/staff_module/add_staff.py
-
 from datetime import datetime, timezone
-from flask import jsonify, session, Blueprint, request
-from pydantic import ValidationError
+from flask import Blueprint, jsonify, request, session
+from pydantic_core import ValidationError
 from sqlalchemy import func
-from psycopg2.errors import UniqueViolation
 
-
-from src.model.StaffPermissions import StaffPermissions
-from src.model.TeachersLogin import TeachersLogin
-from src.model.Roles import Roles
-from src.model.ClassAccess import ClassAccess
-
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 from src.controller.staff_module.utils import hash_password
+from src.controller.staff_module.utils.class_permission_validator import staff_specific_permission, validate_class, validate_permissions
 from src.controller.staff_module.utils.pydantic_verification import StaffVerification
-from src.controller.staff_module.utils.class_permission_validator import (validate_class, 
-                                                                          validate_permissions,
-                                                                          staff_specific_permission)
-
+from src.model import StaffPermissions
+from src.model.ClassAccess import ClassAccess
+from src.model.Roles import Roles
+from src.model.TeachersLogin import TeachersLogin
 from src import db
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
 
-add_staff_api_bp = Blueprint( 'add_staff_api_bp',   __name__)
+update_staff_api_bp = Blueprint( 'update_staff_api_bp',   __name__)
 
-@add_staff_api_bp.route('/api/add_staff', methods=['POST'])
+@update_staff_api_bp.route('/api/update_staff_api', methods=['POST'])
 @login_required
-@permission_required('add_staff')
-def add_staff():
-
+@permission_required('update_staff')
+def update_staff_api():
     data = request.get_json(silent=True) or (request.form.to_dict() if request.form else {})
     school_id = session.get('school_id')
+    # Determine staff_id: try JSON/form payload keys, then query params, then session (for self-update)
+    staff_id = data.get('staff_id')
+
+    if not staff_id:
+        return jsonify({'message': 'Staff ID is required'}), 400
+
+    try:
+        staff_id = int(staff_id)
+    except (ValueError, TypeError):
+        return jsonify({'message': 'Invalid Staff ID'}), 400
+
+    # Get existing staff
+    staff = TeachersLogin.query.filter_by(id=staff_id, school_id=school_id).first()
+    if not staff:
+        return jsonify({'message': 'Staff not found'}), 404
+
     # Normalize gender to match Pydantic Literal and DB Enum
     gender = data.get('gender')
     if isinstance(gender, str):
@@ -60,7 +67,6 @@ def add_staff():
         else:
             return jsonify({'message': 'Role name is required'}), 400
 
-
     try:
         model = StaffVerification(**{
             'name': data.get('name'), 
@@ -87,18 +93,20 @@ def add_staff():
             # Make error messages user-friendly
             errors.append(f"{field.capitalize()}: {msg}")
         return jsonify({'success': False, 'errors': errors}), 400
-    
 
-    # Email unique check
-    if model.email and TeachersLogin.query.filter_by(email=str(model.email)).first():
-        return jsonify({'message': f'Email ({model.email}) already exists'}), 400
+    # Email unique check (exclude current staff)
+    if model.email and model.email != staff.email:
+        existing_staff = TeachersLogin.query.filter_by(email=str(model.email)).first()
+        if existing_staff and existing_staff.id != staff_id:
+            return jsonify({'message': f'Email ({model.email}) already exists'}), 400
 
-    # Build DB entity
+    # Update staff data
     try:
+
         # Class and Permissions Validation
         assigned_classes = data.get("assigned_classes") or []
         permission_ids = data.get('permissions') or []
-
+        
         class_validation_message, is_valid = validate_class(assigned_classes, school_id)
         if not is_valid:
             db.session.rollback()
@@ -109,46 +117,49 @@ def add_staff():
             db.session.rollback()
             return jsonify({'message': permission_validation_message}), 400
         
-        staff_specific_permissions = staff_specific_permission(permission_ids, role_id)
         
-        # Adding rows to database
-        teacher = TeachersLogin(
-            Name=model.name, email=str(model.email) if model.email else None,
-            Password=hash_password.encrypt_password(model.password), IP=None,
-            Sign=model.sign, User=model.username, status='active',
-            school_id=session.get('school_id'), role_id=model.role_id,
-            image=model.image, qualification=model.qualification,
-            dob=model.dob, phone=int(model.phone) if model.phone else None,
-            date_of_joining=model.date_of_joining, address=model.address,
-            gender=model.gender, national_id=model.national_id,
-        )
-        db.session.add(teacher)
-        db.session.flush()  # 👈 flush so teacher.id is available before commit
-        
+
+        staff.Name = model.name
+        staff.email = str(model.email) if model.email else None
+        staff.phone = int(model.phone) if model.phone else None
+        staff.dob = model.dob if model.dob else None
+        staff.gender = model.gender if model.gender else None
+        staff.address = model.address if model.address else None
+        staff.User = model.username if model.username else None
+        staff.date_of_joining = model.date_of_joining if model.date_of_joining else None
+        staff.qualification = model.qualification if model.qualification else None
+        staff.salary = model.salary if model.salary else None
+        staff.national_id = model.national_id if model.national_id else None
+        staff.role_id = model.role_id if model.role_id else None
+        staff.image = model.image if model.image else None
+        staff.sign = model.sign if model.sign else None
+        staff.permission_number = staff.permission_number + 1 if staff.permission_number is not None else 1
+        if model.password:
+            staff.Password = hash_password.encrypt_password(model.password)
+
+        #delete the links with ClassAccess and StaffPermissions
+        ClassAccess.query.filter_by(staff_id=staff.id).delete()
+        StaffPermissions.query.filter_by(staff_id=staff.id).delete()
+
         for class_id in assigned_classes:
             db.session.add(ClassAccess(
                 class_id=int(class_id),
-                staff_id=teacher.id,
+                staff_id=staff.id,
                 granted_at=datetime.now(timezone.utc).date()
             ))
 
+        staff_specific_permissions = staff_specific_permission(permission_ids, role_id)
         for perms in staff_specific_permissions:
             db.session.add(StaffPermissions(
                 permission_id=perms["permission_id"],
-                staff_id=teacher.id,
+                staff_id=staff.id,
                 is_granted=perms["isgranted"],
                 created_at=datetime.now(timezone.utc).date()
             ))
-        
-       
+            
         db.session.commit()
-
     except Exception as e:
         db.session.rollback()
-        print(e)
-        if isinstance(e.orig, UniqueViolation):
-            return jsonify({'message': 'Cannot add staff: duplicate record detected. Please check the data and try again.'}), 400
-        else:
-            return jsonify({'message': 'An unexpected database error occurred while adding staff.'}), 500
+        return jsonify({'message': 'Error occurred while updating staff', 'error': str(e)}), 500
 
-    return jsonify({'message': 'Staff added successfully', 'id': teacher.id}), 200
+    return jsonify({'message': 'Staff updated successfully'}), 200

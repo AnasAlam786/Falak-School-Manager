@@ -19,7 +19,7 @@ get_students_pdf_api_bp = Blueprint( 'get_students_pdf_api_bp',   __name__)
 
 @get_students_pdf_api_bp.route('/api/get_students_pdf_api', methods=["GET"])
 @login_required
-@permission_required('download_students_data')
+@permission_required('admission')
 def get_students_pdf_api():
 
     

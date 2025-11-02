@@ -28,4 +28,4 @@ class Subjects(db.Model):
     class_data = db.relationship('ClassData', back_populates='subjects')
     staff_data = db.relationship('TeachersLogin', back_populates='subjects')
 
-    marks = db.relationship("StudentsMarks_duplicate", back_populates="subjects")
+    marks = db.relationship("StudentMarks", back_populates="subjects")

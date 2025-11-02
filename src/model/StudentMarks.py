@@ -4,8 +4,8 @@ from sqlalchemy import (
 )
 from src import db
 
-class StudentsMarks_duplicate(db.Model):
-    __tablename__ = 'StudentsMarks_duplicate'
+class StudentMarks(db.Model):
+    __tablename__ = 'StudentMarks'
 
     id = db.Column(BigInteger, primary_key=True, autoincrement=True)
     student_id = Column(BigInteger, db.ForeignKey('StudentsDB.id', onupdate='CASCADE'), nullable=False)

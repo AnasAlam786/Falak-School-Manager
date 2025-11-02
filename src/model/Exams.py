@@ -17,5 +17,5 @@ class Exams(db.Model):
 
     # Optional relationship
     school = db.relationship('Schools', back_populates='exams')
-    marks = db.relationship("StudentsMarks_duplicate", back_populates="exams")
+    marks = db.relationship("StudentMarks", back_populates="exams")
     class_exams = db.relationship("ClassExams", back_populates="exams")

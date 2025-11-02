@@ -367,6 +367,8 @@
 </style>
 
 <div class="mx-auto">
+    <!-- Hidden staff id (used by JS to tell backend which staff to update) -->
+    <input type="hidden" id="staff_id" name="staff_id" value="{{ staff.id }}">
     <header
         class="flex justify-between items-center py-5 border-b border-border-light mb-[30px] bg-gradient-to-r from-slate-800/50 to-slate-900/50 rounded-xl p-6">
         <div class="mb-[30px]">
@@ -412,25 +414,25 @@
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Email</label>
-                        <input type="email"
+                        <input type="email" value="{{ staff.email }}"
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="email" placeholder="john.smith@example.com" value="{{ staff.email }}">
+                            id="email" placeholder="john.smith@example.com">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="emailError">Please enter a valid
                             email address</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Phone Number</label>
-                        <input type="tel"
+                        <input type="tel" value="{{ staff.phone if staff.phone else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="phone" placeholder="+91 98765543210" value="{{ staff.phone or '' }}">
+                            id="phone" placeholder="eg. 98765543210">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="phoneError">Please enter a valid
                             phone number</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Date of Birth</label>
-                        <input type="date"
+                        <input type="date" value="{{ staff.dob if staff.dob else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="dob" value="{{ staff.dob or '' }}">
+                            id="dob">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="dobError">Please select a date of
                             birth</div>
                     </div>
@@ -438,14 +440,12 @@
                     <div class="form-group radio-group-container mb-4 mt-2 mb-5 col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Gender</label>
                         <div class="radio-group grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.gender == 'male' %}selected{% endif %}">
+                            <label class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {{ 'selected' if staff.gender == 'Male' else '' }}">
                                 <input type="radio" name="gender" value="male" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'Male' %}checked{% endif %}>
                                 <i class="fas fa-mars text-[1.8rem] mb-2 text-[#3a86ff]"></i>
                                 <div>Male</div>
                             </label>
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.gender == 'female' %}selected{% endif %}">
+                            <label class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {{ 'selected' if staff.gender == 'Female' else '' }}">
                                 <input type="radio" name="gender" value="female" class="absolute opacity-0 w-0 h-0" {% if staff.gender == 'Female' %}checked{% endif %}>
                                 <i class="fas fa-venus text-[1.8rem] mb-2 text-[#ff006e]"></i>
                                 <div>Female</div>
@@ -460,7 +460,7 @@
                         <textarea
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
                             rows="3" id="address" placeholder="123 Main Street, City, Country"
-                            oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());">{{ staff.address or '' }}</textarea>
+                            oninput="this.value = this.value.replace(/\b\w/g, c => c.toUpperCase()).replace(/\B\w/g, c => c.toLowerCase());">{{ staff.address if staff.address else '' }}</textarea>
                     </div>
                 </div>
             </div>
@@ -477,16 +477,16 @@
                 <div class="form-grid grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Username</label>
-                        <input type="text"
+                        <input type="text" value="{{ staff.User if staff.User else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="username" placeholder="john.smith" value="{{ staff.User }}">
+                            id="username" placeholder="john.smith">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="usernameError">Please enter a
                             username</div>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light">Password</label>
+                        <label class="form-label block mb-2 font-medium text-gray-light required">Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password" value = "{{ password }}"
+                            <input type="password" value="{{ password if password else '' }}" 
                                 class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
                                 id="password" placeholder="••••••••">
                             <button
@@ -495,14 +495,14 @@
                                 <i class="fas fa-eye"></i>
                             </button>
                         </div>
-                        <div class="help-text text-gray-lighter text-sm mt-1">Leave blank to keep current password</div>
-                        <div class="error-message text-danger text-sm mt-1 hidden" id="passwordError">Password must be at least 8 characters</div>
+                        <div class="error-message text-danger text-sm mt-1 hidden" id="passwordError">Please enter a
+                            password (min 8 characters)</div>
                     </div>
                     <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light">Confirm
+                        <label class="form-label block mb-2 font-medium text-gray-light required">Confirm
                             Password</label>
                         <div class="password-wrapper relative w-full">
-                            <input type="password" value = "{{ password }}"
+                            <input type="password" value="{{ password if password else '' }}" 
                                 class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)] pr-12"
                                 id="confirmPassword" placeholder="••••••••">
                             <button
@@ -513,16 +513,6 @@
                         </div>
                         <div class="error-message text-danger text-sm mt-1 hidden" id="confirmPasswordError">Passwords
                             do not match</div>
-                    </div>
-                    <div class="form-group mb-4">
-                        <label class="form-label block mb-2 font-medium text-gray-light">Account Status</label>
-                        <div class="flex gap-3">
-                            <select id="status" class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]">
-                                <option value="active" {% if staff.status == 'active' %}selected{% endif %}>Active</option>
-                                <option value="inactive" {% if staff.status == 'inactive' %}selected{% endif %}>Inactive</option>
-                                <option value="suspended" {% if staff.status == 'suspended' %}selected{% endif %}>Suspended</option>
-                            </select>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -540,65 +530,156 @@
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Date of
                             Joining</label>
-                        <input type="date"
+                        <input type="date" value="{{ staff.date_of_joining if staff.date_of_joining else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="date_of_joining" value="{{ staff.date_of_joining or '' }}">
+                            id="date_of_joining">
                         <div class="error-message text-danger text-sm mt-1 hidden" id="joinDateError">Please select a
                             join date</div>
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Qualification</label>
-                        <input type="text"
+                        <input type="text" value="{{ staff.qualification if staff.qualification else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="qualification" placeholder="MSc, BEd, PhD, etc." value="{{ staff.qualification or '' }}">
+                            id="qualification" placeholder="MSc, BEd, PhD, etc.">
                     </div>
                     <div class="form-group mb-4">
                         <label class="form-label block mb-2 font-medium text-gray-light">Salary</label>
-                        <input type="text"
+                        <input type="text" value="{{ staff.salary if staff.salary else '' }}" 
                             class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
-                            id="salary" placeholder="In rupees" value="{{ staff.salary or '' }}">
+                            id="salary" placeholder="In rupees">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label block mb-2 font-medium text-gray-light">UDISE National ID</label>
+                        <input type="text" value="{{ staff.national_id if staff.national_id else '' }}" 
+                            class="form-input w-full p-3 rounded-xl text-gray-light text-base transition-all duration-300 focus:outline-none focus:border-primary focus:shadow-[0_0_0_3px_rgba(67,97,238,0.2)]"
+                            id="national_id" placeholder="e.g: UP2021123456789" style="text-transform: uppercase;"
+                            oninput="this.value = this.value.toUpperCase()">
                     </div>
                     <div class="form-group radio-group-container mb-4 col-span-full">
                         <label class="form-label block mb-2 font-medium text-gray-light required">Role</label>
-                        <div class="radio-group grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.role_id == roles['Teacher'] %}selected{% endif %}">
-                                <input type="radio" name="role_id" value="{{ roles['Teacher'] }}"
-                                    class="absolute opacity-0 w-0 h-0" {% if staff.role_id == roles['Teacher'] %}checked{% endif %}>
-                                <i class="fas fa-chalkboard-teacher text-[1.8rem] mb-2 text-[#3a86ff]"></i>
-                                <div>Teacher</div>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            {% for role in roles %}
+                            <label class="radio-card flex flex-col items-center justify-center 
+                                        cursor-pointer transition-all duration-300 relative 
+                                        w-[46%] sm:w-[30%] md:w-[22%] lg:w-[18%] p-4 
+                                        rounded-xl text-center shadow hover:shadow-lg bg-white {% if role.id == staff.role_id %}selected{% endif %}">
+
+                                <input type="radio" name="role_id" value="{{ role.id }}" staff-id="{{ staff.role_id }}"
+                                    class="absolute opacity-0 w-0 h-0" {% if role.id == staff.role_id %}checked{% endif %}>
+
+                                <i class="{{ ROLE_ICONS[role.role_name].icon }} 
+                                            text-[1.8rem] mb-2 text-{{ ROLE_ICONS[role.role_name].color }}"></i>
+
+                                <div class="font-medium">{{ role.role_name }}</div>
                             </label>
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.role_id == roles['Support Staff'] %}selected{% endif %}">
-                                <input type="radio" name="role_id" value="{{ roles['Support Staff'] }}"
-                                    class="absolute opacity-0 w-0 h-0" {% if staff.role_id == roles['Support Staff'] %}checked{% endif %}>
-                                <i class="fas fa-headset text-[1.8rem] mb-2 text-[#8338ec]"></i>
-                                <div>Support Staff</div>
-                            </label>
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.role_id == roles['Principal'] %}selected{% endif %}">
-                                <input type="radio" name="role_id" value="{{ roles['Principal'] }}"
-                                    class="absolute opacity-0 w-0 h-0" {% if staff.role_id == roles['Principal'] %}checked{% endif %}>
-                                <i class="fas fa-user-shield text-[1.8rem] mb-2 text-[#ff006e]"></i>
-                                <div>Principal</div>
-                            </label>
-                            <label
-                                class="radio-card p-4 rounded-xl text-center cursor-pointer transition-all duration-300 relative {% if staff.role_id == roles['Vice Principal'] %}selected{% endif %}">
-                                <input type="radio" name="role_id" value="{{ roles['Vice Principal'] }}"
-                                    class="absolute opacity-0 w-0 h-0" {% if staff.role_id == roles['Vice Principal'] %}checked{% endif %}>
-                                <i class="fas fa-hands-helping text-[1.8rem] mb-2 text-[#ffbe0b]"></i>
-                                <div>Vice Principal</div>
-                            </label>
+                            {% endfor %}
                         </div>
+
                         <div class="error-message text-danger text-sm mt-1 hidden" id="roleError">Please select a role
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Permissions Assignment -->
+            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
+                <div class="section-header flex items-center mb-6 pb-4">
+                    <div
+                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h2 class="section-title text-[1.4rem] font-semibold">Permissions</h2>
+                </div>
+                <div class="form-content" id="permissionCardBody">
+                    {% if not staff.role_id %}
+                        <!-- Permissions Placeholder Card -->
+                        <div
+                            class="flex flex-col items-center justify-center text-center rounded-2xl border border-dashed border-gray-700 bg-[#1A1A1A] p-10 shadow-inner">
+                            <div
+                                class="flex items-center justify-center w-16 h-16 mb-5 rounded-full bg-indigo-500/10 text-indigo-400">
+                                <i class="fas fa-user-shield text-2xl"></i>
+                            </div>
+
+                            <h3 class="text-lg font-semibold text-gray-100 mb-2">No Role Selected</h3>
+                            <p class="text-gray-400 max-w-sm leading-relaxed mb-6">
+                                Please select a role to automatically load its default permissions.
+                                Once selected, permissions will appear here.
+                            </p>
+
+                            <button
+                                onclick="document.querySelector('[name=role_id]')?.scrollIntoView({behavior:'smooth',block:'center'})"
+                                class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition-all duration-300 shadow-md hover:shadow-lg">
+                                <i class="fas fa-arrow-up text-sm"></i>
+                                Select a Role
+                            </button>
+                        </div>
+
+                    {% else %}
+                        <div class="space-y-6">
+                            <!-- Section Header -->
+                            <div class="text-center">
+                                <h2 class="text-2xl font-semibold text-blue-400 mb-2">
+                                    Permissions & Features
+                                </h2>
+                                <!-- Manage Permissions Button -->
+                                <button 
+                                    onclick="openPermissionModal()" 
+                                    class="mb-4 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow shadow-blue-500/30 transition-all duration-300">
+                                    <i class="fa-solid fa-pen-to-square mr-2"></i> Manage Permissions
+                                </button>
+                                <p class="text-gray-400 text-sm max-w-2xl mx-auto">
+                                    For the selected role, these are the permissions and features this staff member will have access to.
+                                </p>
+                            </div>
+                            {% if not permissions_list %}
+                                <div class="flex flex-col items-center justify-center text-center py-16 bg-[#1A1A1A] from-gray-800 to-gray-900 rounded-2xl border border-dashed border-gray-700 shadow-inner shadow-black/30">
+                                    <div class="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center mb-5 shadow-lg shadow-blue-600/30">
+                                        <i class="fa-solid fa-lock-open text-white text-3xl"></i>
+                                    </div>
+                                    <h3 class="text-xl font-semibold text-blue-400 mb-2">No Permissions Assigned</h3>
+                                    <p class="text-gray-400 text-sm max-w-md mb-5">
+                                        This role doesn’t currently have any permissions or features assigned.
+                                        Try assigning permissions from the "Manage Permissions" button.
+                                    </p>
+                                </div>
+                            {% else %}
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+                                    {% for permission in permissions_list %}
+                                        {% if permission.selected %}
+                                            <div class="permission_list group relative rounded-2xl p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 shadow-lg hover:shadow-blue-500/40 hover:scale-[1.03] transition-all duration-300">
+                        
+                                                <!-- Blue Hover Glow -->
+                                                <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+
+                                                <!-- Title + Icon Row -->
+                                                <div class="flex items-center gap-3 mb-3 relative z-10">
+                                                    <div class="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-inner shadow-black/30">
+                                                        <i class="fas {{ permission.icon }} text-white text-lg"></i>
+                                                    </div>
+                                                    <h3 class="font-semibold text-lg text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
+                                                        {{ permission.title }}
+                                                    </h3>
+                                                </div>
+
+                                                <!-- Description -->
+                                                <p class="text-gray-400 text-sm leading-snug relative z-10">
+                                                    {{ permission.description }}
+                                                </p>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                </div>
+                            {% endif%}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- Class Assignment (Visible only for Teachers) -->
             <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section"
-                id="classAssignmentSection" {% if staff.role_id != roles['Teacher'] %}style="display: none;"{% endif %}>
+                id="classAssignmentSection">
                 <div class="section-header flex items-center mb-6 pb-4">
                     <div
                         class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
@@ -617,18 +698,17 @@
                     </div>
 
                     <!-- Selected Classes Preview -->
-                    <div class="selected-classes-preview mb-4 {% if not staff.assigned_classes %}hidden{% endif %}" id="selectedClassesPreview">
+                    <div class="selected-classes-preview mb-4" id="selectedClassesPreview">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-gray-light font-medium">Selected Classes:</span>
-                            <span class="text-primary text-sm" id="selectedCount">{{ staff.assigned_classes|length }} classes</span>
+                            <span class="text-primary text-sm" id="selectedCount"> {{ selected_classes | length }} classes</span>
                         </div>
                         <div class="selected-classes-tags flex flex-wrap gap-2" id="selectedClassesTags">
-                            {% for class_id in staff.assigned_classes %}
-                                {% for cls in classes %}
-                                    {% if cls.id == class_id %}
-                                        <span class="class-tag px-2 py-1 rounded mr-2 mb-1 inline-block" data-id="{{ cls.id }}">{{ cls.CLASS }}</span>
-                                    {% endif %}
-                                {% endfor %}
+                            <!-- Selected classes will appear here -->
+                            {% for cls in selected_classes %}
+
+                                <span class="text-sm px-2 py-1 rounded-full font-medium bg-blue-50 text-blue-700 mr-1 mb-1">{{ cls.name }}</span>
+
                             {% endfor %}
                         </div>
                     </div>
@@ -637,20 +717,19 @@
                     <div class="classes-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-80 overflow-y-auto p-2"
                         id="classesContainer">
                         {% for cls in classes %}
-                            <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300 {% if cls.id in staff.assigned_classes %}selected{% endif %}" 
-                                data-id="{{ cls.id }}" data-name="{{ cls.CLASS }}">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="font-medium text-gray-light">{{ cls.CLASS }}</div>
-                                        <div class="text-sm text-gray-lighter mt-1">Grade 1 • Mathematics</div>
-                                    </div>
-                                    <div class="checkbox-indicator">
-                                        <input type="checkbox" 
-                                            class="w-4 h-4 rounded-sm border border-gray-400 bg-gray-600 checked:bg-green-500 checked:border-green-500 text-green-500 focus:ring-2 focus:ring-green-400 appearance-none relative"
-                                            {% if cls.id in staff.assigned_classes %}checked{% endif %}>
-                                    </div>
+                        <div class="checkbox-item p-4 rounded-xl cursor-pointer transition-all duration-300"
+                            data-id="{{ cls.id }}" data-name="{{ cls.CLASS }}">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <div class="font-medium text-gray-light">{{ cls.CLASS }}</div>
+                                    <div class="text-sm text-gray-lighter mt-1">Class Teacher: None</div>
+                                </div>
+                                <div class="checkbox-indicator">
+                                    <input type="checkbox" {% if cls.access_id %}checked{% endif %}
+                                        class="w-4 h-4 rounded-sm border border-gray-400 bg-gray-600 checked:bg-green-500 checked:border-green-500 text-green-500 focus:ring-2 focus:ring-green-400 appearance-none relative">
                                 </div>
                             </div>
+                        </div>
                         {% endfor %}
                     </div>
 
@@ -662,69 +741,7 @@
                 </div>
             </div>
 
-            <!-- Permissions Assignment -->
-            <div class="form-section bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
-                <div class="section-header flex items-center mb-6 pb-4">
-                    <div
-                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-                        <i class="fas fa-shield-alt"></i>
-                    </div>
-                    <h2 class="section-title text-[1.4rem] font-semibold">System Permissions</h2>
-                </div>
-                <div class="form-content">
-                    <p class="text-gray-lighter mb-4">Select permissions to control access within the ERP system.</p>
 
-                    <!-- Permission Categories -->
-                    <div class="permission-categories mb-6">
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                class="permission-category-btn active px-3 py-2 rounded-lg bg-primary/20 text-primary font-medium"
-                                data-category="all">All Permissions</button>
-                            {% for category in permission_categories %}
-                                <button class="permission-category-btn px-3 py-2 rounded-lg text-gray-lighter font-medium"
-                                    data-category="{{ category }}">{{ category|capitalize }}</button>
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Selected Permissions Preview -->
-                    <div class="selected-permissions-preview mb-4 {% if not staff.permissions %}hidden{% endif %}" id="selectedPermissionsPreview">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-gray-light font-medium">Selected Permissions:</span>
-                            <span class="text-primary text-sm" id="selectedPermissionsCount">{{ staff.permissions.count() }} permissions</span>
-                        </div>
-                        <div class="selected-permissions-tags flex flex-wrap gap-2" id="selectedPermissionsTags">
-                            {% for perm_id in staff.permissions %}
-                                {% for permission in permissions %}
-                                    {% if permission.id == perm_id %}
-                                        <span class="permission-card px-2 py-1 rounded mr-2 mb-1 inline-block" data-id="{{ permission.id }}">{{ permission.title }}</span>
-                                    {% endif %}
-                                {% endfor %}
-                            {% endfor %}
-                        </div>
-                    </div>
-
-                    <!-- Permissions Grid -->
-                    <div class="permissions-grid grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto p-2" id="permissionsContainer">
-                        {% for permission in permissions %}
-                        <div class="permission-card p-4 rounded-xl cursor-pointer transition-all duration-300 {% if permission.id in staff.permissions %}checked{% endif %}" 
-                            data-id="{{ permission.id }}" data-name="{{ permission.title }}">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="font-medium text-gray-light">{{ permission.title }}</div>
-                                <div class="checkbox-indicator">
-                                    <input type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                        {% if permission.id in staff.permissions %}checked{% endif %}>
-                                </div>
-                            </div>
-                            <div class="text-sm text-gray-lighter">{{ permission.description }}</div>
-                            <div class="permission-category-tag mt-2 inline-block px-2 py-1 text-xs rounded bg-gray-dark/50 text-gray-lighter">
-                                {{ permission.action }}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="w-full flex flex-col lg:flex-row gap-6">
@@ -739,17 +756,12 @@
                 </div>
                 <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative"
                     id="profileUpload">
-                    {% if staff.image %}
-                        <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4"
-                            id="profilePreview" style="background-image: url('{{ staff.image }}');"></div>
-                    {% else %}
-                        <div class="upload-icon text-primary text-[3rem] mb-4">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                        </div>
-                        <div class="upload-text text-gray-lighter mb-4">Click to upload profile photo</div>
-                        <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
-                            id="profilePreview"></div>
-                    {% endif %}
+                    <div class="upload-icon text-primary text-[3rem] mb-4">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text text-gray-lighter mb-4">Click to upload profile photo</div>
+                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
+                        id="profilePreview"></div>
                     <div class="btn-group flex gap-3 mt-4">
                         <button
                             class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
@@ -761,13 +773,6 @@
                             id="captureProfile">
                             <i class="fas fa-camera mr-2"></i> Capture
                         </button>
-                        {% if staff.image %}
-                        <button
-                            class="btn-upload flex-1 p-3 rounded-lg text-danger cursor-pointer transition-all duration-300"
-                            id="removeProfile">
-                            <i class="fas fa-trash mr-2"></i> Remove
-                        </button>
-                        {% endif %}
                     </div>
                 </div>
                 <input type="file" accept="image/*" class="hidden" id="profileFileInput">
@@ -784,17 +789,12 @@
                 </div>
                 <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative"
                     id="signatureUpload">
-                    {% if staff.sign %}
-                        <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4"
-                            id="signaturePreview" style="background-image: url('{{ staff.sign }}');"></div>
-                    {% else %}
-                        <div class="upload-icon text-primary text-[3rem] mb-4">
-                            <i class="fas fa-file-signature"></i>
-                        </div>
-                        <div class="upload-text text-gray-lighter mb-4">Upload or capture signature</div>
-                        <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
-                            id="signaturePreview"></div>
-                    {% endif %}
+                    <div class="upload-icon text-primary text-[3rem] mb-4">
+                        <i class="fas fa-file-signature"></i>
+                    </div>
+                    <div class="upload-text text-gray-lighter mb-4">Upload or capture signature</div>
+                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
+                        id="signaturePreview"></div>
                     <div class="btn-group flex gap-3 mt-4">
                         <button
                             class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
@@ -806,13 +806,6 @@
                             id="captureSignature">
                             <i class="fas fa-camera mr-2"></i> Capture
                         </button>
-                        {% if staff.sign %}
-                        <button
-                            class="btn-upload flex-1 p-3 rounded-lg text-danger cursor-pointer transition-all duration-300"
-                            id="removeSignature">
-                            <i class="fas fa-trash mr-2"></i> Remove
-                        </button>
-                        {% endif %}
                     </div>
                 </div>
                 <input type="file" accept="image/*" class="hidden" id="signatureFileInput">
@@ -821,58 +814,132 @@
     </div>
 </div>
 
-<!-- Cropper Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-[rgba(10,10,10,0.95)] z-50 items-center justify-center p-5"
-    id="cropperModal">
+<div class="fixed inset-0 bg-black/50 backdrop-blur-lg z-50 flex items-center justify-center p-4 overflow-hidden hidden"
+    id="managePermission">
     <div
-        class="modal-content bg-gray-dark/95 rounded-xl max-w-[800px] w-full overflow-hidden shadow-modal animate-modal">
-        <div class="modal-header p-5 flex justify-between items-center">
-            <h3 class="modal-title text-[1.3rem] font-semibold flex items-center gap-2"><i class="fas fa-crop-alt"></i>
-                Crop Image</h3>
-            <button
-                class="close-modal bg-transparent border-none text-gray-lighter text-2xl cursor-pointer transition-colors duration-300 hover:text-danger">&times;</button>
+        class="bg-[#0f0f0f] rounded-2xl w-full max-w-4xl mx-4 shadow-2xl border border-gray-800 max-h-[90vh] flex flex-col overflow-hidden transition-all duration-300 transform scale-100">
+
+        <!-- Modal Header -->
+        <div class="relative bg-gradient-to-br from-slate-900 to-slate-800 p-4 sm:p-6 border-b border-slate-700/50">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div class="p-2 sm:p-3 bg-white/5 rounded-xl backdrop-blur-sm border border-slate-600/30">
+                        <i class="fas fa-user-shield text-slate-300 text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <h5 class="text-white text-xl sm:text-2xl font-light tracking-tight">Manage Permissions</h5>
+                        <p class="text-slate-400 text-xs sm:text-sm mt-1 font-light">Configure access controls and
+                            system privileges</p>
+                    </div>
+                </div>
+                <button type="button"
+                    class="p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all duration-200 border border-transparent hover:border-slate-600"
+                    onclick="closePermissionModal()">
+                    <i class="fas fa-times text-base sm:text-lg"></i>
+                </button>
+            </div>
         </div>
-        <div class="modal-body p-6 max-h-[70vh] overflow-auto">
-            <div class="cropper-image-container w-full h-[400px] rounded-xl overflow-hidden mb-5">
-                <img id="cropperImage" src="" class="block max-w-full" loading="lazy">
+
+        <!-- Modal Body -->
+        <div
+            class="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 bg-[#0f0f0f] scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent hover:scrollbar-thumb-slate-600">
+
+            <!-- Selected Permissions Preview -->
+            <div class="selected-permissions-preview mb-6 p-4 bg-slate-900/30 rounded-xl border border-slate-700/30 backdrop-blur-sm transition-all duration-300"
+                id="selectedPermissionsPreview">
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-circle text-emerald-400 text-lg"></i>
+                        <span class="text-slate-300 font-medium text-base sm:text-lg">Selected Permissions</span>
+                    </div>
+                    <span
+                        class="px-3 py-1 bg-emerald-500/10 text-emerald-400 text-sm rounded-full font-medium border border-emerald-500/20 self-start sm:self-auto"
+                        id="selectedPermissionsCount">
+                        0 selected
+                    </span>
+                </div>
+                <div class="selected-permissions-tags flex flex-wrap gap-2 min-h-8" id="selectedPermissionsTags">
+                    <div class="flex items-center space-x-2 text-slate-500 text-sm">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Select permissions from the list below</span>
+                    </div>
+                </div>
             </div>
 
-            <div class="cropper-controls flex flex-wrap gap-3 mb-5">
-                <button
-                    class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
-                    id="rotateLeft">
-                    <i class="fas fa-undo"></i> Rotate Left
-                </button>
-                <button
-                    class="cropper-btn px-4 py-3 bg-primary/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
-                    id="rotateRight">
-                    <i class="fas fa-redo"></i> Rotate Right
-                </button>
-                <button
-                    class="cropper-btn ai px-4 py-3 bg-success/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
-                    id="removeBackground">
-                    <i class="fas fa-magic"></i> AI Remove Background
-                </button>
-                <button
-                    class="cropper-btn undo px-4 py-3 bg-danger/20 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300 flex items-center gap-2"
-                    id="undoEdit">
-                    <i class="fas fa-undo"></i> Undo
-                </button>
+            <!-- Permissions Grid -->
+            <div class="mb-2">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-6">
+                    <h6 class="text-slate-400 font-medium text-sm uppercase tracking-widest">Available Permissions</h6>
+                    <div class="flex items-center space-x-2 text-slate-500 text-sm">
+                        <i class="fas fa-filter"></i>
+                        <span>{{ permissions_list|length }} permissions available</span>
+                    </div>
+                </div>
+
+                <div class="permissions-grid grid grid-cols-1 lg:grid-cols-2 gap-3 overflow-y-auto p-1"
+                    id="permissionsContainer">
+                    {% for permission in permissions_list %}
+                    <div class="permission-card p-4 sm:p-5 rounded-xl cursor-pointer transition-all duration-300 border border-slate-700/50 hover:border-blue-400/30 hover:bg-slate-800/20 hover:shadow-lg hover:shadow-blue-500/5 group relative overflow-hidden"
+                        data-id="{{ permission.id }}" data-name="{{ permission.title }}">
+                        <!-- Selection indicator -->
+                        <div
+                            class="absolute top-3 sm:top-4 right-3 sm:right-4 w-5 h-5 sm:w-6 sm:h-6 border-2 border-slate-600 rounded-lg group-hover:border-blue-400 transition-all duration-300 flex items-center justify-center">
+                            <div
+                                class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-blue-500 rounded-sm scale-0 transition-transform duration-200 group-[.selected]:scale-100">
+                            </div>
+                        </div>
+
+                        <div class="pr-6 sm:pr-8">
+                            <div
+                                class="font-semibold text-slate-200 group-hover:text-white transition-colors mb-2 text-base sm:text-lg leading-tight">
+                                {{ permission.title }}
+                            </div>
+                            <div class="text-xs sm:text-sm text-slate-400 mb-3 sm:mb-4 leading-relaxed font-light">
+                                {{ permission.description }}
+                            </div>
+                            <div
+                                class="permission-category-tag inline-flex items-center space-x-1.5 px-2.5 py-1 text-xs rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/50">
+                                <i class="fas fa-tag text-xs"></i>
+                                <span class="truncate max-w-[120px] sm:max-w-none">{{ permission.action }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
+
         </div>
-        <div class="modal-footer p-4 flex justify-end gap-3">
-            <button
-                class="btn-crop btn-cancel px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-[rgba(255,255,255,0.08)] text-gray-light hover:bg-[rgba(255,255,255,0.15)]">Cancel</button>
-            <button
-                class="btn-crop btn-confirm px-5 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:-translate-y-0.5 hover:shadow-primary-glow"
-                id="cropImage">Crop & Apply</button>
+
+        <!-- Modal Footer -->
+        <div
+            class="bg-slate-900/50 border-t border-slate-700/30 px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row gap-3 justify-between backdrop-blur-sm">
+
+            <!-- Close button -->
+            <button type="button"
+                class="px-5 py-2.5 bg-transparent hover:bg-slate-700/50 text-slate-400 hover:text-white rounded-xl font-medium transition-all duration-200 border border-slate-600 hover:border-slate-500 flex items-center justify-center space-x-2 group order-2 sm:order-1"
+                onclick="closePermissionModal()">
+                <i class="fas fa-arrow-left group-hover:-translate-x-0.5 transition-transform"></i>
+                <span>Cancel</span>
+            </button>
+
+            <!-- Action buttons -->
+            <!-- <div class="flex flex-wrap gap-3 order-1 sm:order-2" id="tc-modal-footer">
+                <button type="button"
+                    class="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-400 hover:to-blue-500 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-blue-500/25 border border-blue-400/30 flex items-center justify-center space-x-2 group hover:scale-[1.02] transform w-full sm:w-auto"
+                    id="tc-generateButton">
+                    <i class="fas fa-save group-hover:scale-110 transition-transform"></i>
+                    <span>Save Permissions</span>
+                </button>
+            </div> -->
         </div>
     </div>
 </div>
 
 <!-- Verification Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="verificationModal">
-    <div class="modal-content bg-slate-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-modal animate-modal-enter">
+<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    id="verificationModal">
+    <div
+        class="modal-content bg-slate-800 rounded-2xl max-w-2xl w-full overflow-hidden shadow-modal animate-modal-enter">
         <!-- Modal Header -->
         <div class="modal-header p-6 pb-4 border-b border-slate-700">
             <div class="flex justify-between items-center">
@@ -881,29 +948,27 @@
                         <i class="fas fa-shield-alt text-indigo-500"></i>
                     </div>
                     <div>
-                        <h3 class="text-xl font-semibold text-white">Verify Staff Updates</h3>
-                        <p class="text-sm text-slate-400 mt-1">Review all changes before updating the system</p>
+                        <h3 class="text-xl font-semibold text-white">Verify Staff Details</h3>
+                        <p class="text-sm text-slate-400 mt-1">Review all information before updating to system</p>
                     </div>
                 </div>
-                <button class="close-modal bg-slate-700 hover:bg-slate-600 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors duration-300">
+                <button
+                    class="close-modal bg-slate-700 hover:bg-slate-600 w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors duration-300">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         </div>
-        
+
         <!-- Modal Body -->
         <div class="modal-body p-6 max-h-[70vh] overflow-y-auto modal-scrollbar">
             <!-- Profile Preview -->
             <div class="flex flex-col items-center mb-6">
-                <div class="profile-preview w-24 h-24 rounded-full mb-4 bg-cover bg-center border-4 border-indigo-500/30 shadow-lg bg-slate-700 flex items-center justify-center text-slate-400" id="finalProfilePreview">
-                    {% if staff.image %}
-                        <div style="background-image: url('{{ staff.image }}');" class="w-full h-full rounded-full bg-cover bg-center"></div>
-                    {% else %}
-                        <i class="fas fa-user text-3xl"></i>
-                    {% endif %}
+                <div class="profile-preview w-24 h-24 rounded-full mb-4 bg-cover bg-center border-4 border-indigo-500/30 shadow-lg bg-slate-700 flex items-center justify-center text-slate-400"
+                    id="finalProfilePreview">
+                    <i class="fas fa-user text-3xl"></i>
                 </div>
             </div>
-            
+
             <!-- Verification Grid -->
             <div class="verification-grid grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
@@ -929,7 +994,7 @@
                 <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
                     <div class="verification-label text-xs text-slate-400 mb-1">Status</div>
                     <div class="verification-value font-medium">
-                        <span class="px-2 py-1 rounded-full text-xs" id="verifyStatus"></span>
+                        <span class="px-2 py-1 rounded-full text-xs bg-emerald-500/20 text-emerald-400">Active</span>
                     </div>
                 </div>
                 <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
@@ -940,12 +1005,18 @@
                     <div class="verification-label text-xs text-slate-400 mb-1">Salary</div>
                     <div class="verification-value font-medium text-white" id="verifySalary"></div>
                 </div>
-                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2" id="verifyClassesItem">
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600">
+                    <div class="verification-label text-xs text-slate-400 mb-1">National ID</div>
+                    <div class="verification-value font-medium text-white" id="verifyNational_id"></div>
+                </div>
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2"
+                    id="verifyClassesItem">
                     <div class="verification-label text-xs text-slate-400 mb-1">Assigned Classes</div>
                     <div class="verification-value flex flex-wrap gap-1" id="verifyClasses"></div>
                 </div>
 
-                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2" id="verifyPermissionsItem">
+                <div class="verification-item p-4 bg-slate-700/50 rounded-xl border border-slate-600 md:col-span-2"
+                    id="verifyPermissionsItem">
                     <div class="verification-label text-xs text-slate-400 mb-1">Assigned Permissions</div>
                     <div class="verification-value flex flex-wrap gap-1" id="verifyPermissions"></div>
                 </div>
@@ -954,97 +1025,245 @@
                     <div class="verification-value font-medium text-white" id="verifyJoinDate"></div>
                 </div>
             </div>
-            
+
             <!-- Verification Note -->
             <div class="mt-6 bg-slate-700/30 p-4 rounded-xl border border-slate-600">
                 <div class="flex items-start gap-3">
                     <i class="fas fa-info-circle text-indigo-500 mt-0.5"></i>
-                    <p class="text-sm text-slate-300">Please verify all changes carefully before updating the system. Once confirmed, the staff member's information will be updated in the database.</p>
+                    <p class="text-sm text-slate-300">Please verify all details carefully before updating to the system.
+                        Once confirmed, the staff member will be updated to the database.
+                    </p>
                 </div>
             </div>
         </div>
-        
+
         <!-- Modal Footer -->
         <div class="modal-footer p-6 pt-4 border-t border-slate-700 flex flex-col sm:flex-row justify-end gap-3">
-            <button class="btn-crop btn-cancel px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white w-full sm:w-auto">
+            <button
+                class="btn-crop btn-cancel px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white w-full sm:w-auto">
                 Cancel
             </button>
-            <button class="btn-crop btn-confirm px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:shadow-primary-glow flex items-center justify-center gap-2 w-full sm:w-auto" id="verifyConfirm">
+            <button
+                class="btn-crop btn-confirm px-5 py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border-none bg-primary-gradient text-white hover:shadow-primary-glow flex items-center justify-center gap-2 w-full sm:w-auto"
+                id="verifyConfirm">
+                <i class="fas fa-check-circle"></i>
+                Verify & Update
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- Verification Modal -->
+<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+    id="verificationModal">
+    <div
+        class="modal-content bg-slate-800 rounded-2xl max-w-4xl w-full overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] animate-[modalEnter_0.3s_ease-out]">
+        <!-- Modal Header -->
+        <div class="modal-header p-4 sm:p-6 pb-2 sm:pb-4 border-b border-slate-700">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <i class="fas fa-shield-alt text-indigo-500 text-sm sm:text-base"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-semibold text-white">Update Staff Details</h3>
+                        <p class="text-xs sm:text-sm text-slate-400 mt-1">Review all information before updating to system</p>
+                    </div>
+                </div>
+                <button
+                    class="close-modal bg-slate-700 hover:bg-slate-600 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors duration-300">
+                    <i class="fas fa-times text-xs sm:text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body p-4 sm:p-6 max-h-[65vh] sm:max-h-[70vh] overflow-y-auto">
+            <!-- Staff Summary -->
+            <div class="bg-slate-700/30 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                    <div class="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-indigo-500/20 flex items-center justify-center">
+                        <i class="fas fa-user text-indigo-500 text-lg sm:text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="text-base sm:text-lg font-semibold text-white">Sarah Johnson</h4>
+                        <p class="text-slate-400 text-sm">ID: STF-2023-0452</p>
+                    </div>
+                    <div class="bg-slate-700 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm text-slate-300 self-start sm:self-auto">
+                        <i class="fas fa-clock mr-1"></i> Last updated: 2 days ago
+                    </div>
+                </div>
+            </div>
+
+            <!-- Changes Section -->
+            <div class="mb-4 sm:mb-6">
+                <h4 class="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center gap-2">
+                    <i class="fas fa-exchange-alt text-indigo-500"></i>
+                    Changes to be Applied
+                </h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                    <!-- Current Details -->
+                    <div class="bg-slate-700/30 rounded-xl p-3 sm:p-4">
+                        <h5 class="text-sm sm:text-md font-medium text-slate-300 mb-2 sm:mb-3 flex items-center gap-2">
+                            <i class="fas fa-file-alt text-blue-400"></i>
+                            Current Details
+                        </h5>
+                        
+                        <div class="space-y-2 sm:space-y-3 text-sm sm:text-base">
+                            <div>
+                                <label class="text-xs text-slate-400">Full Name</label>
+                                <p class="text-white">Sarah Johnson</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Email</label>
+                                <p class="text-white">sarah.j@company.com</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Phone</label>
+                                <p class="text-white">+1 (555) 123-4567</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Department</label>
+                                <p class="text-white">Marketing</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Position</label>
+                                <p class="text-white">Marketing Specialist</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Status</label>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-400">
+                                    <i class="fas fa-clock mr-1"></i> Pending Review
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Updated Details -->
+                    <div class="bg-slate-700/30 rounded-xl p-3 sm:p-4 border border-indigo-500/30">
+                        <h5 class="text-sm sm:text-md font-medium text-slate-300 mb-2 sm:mb-3 flex items-center gap-2">
+                            <i class="fas fa-edit text-green-400"></i>
+                            Updated Details
+                        </h5>
+                        
+                        <div class="space-y-2 sm:space-y-3 text-sm sm:text-base">
+                            <div>
+                                <label class="text-xs text-slate-400">Full Name</label>
+                                <p class="text-white">Sarah Johnson</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Email</label>
+                                <p class="text-green-400">sarah.johnson@company.com</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Phone</label>
+                                <p class="text-green-400">+1 (555) 987-6543</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Department</label>
+                                <p class="text-white">Marketing</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Position</label>
+                                <p class="text-green-400">Senior Marketing Specialist</p>
+                            </div>
+                            <div>
+                                <label class="text-xs text-slate-400">Status</label>
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400">
+                                    <i class="fas fa-check-circle mr-1"></i> Active
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summary of Changes -->
+            <div class="bg-slate-700/30 rounded-xl p-3 sm:p-4 mb-4 sm:mb-6">
+                <h5 class="text-sm sm:text-md font-medium text-white mb-2 sm:mb-3 flex items-center gap-2">
+                    <i class="fas fa-list-check text-indigo-500"></i>
+                    Summary of Changes
+                </h5>
+                
+                <ul class="space-y-1 sm:space-y-2 text-xs sm:text-sm">
+                    <li class="flex items-start gap-2 text-slate-300">
+                        <i class="fas fa-circle text-green-500 mt-1 text-xs"></i>
+                        <span>Email updated from <span class="text-red-400 line-through">sarah.j@company.com</span> to <span class="text-green-400">sarah.johnson@company.com</span></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-300">
+                        <i class="fas fa-circle text-green-500 mt-1 text-xs"></i>
+                        <span>Phone number updated from <span class="text-red-400 line-through">+1 (555) 123-4567</span> to <span class="text-green-400">+1 (555) 987-6543</span></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-300">
+                        <i class="fas fa-circle text-green-500 mt-1 text-xs"></i>
+                        <span>Position updated from <span class="text-red-400 line-through">Marketing Specialist</span> to <span class="text-green-400">Senior Marketing Specialist</span></span>
+                    </li>
+                    <li class="flex items-start gap-2 text-slate-300">
+                        <i class="fas fa-circle text-green-500 mt-1 text-xs"></i>
+                        <span>Status updated from <span class="text-red-400 line-through">Pending Review</span> to <span class="text-green-400">Active</span></span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Verification Note -->
+            <div class="mt-4 sm:mt-6 bg-slate-700/30 p-3 sm:p-4 rounded-xl border border-slate-600">
+                <div class="flex items-start gap-2 sm:gap-3">
+                    <i class="fas fa-info-circle text-indigo-500 mt-0.5 text-sm sm:text-base"></i>
+                    <p class="text-xs sm:text-sm text-slate-300">Please verify all details carefully before updating to the system.
+                        Once confirmed, the staff member will be updated to the database.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer p-4 sm:p-6 pt-2 sm:pt-4 border-t border-slate-700 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+            <button
+                class="btn-crop btn-cancel px-4 py-2 sm:px-5 sm:py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border border-slate-600 bg-slate-700 text-slate-300 hover:bg-slate-600 hover:text-white w-full sm:w-auto text-sm sm:text-base">
+                Cancel
+            </button>
+            <button
+                class="btn-crop btn-confirm px-4 py-2 sm:px-5 sm:py-3 rounded-xl font-medium cursor-pointer transition-all duration-300 border-none bg-gradient-to-r from-indigo-500 to-blue-700 text-white hover:shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center gap-2 w-full sm:w-auto text-sm sm:text-base"
+                id="verifyConfirm">
                 <i class="fas fa-check-circle"></i>
                 Verify & Update Staff
             </button>
         </div>
     </div>
+
 </div>
 
-<!-- Success Modal -->
-<div class="modal fixed hidden inset-0 w-full h-full bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" id="successModal">
-    <div class="modal-content bg-slate-800 rounded-2xl max-w-md w-full overflow-hidden shadow-modal animate-scale-in">
-        <div class="success-modal-content text-center p-8">
-            <!-- Success Icon -->
-            <div class="success-icon w-20 h-20 bg-success-gradient rounded-full flex items-center justify-center mx-auto mb-5 text-white text-2xl shadow-lg animate-modal-enter">
-                <i class="fas fa-check"></i>
-            </div>
-            
-            <!-- Success Title and Message -->
-            <h2 class="success-title text-2xl font-bold mb-3 text-white">Success!</h2>
-            <p class="success-message text-slate-300 mb-6" id="successMessage">
-                Staff member has been successfully updated.
-            </p>
 
-            <!-- Success Actions -->
-            <div class="success-actions flex flex-col sm:flex-row justify-center gap-3 mt-6">
-                <a href="/staff_view" class="btn btn-success px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 border-none bg-success-gradient text-white hover:shadow-success-glow w-full sm:w-auto">
-                    <i class="fas fa-users"></i>
-                    Staff Module
-                </a>
-                <a class="btn btn-whatsapp px-5 py-3 rounded-xl font-medium flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 border-none bg-whatsapp-gradient text-white hover:shadow-whatsapp-glow w-full sm:w-auto" id="sendWhatsApp">
-                    <i class="fab fa-whatsapp"></i>
-                    Send WhatsApp
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 <script>
+
+    // Define required fields for validation
+    const requiredFields = [
+        { id: 'name', errorId: 'fullNameError', name: 'Full Name', type: 'text' },
+        { id: 'email', errorId: 'emailError', name: 'Email', type: 'email' },
+        { id: 'username', errorId: 'usernameError', name: 'Username', type: 'text' },
+        { id: 'password', errorId: 'passwordError', name: 'Password', type: 'password' },
+        { id: 'confirmPassword', errorId: 'confirmPasswordError', name: 'Confirm Password', type: 'password' },
+    ];
+
+    // Define radio groups for validation
+    const radioGroups = [
+        { name: 'gender', errorId: 'genderError' },
+        { name: 'role_id', errorId: 'roleError' }
+    ];
+
     document.addEventListener('DOMContentLoaded', function () {
-        // Staff ID for update operations
-        const staffId = {{ staff.id }};
-        
         // Modal elements
         const verificationModal = document.getElementById('verificationModal');
         const successModal = document.getElementById('successModal');
-        const cropperModal = document.getElementById('cropperModal');
         const closeButtons = document.querySelectorAll('.close-modal, .btn-cancel');
 
         // Form elements
         const updateButton = document.getElementById('updateButton');
         const verifyConfirm = document.getElementById('verifyConfirm');
+        const goToStaffButton = document.getElementById('goToStaff');
         const sendWhatsAppButton = document.getElementById('sendWhatsApp');
-
-        // Image upload elements
-        const profileUpload = document.getElementById('profileUpload');
-        const signatureUpload = document.getElementById('signatureUpload');
-        const uploadProfileBtn = document.getElementById('uploadProfile');
-        const captureProfileBtn = document.getElementById('captureProfile');
-        const uploadSignatureBtn = document.getElementById('uploadSignature');
-        const captureSignatureBtn = document.getElementById('captureSignature');
-        const removeProfileBtn = document.getElementById('removeProfile');
-        const removeSignatureBtn = document.getElementById('removeSignature');
-        const profileFileInput = document.getElementById('profileFileInput');
-        const signatureFileInput = document.getElementById('signatureFileInput');
-        const profilePreview = document.getElementById('profilePreview');
-        const signaturePreview = document.getElementById('signaturePreview');
-
-        // Cropper elements
-        const cropperImage = document.getElementById('cropperImage');
-        const rotateLeftBtn = document.getElementById('rotateLeft');
-        const rotateRightBtn = document.getElementById('rotateRight');
-        const removeBackgroundBtn = document.getElementById('removeBackground');
-        const undoEditBtn = document.getElementById('undoEdit');
-        const cropImageBtn = document.getElementById('cropImage');
 
         // Validation elements
         const validationSummary = document.getElementById('validationSummary');
@@ -1066,404 +1285,381 @@
         const selectedPermissionsTags = document.getElementById('selectedPermissionsTags');
         const selectedPermissionsCount = document.getElementById('selectedPermissionsCount');
 
-        // Variables
-        let cropper;
-        let currentImageType = null; // 'profile' or 'signature'
-        let originalImageData = null;
-        let editedImageData = null;
-        let profileDataUrl = {% if staff.image %}'{{ staff.image }}'{% else %}null{% endif %};
-        let signatureDataUrl = {% if staff.sign %}'{{ staff.sign }}'{% else %}null{% endif %};
-        let selectedClasses = [];
-        let selectedPermissions = [];
-
-        // Initialize selected classes and permissions from existing data
-        {% for class_id in staff.assigned_classes %}
-            selectedClasses.push({id: {{ class_id }}, name: '{{ classes|selectattr("id", "equalto", class_id)|map(attribute="CLASS")|first }}'});
-        {% endfor %}
-        
-        {% for perm_id in staff.permissions %}
-            {% for permission in permissions %}
-                {% if permission.id == perm_id %}
-                    selectedPermissions.push({id: {{ permission.id }}, name: '{{ permission.title }}'});
-                {% endif %}
-            {% endfor %}
-        {% endfor %}
-
-        // Define required fields for validation
-        const requiredFields = [
-            { id: 'name', errorId: 'fullNameError', name: 'Full Name', type: 'text' },
-            { id: 'email', errorId: 'emailError', name: 'Email', type: 'email' },
-            { id: 'username', errorId: 'usernameError', name: 'Username', type: 'text' },
-        ];
-
-        // Define radio groups for validation
-        const radioGroups = [
-            { name: 'gender', errorId: 'genderError' },
-            { name: 'role_id', errorId: 'roleError' }
-        ];
-
-        // --- CLASS SEARCH/FILTER FUNCTIONALITY ---
-        if (classSearch && classesContainer) {
-            classSearch.addEventListener('input', function () {
-                const searchTerm = this.value.trim().toLowerCase();
-                let anyVisible = false;
-                classesContainer.querySelectorAll('.checkbox-item').forEach(item => {
-                    const className = item.getAttribute('data-name') ? item.getAttribute('data-name').toLowerCase() : '';
-                    if (className.includes(searchTerm)) {
-                        item.style.display = '';
-                        anyVisible = true;
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-                if (!anyVisible) {
-                    noClassesMessage.style.display = 'block';
-                } else {
-                    noClassesMessage.style.display = 'none';
-                }
-            });
-        }
-
-        // Helper: get class info from element
-        function getClassInfo(el) {
-            return {
-                id: el.getAttribute('data-id'),
-                name: el.getAttribute('data-name')
-            };
-        }
-
-        // Helper: get permission info from element
-        function getPermissionInfo(el) {
-            return {
-                id: el.getAttribute('data-id'),
-                name: el.getAttribute('data-name')
-            };
-        }
-
-        // --- CLASS SELECTION ---
-        classesContainer.addEventListener('click', function (e) {
-            const el = e.target.closest('.checkbox-item');
-            if (!el) return;
-            const info = getClassInfo(el);
-            const indicator = el.querySelector('.checkbox-indicator');
-            const checkbox = indicator.querySelector('input[type="checkbox"]');
-            if (!checkbox) return;
-            const idx = selectedClasses.findIndex(c => c.id == info.id);
-            if (idx === -1) {
-                selectedClasses.push(info);
-                el.classList.add('selected');
-                checkbox.checked = true;
-            } else {
-                selectedClasses.splice(idx, 1);
-                el.classList.remove('selected');
-                checkbox.checked = false;
-            }
-            selectedCount.textContent = `${selectedClasses.length} ${selectedClasses.length === 1 ? 'class' : 'classes'}`;
-            if (selectedClasses.length > 0) {
-                selectedClassesPreview.style.display = 'block';
-                selectedClassesTags.innerHTML = '';
-                selectedClasses.forEach(cls => {
-                    const tag = document.createElement('span');
-                    tag.className = 'class-tag px-2 py-1 rounded mr-2 mb-1 inline-block';
-                    tag.textContent = cls.name;
-                    selectedClassesTags.appendChild(tag);
-                });
-            } else {
-                selectedClassesPreview.style.display = 'none';
-            }
-        });
-
-        // --- PERMISSION SELECTION ---
-        permissionsContainer.addEventListener('click', function (e) {
-            const el = e.target.closest('.permission-card');
-            if (!el) return;
-            
-            const info = getPermissionInfo(el);
-            if (!info.id) return;
-            const indicator = el.querySelector('.checkbox-indicator');
-            const checkbox = indicator.querySelector('input[type="checkbox"]');
-            if (!checkbox) return;
-            const idx = selectedPermissions.findIndex(p => p.id == info.id);
-            if (idx === -1) {
-                selectedPermissions.push(info);
-                el.classList.add('checked');
-                checkbox.checked = true;
-            } else {
-                selectedPermissions.splice(idx, 1);
-                el.classList.remove('checked');
-                checkbox.checked = false;
-            }
-            selectedPermissionsCount.textContent = `${selectedPermissions.length} ${selectedPermissions.length === 1 ? 'permission' : 'permissions'}`;
-            if (selectedPermissions.length > 0) {
-                selectedPermissionsPreview.style.display = 'block';
-                selectedPermissionsTags.innerHTML = '';
-                selectedPermissions.forEach(perm => {
-                    const tag = document.createElement('span');
-                    tag.className = 'permission-card px-2 py-1 rounded mr-2 mb-1 inline-block';
-                    tag.textContent = perm.name;
-                    selectedPermissionsTags.appendChild(tag);
-                });
-            } else {
-                selectedPermissionsPreview.style.display = 'none';
-            }
-        });
-
-        // --- RADIO BUTTONS ---
-        document.querySelectorAll('.radio-card input[type="radio"]').forEach(input => {
-            input.addEventListener('change', function () {
-                document.querySelectorAll(`.radio-card input[name="${input.name}"]`).forEach(i => {
-                    i.parentElement.classList.remove('selected');
-                    i.parentElement.classList.remove('error');
-                });
-                input.parentElement.classList.add('selected');
-                const errorEl = document.getElementById(input.name + 'Error');
-                if (errorEl) errorEl.style.display = 'none';
-                
-                // Show/hide class assignment based on role
-                if (input.name === 'role_id') {
-                    const isTeacher = input.value == {{ roles['Teacher'] }};
-                    classAssignmentSection.style.display = isTeacher ? 'block' : 'none';
-                }
-            });
-        });
-
-        // --- REQUIRED FIELDS ---
-        requiredFields.forEach(field => {
-            const element = document.getElementById(field.id);
-            const errorElement = document.getElementById(field.errorId);
-            if (!element) return;
-            element.addEventListener('blur', function () {
-                if (!this.value.trim()) {
-                    this.classList.add('error');
-                    errorElement.style.display = 'block';
-                } else {
-                    this.classList.remove('error');
-                    errorElement.style.display = 'none';
-                }
-            });
-            element.addEventListener('input', function () {
-                if (this.value.trim()) {
-                    this.classList.remove('error');
-                    errorElement.style.display = 'none';
-                }
-            });
-        });
-
         // Password toggle functionality
         const passwordField = document.getElementById('password');
         const confirmPasswordField = document.getElementById('confirmPassword');
         const togglePassword = document.getElementById('togglePassword');
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 
-        // Toggle password visibility
-        function togglePasswordVisibility(field, button) {
-            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
-            field.setAttribute('type', type);
+        // Variables
+        let profileDataUrl = null;
+        let signatureDataUrl = null;
+        let selectedClasses = [];
+        let allPermissions = [];
+        try {
+            // Parse permissions_list safely
+            allPermissions = JSON.parse('{{ permissions_list | tojson | safe }}') || [];
+            allPermissions.forEach(p => { 
+                if (typeof p.selected === 'undefined') p.selected = !!p.selected; 
+            });
+        } catch (e) { console.log(e); }
 
-            // Toggle eye icon
-            if (type === 'text') {
-                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            } else {
-                button.innerHTML = '<i class="fas fa-eye"></i>';
-            }
+        try {
+            // Generate selectedClasses as object array
+            selectedClasses = JSON.parse('{{ selected_classes | tojson | safe }}') || [];
+        } catch (e) { console.log(e); }
+
+        // ---------- Utility helpers ----------
+        function el(id) { return document.getElementById(id); }
+        function createBadge(name, bgClass = 'bg-gray-200', textClass = 'text-gray-700') {
+            const span = document.createElement('span');
+            span.textContent = name;
+            span.className = `text-sm px-2 py-1 rounded-full font-medium ${bgClass} ${textClass} mr-1 mb-1`;
+            return span;
+        }
+        function isValidEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        function clearValidationSummary() {
+            if (!validationSummary || !errorList) return;
+            validationSummary.style.display = 'none';
+            errorList.innerHTML = '';
+        }
+        function showValidationSummary(errors = []) {
+            if (!validationSummary || !errorList) return;
+                validationSummary.style.display = 'block';
+                errorList.innerHTML = '';
+                errors.forEach(err => {
+                const li = document.createElement('li');
+                li.textContent = err;
+                errorList.appendChild(li);
+            });
+            validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        togglePassword.addEventListener('click', () => {
-            togglePasswordVisibility(passwordField, togglePassword);
-        });
 
-        toggleConfirmPassword.addEventListener('click', () => {
-            togglePasswordVisibility(confirmPasswordField, toggleConfirmPassword);
-        });
-
-        // Image upload functionality
-        function setupImageUpload(uploadElement, fileInput, previewElement, type) {
-            // Click on upload area
-            uploadElement.addEventListener('click', function (e) {
-                // Don't trigger if clicking on buttons inside
-                if (!e.target.closest('.btn-upload')) {
-                    fileInput.click();
-                }
-            });
-
-            // Click on upload button
-            const uploadBtn = type === 'profile' ? uploadProfileBtn : uploadSignatureBtn;
-            uploadBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                fileInput.click();
-            });
-
-            // Click on capture button
-            const captureBtn = type === 'profile' ? captureProfileBtn : captureSignatureBtn;
-            captureBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                alert('Camera functionality would open here. This requires additional permissions and APIs.');
-                // In a real implementation, we would use:
-                // fileInput.setAttribute('capture', 'environment');
-                // fileInput.click();
-            });
-
-            // File input change
-            fileInput.addEventListener('change', function () {
-                if (this.files && this.files[0]) {
-                    const reader = new FileReader();
-
-                    reader.onload = function (e) {
-                        // Set current image type
-                        currentImageType = type;
-
-                        // Show image in cropper
-                        cropperImage.src = e.target.result;
-                        cropperModal.style.display = 'flex';
-
-                        // Initialize cropper
-                        setTimeout(initCropper, 100);
+        // ---------- Class search/filter ----------
+        if (classSearch && classesContainer) {
+            classSearch.addEventListener('input', function () {
+                const searchTerm = this.value.trim().toLowerCase();
+                let anyVisible = false;
+                classesContainer.querySelectorAll('.checkbox-item').forEach(item => {
+                    const className = (item.getAttribute('data-name') || '').toLowerCase();
+                    if (className.includes(searchTerm)) {
+                    item.style.display = '';
+                    anyVisible = true;
+                    } else {
+                    item.style.display = 'none';
                     }
+                });
+                if (noClassesMessage) noClassesMessage.style.display = anyVisible ? 'none' : 'block';
+            });
+        }
 
-                    reader.readAsDataURL(this.files[0]);
+        // ---------- Class selection (delegated) ----------
+        if (classesContainer) {
+            classesContainer.addEventListener('click', (e) => {
+
+            const elItem = e.target.closest('.checkbox-item');
+            if (!elItem) return;
+
+            const id = elItem.getAttribute('data-id');
+            const name = elItem.getAttribute('data-name') || (elItem.textContent || '').trim();
+            const checkbox = elItem.querySelector('input[type="checkbox"]');
+            if (!id) return;
+
+            const idx = selectedClasses.findIndex(c => c.id === id);
+            console.log(selectedClasses)
+            
+            if (idx === -1) {
+                selectedClasses.push({ id, name });
+                elItem.classList.add('selected');
+                if (checkbox) checkbox.checked = true;
+            } else {
+                selectedClasses.splice(idx, 1);
+                elItem.classList.remove('selected');
+                if (checkbox) checkbox.checked = false;
+            }
+
+            // Update preview
+            const n = selectedClasses.length;
+            if (selectedCount) selectedCount.textContent = `${n} ${n === 1 ? 'class' : 'classes'}`;
+            if (selectedClassesPreview && selectedClassesTags) {
+                if (n > 0) {
+                selectedClassesTags.innerHTML = '';
+                selectedClasses.forEach(cls => selectedClassesTags.appendChild(createBadge(cls.name, 'bg-blue-50', 'text-blue-700')));
+                } else {
+                selectedClassesTags.innerHTML = '';
+                }
+            }
+            });
+        }
+
+        // ---------- Permissions: render / modal update ----------
+        function renderMainPermissionChips() {
+            const permissionCardBody = document.getElementById('permissionCardBody');
+            if (!permissionCardBody) return;
+
+            // Filter only selected permissions
+            const selected = allPermissions.filter(p => p.selected);
+            if (selected.length === 0) {
+
+                permissionCardBody.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Section Header -->
+                    <div class="text-center">
+                        <h2 class="text-2xl font-semibold text-blue-400 mb-2">
+                            Permissions & Features
+                        </h2>
+                        <!-- Manage Permissions Button -->
+                        <button 
+                            onclick="openPermissionModal()" 
+                            class="mb-4 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow shadow-blue-500/30 transition-all duration-300">
+                            <i class="fa-solid fa-pen-to-square mr-2"></i> Manage Permissions
+                        </button>
+                        <p class="text-gray-400 text-sm max-w-2xl mx-auto">
+                            For the selected role, these are the permissions and features this staff member will have access to.
+                        </p>
+                    </div>
+                    <div class="flex flex-col items-center justify-center text-center py-16 bg-[#1A1A1A] from-gray-800 to-gray-900 rounded-2xl border border-dashed border-gray-700 shadow-inner shadow-black/30">
+                        <div class="h-20 w-20 rounded-full bg-blue-600 flex items-center justify-center mb-5 shadow-lg shadow-blue-600/30">
+                            <i class="fa-solid fa-lock-open text-white text-3xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-blue-400 mb-2">No Permissions Assigned</h3>
+                        <p class="text-gray-400 text-sm max-w-md mb-5">
+                            This role doesn’t currently have any permissions or features assigned.
+                            Try assigning permissions from the "Manage Permissions" button.
+                        </p>
+                    </div>
+                </div>
+                    `;
+                return;
+            }
+
+            // Update the main form chips
+            let html = `
+            <div class="space-y-6">
+
+                <!-- Section Header -->
+                <div class="text-center">
+                    <h2 class="text-2xl font-semibold text-blue-400 mb-2">
+                        Permissions & Features
+                    </h2>
+                
+
+                    <!-- Manage Permissions Button -->
+                    <button 
+                        onclick="openPermissionModal()" 
+                        class="mb-4 px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow shadow-blue-500/30 transition-all duration-300">
+                        <i class="fa-solid fa-pen-to-square mr-2"></i> Manage Permissions
+                    </button>
+                    <p class="text-gray-400 text-sm max-w-2xl mx-auto">
+                        For the selected role, these are the permissions and features this staff member will have access to.
+                    </p>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            `;
+
+            for (const perm of selected) {
+                html +=
+                    `
+                <div class="permission_list group relative rounded-2xl p-5 bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 shadow-lg hover:shadow-blue-500/40 hover:scale-[1.03] transition-all duration-300">
+                
+                    <!-- Blue Hover Glow -->
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+
+                    <!-- Title + Icon Row -->
+                    <div class="flex items-center gap-3 mb-3 relative z-10">
+                        <div class="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-inner shadow-black/30">
+                            <i class="fas ${perm.icon} text-white text-lg"></i>
+                        </div>
+                        <h3 class="font-semibold text-lg text-blue-400 group-hover:text-blue-300 transition-colors duration-300">
+                            ${perm.title}
+                        </h3>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="text-gray-400 text-sm leading-snug relative z-10">
+                        ${perm.description}
+                    </p>
+                </div>
+                `
+            }
+            html += '</div></div>';
+
+            permissionCardBody.innerHTML = html;
+        }
+
+        function updateModalPermissions() {
+            const cards = document.querySelectorAll('.permission-card');
+            const selectedPermissionsPreview = document.getElementById('selectedPermissionsPreview');
+            const selectedPermissionsTags = document.getElementById('selectedPermissionsTags');
+
+
+            // Go through each permission card in the modal
+            cards.forEach(card => {
+                const id = card.dataset.id;
+                const perm = allPermissions.find(p => String(p.id) === String(id));
+
+                // If permission not found, skip
+                if (!perm) return;
+
+                // Apply or remove "selected" look based on its state
+                if (perm.selected) {
+                    card.classList.add('selected', 'border-blue-400/40', 'bg-slate-800/30');
+                    card.classList.remove('hover:bg-slate-800/20');
+                } else {
+                    card.classList.remove('selected', 'border-blue-400/40', 'bg-slate-800/30');
+                    card.classList.add('hover:bg-slate-800/20');
                 }
             });
+
+            // Get all selected permissions from allPermissions
+            const selected = allPermissions.filter(p => p.selected);
+
+            // Update count text
+            selectedPermissionsCount.textContent = `${selected.length} selected`;
+
+            // If any selected permissions exist
+            if (selected.length > 0) {
+                // Show preview section
+                selectedPermissionsPreview.classList.remove('hidden');
+
+                // Clear old tags
+                selectedPermissionsTags.innerHTML = '';
+
+                // Create tag for each selected permission
+                selected.forEach(perm => {
+                    const tag = document.createElement('span');
+                    tag.className = `
+                        inline-flex items-center space-x-1 px-2 py-1
+                        bg-blue-600/20 text-blue-400 border border-blue-500/30
+                        rounded-full text-sm
+                    `;
+                    tag.innerHTML = `<span>${perm.title}</span>`;
+                    selectedPermissionsTags.appendChild(tag);
+                });
+            }
+            // If none selected
+            else {
+                selectedPermissionsPreview.classList.add('hidden');
+            }
+
         }
 
-        // Initialize cropper
-        function initCropper() {
-            if (cropper) {
-                cropper.destroy();
-            }
-
-            cropper = new Cropper(cropperImage, {
-                aspectRatio: currentImageType === 'profile' ? 1 : 3 / 1,
-                viewMode: 1,
-                guides: true,
-                background: false,
-                responsive: true,
-                autoCropArea: 0.8,
-                checkOrientation: true,
-            });
-
-            // Store original image data
-            originalImageData = cropperImage.src;
-        }
-
-        // Rotate image left
-        rotateLeftBtn.addEventListener('click', function () {
-            if (cropper) {
-                cropper.rotate(-90);
-            }
-        });
-
-        // Rotate image right
-        rotateRightBtn.addEventListener('click', function () {
-            if (cropper) {
-                cropper.rotate(90);
-            }
-        });
-
-        // Remove background (simulated)
-        removeBackgroundBtn.addEventListener('click', function () {
-            removeBackgroundBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            removeBackgroundBtn.disabled = true;
-
-            setTimeout(function () {
-                // This would be replaced with actual API call
-                alert('In a real application, this would send the image to an AI background removal API and return the processed image.');
-
-                // For demo purposes, we'll just add a blue background
-                const canvas = cropper.getCroppedCanvas();
-                const ctx = canvas.getContext('2d');
-
-                // Store current image data
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-                // Create new canvas with blue background
-                const newCanvas = document.createElement('canvas');
-                newCanvas.width = canvas.width;
-                newCanvas.height = canvas.height;
-                const newCtx = newCanvas.getContext('2d');
-
-                // Fill with blue background
-                newCtx.fillStyle = '#4361ee';
-                newCtx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-
-                // Draw original image on top
-                newCtx.drawImage(canvas, 0, 0);
-
-                // Replace cropper image
-                cropper.replace(newCanvas.toDataURL());
-
-                removeBackgroundBtn.innerHTML = '<i class="fas fa-magic"></i> AI Remove Background';
-                removeBackgroundBtn.disabled = false;
-            }, 2000);
+        // Expose open/close modal functions for inline handlers
+        window.openPermissionModal = function () {
+            const manageModal = document.getElementById('managePermission');
+            if (!manageModal) return;
+            manageModal.classList.remove('hidden');
+            updateModalPermissions();
+        };
+        
+        window.closePermissionModal = function () {
+            const manageModal = document.getElementById('managePermission');
+            if (!manageModal) return;
+            manageModal.classList.add('hidden');
         };
 
-        // Undo edit
-        undoEditBtn.addEventListener('click', function () {
-            if (editedImageData) {
-                cropper.replace(editedImageData);
-                editedImageData = null;
-            } else if (originalImageData) {
-                cropper.replace(originalImageData);
-            }
-        });
 
-        // Crop and apply
-        cropImageBtn.addEventListener('click', function () {
-            const canvas = cropper.getCroppedCanvas();
-            const dataURL = canvas.toDataURL('image/jpeg', 0.8);
-
-            // Set preview based on current image type
-            if (currentImageType === 'profile') {
-                profilePreview.style.backgroundImage = `url(${dataURL})`;
-                profilePreview.style.display = 'block';
-                profileDataUrl = dataURL;
-            } else {
-                signaturePreview.style.backgroundImage = `url(${dataURL})`;
-                signaturePreview.style.display = 'block';
-                signatureDataUrl = dataURL;
-            }
-
-            // Close cropper modal
-            cropperModal.style.display = 'none';
-
-            // Clean up cropper
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-        });
-
-        // Setup image upload for profile and signature
-        setupImageUpload(profileUpload, profileFileInput, profilePreview, 'profile');
-        setupImageUpload(signatureUpload, signatureFileInput, signaturePreview, 'signature');
-
-        // Remove profile image
-        if (removeProfileBtn) {
-            removeProfileBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                profilePreview.style.display = 'none';
-                profileDataUrl = null;
-                profileUpload.querySelector('.upload-icon').style.display = 'block';
-                profileUpload.querySelector('.upload-text').style.display = 'block';
-                this.style.display = 'none';
+        // ---------- Permission card click (delegated) ----------
+        if (permissionsContainer) {
+            permissionsContainer.addEventListener('click', (e) => {
+            const card = e.target.closest('.permission-card');
+            if (!card) return;
+            const id = card.dataset.id;
+            const perm = allPermissions.find(p => String(p.id) === String(id));
+            if (!perm) return;
+            perm.selected = !perm.selected;
+            renderMainPermissionChips();
+            updateModalPermissions();
             });
         }
 
-        // Remove signature image
-        if (removeSignatureBtn) {
-            removeSignatureBtn.addEventListener('click', function (e) {
-                e.stopPropagation();
-                signaturePreview.style.display = 'none';
-                signatureDataUrl = null;
-                signatureUpload.querySelector('.upload-icon').style.display = 'block';
-                signatureUpload.querySelector('.upload-text').style.display = 'block';
-                this.style.display = 'none';
-            });
+        // Gender and role selection (delegated) — use single handler to avoid duplicate listeners
+        document.addEventListener('click', async function (event) {
+            const card = event.target.closest('.radio-card');
+            if (!card) return;
+            const radioInput = card.querySelector('input[type="radio"]');
+            if (!radioInput) return;
+
+            // For gender
+            if (radioInput.name === 'gender') {
+                document.querySelectorAll('.radio-card').forEach(c => {
+                    if (c.querySelector('input[name="gender"]')) {
+                        c.classList.remove('selected');
+                        c.classList.remove('error');
+                    }
+                });
+                card.classList.add('selected');
+                radioInput.checked = true;
+
+                // Clear error
+                const genderErr = document.getElementById('genderError');
+                if (genderErr) genderErr.style.display = 'none';
+                return;
+            }
+
+            // For role
+            if (radioInput.name === 'role_id') {
+                document.querySelectorAll('.radio-card').forEach(c => {
+                    if (c.querySelector('input[name="role_id"]')) {
+                        c.classList.remove('selected');
+                        c.classList.remove('error');
+                    }
+                });
+                card.classList.add('selected');
+                radioInput.checked = true;
+
+                // Clear error
+                const roleErr = document.getElementById('roleError');
+                if (roleErr) roleErr.style.display = 'none';
+
+                const permissionCardBody = document.getElementById('permissionCardBody');
+                if (permissionCardBody) permissionCardBody.innerHTML = "";
+
+                const roleId = radioInput.value;
+                // Ensure we only call once per click
+                await pullRolePermisions(roleId);
+                renderMainPermissionChips();
+            }
+        });
+        
+        async function pullRolePermisions(roleId) {
+            try {
+                const response = await fetch(`/api/get_role_permissions?role_id=${roleId}`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const rolePermIds = data.permissions_list; // e.g. [1, 3, 5, 7]
+
+                    // Step 1: reset all permissions
+                    allPermissions.forEach(p => p.selected = false);
+
+                    // Step 2: mark the returned ones as true
+                    allPermissions.forEach(p => {
+                        if (rolePermIds.includes(p.id)) {
+                            p.selected = true;
+                        }
+                    });
+                    return true
+                } else {
+                    console.error('Failed to fetch role permissions');
+                }
+            } catch (err) {
+                console.error('Error fetching role permissions:', err);
+            }
         }
 
-        // Validate form function
+        // ---------- Validation ----------
         function validateForm() {
-            let isValid = true;
+            clearValidationSummary();
             const errors = [];
+            let isValid = true;
 
             // Clear previous errors
             errorList.innerHTML = '';
@@ -1472,6 +1668,7 @@
             requiredFields.forEach(field => {
                 const element = document.getElementById(field.id);
                 const errorElement = document.getElementById(field.errorId);
+                if (!element) return;
 
                 // Remove previous error styling
                 element.classList.remove('error');
@@ -1492,6 +1689,21 @@
                     errorElement.style.display = 'block';
                     errors.push('Please enter a valid email address');
                 }
+                // Validate password length
+                else if (field.id === 'password' && element.value.length < 8) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.textContent = 'Password must be at least 8 characters';
+                    errorElement.style.display = 'block';
+                    errors.push('Password must be at least 8 characters');
+                }
+                // Validate password match
+                else if (field.id === 'confirmPassword' && element.value !== passwordField.value) {
+                    isValid = false;
+                    element.classList.add('error');
+                    errorElement.style.display = 'block';
+                    errors.push('Passwords do not match');
+                }
             });
 
             // Validate radio groups
@@ -1500,7 +1712,7 @@
                 const errorElement = document.getElementById(group.errorId);
 
                 // Remove error from all cards in group
-                document.querySelectorAll(`.radio-card input[name="${group.name}"]`).forEach(input => {
+                document.querySelectorAll(".radio-card input[name='${group.name}']").forEach(input => {
                     input.parentElement.classList.remove('error');
                 });
 
@@ -1517,102 +1729,107 @@
                 }
             });
 
-            // Validate password if provided
-            const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            
-            if (password && password.length < 8) {
-                isValid = false;
-                document.getElementById('password').classList.add('error');
-                document.getElementById('passwordError').style.display = 'block';
-                errors.push('Password must be at least 8 characters');
-            }
-            
-            if (password && password !== confirmPassword) {
-                isValid = false;
-                document.getElementById('confirmPassword').classList.add('error');
-                document.getElementById('confirmPasswordError').style.display = 'block';
-                errors.push('Passwords do not match');
-            }
-
-            // Display validation summary if there are errors
-            if (errors.length > 0) {
-                validationSummary.style.display = 'block';
-                errors.forEach(error => {
-                    const li = document.createElement('li');
-                    li.textContent = error;
-                    errorList.appendChild(li);
-                });
-
-                // Scroll to validation summary
-                validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-
+            if (!isValid) showValidationSummary(errors);
             return isValid;
         }
+        
+        // small Real-time validation for inputs validation
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            const errorElement = document.getElementById(field.errorId);
+            if (!element) return;
+            element.addEventListener('blur', function () {
+                if (!this.value.trim()) {
+                    this.classList.add('error');
+                    errorElement.style.display = 'block';
+                } else {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+            });
+            element.addEventListener('input', function () {
+                if (this.value.trim()) {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+                if (field.id === 'confirmPassword' && this.value === passwordField.value) {
+                    this.classList.remove('error');
+                    errorElement.style.display = 'none';
+                }
+            });
+        });
 
-        // Email validation function
-        function isValidEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
+        // ---------- Password toggles ----------
+        function togglePasswordVisibility(field, button) {
+            const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+            field.setAttribute('type', type);
 
-        // Utility function to create a badge
-        function createBadge(name, bgColor, textColor) {
-            const span = document.createElement('span');
-            span.textContent = name;
-            span.className = `text-sm px-2 py-1 rounded-full font-medium ${bgColor} ${textColor}`;
-            return span;
-        }
-
-        // Status class mapping
-        function getStatusClass(status) {
-            switch(status) {
-                case 'active': return 'status-active';
-                case 'inactive': return 'status-inactive';
-                case 'suspended': return 'status-suspended';
-                default: return 'status-inactive';
+            // Toggle eye icon
+            if (type === 'text') {
+                button.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                button.innerHTML = '<i class="fas fa-eye"></i>';
             }
         }
 
-        // Ensure Update button works and opens verification modal
+        togglePassword.addEventListener('click', () => {
+            togglePasswordVisibility(passwordField, togglePassword);
+        });
+
+        toggleConfirmPassword.addEventListener('click', () => {
+            togglePasswordVisibility(confirmPasswordField, toggleConfirmPassword);
+        });
+
+
+        // ---------- Close modals ----------
+        closeButtons.forEach(button => button.addEventListener('click', () => {
+            if (verificationModal) verificationModal.style.display = 'none';
+            if (successModal) successModal.style.display = 'none';
+        }));
+
+        // Close modal by clicking outside
+        window.addEventListener('click', (event) => {
+            if (verificationModal && event.target === verificationModal) verificationModal.style.display = 'none';
+            if (successModal && event.target === successModal) successModal.style.display = 'none';
+            const manageModal = document.getElementById('managePermission');
+            if (manageModal && event.target === manageModal) {
+            if (typeof window.closePermissionModal === 'function') window.closePermissionModal();
+            else manageModal.classList.add('hidden');
+            }
+        });
+
+        // Ensure Save button works and opens verification modal
         if (updateButton) {
             updateButton.addEventListener('click', function () {
                 // Validate form before proceeding
-                if (!validateForm()) {
-                    return;
-                }
+                if (!validateForm()) { return; }
 
                 // Update profile preview in verification modal
-                const finalProfilePreview = document.getElementById('finalProfilePreview');
-                if (profilePreview.style.backgroundImage) {
-                    finalProfilePreview.style.backgroundImage = profilePreview.style.backgroundImage;
-                } else if (profileDataUrl) {
-                    finalProfilePreview.style.backgroundImage = `url(${profileDataUrl})`;
+                if (finalProfilePreview && profilePreview) {
+                    const bg = profilePreview.style.backgroundImage || '';
+                    if (bg) finalProfilePreview.style.backgroundImage = bg;
                 }
 
+                // Fill verification modal fields (safe insertion)
+                const setText = (id, text) => {
+                    const node = document.getElementById(id);
+                    if (node) node.textContent = text || 'Not Provided';
+                };
+
                 // Update verification modal with form data
-                document.getElementById('verifyName').textContent = document.getElementById('name').value;
-                document.getElementById('verifyEmail').textContent = document.getElementById('email').value;
-                document.getElementById('verifyUsername').textContent = document.getElementById('username').value;
+                setText('verifyName', el('name') ? el('name').value.trim() : '');
+                setText('verifyEmail', el('email') ? el('email').value.trim() : '');
+                setText('verifyUsername', el('username') ? el('username').value.trim() : '');
+                setText('verifyQualification', el('qualification') ? el('qualification').value.trim() : 'Not Provided');
+                setText('verifySalary', el('salary') ? el('salary').value.trim() : 'Not Provided');
+                setText('verifyNational_id', el('national_id') ? el('national_id').value.trim() : 'Not Provided');
+                setText('verifyPhone', el('phone') ? el('phone').value.trim() : 'Not Provided');
 
-                const qualificationValue = document.getElementById('qualification').value.trim();
-                const salaryValue = document.getElementById('salary').value.trim();
-                const phoneValue = document.getElementById('phone').value.trim();
-                const statusValue = document.getElementById('status').value;
-
-                document.getElementById('verifyQualification').textContent = qualificationValue ? qualificationValue : 'Not Provided';
-                document.getElementById('verifySalary').textContent = salaryValue ? salaryValue : 'Not Provided';
-                document.getElementById('verifyPhone').textContent = phoneValue ? phoneValue : 'Not Provided';
-                
-                const statusSpan = document.getElementById('verifyStatus');
-                statusSpan.textContent = statusValue.charAt(0).toUpperCase() + statusValue.slice(1);
-                statusSpan.className = `px-2 py-1 rounded-full text-xs ${getStatusClass(statusValue)}`;
 
                 const joinDateInput = document.getElementById('date_of_joining').value;
                 const joinDate = new Date(joinDateInput);
-
                 let JoinDateValue = 'Not Provided';
+
                 if (joinDateInput && !isNaN(joinDate.getTime())) {
                     JoinDateValue = joinDate.toLocaleDateString('en-US', {
                         year: 'numeric',
@@ -1626,52 +1843,51 @@
                 const selectedRole = document.querySelector('input[name="role_id"]:checked');
                 document.getElementById('verifyRole').textContent = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : 'Not selected';
 
-                // Fill Classes
+                // classes preview
                 const verifyClasses = document.getElementById('verifyClasses');
-                verifyClasses.innerHTML = ''; // clear previous badges
-                if (selectedClasses.length > 0) {
-                    selectedClasses.forEach(cls => {
-                        verifyClasses.appendChild(createBadge(cls.name, 'bg-blue-500/20', 'text-blue-300'));
-                    });
-                } else {
-                    verifyClasses.appendChild(createBadge('None', 'bg-gray-500/20', 'text-gray-300'));
+                if (verifyClasses) {
+                    verifyClasses.innerHTML = '';
+                    if (selectedClasses.length > 0) {
+                        selectedClasses.forEach(cls => verifyClasses.appendChild(createBadge(cls.name, 'bg-blue-50', 'text-blue-700')));
+                    } else {
+                        verifyClasses.appendChild(createBadge('None', 'bg-gray-100', 'text-gray-600'));
+                    }
                 }
 
-                // Fill Permissions
+                // permissions preview
                 const verifyPermissions = document.getElementById('verifyPermissions');
-                verifyPermissions.innerHTML = ''; // clear previous badges
-                if (selectedPermissions.length > 0) {
-                    selectedPermissions.forEach(perm => {
-                        verifyPermissions.appendChild(createBadge(perm.name, 'bg-green-500/20', 'text-green-300'));
-                    });
-                } else {
-                    verifyPermissions.appendChild(createBadge('None', 'bg-gray-500/20', 'text-gray-300'));
+                if (verifyPermissions) {
+                    verifyPermissions.innerHTML = ''; // clear previous badges
+                    const selectedPermissions = allPermissions.filter(p => p.selected);
+                    if (selectedPermissions.length > 0) {
+                        selectedPermissions.forEach(perm => {
+                            console.log(perm)
+                            verifyPermissions.appendChild(createBadge(perm.title, 'bg-green-500/20', 'text-green-300'));
+                        });
+                    } else {
+                        verifyPermissions.appendChild(createBadge('None', 'bg-gray-500/20', 'text-gray-300'));
+                    }
                 }
 
-                verificationModal.style.display = 'flex';
+                if (verificationModal) verificationModal.style.display = 'flex';
             });
+
         }
 
-        // Close modals
-        closeButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                verificationModal.style.display = 'none';
-                successModal.style.display = 'none';
-                cropperModal.style.display = 'none';
-            });
-        });
 
-        // Verify and update staff
+        // Verify and add staff
         verifyConfirm.addEventListener('click', async function () {
+            if (!validateForm()) { return; }
+
             verifyConfirm.disabled = true;
-            verifyConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-            
+            verifyConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             const selectedGender = document.querySelector('input[name="gender"]:checked');
             const selectedRole = document.querySelector('input[name="role_id"]:checked');
             const roleLabel = selectedRole ? selectedRole.parentElement.querySelector('div').textContent : null;
-            
+            // read staff id from hidden input (sent by server template)
+            const staffIdEl = document.getElementById('staff_id');
+            const staffId = staffIdEl && staffIdEl.value ? parseInt(staffIdEl.value, 10) : null;
             const payload = {
-                id: staffId,
                 name: document.getElementById('name').value.trim(),
                 email: document.getElementById('email').value.trim(),
                 phone: document.getElementById('phone').value.replace(/\D/g, '') || null,
@@ -1679,29 +1895,26 @@
                 gender: selectedGender ? selectedGender.value : null,
                 address: document.getElementById('address').value.trim() || null,
                 username: document.getElementById('username').value.trim(),
-                password: document.getElementById('password').value || null, // Only send if changed
+                password: document.getElementById('password').value,
                 date_of_joining: document.getElementById('date_of_joining').value || null,
                 qualification: document.getElementById('qualification').value.trim() || null,
                 salary: document.getElementById('salary').value.trim() || null,
+                national_id: document.getElementById('national_id').value.trim() || null,
                 role_id: selectedRole ? selectedRole.value : null,
                 role_name: roleLabel,
-                status: document.getElementById('status').value,
+                staff_id: staffId,
                 assigned_classes: selectedClasses.map(cls => cls.id),
-                permissions: selectedPermissions.map(perm => perm.id),
+                permissions: allPermissions.filter(p => p.selected).map(p => p.id),
                 image: profileDataUrl,
                 sign: signatureDataUrl
             };
-            
             try {
-                const res = await fetch('/api/update_staff', { 
-                    method: 'PUT', 
-                    headers: { 'Content-Type': 'application/json' }, 
-                    body: JSON.stringify(payload) 
-                });
-                
+                // console.log("Sending payload:", payload);
+                const res = await fetch('/api/update_staff_api', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                // console.log("Response status:", res);
                 const data = await res.json().catch(() => ({}));
                 verificationModal.style.display = 'none';
-                
+                console.log(data)
                 if (!res.ok) {
                     validationSummary.style.display = 'block';
                     errorList.innerHTML = '';
@@ -1716,76 +1929,30 @@
                     } else {
                         // Fallback to single message
                         const li = document.createElement('li');
-                        li.textContent = data.message || 'Failed to update staff. Please review the form.';
+                        li.textContent = data.message || 'Failed to add staff. Please review the form.';
                         errorList.appendChild(li);
                     }
 
                     validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else {
-                    document.querySelector('#successModal .success-message').textContent = 
-                        `${payload.name}'s information has been successfully updated.`;
-                    successModal.style.display = 'flex';
+                    showAlert(res.status, data.message || 'Staff Updated Successfully!');
                 }
             } catch (e) {
                 verificationModal.style.display = 'none';
                 validationSummary.style.display = 'block';
                 errorList.innerHTML = '';
                 const li = document.createElement('li');
-                li.textContent = 'Network error while updating. Please try again.';
+                li.textContent = e;
                 errorList.appendChild(li);
                 validationSummary.scrollIntoView({ behavior: 'smooth', block: 'start' });
             } finally {
                 verifyConfirm.disabled = false;
-                verifyConfirm.innerHTML = 'Verify & Update Staff';
+                verifyConfirm.innerHTML = 'Verify & Add Staff';
             }
         });
 
-        // Send WhatsApp message
-        sendWhatsAppButton.addEventListener('click', function () {
-            const phone = document.getElementById('phone').value.replace(/\D/g, '');
-            const name = document.getElementById('name').value;
-
-            if (phone) {
-                const whatsappUrl = `https://wa.me/${phone}?text=Your%20staff%20account%20information%20has%20been%20updated.%20Please%20contact%20admin%20if%20you%20have%20any%20questions.`;
-                window.open(whatsappUrl, '_blank');
-            } else {
-                alert('Phone number is required to send WhatsApp message');
-            }
-        });
-
-        // Close modal if clicked outside
-        window.addEventListener('click', function (event) {
-            if (event.target === verificationModal) {
-                verificationModal.style.display = 'none';
-            }
-            if (event.target === successModal) {
-                successModal.style.display = 'none';
-            }
-            if (event.target === cropperModal) {
-                cropperModal.style.display = 'none';
-            }
-        });
-
-        // Real-time validation for inputs
-        requiredFields.forEach(field => {
-            const element = document.getElementById(field.id);
-            const errorElement = document.getElementById(field.errorId);
-
-            element.addEventListener('input', function () {
-                if (this.value.trim()) {
-                    this.classList.remove('error');
-                    errorElement.style.display = 'none';
-                }
-            });
-
-            element.addEventListener('blur', function () {
-                if (!this.value.trim()) {
-                    this.classList.add('error');
-                    errorElement.style.display = 'block';
-                }
-            });
-        });
     });
 </script>
+
 
 {% endblock %}

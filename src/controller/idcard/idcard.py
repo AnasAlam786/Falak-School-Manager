@@ -82,6 +82,11 @@ def idcards_page():
         Schools.id == school_id
     ).first()
 
+    principal_sign = db.session.query( TeachersLogin.Sign
+        ).filter(
+            TeachersLogin.school_id == school_id,
+            TeachersLogin.role_id == 2  #2 role_id is for principal in database
+        ).scalar()
 
     # for student in students:
     #     print({
@@ -104,7 +109,8 @@ def idcards_page():
 
     # '/pdf-components/icards/hanging_image_icard.html'
 
+    session_logo = 'https://lh3.googleusercontent.com/d/1tJnm5i4GgSyb4HIULAb2tvbejXfrz5HZ=s200'
 
     return render_template('/idcard.html',
-                           students=students, school = school, classes=classes)
+                           students=students, school = school, classes=classes, session_logo = session_logo, principal_sign = principal_sign)
 

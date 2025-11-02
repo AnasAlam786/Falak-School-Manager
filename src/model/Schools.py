@@ -32,7 +32,7 @@ class Schools(db.Model):
 
     exams = db.relationship("Exams", back_populates="school")
     subjects = db.relationship("Subjects", back_populates="school")
-    marks = db.relationship("StudentsMarks_duplicate", back_populates="school")
+    marks = db.relationship("StudentMarks", back_populates="school")
 
     # students_marks = db.relationship("StudentsMarks", back_populates="school")
     staff_data = db.relationship("TeachersLogin", back_populates="school")

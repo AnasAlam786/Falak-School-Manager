@@ -3,12 +3,14 @@
 from flask import render_template, session, request, jsonify, Blueprint
 
 
-from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentsMarks_duplicate, Subjects, TeachersLogin, ClassExams
+
+from src.model import Exams, StudentsDB, StudentSessions, ClassData, StudentMarks, Subjects, TeachersLogin, ClassExams
 from src.model.ClassAccess import ClassAccess
 from src import db
 
 from bs4 import BeautifulSoup
 from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 
 fill_marks_bp = Blueprint( 'fill_marks_bp',   __name__)
@@ -16,6 +18,7 @@ fill_marks_bp = Blueprint( 'fill_marks_bp',   __name__)
 
 @fill_marks_bp.route('/fill_marks', methods=["GET", "POST"])
 @login_required
+@permission_required('fill_marks')
 def fill_marks():
     
     user_id = session["user_id"]
@@ -61,8 +64,6 @@ def fill_marks():
         .order_by(Exams.display_order.asc())
         .all()
     )
-    for exam_name, exam_id in exams:
-        print(f"Exam ID: {exam_id}, Exam Name: {exam_name}")
         
     data = None
 
@@ -77,8 +78,8 @@ def fill_marks():
 
         marks_data = (
             db.session.query(
-                StudentsMarks_duplicate.id.label('id'),
-                StudentsMarks_duplicate.score,          # Student's mark (can be None)
+                StudentMarks.id.label('id'),
+                StudentMarks.score,          # Student's mark (can be None)
                 StudentsDB.STUDENTS_NAME,               # Name of the student
                 StudentsDB.GENDER,
                 StudentsDB.id.label('student_id'), 
@@ -106,11 +107,11 @@ def fill_marks():
 
             # Outer join: get marks only if they exist
             .outerjoin(
-                StudentsMarks_duplicate,
-                (StudentsMarks_duplicate.student_id == StudentsDB.id) &
-                (StudentsMarks_duplicate.exam_id == exam_id) &
-                (StudentsMarks_duplicate.subject_id == Subjects.id) &
-                (StudentsMarks_duplicate.session_id == current_session_id)   # 🔑 Important
+                StudentMarks,
+                (StudentMarks.student_id == StudentsDB.id) &
+                (StudentMarks.exam_id == exam_id) &
+                (StudentMarks.subject_id == Subjects.id) &
+                (StudentMarks.session_id == current_session_id)   # 🔑 Important
             )
 
             # Filter by class, school, and session

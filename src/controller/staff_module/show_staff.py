@@ -1,4 +1,4 @@
-# src/controller/staff_module/staff_view.py
+# src/controller/staff_module/show_staff.py
 
 from collections import Counter
 from flask import render_template, session, Blueprint
@@ -14,13 +14,14 @@ from ..auth.login_required import login_required
 from ..permissions.permission_required import permission_required
 
 
-staff_view_bp = Blueprint( 'staff_view_bp',   __name__)
+show_staff_bp = Blueprint( 'show_staff_bp',   __name__)
 
 #add the aadhar of aarish in database after taking from udise
 
-@staff_view_bp.route('/staff_view', methods=['GET'])
+@show_staff_bp.route('/show_staff', methods=['GET'])
 @login_required
-def staff_view():
+@permission_required('show_staff')
+def show_staff():
     school_id = session['school_id']
 
     # --- teachers data (role + accessible classes + total accessible count per teacher)
@@ -64,7 +65,7 @@ def staff_view():
     sample_female_image = 'https://static.vecteezy.com/system/resources/previews/025/030/083/non_2x/businesswoman-portrait-beautiful-woman-in-business-suit-employee-of-business-institution-in-uniform-lady-office-worker-woman-business-avatar-profile-picture-illustration-vector.jpg'
 
     return render_template(
-        'staff/staff_view.html',
+        'staff/show_staff.html',
         teachers=teachers,
         total_staff=total_staff,
         total_classes=total_classes,

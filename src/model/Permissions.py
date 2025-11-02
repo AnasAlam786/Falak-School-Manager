@@ -1,5 +1,5 @@
 from sqlalchemy import (
-    Column, BigInteger, Text, Date
+    Boolean, Column, BigInteger, Text, Date
 )
 from src import db
 
@@ -10,6 +10,7 @@ class Permissions(db.Model):
     title = Column(Text, nullable=False)
     action = Column(Text, nullable=False)
     description = Column(Text, nullable=True)
+    assignable = Column(Boolean, nullable=True)
     created_at = Column(Date, nullable=True)
 
     role_permissions = db.relationship("RolePermissions", back_populates="permission_data")
