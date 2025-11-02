@@ -14,6 +14,8 @@ from src.model.Roles import Roles
 from src.model.TeachersLogin import TeachersLogin
 from src import db
 
+from src import r
+
 update_staff_api_bp = Blueprint( 'update_staff_api_bp',   __name__)
 
 @update_staff_api_bp.route('/api/update_staff_api', methods=['POST'])
@@ -156,6 +158,10 @@ def update_staff_api():
                 is_granted=perms["isgranted"],
                 created_at=datetime.now(timezone.utc).date()
             ))
+        
+        # updating permission no to reflect the permissions in client side instantly
+        permission_no = int(r.get(staff.id))
+        r.set(staff.id, permission_no+1)
             
         db.session.commit()
     except Exception as e:
