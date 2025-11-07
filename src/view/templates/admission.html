@@ -286,9 +286,27 @@
     </div>
   </div>
 
-  {% from "html-components/image-uploader.html" import render_image_uploader %}
-  {{ render_image_uploader(unique_suffix='new_student', label='Click to upload the image', image_url = '') }}
+<div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 pb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
 
+  <div class="section-header flex items-center gap-4 mb-8 pb-4 bottom-border">
+    <!-- Icon container -->
+    <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-sm">
+      <i class="fas fa-camera text-lg"></i>
+    </div>
+    <div>
+      <h2 class="section-title text-xl font-semibold leading-tight">Profile Photo</h2>
+      <p class="text-gray-500 text-sm mt-1">Upload or Capture the photo of student</p>
+    </div>
+  </div>
+
+  <!-- Centered Image Uploader -->
+  <div class="w-full lg:w-1/2 mx-auto">
+    {% from "html-components/image-uploader.html" import render_image_uploader %}
+    {{ render_image_uploader(unique_suffix='new_student', label='Click to upload the image', image_url='', icon='fas fa-cloud-upload-alt') }}
+  </div>
+</div>
+
+  
 </form>
 
 

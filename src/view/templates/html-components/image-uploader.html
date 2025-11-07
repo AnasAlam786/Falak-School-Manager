@@ -1,10 +1,9 @@
-{% macro render_image_uploader(unique_suffix='', label='Upload Image', image_url = '') %}
+{% macro render_image_uploader(unique_suffix='', label='Click to upload the image', image_url = '', icon = 'fas fa-cloud-upload-alt') %}
 
-<div class="flex justify-center">
-  <div id="uploadContainer{{ unique_suffix }}" class="w-full max-w-md rounded-3 border-2 border-dashed border-gray-500/40 bg-dark p-6 shadow-sm transition hover:border-blue-400/70">
+<!-- <div class="flex justify-center">
+  <div class="w-full max-w-md rounded-3 border-2 border-dashed border-gray-500/40 bg-dark p-6 shadow-sm transition hover:border-blue-400/70">
     <div id="uploadContent{{ unique_suffix }}" class="flex flex-col items-center justify-center cursor-pointer">
 
-      <!-- Upload Icon & Label (Visible by default) -->
       <div id="uploadIconSection{{unique_suffix }}" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none"
           viewBox="0 0 24 24" stroke="currentColor">
@@ -13,9 +12,8 @@
         </svg>
         <p class="text-gray-400 mt-2">{{ label or 'Click to upload the image' }}</p>
       </div>
-      <!-- Upload Icon & Label END -->
 
-      <!-- Cropped Image Preview Section (Initially hidden) -->
+      
       <div id="uploadedImageSection{{unique_suffix }}" class="relative w-full {{ '' if image_url else 'hidden' }}">
         <img id="uploadedImage{{unique_suffix }}" src="{{ image_url or '' }}" alt="Cropped Image" class="w-full rounded-2 border border-white/25" />
         <button id="destroyImage{{unique_suffix }}" type="button"
@@ -26,15 +24,70 @@
         </button>
         <p class="mt-2 text-center text-gray-300">Image uploaded successfully. Click to change.</p>
       </div>
-      <!-- Cropped Image Preview Section END -->
 
     </div>
   </div>
-  <!-- Hidden File Input -->
+
   <input type="file" id="imageInput{{unique_suffix }}" accept="image/*" class="hidden">
 
-</div>
+</div> -->
 
+<style>
+.image-upload {
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.7) !important;
+}
+
+.image-upload {
+        border: 2px dashed rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.7) !important;
+    }
+    .btn-upload {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(15, 23, 42, 0.9) !important;
+        transition: all 0.3s ease;
+    }
+
+    .btn-upload:hover {
+        background: rgba(67, 97, 238, 0.2) !important;
+        border-color: #4361ee;
+    }
+</style>
+<div class="form-section flex-1 bg-gray-dark/70 backdrop-blur-md rounded-xl shadow-section">
+  <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative" id="uploadContent{{ unique_suffix }}">
+    <input type="file" accept="image/*" class="hidden" style="display:none" id="imageInput{{unique_suffix }}">
+
+      <!-- Show if image is not passed -->
+      <div id="uploadIconSection{{unique_suffix }}" class="flex flex-col items-center {{ 'hidden' if image_url else '' }}">
+        <div class="text-primary text-[3rem] mb-4">
+            <i class="{{ icon or 'fas fa-cloud-upload-alt' }}"></i>
+        </div>
+        <div class="upload-text text-gray-lighter mb-4">{{ label or 'Click to upload the image' }}</div>
+      </div>
+
+      <!-- Show if image is passed -->
+      <div id="uploadedImageSection{{unique_suffix }}" class="relative w-full {{ '' if image_url else 'hidden' }}">
+        <img id="uploadedImage{{unique_suffix }}" src="{{ image_url or '' }}" alt="Cropped Image" 
+              class="max-h-96 w-auto mx-auto rounded-lg border border-white/25 object-contain transition-all duration-300 shadow-md" />
+        <button id="destroyImage{{unique_suffix }}" type="button"
+          class="absolute top-2 right-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white hover:bg-black/85 focus:outline-none focus:ring-2 focus:ring-white/70">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <p class="mt-2 text-center text-gray-300">Image uploaded successfully. Click to change.</p>
+      </div>
+
+      <div class="btn-group flex gap-3 mt-4">
+          <button class="useUpload{{unique_suffix }} btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" type="button" id="useUpload{{unique_suffix }}">
+              <i class="fas fa-upload mr-2"></i> Upload
+          </button>
+          <button class="useCamera{{unique_suffix }} btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300" type="button" id="useCamera{{unique_suffix }}">
+              <i class="fas fa-camera mr-2"></i> Capture
+          </button>
+      </div>
+  </div>
+</div>
 
 <!-- Choice Modal -->
 <div id="choiceModal{{unique_suffix }}" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
@@ -55,14 +108,14 @@
 
       <!-- Action Buttons -->
       <div class="space-y-4">
-        <button id="useCamera{{unique_suffix }}" type="button" class="w-full rounded-xl bg-blue-600 px-6 py-3.5 text-white transition-all hover:bg-blue-700 font-medium flex items-center justify-center gap-2">
+        <button id="useCamera{{ unique_suffix }}" type="button" class="useCamera{{ unique_suffix }} w-full rounded-xl bg-blue-600 px-6 py-3.5 text-white transition-all hover:bg-blue-700 font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M4 5a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2h-1.586a1 1 0 01-.707-.293l-1.121-1.121A2 2 0 0011.172 3H8.828a2 2 0 00-1.414.586L6.293 4.707A1 1 0 015.586 5H4zm6 9a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
           </svg>
           Take Photo
         </button>
         
-        <button id="useUpload{{unique_suffix }}" type="button" class="w-full rounded-xl border border-white/10 px-6 py-3.5 text-gray-200 hover:text-white hover:border-blue-500 transition-all font-medium flex items-center justify-center gap-2">
+        <button id="useUpload{{ unique_suffix }}" type="button" class=" useUpload{{ unique_suffix }} w-full rounded-xl border border-white/10 px-6 py-3.5 text-gray-200 hover:text-white hover:border-blue-500 transition-all font-medium flex items-center justify-center gap-2">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
           </svg>
@@ -140,6 +193,7 @@
   </div>
 </div>
 
+
 <!-- Main Script -->
 <script>
 
@@ -152,7 +206,6 @@
         this.imageStatus = 'unchanged'; // "unchanged", "updated", "removed"
 
         // DOM elements
-        this.uploadContainer = document.getElementById('uploadContainer' + this.id);
         this.uploadContent = document.getElementById('uploadContent' + this.id);
         this.imageInput = document.getElementById('imageInput' + this.id);
         this.cropperImage = document.getElementById('cropperImage' + this.id);
@@ -164,28 +217,51 @@
 
         this.cropper = null;
 
+        // Ensure modals are direct children of <body> so fixed positioning
+        // is relative to the viewport and not clipped by any ancestor stacking context.
+        // This avoids the modals appearing only within the uploader container.
+        try {
+          if (this.choiceModal && this.choiceModal.parentNode !== document.body) {
+            document.body.appendChild(this.choiceModal);
+          }
+          if (this.cropModal && this.cropModal.parentNode !== document.body) {
+            document.body.appendChild(this.cropModal);
+          }
+        } catch (err) {
+          // If DOM operations fail (very unlikely) continue without breaking uploader.
+          console.warn('Failed to move image uploader modals to document.body', err);
+        }
+
         this._bindEvents();
     }
 
     _bindEvents() {
-        // Open choice modal
-        this.uploadContent.addEventListener('click', () => {
-            this.choiceModal.classList.remove('hidden');
-            document.body.classList.add('overflow-hidden');
+        // Open modal when clicking on container background only
+        this.uploadContent.addEventListener("click", (e) => {
+            this.choiceModal.classList.remove("hidden");
+            document.body.classList.add("overflow-hidden");
         });
 
-        // Upload from file
-        document.getElementById('useUpload' + this.id).addEventListener('click', () => {
-            this.imageInput.removeAttribute('capture');
-            this.imageInput.click();
-            this.choiceModal.classList.add('hidden');
+        // Handle "Upload Image" buttons (both container + modal)
+        document.querySelectorAll(`.useUpload${this.id}`).forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation(); // prevent triggering container click
+                this.imageInput.removeAttribute("capture");
+                this.imageInput.click();
+                this.choiceModal.classList.add("hidden");
+                document.body.classList.remove("overflow-hidden");
+            });
         });
 
-        // Use camera
-        document.getElementById('useCamera' + this.id).addEventListener('click', () => {
-            this.choiceModal.classList.add('hidden');
-            this.imageInput.setAttribute('capture', 'environment');
-            this.imageInput.click();
+        // Handle "Take Photo" buttons (both container + modal)
+        document.querySelectorAll(`.useCamera${this.id}`).forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+                e.stopPropagation(); // prevent triggering container click
+                this.imageInput.click();
+                this.choiceModal.classList.add("hidden");
+                this.imageInput.setAttribute("capture", "environment");
+                document.body.classList.remove("overflow-hidden");
+            });
         });
 
         // Close choice modal

@@ -31,6 +31,4 @@ def get_permissions(user_id, role_id):
         else:
             permissions_list.discard(permission_name)
 
-    print("Final permissions list:", permissions_list)
-
     return list(permissions_list)
