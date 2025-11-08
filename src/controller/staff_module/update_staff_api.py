@@ -49,7 +49,6 @@ def update_staff_api():
     else:
         gender_norm = None
 
-
     # Resolve role_id: accept numeric id or map from role_name/value label
     role_id_raw = data.get('role_id')
     role_id = None
@@ -104,7 +103,6 @@ def update_staff_api():
 
     # Update staff data
     try:
-
         # Class and Permissions Validation
         assigned_classes = data.get("assigned_classes") or []
         permission_ids = data.get('permissions') or []
@@ -133,8 +131,8 @@ def update_staff_api():
         staff.salary = model.salary if model.salary else None
         staff.national_id = model.national_id if model.national_id else None
         staff.role_id = model.role_id if model.role_id else None
-        staff.image = model.image if model.image else None
-        staff.sign = model.sign if model.sign else None
+        # staff.image = model.image if model.image else None
+        # staff.sign = model.sign if model.sign else None
         staff.permission_number = staff.permission_number + 1 if staff.permission_number is not None else 1
         if model.password:
             staff.Password = hash_password.encrypt_password(model.password)

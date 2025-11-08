@@ -88,7 +88,6 @@ def add_staff():
             errors.append(f"{field.capitalize()}: {msg}")
         return jsonify({'success': False, 'errors': errors}), 400
     
-
     # Email unique check
     if model.email and TeachersLogin.query.filter_by(email=str(model.email)).first():
         return jsonify({'message': f'Email ({model.email}) already exists'}), 400
@@ -115,13 +114,15 @@ def add_staff():
         teacher = TeachersLogin(
             Name=model.name, email=str(model.email) if model.email else None,
             Password=hash_password.encrypt_password(model.password), IP=None,
-            Sign=model.sign, User=model.username, status='active',
+            User=model.username, status='active',
             school_id=session.get('school_id'), role_id=model.role_id,
-            image=model.image, qualification=model.qualification,
+            # image=model.image, Sign=model.sign,
+            qualification=model.qualification,
             dob=model.dob, phone=int(model.phone) if model.phone else None,
             date_of_joining=model.date_of_joining, address=model.address,
             gender=model.gender, national_id=model.national_id,
-        )
+        )    
+
         db.session.add(teacher)
         db.session.flush()  # 👈 flush so teacher.id is available before commit
         
@@ -147,7 +148,7 @@ def add_staff():
         db.session.rollback()
         print(e)
         if isinstance(e.orig, UniqueViolation):
-            return jsonify({'message': 'Cannot add staff: duplicate record detected. Please check the data and try again.'}), 400
+            return jsonify({'message': 'Cannot add staff: duplicate record detected. Please check the data and try again. Please change User id or email'}), 400
         else:
             return jsonify({'message': 'An unexpected database error occurred while adding staff.'}), 500
 

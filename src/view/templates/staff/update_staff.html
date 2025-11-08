@@ -740,44 +740,27 @@
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <div class="form-section custom-bg-gray-darker backdrop-blur-md rounded-xl custom-border p-3 mb-6 pb-6 shadow-[0_4px_15px_rgba(0,0,0,1)]">
 
+        <div class="section-header flex items-center gap-4 mb-8 pb-4 bottom-border">
+            <!-- Icon container -->
+            <div class="section-icon w-12 h-12 bg-primary/15 rounded-xl flex items-center justify-center text-primary shadow-sm">
+            <i class="fas fa-camera text-lg"></i>
+            </div>
+            <div>
+            <h2 class="section-title text-xl font-semibold leading-tight">Profile Photo</h2>
+            <p class="text-gray-500 text-sm mt-1">Upload or Capture the photo of student</p>
+            </div>
         </div>
 
-        <div class="w-full flex flex-col lg:flex-row gap-6">
-            <!-- Profile Photo -->
-            <div class="form-section flex-1 bg-gray-dark/70 backdrop-blur-md rounded-xl p-6 mb-6 shadow-section">
-                <div class="section-header flex items-center mb-6 pb-4">
-                    <div
-                        class="section-icon w-10 h-10 bg-primary/15 rounded-lg flex items-center justify-center mr-4 text-primary">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                    <h2 class="section-title text-[1.4rem] font-semibold">Profile Photo</h2>
-                </div>
-                <div class="image-upload text-center p-6 rounded-xl cursor-pointer transition-all duration-300 mb-5 relative"
-                    id="profileUpload">
-                    <div class="upload-icon text-primary text-[3rem] mb-4">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                    </div>
-                    <div class="upload-text text-gray-lighter mb-4">Click to upload profile photo</div>
-                    <div class="image-preview w-full h-[200px] bg-contain bg-center bg-no-repeat rounded-xl mt-4 hidden"
-                        id="profilePreview"></div>
-                    <div class="btn-group flex gap-3 mt-4">
-                        <button
-                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
-                            id="uploadProfile">
-                            <i class="fas fa-upload mr-2"></i> Upload
-                        </button>
-                        <button
-                            class="btn-upload flex-1 p-3 rounded-lg text-gray-lighter cursor-pointer transition-all duration-300"
-                            id="captureProfile">
-                            <i class="fas fa-camera mr-2"></i> Capture
-                        </button>
-                    </div>
-                </div>
-                <input type="file" accept="image/*" class="hidden" id="profileFileInput">
-            </div>
-
+        <!-- Centered Image Uploader -->
+        <div class="w-full lg:w-1/2 mx-auto">
+            {% set image_url = 'https://lh3.googleusercontent.com/d/' ~ staff.image if staff.image else '' %}
+            {% from "html-components/image-uploader.html" import render_image_uploader %}
+            {{ render_image_uploader(unique_suffix='update_staff', label='Click to upload the image of staff', image_url=image_url, icon='fas fa-cloud-upload-alt') }}
         </div>
     </div>
 </div>
@@ -933,7 +916,6 @@
             <div class="flex flex-col items-center mb-6">
                 <div class="profile-preview w-24 h-24 rounded-full mb-4 bg-cover bg-center border-4 border-indigo-500/30 shadow-lg bg-slate-700 flex items-center justify-center text-slate-400"
                     id="finalProfilePreview">
-                    <i class="fas fa-user text-3xl"></i>
                 </div>
             </div>
 
@@ -1260,8 +1242,6 @@
         const toggleConfirmPassword = document.getElementById('toggleConfirmPassword');
 
         // Variables
-        let profileDataUrl = null;
-        let signatureDataUrl = null;
         let selectedClasses = [];
         let allPermissions = [];
         try {
@@ -1363,6 +1343,12 @@
             }
             });
         }
+
+        // setup image uploader
+        let avatarUploader;
+        avatarUploader = new ImageUploader('update_staff');
+        avatarUploader.onChange((blob, status) => console.log('Avatar:', status, blob));
+
 
         // ---------- Permissions: render / modal update ----------
         function renderMainPermissionChips() {
@@ -1773,9 +1759,15 @@
                 if (!validateForm()) { return; }
 
                 // Update profile preview in verification modal
-                if (finalProfilePreview && profilePreview) {
-                    const bg = profilePreview.style.backgroundImage || '';
-                    if (bg) finalProfilePreview.style.backgroundImage = bg;
+                let imageURL = null;
+                let croppedBlob = avatarUploader && typeof avatarUploader.getBlob === 'function' ? avatarUploader.getBlob() : null;
+                if (typeof croppedBlob !== 'undefined' && croppedBlob !== null) {
+                    imageURL = URL.createObjectURL(croppedBlob);
+                }
+                if (finalProfilePreview) {
+                    console.log("imageURL")
+                    if (imageURL) { finalProfilePreview.style.backgroundImage = `url(${imageURL})`; }
+                    else {finalProfilePreview.style.backgroundImage = `url(https://cdn.pixabay.com/photo/2016/04/22/04/57/graduation-1345143_1280.png)`;}
                 }
 
                 // Fill verification modal fields (safe insertion)
@@ -1847,6 +1839,24 @@
         verifyConfirm.addEventListener('click', async function () {
             if (!validateForm()) { return; }
 
+            let base64Image = null;
+            // defensive checks in case avatarUploader wasn't initialized
+            let imageStatus = avatarUploader && typeof avatarUploader.getStatus === 'function' ? avatarUploader.getStatus() : 'unchanged';
+            let croppedBlob = avatarUploader && typeof avatarUploader.getBlob === 'function' ? avatarUploader.getBlob() : null;
+
+            if (typeof croppedBlob !== 'undefined' && croppedBlob !== null && imageStatus === 'updated') {
+                base64Image = await convertBlobToBase64(croppedBlob);
+            }
+            //handle where image is cahnges and to null
+            else if (imageStatus === 'removed' && croppedBlob === null) {
+                // Handle case where image is changed but not cropped
+                base64Image = null;
+            }
+            else if (imageStatus === 'unchanged') {
+                // Handle case where no image is uploaded or removed
+                base64Image = null;
+            }
+
             verifyConfirm.disabled = true;
             verifyConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
             const selectedGender = document.querySelector('input[name="gender"]:checked');
@@ -1873,8 +1883,7 @@
                 staff_id: staffId,
                 assigned_classes: selectedClasses.map(cls => cls.id),
                 permissions: allPermissions.filter(p => p.selected).map(p => p.id),
-                image: profileDataUrl,
-                sign: signatureDataUrl
+                image: base64Image,
             };
             try {
                 // console.log("Sending payload:", payload);
@@ -1920,6 +1929,19 @@
         });
 
     });
+
+
+
+    function convertBlobToBase64(blob) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = function () {
+                resolve(reader.result);  // base64 string
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
 </script>
 
 
