@@ -22,8 +22,10 @@ from .RolePermissions import RolePermissions
 from .StaffPermissions import StaffPermissions
 
 from .FeeData import  FeeData
-from .FeeAmount import FeeAmount
 from .FeeStructure import FeeStructure
+from .FeeHeads import FeeHeads
+from .FeeSessionData import FeeSessionData
+from .FeeTransaction import FeeTransaction
 
 # Optional: control what `from src.model import *` brings in
 __all__ = [
@@ -49,6 +51,8 @@ __all__ = [
     "StaffPermissions",
 
     "FeeData",
-    "FeeAmount",
     "FeeStructure",
+    "FeeHeads",
+    "FeeSessionData",
+    "FeeTransaction",
 ]

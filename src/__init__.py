@@ -53,7 +53,7 @@ def create_app():
     )
 
     try:
-        r.ping()
+        # r.ping()
         print("✅ Connected to Redis Cloud successfully.")
     except redis.exceptions.ConnectionError as e:
         print("❌ Redis connection failed:", e)

@@ -1,0 +1,927 @@
+{# components/drawer.html #}
+{% macro fee_drawer() %}
+<div id="entireDrawerContainer">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Simple, clear state management */
+        #feeDrawer {
+            transform: translateX(100%);
+        }
+
+        #feeDrawer.open {
+            transform: translateX(0);
+        }
+
+        #overlay {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #overlay.open {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .drawer-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+
+        .glow-hover:hover {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .fee-card {
+            transition: all 0.2s ease;
+        }
+
+        .fee-card:hover:not(.paid) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .payment-mode.active {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .receipt-modal {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+        }
+
+        /* Modern Sibling Tabs */
+        .sibling-tabs-container {
+            background: linear-gradient(135deg, rgba(30, 35, 40, 0.9) 0%, rgba(45, 50, 56, 0.9) 100%);
+            border-radius: 16px;
+            padding: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sibling-tab {
+            position: relative;
+            padding: 10px 16px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            min-width: 0;
+            background: transparent;
+            color: #9ca3af;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .sibling-tab.active {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .sibling-tab:not(.active):hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #e5e7eb;
+        }
+
+        .sibling-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .sibling-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    </style>
+
+    <!-- Overlay -->
+    <div id="overlay" class="drawer-overlay fixed inset-0 z-40"></div>
+
+    <!-- Fee Payment Drawer -->
+    <div id="feeDrawer"
+        class="fixed inset-0 z-50 flex justify-end transform translate-x-full transition-transform duration-300">
+        <!-- Drawer Content -->
+        <div class="relative w-full max-w-md bg-gray-900 h-full flex flex-col shadow-2xl pointer-events-auto">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-800 bg-gray-900 flex-shrink-0">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Fee Payment</h2>
+                    <button id="closeDrawer" class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Current Student Info -->
+                <div class="bg-gradient-to-r from-gray-800 to-gray-700 p-4 rounded-2xl mb-4">
+                    <div class="flex justify-between items-start " id="studentInfoCard">
+                        <div>
+                            <h3 class="font-bold text-lg" id="studentName"></h3>
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                <span class="bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg text-sm"
+                                    id="studentClass"></span>
+                                <span class="bg-purple-500/20 text-purple-300 px-2 py-1 rounded-lg text-sm"
+                                    id="studentRoll"></span>
+                            </div>
+                        </div>
+                        <!-- Image circle -->
+                        <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-blue-500">
+                            <img id="studentImage" src="" alt="Student Photo" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modern Sibling Tabs -->
+                <div class="sibling-tabs-container flex mb-2" id="siblingTabsContainer">
+                    <!-- Sibling Tabs will be dynamically generated here -->
+                </div>
+            </div>
+
+            <!-- Main Content (Scrollable) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+                <div class="p-6">
+                    <!-- Monthly Fees Section -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-calendar-alt mr-2 text-blue-400"></i>Monthly Fees
+                        </h3>
+
+                        <div id="monthlyFeesGrid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            <!-- Monthly fees will be dynamically generated here -->
+                        </div>
+                    </div>
+
+                    <!-- Other Fees Section -->
+                    <div class="mb-8">
+                        <h3 class="text-lg font-semibold mb-4 flex items-center">
+                            <i class="fas fa-receipt mr-2 text-purple-400"></i>Other Fees
+                        </h3>
+
+                        <div id="otherFeesGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <!-- Other fees will be dynamically generated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="mt-auto p-6 border-t border-gray-800 bg-gray-900">
+                    <!-- Payment Summary -->
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">Selected Fees (Current Student):</span>
+                            <span class="font-medium" id="currentStudentFees">₹0</span>
+                        </div>
+
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">Total All Students:</span>
+                            <span class="font-medium" id="totalAllFees">₹0</span>
+                        </div>
+
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-400">Discount:</span>
+                            <div class="flex items-center">
+                                <span class="mr-1">₹</span>
+                                <input type="number" id="discountInput"
+                                    class="w-20 bg-gray-800 border border-gray-700 rounded-lg px-2 py-1 text-right text-sm"
+                                    placeholder="0" min="0">
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between font-bold text-lg mt-3 pt-3 border-t border-gray-700">
+                            <span>Final Payable:</span>
+                            <span id="finalAmount">₹0</span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Mode -->
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium mb-2 text-gray-400">Payment Mode</h4>
+                        <div class="grid grid-cols-4 gap-2">
+                            <div class="payment-mode border border-gray-700 rounded-xl p-2 text-center cursor-pointer transition-all"
+                                data-mode="cash">
+                                <i class="fas fa-money-bill text-xl mb-1"></i>
+                                <div class="text-xs">Cash</div>
+                            </div>
+                            <div class="payment-mode border border-gray-700 rounded-xl p-2 text-center cursor-pointer transition-all"
+                                data-mode="upi">
+                                <i class="fas fa-mobile-alt text-xl mb-1"></i>
+                                <div class="text-xs">UPI</div>
+                            </div>
+                            <div class="payment-mode border border-gray-700 rounded-xl p-2 text-center cursor-pointer transition-all"
+                                data-mode="card">
+                                <i class="fas fa-credit-card text-xl mb-1"></i>
+                                <div class="text-xs">Card</div>
+                            </div>
+                            <div class="payment-mode border border-gray-700 rounded-xl p-2 text-center cursor-pointer transition-all"
+                                data-mode="netbanking">
+                                <i class="fas fa-university text-xl mb-1"></i>
+                                <div class="text-xs">Net Banking</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proceed Button -->
+                    <button id="proceedButton"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all duration-300 glow-hover transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                        disabled>
+                        <i class="fas fa-lock mr-2"></i>Proceed to Pay
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Payment Receipt Modal -->
+    <div id="receiptModal"
+        class="fixed inset-0 z-50 flex items-center justify-center receipt-modal opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] flex flex-col overflow-hidden">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-700 flex-shrink-0">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-bold">Payment Receipt</h2>
+                    <button id="closeReceipt" onclick="closeReceipt()"
+                        class="text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Body (scrollable) -->
+            <div class="p-6 overflow-y-auto flex-grow custom-scrollbar">
+                <div id="receiptContent">
+                    <!-- your content here -->
+                </div>
+            </div>
+
+            <!-- Footer (always visible) -->
+            <div class="p-6 border-t border-gray-700 flex-shrink-0">
+                <button id="printReceipt"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold transition-all duration-300">
+                    <i class="fas fa-print mr-2"></i>Print Receipt
+                </button>
+
+                <button id="sendWhatsapp"
+                    class="w-full mt-3 bg-green-600 hover:bg-green-700 text-white py-3 rounded-xl font-bold transition-all duration-300 flex items-center justify-center">
+                    <i class="fab fa-whatsapp text-xl mr-2"></i>Send on WhatsApp
+                </button>
+            </div>
+
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='watsappMessage.js') }}"></script>
+    <script>
+        // DOM Elements
+        const closeDrawerBtn = document.getElementById('closeDrawer');
+        const feeDrawer = document.getElementById('feeDrawer');
+        const overlay = document.getElementById('overlay');
+        const discountInput = document.getElementById('discountInput');
+        const currentStudentFeesEl = document.getElementById('currentStudentFees');
+        const totalAllFeesEl = document.getElementById('totalAllFees');
+        const finalAmountEl = document.getElementById('finalAmount');
+        const proceedButton = document.getElementById('proceedButton');
+        const paymentModes = document.querySelectorAll('.payment-mode');
+
+        const studentNameEl = document.getElementById('studentName');
+        const studentClass = document.getElementById('studentClass');
+        const studentRoll = document.getElementById('studentRoll');
+        const studentImage = document.getElementById('studentImage');
+
+        const monthlyFeesGrid = document.getElementById('monthlyFeesGrid');
+        const otherFeesGrid = document.getElementById('otherFeesGrid');
+        const receiptModal = document.getElementById('receiptModal');
+        const closeReceiptBtn = document.getElementById('closeReceipt');
+        const receiptContent = document.getElementById('receiptContent');
+        const printReceiptBtn = document.getElementById('printReceipt');
+        const sendWhatsappBtn = document.getElementById('sendWhatsapp');
+
+
+        let discount = 0;
+        let currentStudent = 0;
+        let paymentMode = '';
+
+        // Student Data with unique fee structures and persistent selection state
+        // let students = [
+        //     {
+        //         id: 0, name: "Sarah Johnson",
+        //         class: "10-A", rollNo: 25,
+        //         session: "2023-24", image: "",
+        //         monthlyFees: [
+        //             { id: "sarah_jan", month: "Jan", amount: 2500, dueDate: "5 Jan", status: "paid" },
+        //             { id: "sarah_feb", month: "Feb", amount: 2500, dueDate: "5 Feb", status: "paid" },
+        //             { id: "sarah_mar", month: "Mar", amount: 2500, dueDate: "5 Mar", status: "due" },
+        //             { id: "sarah_apr", month: "Apr", amount: 2500, dueDate: "5 Apr", status: "due" },
+        //             { id: "sarah_may", month: "May", amount: 2500, dueDate: "5 May", status: "upcoming" },
+        //             { id: "sarah_jun", month: "Jun", amount: 2500, dueDate: "5 Jun", status: "upcoming" },
+        //             { id: "sarah_jul", month: "Jul", amount: 2500, dueDate: "5 Jul", status: "upcoming" },
+        //             { id: "sarah_aug", month: "Aug", amount: 2500, dueDate: "5 Aug", status: "upcoming" },
+        //             { id: "sarah_sep", month: "Sep", amount: 2500, dueDate: "5 Sep", status: "upcoming" },
+        //             { id: "sarah_oct", month: "Oct", amount: 2500, dueDate: "5 Oct", status: "upcoming" },
+        //             { id: "sarah_nov", month: "Nov", amount: 2500, dueDate: "5 Nov", status: "upcoming" },
+        //             { id: "sarah_dec", month: "Dec", amount: 2500, dueDate: "5 Dec", status: "upcoming" }
+        //         ],
+        //         otherFees: [
+        //             { id: "sarah_exam", name: "Exam Fee", amount: 1500, dueDate: "15 Mar", status: "due" },
+        //             { id: "sarah_annual", name: "Annual Fee", amount: 5000, dueDate: "10 Jan", status: "paid" },
+        //             { id: "sarah_transport", name: "Transport", amount: 1200, dueDate: "8 Mar", status: "due" },
+        //             { id: "sarah_library", name: "Library", amount: 800, dueDate: "1 Apr", status: "upcoming" }
+        //         ],
+        //         selectedFees: []
+        //     }
+        // ];
+        let students = []
+        // Initialize the application
+        function init(studentsData) {
+            // Application State
+            students = studentsData
+
+            discount = 0;
+            currentStudent = 0;
+            paymentMode = '';
+            resetFeeDrawerUI()
+
+            renderSiblingTabs()
+            renderStudentData(0);
+            updatePaymentSummary();
+            setupEventListeners();
+        }
+
+        // Set up all event listeners
+        function setupEventListeners() {
+            const siblingTabs = document.querySelectorAll('.sibling-tab');
+
+            // Drawer controls
+            closeDrawerBtn.addEventListener('click', closeDrawer);
+            overlay.addEventListener('click', closeDrawer);
+
+            // Student switching
+
+            siblingTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const studentIndex = parseInt(tab.getAttribute('data-index'));
+                    switchStudent(studentIndex);
+                });
+            });
+
+            // Payment controls
+            discountInput.addEventListener('input', updateDiscount);
+            paymentModes.forEach(mode => {
+                mode.addEventListener('click', () => {
+                    setPaymentMode(mode.getAttribute('data-mode'));
+                });
+            });
+
+            // Payment flow
+            if (proceedButton) proceedButton.addEventListener('click', processPayment);
+            if (closeReceiptBtn) closeReceiptBtn.addEventListener('click', closeReceipt);
+            if (printReceiptBtn) printReceiptBtn.addEventListener('click', printReceipt);
+        }
+
+        // Close the fee drawer
+        function closeDrawer() {
+            document.getElementById('feeDrawer').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Reset transient UI (discount & payment mode)
+        function resetFeeDrawerUI() {
+            // reset discount value and input
+            discount = 0;
+            if (discountInput) discountInput.value = 0;
+
+            // reset payment mode UI
+            paymentMode = '';
+            if (paymentModes && paymentModes.length) {
+                paymentModes.forEach(m => m.classList.remove('active'));
+            }
+
+        }
+
+        // Expose to global so markup can call `openDrawer(...)` from inline onclicks
+        window.openDrawer = openDrawer;
+
+        function renderSiblingTabs() {
+            const container = document.getElementById("siblingTabsContainer");
+            container.innerHTML = "";
+
+
+            students.forEach((student, studentIndex) => {
+                const tab = document.createElement("div");
+                tab.className = `sibling-tab ${studentIndex === currentStudent ? "active" : ""}`;
+                tab.setAttribute("data-index", studentIndex);
+
+                // Color indicator (random / fixed)
+                const colors = ["bg-blue-500", "bg-green-500", "bg-amber-500", "bg-purple-500"];
+                const indicatorColor = colors[studentIndex % colors.length];
+
+                tab.innerHTML = `
+                    <div class="sibling-indicator ${indicatorColor}"></div>
+                    <span class="sibling-name">${student.name}</span>
+                `;
+
+                tab.addEventListener("click", () => {
+                    switchStudent(studentIndex);
+                });
+
+                container.appendChild(tab);
+            });
+        }
+
+        // Switch between students
+        function switchStudent(studentIndex) {
+            // Update active tab
+            const siblingTabs = document.querySelectorAll('.sibling-tab');
+
+            siblingTabs.forEach(tab => tab.classList.remove('active'));
+
+            siblingTabs[studentIndex].classList.add('active');
+
+            // Update current student
+            currentStudent = studentIndex;
+
+            // Render student data
+            renderStudentData(studentIndex);
+
+            // Update payment summary
+            updatePaymentSummary();
+        }
+
+        // Render student data including fees
+        function renderStudentData(studentIndex) {
+
+            const student = students[studentIndex];
+
+            // Update student info
+            studentNameEl.textContent = student.name;
+            studentClass.textContent = "Class: " + student.class;
+            studentRoll.textContent = "Roll No: " + student.rollNo;
+            studentImage.src = student.image || "https://static.vecteezy.com/system/resources/previews/036/594/092/large_2x/man-empty-avatar-photo-placeholder-for-social-networks-resumes-forums-and-dating-sites-male-and-female-no-photo-images-for-unfilled-user-profile-free-vector.jpg";
+            // Render monthly fees
+            renderMonthlyFees(student);
+
+            // Render other fees
+            renderOtherFees(student);
+        }
+
+        // Render monthly fees for a student
+        function renderMonthlyFees(student) {
+            monthlyFeesGrid.innerHTML = '';
+
+            student.monthlyFees.forEach(fee => {
+                const isSelected = student.selectedFees.some(selected => selected.id === fee.id);
+                const feeCard = createFeeCard(fee, isSelected);
+                monthlyFeesGrid.appendChild(feeCard);
+            });
+        }
+
+        // Render other fees for a student
+        function renderOtherFees(student) {
+            otherFeesGrid.innerHTML = '';
+
+            student.otherFees.forEach(fee => {
+                const isSelected = student.selectedFees.some(selected => selected.id === fee.id);
+                const feeCard = createFeeCard(fee, isSelected, true);
+                otherFeesGrid.appendChild(feeCard);
+            });
+        }
+
+        // Create a fee card element
+        function createFeeCard(fee, isSelected, isOtherFee = false) {
+            const feeCard = document.createElement('div');
+            let statusClass = '';
+            let statusIcon = '';
+            let cursorClass = 'cursor-pointer';
+            let dueTextClass = '';
+
+            if (fee.status === 'paid') {
+                statusClass = 'paid bg-green-600/30 border border-green-500/30';
+                statusIcon = '<i class="fas fa-check-circle text-green-400"></i>';
+                cursorClass = 'cursor-not-allowed';
+                dueTextClass = 'text-gray-400';
+            } else if (fee.status === 'due') {
+                statusClass = isSelected
+                    ? 'selected bg-blue-500/20 border border-blue-500'
+                    : 'border border-red-500 bg-gray-800';
+                statusIcon = isSelected
+                    ? '<i class="fas fa-check text-blue-400"></i>'
+                    : '<i class="fas fa-exclamation-circle text-red-400"></i>';
+                dueTextClass = 'text-red-400';
+            } else if (fee.status === 'upcoming') {
+                statusClass = isSelected
+                    ? 'selected bg-blue-500/20 border border-blue-500'
+                    : 'bg-amber-500/10 border border-amber-500/30';
+                statusIcon = isSelected
+                    ? '<i class="fas fa-check text-blue-400"></i>'
+                    : '<i class="fas fa-clock text-amber-400"></i>';
+                dueTextClass = 'text-amber-400';
+            }
+
+            feeCard.className = `fee-card ${statusClass} ${isOtherFee ? 'p-4' : 'p-3'} rounded-2xl ${cursorClass} transition-all`;
+            feeCard.setAttribute('data-fee-id', fee.id);
+
+            const feeName = fee.period_name;
+
+            feeCard.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-medium">${feeName}</span>
+                    ${statusIcon}
+                </div>
+                <div class="text-sm text-gray-300">₹${fee.amount}</div>
+                <div class="text-xs ${dueTextClass}">Due: ${fee.dueDate}</div>
+            `;
+
+            // Add click event for due and upcoming fees (not paid)
+            if (fee.status !== 'paid') {
+                feeCard.addEventListener('click', () => toggleFeeSelection(fee));
+            }
+
+            return feeCard;
+        }
+
+        // Toggle fee selection
+        function toggleFeeSelection(fee) {
+            const student = students[currentStudent];
+            const isSelected = student.selectedFees.some(selected => selected.id === fee.id);
+
+            if (isSelected) {
+                // Deselect
+                student.selectedFees = student.selectedFees.filter(selected => selected.id !== fee.id);
+            } else {
+                // Select
+                student.selectedFees.push({
+                    id: fee.id,
+                    fee_id: fee.fee_id,
+                    period_name: fee.period_name,
+                    amount: fee.amount,
+                    dueDate: fee.dueDate,
+                    status: fee.status
+                });
+            }
+
+            // Re-render fees to reflect selection state
+            renderStudentData(currentStudent);
+
+            // Update payment summary
+            updatePaymentSummary();
+        }
+
+        // Update discount value
+        function updateDiscount() {
+            discount = parseInt(discountInput.value) || 0;
+            updatePaymentSummary();
+        }
+
+        // Set payment mode
+        function setPaymentMode(mode) {
+            paymentMode = mode;
+            paymentModes.forEach(m => m.classList.remove('active'));
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+        }
+
+        // Update payment summary - now shows current student's total and grand total
+        function updatePaymentSummary() {
+            // Calculate current student's total
+            const currentStudentTotal = students[currentStudent].selectedFees.reduce((sum, fee) => sum + fee.amount, 0);
+
+            // Calculate grand total from ALL students
+            const grandTotal = students.reduce((sum, student) => {
+                return sum + student.selectedFees.reduce((studentSum, fee) => studentSum + fee.amount, 0);
+            }, 0);
+
+            const finalAmount = Math.max(0, grandTotal - discount);
+
+            currentStudentFeesEl.textContent = `₹${currentStudentTotal}`;
+            totalAllFeesEl.textContent = `₹${grandTotal}`;
+            finalAmountEl.textContent = `₹${finalAmount}`;
+
+            // Enable/disable proceed button based on whether any student has selected fees
+            const hasSelectedFees = students.some(student => student.selectedFees.length > 0);
+            proceedButton.disabled = !hasSelectedFees;
+
+        }
+
+        // Process payment and show receipt
+        async function processPayment() {
+            // 1. Validate payment selection
+            const hasSelectedFees = students.some(s => Array.isArray(s.selectedFees) && s.selectedFees.length > 0);
+
+            if (!hasSelectedFees) {
+                alert("Please select at least one fee to pay.");
+                return;
+            }
+
+            // 2. Submit data to backend
+            try {
+                const response = await fetch("/api/pay_fee", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ students: students, discount: discount, payment_mode: paymentMode, date: null })
+                });
+
+                const data = await response.json();
+                console.log(data)
+
+                if (!response.ok) {
+                    // Backend returned an error (400–500)
+                    showAlert(response.status, data.message);
+                    console.error("Backend error:", response.status, await response.text());
+                    return;
+                }
+
+                showAlert(response.status, data.message);
+                closeDrawer()
+
+                // 3. Generate and display receipt **only if payment success**
+                generateReceipt(data.transaction_no, data.whatsapp_message, data.phone_number);
+                showReceipt();
+
+            } catch (err) {
+                // Network or JS errors
+                showAlert(500, "An error occurred while submitting the form.");
+                console.error("Error occurred while submitting the form:", err);
+                return;
+            }
+        }
+
+
+        // Generate payment receipt
+        function generateReceipt(transaction_no, whatsapp_message, phone_number) {
+            let receiptHTML = `
+                <div class="mb-6 text-center">
+                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-check text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-green-400">Payment Successful!</h3>
+                    <p class="text-gray-400 mt-2">Transaction ID: ${transaction_no}</p>
+                </div>
+                
+                <div class="space-y-6">
+            `;
+
+            // Add payment details for each student
+            students.forEach(student => {
+                if (student.selectedFees.length > 0) {
+                    const studentTotal = student.selectedFees.reduce((sum, fee) => sum + fee.amount, 0);
+
+                    receiptHTML += `
+                        <div class="border border-gray-700 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <h4 class="font-bold">${student.name}</h4>
+                                <span class="text-sm bg-blue-500/20 text-blue-300 px-2 py-1 rounded-lg">${student.class}</span>
+                            </div>
+                            
+                            <div class="space-y-2 mb-3">
+                    `;
+
+                    student.selectedFees.forEach(fee => {
+                        const statusBadge = fee.status === 'due'
+                            ? '<span class="text-xs bg-red-500/20 text-red-300 px-1 rounded ml-2">Due</span>'
+                            : fee.status === 'upcoming'
+                                ? '<span class="text-xs bg-amber-500/20 text-amber-300 px-1 rounded ml-2">Upcoming</span>'
+                                : '';
+
+                        receiptHTML += `
+                            <div class="flex justify-between text-sm">
+                                <span>${fee.period_name} ${statusBadge}</span>
+                                <span>₹${fee.amount}</span>
+                            </div>
+                        `;
+                    });
+
+                    receiptHTML += `
+                            </div>
+                            
+                            <div class="flex justify-between border-t border-gray-700 pt-2">
+                                <span class="font-medium">Subtotal:</span>
+                                <span class="font-medium">₹${studentTotal}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // Add payment summary
+            const grandTotal = students.reduce((sum, student) =>
+                sum + student.selectedFees.reduce((studentSum, fee) => studentSum + fee.amount, 0), 0);
+            const finalAmount = Math.max(0, grandTotal - discount);
+
+            receiptHTML += `
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <div class="flex justify-between mb-2">
+                        <span>Total Fees:</span>
+                        <span>₹${grandTotal}</span>
+                    </div>
+                    
+                    <div class="flex justify-between mb-2">
+                        <span>Discount:</span>
+                        <span>-₹${discount}</span>
+                    </div>
+                    
+                    <div class="flex justify-between font-bold text-lg mt-2 pt-2 border-t border-gray-700">
+                        <span>Amount Paid:</span>
+                        <span>₹${finalAmount}</span>
+                    </div>
+                    
+                    <div class="mt-4 text-sm text-gray-400">
+                        <p><i class="fas fa-money-check mr-2"></i>Payment Method: ${paymentMode.toUpperCase()}</p>
+                        <p class="mt-1"><i class="fas fa-clock mr-2"></i>Date: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                </div>
+            `;
+
+            receiptContent.innerHTML = receiptHTML;
+
+            // Wire WhatsApp send button to open WhatsApp with the prepared message
+            if (sendWhatsappBtn) {
+                sendWhatsappBtn.onclick = () => {
+                    sendWhatsAppMessage(phone_number, whatsapp_message);
+                };
+            }
+        }
+
+
+        // Show receipt modal
+        function showReceipt() {
+            receiptModal.classList.remove('opacity-0', 'pointer-events-none');
+            receiptModal.querySelector('.bg-gray-800').classList.remove('scale-95');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close receipt modal
+        function closeReceipt() {
+            receiptModal.classList.add('opacity-0', 'pointer-events-none');
+            receiptModal.querySelector('.bg-gray-800').classList.add('scale-95');
+            document.body.style.overflow = 'auto';
+
+            // Log payment data to console as requested
+            console.log("Payment Data for All Students:");
+            students.forEach(student => {
+                if (student.selectedFees.length > 0) {
+                    console.log(`Student: ${student.name}`);
+                    student.selectedFees.forEach(fee => {
+                        console.log(`  - ${fee.name}: ₹${fee.amount} (${fee.status})`);
+                    });
+                    console.log(`  Total: ₹${student.selectedFees.reduce((sum, fee) => sum + fee.amount, 0)}`);
+                }
+            });
+        }
+
+        // Print receipt
+        function printReceipt() {
+            const printWindow = window.open('', '_blank');
+            const receiptHTML = `
+                <html>
+                <head>
+                    <title>Payment Receipt</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        .header { text-align: center; margin-bottom: 20px; }
+                        .student-section { margin-bottom: 15px; padding: 10px; border: 1px solid #ddd; }
+                        .summary { margin-top: 20px; border-top: 2px solid #000; padding-top: 10px; }
+                        .total { font-weight: bold; font-size: 1.2em; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h2>Fee Payment Receipt</h2>
+                        <p>Transaction ID: TXN${Date.now().toString().slice(-8)}</p>
+                        <p>Date: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    ${receiptContent.innerHTML}
+                </body>
+                </html>
+            `;
+
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function addSkeletonLoader() {
+
+            const siblingTabsSkeleton = `
+                <div class="sibling-tab animate-pulse">
+                    <div class="w-3 h-3 rounded-full bg-gray-500/40"></div>
+                    <span class="ml-2 h-4 w-24 bg-gray-500/40 rounded block"></span>
+                </div>
+
+                <!-- Skeleton Tab -->
+                <div class="sibling-tab animate-pulse ml-3">
+                    <div class="w-3 h-3 rounded-full bg-gray-500/40"></div>
+                    <span class="ml-2 h-4 w-20 bg-gray-500/40 rounded block"></span>
+                </div>
+
+                <!-- Skeleton Tab -->
+                <div class="sibling-tab animate-pulse ml-3">
+                    <div class="w-3 h-3 rounded-full bg-gray-500/40"></div>
+                    <span class="ml-2 h-4 w-24 bg-gray-500/40 rounded block"></span>
+                </div>
+            `
+
+            const periodicFeeCardsSkeleton = `
+                <div class="p-3 rounded-2xl bg-gray-800 border border-gray-700 animate-pulse">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="h-4 w-16 bg-gray-600/40 rounded"></div>
+                        <div class="h-4 w-4 bg-gray-600/40 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-20 bg-gray-600/40 rounded mb-1"></div>
+                    <div class="h-3 w-24 bg-gray-600/40 rounded"></div>
+                </div>
+                <div class="p-3 rounded-2xl bg-gray-800 border border-gray-700 animate-pulse">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="h-4 w-16 bg-gray-600/40 rounded"></div>
+                        <div class="h-4 w-4 bg-gray-600/40 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-20 bg-gray-600/40 rounded mb-1"></div>
+                    <div class="h-3 w-24 bg-gray-600/40 rounded"></div>
+                </div>
+
+                <div class="p-3 rounded-2xl bg-gray-800 border border-gray-700 animate-pulse">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="h-4 w-16 bg-gray-600/40 rounded"></div>
+                        <div class="h-4 w-4 bg-gray-600/40 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-20 bg-gray-600/40 rounded mb-1"></div>
+                    <div class="h-3 w-24 bg-gray-600/40 rounded"></div>
+                </div>
+            `
+
+            const otherFeeCardsSkeleton = `
+                <div class="p-4 rounded-2xl bg-gray-800 border border-gray-700 animate-pulse">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="h-4 w-32 bg-gray-600/40 rounded"></div>
+                        <div class="h-4 w-4 bg-gray-600/40 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-16 bg-gray-600/40 rounded mb-1"></div>
+                    <div class="h-3 w-28 bg-gray-600/40 rounded"></div>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-gray-800 border border-gray-700 animate-pulse">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="h-4 w-32 bg-gray-600/40 rounded"></div>
+                        <div class="h-4 w-4 bg-gray-600/40 rounded-full"></div>
+                    </div>
+                    <div class="h-3 w-16 bg-gray-600/40 rounded mb-1"></div>
+                    <div class="h-3 w-28 bg-gray-600/40 rounded"></div>
+                </div>
+            `
+
+            const siblingTabs = document.getElementById("siblingTabsContainer");
+            siblingTabs.innerHTML = siblingTabsSkeleton;
+
+            const monthlyFeeCards = document.getElementById("monthlyFeesGrid");
+            monthlyFeeCards.innerHTML = periodicFeeCardsSkeleton;
+
+            const otherFeeCards = document.getElementById("otherFeesGrid");
+            otherFeeCards.innerHTML = otherFeeCardsSkeleton
+
+            const studentName = document.getElementById("studentName");
+            studentName.innerHTML = `<div class="h-5 w-32 bg-gray-300/40 animate-pulse rounded"></div>`;
+
+            const studentClass = document.getElementById("studentClass");
+            studentClass.innerHTML = `<div class="h-4 w-24 bg-gray-300/40 animate-pulse rounded"></div>`;
+
+            const studentRoll = document.getElementById("studentRoll");
+            studentRoll.innerHTML = `<div class="h-4 w-24 bg-gray-300/40 animate-pulse rounded"></div>`;
+
+            const studentImage = document.getElementById("studentImage");
+            studentImage.src = ""
+
+
+        }
+
+    </script>
+</div>
+{% endmacro %}

@@ -654,14 +654,48 @@
     {% for row in data %}
     <div class="student-card overflow-hidden" data-name="{{ row.STUDENTS_NAME }}" data-class="{{ row.CLASS }}"
       data-father="{{ row.FATHERS_NAME }}" data-PEN="{{ row.PEN }}" data-roll="{{ row.ROLL }}">
-      <!-- Badges - Always visible -->
-      <div class="absolute top-4 right-4 flex flex-col items-end z-10">
-        {% if row.is_RTE and row.is_RTE == true %}
-        <span class="bg-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded">RTE</span>
-        {% endif %}
+
+      <!-- TOP BAR -->
+      <div class="flex items-center justify-between px-3 py-0.5 bg-gray-800 bg-opacity-40 border-b border-gray-700">
+
+          <!-- LEFT: Badges -->
+          <div class="flex space-x-1">
+              {% if row.is_RTE %}
+              <span class="bg-yellow-500 text-gray-900 text-[9px] font-bold px-1.5 py-[2px] rounded">RTE</span>
+              {% endif %}
+              {% if row.is_new %}
+              <span class="bg-green-500 text-white text-[9px] font-bold px-1.5 py-[2px] rounded">NEW</span>
+              {% endif %}
+          </div>
+
+          <!-- RIGHT: Quick Actions + Menu -->
+          <div class="flex items-center space-x-2">
+
+              <!-- VIEW ICON -->
+              <button onclick="viewStudentDetails('{{ row.id }}', '{{ row.PHONE }}')"
+                      class="relative group p-1.5 hover:bg-gray-700 rounded-full">
+                  <i class="fas fa-eye text-blue-400 text-lg"></i>
+
+                  <!-- Tooltip -->
+                  <span class="absolute right-1/2 translate-x-1/2 -top-7 hidden group-hover:block 
+                              bg-black text-white text-xs px-2 py-1 rounded shadow-lg">
+                      View
+                  </span>
+              </button>
+
+              <!-- EDIT ICON -->
+              <button onclick="window.location.href='/update_student_info?id={{ row.id }}'"
+                      class="relative group p-1.5 hover:bg-gray-700 rounded-full">
+                  <i class="fas fa-edit text-green-400 text-lg"></i>
+
+                  <!-- Tooltip -->
+                  <span class="absolute right-1/2 translate-x-1/2 -top-7 hidden group-hover:block 
+                              bg-black text-white text-xs px-2 py-1 rounded shadow-lg">
+                      Edit
+                  </span>
+              </button>
+          </div>
       </div>
-
-
 
 
       <!-- Student Card Content - Updated layout -->
@@ -717,8 +751,8 @@
         </button>
         <button
           class="action-button bg-green-800 bg-opacity-20 text-green-400 hover:bg-[rgba(65,233,135,0.2)] hover:text-white rounded-br-lg"
-          onclick="window.location.href='/update_student_info?id={{ row.id }}'">
-          <i class="fas fa-edit mr-2"></i> Edit
+          onclick="openDrawer( '{{ row.student_session_id }}', '{{ row.PHONE }}')">
+          <i class="fa-solid fa-indian-rupee-sign mr-2"></i> Pay Fees
         </button>
       </div>
     </div>
@@ -748,6 +782,11 @@
     </div>
   </div>
 </div>
+
+{% from "/fee/fees_modal.html" import fee_drawer %}
+
+{{ fee_drawer() }}
+
 
 <div id="studentDetailsModal"
   class="fixed inset-0 hidden overflow-y-auto bg-black bg-opacity-50 transition-opacity backdrop-blur-sm z-50 transition-opacity">
@@ -781,95 +820,6 @@
     </div>
   </div>
 </div>
-
-<!-- Fees Modal -->
-<!-- <div class="modal fade" id="feesModal" tabindex="-1" aria-labelledby="feesModal" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <div class="flex items-center">
-          <i class="fas fa-credit-card text-white text-xl mr-3"></i>
-          <h5 class="modal-title text-white">Pay Fees</h5>
-        </div>
-        <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div id="feesModalBody" class="modal-body">
-         Content will be loaded dynamically
-      </div>
-    </div>
-  </div>
-</div> -->
-
-<!-- Payment Verification Modal -->
-<!-- <div class="modal fade" id="verify" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-4">
-        <div class="flex items-center w-full">
-          <i class="fas fa-check-circle text-xl mr-3"></i>
-          <h4 class="modal-title font-semibold">Verify Payment Received</h4>
-        </div>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-hidden="true"></button>
-      </div>
-
-      <div class="modal-body py-4 px-5">
-        <form id="paymentVerificationForm">
-          <div class="mb-4">
-            <label class="flex items-center cursor-pointer">
-              <input class="form-checkbox h-5 w-5 text-blue-600 rounded" type="checkbox" id="verifyCheckbox" required>
-              <span class="ml-2 text-white">I confirm that the payment has been successfully received</span>
-            </label>
-          </div>
-
-          <div class="mb-4">
-            <label class="block text-gray-400 mb-2">
-              <i class="far fa-calendar-alt mr-2"></i>Payment Receipt Date
-            </label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <i class="far fa-calendar text-blue-500"></i>
-              </div>
-              <input type="date"
-                class="bg-gray-800 border border-gray-700 text-white rounded-lg block w-full pl-10 p-2.5"
-                id="paymentDate" required>
-            </div>
-            <p class="text-gray-500 text-sm mt-1">Select the date when payment was received</p>
-          </div>
-
-          <div id="paymentSuccessMessage"
-            class="bg-green-900 border border-green-700 text-green-300 px-4 py-3 rounded-lg mt-4 hidden">
-            <div class="flex items-center">
-              <i class="fas fa-check-circle mr-2"></i>
-              <span>Fees Paid Successfully! Now you can send message by clicking the send message button below.</span>
-            </div>
-          </div>
-        </form>
-      </div>
-
-      <div class="modal-footer bg-gray-800 py-3 px-5">
-        <div class="flex justify-between w-full">
-          <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg"
-            id="verifyBackButton" data-bs-target="#feesModal" data-bs-toggle="modal">
-            <i class="fas fa-arrow-left mr-2"></i>Back
-          </button>
-
-          <div class="flex space-x-3">
-            <button type="submit" form="paymentVerificationForm"
-              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" id="finalPay" onclick="Pay()"
-              disabled>
-              <i class="fas fa-check-circle mr-2"></i>Confirm Payment
-            </button>
-
-            <button type="button" id="messageButton"
-              class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" onclick="sendMessage()" disabled>
-              <i class="fab fa-whatsapp mr-2"></i>Send Message
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div> -->
 
 <!-- Optional JavaScript for interaction -->
 <script src="{{ url_for('static', filename='students.js') }}"></script>
@@ -909,10 +859,27 @@
       }
   });
 
+  // Open the fee drawer
+  async function openDrawer(studentSessionID, phoneNumber = null) {
+      document.getElementById('feeDrawer').classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+      addSkeletonLoader()
 
+      try {
+          const res = await fetch(
+              `/api/get_fee?phone=${phoneNumber}&student_session_id=${studentSessionID}`
+          );
+          students = await res.json();   // assign data
+          console.log(students)
+      } catch (error) {
+          console.error("Error fetching fee:", error);
+      }
 
-  
-
+      if (students) {
+          init(students);
+      }
+  }
 
 </script>
 
