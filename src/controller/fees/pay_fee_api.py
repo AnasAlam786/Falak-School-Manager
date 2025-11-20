@@ -1,12 +1,12 @@
 # src/controller/pay_fee.py
 
 from flask import request, jsonify, Blueprint, session
-from sqlalchemy import func
 from sqlalchemy.exc import SQLAlchemyError
 
-from src.model import FeeData, FeeSessionData, FeeStructure, StudentSessions, StudentsDB
+from src.model import FeeData, StudentSessions, StudentsDB
 from src import db
-from datetime import date
+from datetime import datetime
+
 
 from src.model.FeeTransaction import FeeTransaction
 from ..auth.login_required import login_required
@@ -25,16 +25,21 @@ def pay_fee_api():
     session_id = session["session_id"]
 
     whatsapp_message = "Fees Paid Successfully!\n"
-    discount = data.get("discount", 0) # Use .get for safer access
+    discount = int(data.get("discount") or 0)
     payment_mode = data.get("payment_mode")
-    date_str = data.get("date")
+    payment_date = data.get("paymentDate")
     fee_data = data.get("students", [])
+    remark = data.get("remark")
 
     if not payment_mode:
         return jsonify({ "message": "Payment mode cant be empty, Please select payment mode"}), 400
-
-    payment_date = date.today()
-
+    
+    try:
+        # Validate and convert
+        payment_date = datetime.strptime(payment_date, "%d/%m/%Y").date()
+    except (ValueError, TypeError):
+        return jsonify({"message": "Invalid date format. Expected DD/MM/YYYY"}), 400
+    
     # --------------------------- CALCULATE TOTAL ---------------------------
     total_paid = 0
     try:
@@ -64,7 +69,7 @@ def pay_fee_api():
                 payment_date   = payment_date,
                 payment_mode   = payment_mode,
                 discount       = discount,
-                remark         = None,
+                remark         = remark or "",  
                 school_id      = school_id,
                 session_id     = session_id,
                 seq_no         = next_seq  # Make sure to set seq_no

@@ -157,7 +157,7 @@ def get_fee_api():
                 "amount": float(f.amount) if f.amount else 0,
                 "dueDate": f"{f.start_day}-{f.start_month}-{due_year}",
                 "status": status,
-                "paid_date": paid_date.isoformat() if paid_date else None,
+                "paid_date": paid_date.strftime("%d-%m-%Y") if paid_date else None,   # <-- UPDATED
                 "transaction_no": transaction_no,
             }
 
