@@ -24,6 +24,7 @@ class StudentSessions(db.Model):
     students = db.relationship("StudentsDB", back_populates="student_sessions")
     session = db.relationship("Sessions", back_populates="student_sessions")
     fee_data = db.relationship("FeeData", back_populates="student_sessions")
+    attendance = db.relationship("Attendance", back_populates="student_sessions")
 
     __table_args__ = (
         UniqueConstraint('class_id', 'ROLL', 'session_id' ,'Section', name='uix_school_SR'),

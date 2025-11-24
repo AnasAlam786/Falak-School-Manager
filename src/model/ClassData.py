@@ -26,3 +26,4 @@ class ClassData(db.Model):
     class_access = db.relationship("ClassAccess", back_populates="class_data")
     class_exams = db.relationship("ClassExams", back_populates="class_data")
     fee_sessions = db.relationship("FeeSessionData", back_populates="class_data")
+    holidays = db.relationship("AttendanceHolidays", back_populates="class_data")

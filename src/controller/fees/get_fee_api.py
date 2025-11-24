@@ -1,11 +1,8 @@
 # src/controller/get_fee.py
 
-from collections import defaultdict
-import time
-from flask import render_template, session, url_for, redirect, request, jsonify, Blueprint
-from sqlalchemy import and_, outerjoin, select 
+from flask import session, request, jsonify, Blueprint
 
-from src.model import (FeeHeads, Sessions, StudentsDB, StudentSessions, ClassData, 
+from src.model import (FeeHeads, StudentsDB, StudentSessions, ClassData, 
                        FeeStructure, FeeData)
 from src import db
 
@@ -23,8 +20,6 @@ get_fee_api_bp = Blueprint( 'get_fee_api_bp',   __name__)
 def get_fee_api():
     # data = request.json
 
-    # student_id = data.get('student_id')
-    # phone_number = data.get('phone_number')
     current_date = datetime.now().date()
 
     phone = request.args.get("phone")

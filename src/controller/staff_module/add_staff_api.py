@@ -19,8 +19,8 @@ from src.controller.staff_module.utils.class_permission_validator import (valida
                                                                           staff_specific_permission)
 
 from src import db
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 add_staff_api_bp = Blueprint( 'add_staff_api_bp',   __name__)
 

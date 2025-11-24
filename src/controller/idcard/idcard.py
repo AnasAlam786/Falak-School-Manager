@@ -10,8 +10,8 @@ from src.model.ClassData import ClassData
 from src.model.ClassAccess import ClassAccess
 
 from src import db
-from ..auth.login_required import login_required
-from ..permissions.permission_required import permission_required
+from src.controller.auth.login_required import login_required
+from src.controller.permissions.permission_required import permission_required
 
 
 

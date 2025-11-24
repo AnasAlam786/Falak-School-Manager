@@ -15,6 +15,13 @@ from .students.update.update_student_info import update_student_info_bp
 from .students.update.final_student_update_api import final_student_update_api_bp
 from .students.update.update_conflic_varification import update_conflict_verification_api_bp
 
+from .attendance.attendance import attendance_bp
+from .attendance.get_attendance_data_api import get_attendance_data_api_bp
+from .attendance.mark_attendance_api import mark_attendance_api_bp
+from .attendance.add_holiday_api import add_holiday_api_bp
+from .attendance.messages_api import get_message_api_bp
+
+
 from .fees.pay_fee_api import pay_fee_api_bp
 from .fees.get_fee_api import get_fee_api_bp
 
@@ -84,6 +91,12 @@ def register_blueprints(app):
     app.register_blueprint(update_student_info_bp)
     app.register_blueprint(final_student_update_api_bp)
     app.register_blueprint(update_conflict_verification_api_bp)
+
+    app.register_blueprint(attendance_bp)
+    app.register_blueprint(get_attendance_data_api_bp)
+    app.register_blueprint(mark_attendance_api_bp)
+    app.register_blueprint(add_holiday_api_bp)
+    app.register_blueprint(get_message_api_bp)
     
     app.register_blueprint(pay_fee_api_bp)
     app.register_blueprint(get_fee_api_bp)

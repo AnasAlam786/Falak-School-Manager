@@ -11,6 +11,9 @@ from .StudentSessions import StudentSessions
 from .RTEInfo import RTEInfo
 from .TeachersLogin import TeachersLogin
 
+from .Attendance import Attendance
+from .AttendanceHolidays import AttendanceHolidays
+
 from .StudentMarks import StudentMarks
 from .Subjects import Subjects
 from .Exams import Exams
@@ -38,6 +41,9 @@ __all__ = [
     "StudentSessions",
     "RTEInfo",
     "TeachersLogin",
+
+    "Attendance",
+    "AttendanceHolidays",
 
     "StudentMarks",
     "Exams",

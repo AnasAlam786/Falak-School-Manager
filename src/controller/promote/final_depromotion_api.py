@@ -18,9 +18,6 @@ final_depromotion_api_bp = Blueprint('final_depromotion_api_bp',   __name__)
 def depromote_student():
     data = request.json
 
-    if not 'email' in session:
-        return jsonify({"message": "Unauthorized access."}), 400
-
     if not data or "student_session_id" not in data:
         return jsonify({"message": "Missing required parameters."}), 400
 

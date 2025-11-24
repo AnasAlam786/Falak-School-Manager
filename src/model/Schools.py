@@ -38,3 +38,5 @@ class Schools(db.Model):
     staff_data = db.relationship("TeachersLogin", back_populates="school")
     fee_structure = db.relationship("FeeStructure", back_populates="school")
     fee_transactions = db.relationship("FeeTransaction", back_populates="school")
+    holidays = db.relationship("AttendanceHolidays", back_populates="school")
+
