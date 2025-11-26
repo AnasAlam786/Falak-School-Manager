@@ -683,7 +683,7 @@
 
                         <button class="attendance-option present-option ${presentSelected} 
                             border border-green-600 text-green-500 bg-green-500/10 hover:bg-green-500/20
-                            py-3 rounded-xl flex flex-col items-center gap-1 transition"
+                            py-3 rounded-xl flex flex-col items-center gap-1 transition" data-student='${data.student_session_id}'
                             onclick="markAttendance('${data.student_session_id}', 'PRESENT', '${date}', this)">
                             <i class="fas fa-check-circle text-lg"></i>
                             <span class="text-xs font-semibold">Present</span>
@@ -691,7 +691,7 @@
 
                         <button class="attendance-option absent-option ${absentSelected}
                             border border-red-600 text-red-400 bg-red-500/10 hover:bg-red-500/20
-                            py-3 rounded-xl flex flex-col items-center gap-1 transition"
+                            py-3 rounded-xl flex flex-col items-center gap-1 transition" data-student='${data.student_session_id}'
                             onclick="markAttendance('${data.student_session_id}', 'ABSENT', '${date}', this)">
                             <i class="fas fa-times-circle text-lg"></i>
                             <span class="text-xs font-semibold">Absent</span>
@@ -699,7 +699,7 @@
 
                         <button class="attendance-option halfDay-option ${halfdaySelected}
                             border border-yellow-500 text-yellow-400 bg-yellow-400/10 hover:bg-yellow-400/20
-                            py-3 rounded-xl flex flex-col items-center gap-1 transition"
+                            py-3 rounded-xl flex flex-col items-center gap-1 transition" data-student='${data.student_session_id}'
                             onclick="markAttendance('${data.student_session_id}', 'HALF_DAY', '${date}', this)">
                             <i class="fas fa-clock text-lg"></i>
                             <span class="text-xs font-semibold">Half Day</span>
@@ -759,15 +759,11 @@
     }
     
     
-    async function getAttendanceHistory(studentID, date, status) {
-    
-    }
-
+    async function getAttendanceHistory(studentID, date, status) {}
 
     // =====================================================
     //  MODALS (simple)
     // =====================================================
-
     
     async function openMessageModal(studentName, fathersName, className, phone, date ) {
         document.getElementById("messageStudentName").textContent = `Send Message to ${studentName}`;
