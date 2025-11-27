@@ -13,7 +13,7 @@ get_message_api_bp = Blueprint( 'get_message_api_bp',   __name__)
 def get_absent_message_api():
 
     student_name = request.args.get("studentName")
-    father_name = request.args.get("fatherName")
+    father_name = request.args.get("fathersName")
     class_name = request.args.get("className")
     date_str = request.args.get("date")
     school_name = session.get("school_name")

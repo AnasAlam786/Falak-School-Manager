@@ -1,6 +1,7 @@
 # src/controller/get_fee.py
 
 from datetime import datetime
+from time import time
 from flask import session, request, jsonify, Blueprint
 from sqlalchemy import and_
 
@@ -16,6 +17,7 @@ mark_attendance_api_bp = Blueprint( 'mark_attendance_api_bp',   __name__)
 @login_required
 @permission_required('attendance')
 def mark_attendance_api():
+    start_time = time()  # start timer
     # --- Read Inputs ---
     data = request.json
     student_session_id = data.get("student_session_id")
@@ -50,17 +52,17 @@ def mark_attendance_api():
         return jsonify({"message": "Invalid date format"}), 400
 
     # --- Validate student session ---
-    student_session = (
-        db.session.query(StudentSessions.id)
-        .filter(
-            and_(
-                StudentSessions.id == student_session_id,
-                StudentSessions.session_id == current_session,
-            )
-        ).first()
-    )
-    if not student_session:
-        return jsonify({"message": "Invalid student session"}), 404
+    # student_session = (
+    #     db.session.query(StudentSessions.id)
+    #     .filter(
+    #         and_(
+    #             StudentSessions.id == student_session_id,
+    #             StudentSessions.session_id == current_session,
+    #         )
+    #     ).first()
+    # )
+    # if not student_session:
+    #     return jsonify({"message": "Invalid student session"}), 404
 
     # --- Check Existing Attendance ---
     attendance = Attendance.query.filter_by(
@@ -73,11 +75,13 @@ def mark_attendance_api():
             db.session.delete(attendance)
             try:
                 db.session.commit()
+                end_time = time()  # end timer
+                print(f"Attendance took {end_time - start_time:.6f} to mark")
+                return jsonify({"message": "success"}), 200
             except Exception as e:
                 db.session.rollback()
                 print("Attendance Deletion Error:", e)
                 return jsonify({"message": "Database error"}), 500
-        return jsonify({"message": "success"}), 200
 
     # --- Insert or Update Attendance ---
     if attendance:
@@ -101,5 +105,8 @@ def mark_attendance_api():
         db.session.rollback()
         print("Attendance Error:", e)
         return jsonify({"message": "Database error"}), 500
+    
+    end_time = time()  # end timer
+    print(f"Attendance took {end_time - start_time:.6f} to mark")
 
     return jsonify({"message": "success"}), 200

@@ -23,6 +23,21 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
+    .attendance-option.loading-active {
+        opacity: 0.8;
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    .loader-spin {
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+
+
 </style>
 
 
@@ -313,8 +328,6 @@
         </div>
     </div>
 </div>
-
-
 
 
 <!-- Attendance History Modal -->
@@ -724,6 +737,21 @@
 
         const isAlreadySelected = clickedBTN.classList.contains("selected");
 
+        // Save current button content
+        const originalHTML = clickedBTN.innerHTML;
+
+        // Start loading state
+        clickedBTN.disabled = true;
+        clickedBTN.classList.add("loading-active");
+        clickedBTN.innerHTML = `
+            <div class="flex flex-col items-center gap-1">
+                <div class="h-5 flex items-center justify-center">
+                    <span class="loader-spin w-5 h-5 border-2 border-current border-t-transparent rounded-full"></span>
+                </div>
+                <span class="text-xs font-semibold opacity-80">Marking...</span>
+            </div>
+        `;
+
         try {
             if (isAlreadySelected) { status = null }
             const response = await fetch("/api/mark_attendance", {
@@ -755,6 +783,11 @@
         } catch (error) {
             showAlert(500, "Network error");
             console.error("Error:", error);
+        } finally {
+            // Restore button UI
+            clickedBTN.disabled = false;
+            clickedBTN.classList.remove("loading-active");
+            clickedBTN.innerHTML = originalHTML;
         }
     }
     
