@@ -32,7 +32,6 @@ def attendance_page():
 
     classes = classes_query.all()
     current_date = datetime.today().date()
-    print(current_date)
 
     return render_template('/attendance/attendance.html', classes=classes, current_date=current_date)
 

@@ -15,7 +15,7 @@ add_holiday_api_bp = Blueprint( 'add_holiday_api_bp',   __name__)
 
 @add_holiday_api_bp.route('/api/add_holiday', methods=["POST"])
 @login_required
-@permission_required('add_holiday')
+@permission_required('mark_holiday')
 def add_holiday():
     holiday_name = request.form.get('holiday_name')
     start_date   = request.form.get('start_date')

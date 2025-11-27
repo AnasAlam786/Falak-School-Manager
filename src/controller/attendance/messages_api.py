@@ -18,9 +18,6 @@ def get_absent_message_api():
     date_str = request.args.get("date")
     school_name = session.get("school_name")
 
-    
-
-
     def parse_date(date_str):
         formats = ["%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y"]
         for fmt in formats:

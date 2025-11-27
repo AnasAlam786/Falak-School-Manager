@@ -4,7 +4,7 @@ from datetime import date, datetime
 from sqlalchemy import and_, or_
 from flask import session, request, jsonify, Blueprint
 
-from src.controller.permissions import permission_required
+from src.controller.permissions.has_permission import has_permission
 from src.model import StudentsDB, StudentSessions, ClassData
 from src import db
 
@@ -26,6 +26,7 @@ def get_attendance_data_api():
 
     current_session = session["session_id"]
     school_id = session["school_id"]
+    current_date = datetime.today().date()
 
 
     def parse_date(date_str):
@@ -47,6 +48,10 @@ def get_attendance_data_api():
     if date is None:
         return jsonify({"message": "Invalid date format. Use DD/MM/YYYY or DD-MM-YYYY"}), 400
     
+    if current_date != date:
+        if not has_permission("mark_any_day_attendance"):
+            return jsonify({"message": "Access denied. You are only authorized to record attendance for today only."}), 403
+
 
     holiday = AttendanceHolidays.query.filter(
         AttendanceHolidays.school_id == school_id,
@@ -91,6 +96,29 @@ def get_attendance_data_api():
         .order_by(StudentSessions.ROLL.asc())
     ).all()
 
+    total_students = len(attendance_data)
+    present = absent = half_day = not_marked = 0
+
+    for attendance in attendance_data:
+        if attendance.attendance_status == "PRESENT":
+            present +=1 
+        elif attendance.attendance_status == "ABSENT":
+            absent +=1 
+        elif attendance.attendance_status == "HALF_DAY":
+            half_day +=1 
+        else:
+            not_marked += 1
+
     attendance_data = [dict(row._mapping) for row in attendance_data]
+
+    # Pack everything neatly into one variable
+    attendance_summary = {
+        "date": date.strftime("%A, %d %B %Y"),
+        "total": total_students,
+        "present": present,
+        "absent": absent,
+        "half_day": half_day,
+        "not_marked": not_marked
+    }
     
-    return jsonify({"message": "success", "attendance_data": attendance_data, "date": date.strftime("%d-%m-%Y")}), 200
+    return jsonify({"attendance_data": attendance_data, "attendance_summary": attendance_summary}), 200

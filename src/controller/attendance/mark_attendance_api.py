@@ -5,10 +5,11 @@ from time import time
 from flask import session, request, jsonify, Blueprint
 from sqlalchemy import and_
 
+from src.controller.permissions.has_permission import has_permission
 from src.controller.permissions.permission_required import permission_required
 from src.controller.auth.login_required import login_required
 
-from src.model import StudentSessions, Attendance
+from src.model import Attendance
 from src import db
 
 mark_attendance_api_bp = Blueprint( 'mark_attendance_api_bp',   __name__)
@@ -50,6 +51,11 @@ def mark_attendance_api():
     date = parse_date(date_str)
     if date is None:
         return jsonify({"message": "Invalid date format"}), 400
+    
+    current_date = datetime.today().date()
+    if current_date != date:
+        if not has_permission("mark_any_day_attendance"):
+            return jsonify({"message": "Access denied. You are only authorized to record attendance for today only."}), 403
 
     # --- Validate student session ---
     # student_session = (
