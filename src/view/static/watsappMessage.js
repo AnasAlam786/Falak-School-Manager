@@ -26,6 +26,34 @@ function sendWhatsAppMessage(phone, message) {
     // 4. Add country code
     formattedPhone = '91' + formattedPhone;
 
+    // --- Global rate limiting ---
+    const storageKey = 'wa_global_limit';
+    const now = Date.now();
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const data = JSON.parse(localStorage.getItem(storageKey) || '{"lastSent":0,"count":0,"date":""}');
+
+    // Reset daily count if new day
+    if (data.date !== today) {
+        data.count = 0;
+        data.date = today;
+    }
+
+    // Random delay between 10 and 15 seconds (10000–15000  ms)
+    const randomDelay = Math.floor(Math.random() * 5000) + 10000;
+
+    if (now - data.lastSent < randomDelay) {
+        showAlert(400, `⏱ Please wait ${Math.ceil((randomDelay - (now - data.lastSent))/1000)} seconds before sending another message.`);
+        return;
+    }
+
+    // Daily limit check
+    if (data.count >= 200) {
+        showAlert(400, "📵 Daily limit of 200 messages reached.");
+        return;
+    }
+
+    // ---------- OPEN WHATSAPP ----------
+
     // 5. Encode the message
     const encodedMessage = encodeURIComponent(message || '');
 
@@ -42,4 +70,9 @@ function sendWhatsAppMessage(phone, message) {
             '_blank'
         );
     }
+
+    // ---------- UPDATE LIMITS ----------
+    data.lastSent = now;
+    data.count += 1;
+    localStorage.setItem(storageKey, JSON.stringify(data));
 }

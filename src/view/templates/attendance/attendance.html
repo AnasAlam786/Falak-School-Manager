@@ -132,6 +132,14 @@
     .border-primary {
         border-color: rgba(99, 102, 241, 0.3);
     }
+
+    /* Mobile-first adjustments for the holiday modal */
+    @media (max-width: 480px) {
+        #holidayModal .rounded-2xl { border-radius: 14px; }
+        #holidayModal h3 { font-size: 1.05rem; }
+        #holidayModal input, #holidayModal select, #holidayModal button { font-size: 0.95rem; }
+        #holidayModal .flex-col { gap: 8px; }
+    }
 </style>
 
 
@@ -151,7 +159,7 @@
                 </p>
             </div>
 
-            {% if "mark_holiday" in session['permissions'] %}
+            <!-- {% if "mark_holiday" in session['permissions'] %} -->
             <button id="holidayBtn" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 
                    text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-900/20 
                    hover:shadow-blue-900/30 transition-all duration-300 flex items-center gap-2 
@@ -159,10 +167,16 @@
                 <i class="fas fa-plus text-white"></i>
                 Mark Holiday
             </button>
-            {% endif %}
+            <!-- {% endif %} -->
         </div>
     </header>
-
+            <button id="holidayBtn" class="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 
+                   text-white px-6 py-3 rounded-xl font-semibold shadow-lg shadow-blue-900/20 
+                   hover:shadow-blue-900/30 transition-all duration-300 flex items-center gap-2 
+                   transform hover:-translate-y-0.5">
+                <i class="fas fa-plus text-white"></i>
+                Mark Holiday
+            </button>
 
     <!-- Modern Filters Section -->
     <section class="w-full mb-10 p-6 rounded-2xl shadow-2xl border border-[#2B2B2B]
@@ -246,42 +260,41 @@
 </div>
 
 <!-- Holiday Marking Modal -->
-<div id="holidayModal" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+<div id="holidayModal" class="fixed inset-0 flex items-center justify-center z-50 hidden px-4">
     <div class="absolute inset-0 bg-black/70"></div>
-    <div class="relative bg-[#1A1A1A] rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl border border-[#2A2A2A]">
-        <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold">Mark Holidays</h3>
+    <div class="relative bg-[#1A1A1A] rounded-2xl p-4 sm:p-6 w-full max-w-lg mx-auto shadow-2xl border border-[#2A2A2A]">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg sm:text-xl font-semibold">Mark Holiday</h3>
             <button id="closeHolidayModal" class="text-gray-400 hover:text-white transition-colors">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
 
-        <form class="space-y-4" method="POST" action="/api/add-holiday">
+        <form id="holidayForm" class="space-y-4" method="POST" action="/api/add-holiday">
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Holiday Name *</label>
-                <input type="text"
+                <input id="holidayName" name="holiday_name" type="text"
                     class="w-full bg-[#2A2A2A] border border-[#3A3A3A] text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                    placeholder="Enter holiday name" name="holiday_name" required>
+                    placeholder="e.g. Winter Break" required>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Date Range *</label>
-                <div class="flex gap-2">
-                    <input type="date"
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input id="startDate" name="start_date" type="date"
                         class="flex-1 bg-[#2A2A2A] border border-[#3A3A3A] text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                        name="start_date" required>
-                    <span class="self-center text-gray-400">to</span>
-                    <input type="date"
+                        required>
+                    <div class="flex items-center justify-center text-gray-400 py-2">to</div>
+                    <input id="endDate" name="end_date" type="date"
                         class="flex-1 bg-[#2A2A2A] border border-[#3A3A3A] text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                        name="end_date" required>
+                        required>
                 </div>
             </div>
 
             <div>
                 <label class="block text-sm font-medium text-gray-300 mb-2">Apply To</label>
-                <select
-                    class="w-full bg-[#2A2A2A] border border-[#3A3A3A] text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
-                    name="apply_to" required>
+                <select id="applyTo" name="apply_to"
+                    class="w-full bg-[#2A2A2A] border border-[#3A3A3A] text-white rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all">
                     <option selected value="">Entire School</option>
                     {% if classes %}
                     {% for class in classes %}
@@ -291,15 +304,17 @@
                 </select>
             </div>
 
-            <div class="pt-4">
-                <button type="submit"
-                    class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-lg">
-                    Mark as Holiday
+            <div class="pt-2">
+                <button id="holidaySubmit" type="submit"
+                    class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-medium py-3.5 px-4 rounded-xl transition-all shadow-lg flex items-center justify-center gap-3">
+                    <i class="fas fa-calendar-plus"></i>
+                    <span>Mark as Holiday</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+
 
 <!-- Send Message Modal -->
 <div id="messageModal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4">
@@ -638,141 +653,141 @@
             const notMarkedPct = ((notMarked / total) * 100).toFixed(1);
 
             const html = `
-<div class="attendance-card rounded-2xl p-4 md:p-6 mb-6 bg-[#1C1C1C]">
-  <!-- Header -->
-  <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
-    <div>
-      <h1 class="text-xl md:text-2xl font-bold text-white">Class Attendance</h1>
-      <p class="text-gray-400 mt-1 text-sm md:text-base">Real-time attendance summary</p>
-    </div>
-    <div class="mt-4 md:mt-0">
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-opacity text-primary border border-primary">
-        <i class="fas fa-calendar-alt mr-2"></i>
-        ${AttendanceState.summary.date}
-      </span>
-    </div>
-  </div>
+            <div class="attendance-card rounded-2xl p-4 md:p-6 mb-6 bg-[#1C1C1C]">
+                <!-- Header -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                    <h1 class="text-xl md:text-2xl font-bold text-white">Class Attendance</h1>
+                    <p class="text-gray-400 mt-1 text-sm md:text-base">Real-time attendance summary</p>
+                    </div>
+                    <div class="mt-4 md:mt-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-opacity text-primary border border-primary">
+                        <i class="fas fa-calendar-alt mr-2"></i>
+                        ${AttendanceState.summary.date}
+                    </span>
+                    </div>
+                </div>
 
-  <!-- Data holder (server-side values inserted into data-* attributes) -->
-  <div id="attendance-data"
-       data-total="${total}"
-       data-present="${present}"
-       data-absent="${absent}"
-       data-halfday="${halfDay}"
-       data-notmarked="${notMarked}"></div>
+                <!-- Data holder (server-side values inserted into data-* attributes) -->
+                <div id="attendance-data"
+                    data-total="${total}"
+                    data-present="${present}"
+                    data-absent="${absent}"
+                    data-halfday="${halfDay}"
+                    data-notmarked="${notMarked}"></div>
 
-  <!-- Two-column layout: KPI donut + compact stats -->
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-    <!-- Donut KPI (left card) -->
-    <div class="rounded-xl p-4 md:p-6 bg-[#101010] flex items-center justify-center">
-      <div class="w-full flex flex-col md:flex-row items-center gap-4">
-        <div class="mx-auto">
-          <!-- Donut container -->
-          <div id="donut" class="relative rounded-full" 
-            style=" width:120px;
-                    height:120px;
-                    border-radius:50%;
-                    background: conic-gradient(#10b981 ${presentPct}%, rgba(255,255,255,0.06) ${presentPct}% 100%);
-                    box-shadow: inset 0 -6px 18px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.02);">
-            <!-- outer conic background is set by JS -->
-            <div class="absolute inset-0 rounded-full flex items-center justify-center"
-                 style="background: rgba(255,255,255,0.03);">
-            </div>
-            <!-- inner circle (cutout) -->
-            <div id="donut-inner" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-                          bg-[#0F1724] rounded-full flex flex-col items-center justify-center"
-                 style="width:80px;height:80px;box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);">
-              <div id="donut-pct" class="text-white font-bold text-lg">${presentPct ?? '--'}%</div>
-              <div class="text-gray-400 text-xs">Present</div>
-            </div>
-          </div>
-        </div>
+                <!-- Two-column layout: KPI donut + compact stats -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Donut KPI (left card) -->
+                    <div class="rounded-xl p-4 md:p-6 bg-[#101010] flex items-center justify-center">
+                    <div class="w-full flex flex-col md:flex-row items-center gap-4">
+                        <div class="mx-auto">
+                        <!-- Donut container -->
+                        <div id="donut" class="relative rounded-full" 
+                            style=" width:120px;
+                                    height:120px;
+                                    border-radius:50%;
+                                    background: conic-gradient(#10b981 ${presentPct}%, rgba(255,255,255,0.06) ${presentPct}% 100%);
+                                    box-shadow: inset 0 -6px 18px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.02);">
+                            <!-- outer conic background is set by JS -->
+                            <div class="absolute inset-0 rounded-full flex items-center justify-center"
+                                style="background: rgba(255,255,255,0.03);">
+                            </div>
+                            <!-- inner circle (cutout) -->
+                            <div id="donut-inner" class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
+                                        bg-[#0F1724] rounded-full flex flex-col items-center justify-center"
+                                style="width:80px;height:80px;box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);">
+                            <div id="donut-pct" class="text-white font-bold text-lg">${presentPct ?? '--'}%</div>
+                            <div class="text-gray-400 text-xs">Present</div>
+                            </div>
+                        </div>
+                        </div>
 
-        <div class="flex-1 text-center md:text-left">
-          <div class="text-gray-400 text-xs md:text-sm">Total Students</div>
-          <div id="total-count" class="text-white font-extrabold text-2xl md:text-3xl mt-1">${total}</div>
-          <div class="mt-3 flex flex-wrap items-center gap-3 justify-center md:justify-start">
-            <div class="flex items-center gap-2">
-              <span class="inline-block w-2 h-2 rounded-full bg-success"></span>
-              <span class="text-gray-400 text-xs">${presentPct ?? ''}% Present</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="inline-block w-2 h-2 rounded-full bg-danger"></span>
-              <span class="text-gray-400 text-xs">${absentPct ?? ''}% Absent</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+                        <div class="flex-1 text-center md:text-left">
+                        <div class="text-gray-400 text-xs md:text-sm">Total Students</div>
+                        <div id="total-count" class="text-white font-extrabold text-2xl md:text-3xl mt-1">${total}</div>
+                        <div class="mt-3 flex flex-wrap items-center gap-3 justify-center md:justify-start">
+                            <div class="flex items-center gap-2">
+                            <span class="inline-block w-2 h-2 rounded-full bg-success"></span>
+                            <span class="text-gray-400 text-xs">${presentPct ?? ''}% Present</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                            <span class="inline-block w-2 h-2 rounded-full bg-danger"></span>
+                            <span class="text-gray-400 text-xs">${absentPct ?? ''}% Absent</span>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
 
-    <!-- Stats card (right) -->
-    <div class="rounded-xl p-4 md:p-6 bg-[#101010] flex flex-col justify-between">
-      <div class="flex items-center justify-between">
-        <div>
-          <p class="text-gray-400 text-xs md:text-sm font-medium">Attendance Overview</p>
-          <h3 class="text-white font-bold text-lg md:text-xl mt-1">Quick Summary</h3>
-        </div>
-        <div class="text-gray-400 text-xs">Last updated: ${AttendanceState.summary.date}</div>
-      </div>
+                    <!-- Stats card (right) -->
+                    <div class="rounded-xl p-4 md:p-6 bg-[#101010] flex flex-col justify-between">
+                    <div class="flex items-center justify-between">
+                        <div>
+                        <p class="text-gray-400 text-xs md:text-sm font-medium">Attendance Overview</p>
+                        <h3 class="text-white font-bold text-lg md:text-xl mt-1">Quick Summary</h3>
+                        </div>
+                        <div class="text-gray-400 text-xs">Last updated: ${AttendanceState.summary.date}</div>
+                    </div>
 
-      <div class="mt-4 space-y-4">
-        <!-- Present -->
-        <div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-success-opacity flex items-center justify-center">
-                <i class="fas fa-check text-success"></i>
-              </div>
-              <div>
-                <div class="text-gray-400 text-xs">Present</div>
-                <div id="present-count" class="text-white font-bold text-lg">${present}</div>
-              </div>
-            </div>
-            <div class="w-1/3">
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div id="present-bar" class="h-2 rounded-full bg-success" style="width:${presentPct ?? '0'}%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+                    <div class="mt-4 space-y-4">
+                        <!-- Present -->
+                        <div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-success-opacity flex items-center justify-center">
+                                <i class="fas fa-check text-success"></i>
+                            </div>
+                            <div>
+                                <div class="text-gray-400 text-xs">Present</div>
+                                <div id="present-count" class="text-white font-bold text-lg">${present}</div>
+                            </div>
+                            </div>
+                            <div class="w-1/3">
+                            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div id="present-bar" class="h-2 rounded-full bg-success" style="width:${presentPct ?? '0'}%"></div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
 
-        <!-- Absent -->
-        <div>
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full bg-danger-opacity flex items-center justify-center">
-                <i class="fas fa-times text-danger"></i>
-              </div>
-              <div>
-                <div class="text-gray-400 text-xs">Absent</div>
-                <div id="absent-count" class="text-white font-bold text-lg">${absent}</div>
-              </div>
-            </div>
-            <div class="w-1/3">
-              <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                <div id="absent-bar" class="h-2 rounded-full bg-danger" style="width: ${absentPct ?? '0'}%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+                        <!-- Absent -->
+                        <div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-danger-opacity flex items-center justify-center">
+                                <i class="fas fa-times text-danger"></i>
+                            </div>
+                            <div>
+                                <div class="text-gray-400 text-xs">Absent</div>
+                                <div id="absent-count" class="text-white font-bold text-lg">${absent}</div>
+                            </div>
+                            </div>
+                            <div class="w-1/3">
+                            <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div id="absent-bar" class="h-2 rounded-full bg-danger" style="width: ${absentPct ?? '0'}%"></div>
+                            </div>
+                            </div>
+                        </div>
+                        </div>
 
-        <!-- Micro stats -->
-        <div class="flex gap-3 flex-wrap mt-2">
-          <div class="px-3 py-2 bg-white/5 rounded-full flex items-center gap-2 text-xs">
-            <span class="inline-block w-2 h-2 rounded-full bg-warning"></span>
-            <span id="halfday-count" class="text-gray-300">${halfDay}</span>
-            <span class="text-gray-400">Half Day</span>
-          </div>
-          <div class="px-3 py-2 bg-white/5 rounded-full flex items-center gap-2 text-xs">
-            <span class="inline-block w-2 h-2 rounded-full bg-neutral"></span>
-            <span id="notmarked-count" class="text-gray-300">${notMarked}</span>
-            <span class="text-gray-400">Not Marked</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+                        <!-- Micro stats -->
+                        <div class="flex gap-3 flex-wrap mt-2">
+                        <div class="px-3 py-2 bg-white/5 rounded-full flex items-center gap-2 text-xs">
+                            <span class="inline-block w-2 h-2 rounded-full bg-warning"></span>
+                            <span id="halfday-count" class="text-gray-300">${halfDay}</span>
+                            <span class="text-gray-400">Half Day</span>
+                        </div>
+                        <div class="px-3 py-2 bg-white/5 rounded-full flex items-center gap-2 text-xs">
+                            <span class="inline-block w-2 h-2 rounded-full bg-neutral"></span>
+                            <span id="notmarked-count" class="text-gray-300">${notMarked}</span>
+                            <span class="text-gray-400">Not Marked</span>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                </div>
 
         `;
 
@@ -789,14 +804,53 @@
          * Initialize all modal event listeners
          */
         init() {
-            // Holiday Modal
-            const holidayBtn = document.getElementById('holidayBtn');
+            // Holiday Modal (supports multiple holiday buttons)
+            const holidayBtnEls = document.querySelectorAll('#holidayBtn');
             const holidayModal = document.getElementById('holidayModal');
             const closeHolidayModal = document.getElementById('closeHolidayModal');
+            const holidayForm = document.getElementById('holidayForm');
+            const holidaySubmit = document.getElementById('holidaySubmit');
 
-            if (holidayBtn) {
-                holidayBtn.addEventListener('click', () => this.openModal(holidayModal));
-                closeHolidayModal.addEventListener('click', () => this.closeModal(holidayModal));
+            // Open modal from any holiday button (there may be more than one in the UI)
+            holidayBtnEls.forEach(btn => btn && btn.addEventListener('click', () => this.openModal(holidayModal)));
+            if (closeHolidayModal) closeHolidayModal.addEventListener('click', () => this.closeModal(holidayModal));
+
+            // Close modal when clicking backdrop
+            if (holidayModal) holidayModal.addEventListener('click', (e) => { if (e.target === holidayModal) this.closeModal(holidayModal); });
+
+            // Holiday form AJAX submit
+            if (holidayForm) {
+                holidayForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(holidayForm);
+
+                    const start = formData.get('start_date');
+                    const end = formData.get('end_date');
+                    if (end < start) {
+                        showAlert(400, 'End date must be same or after start date');
+                        return;
+                    }
+
+                    if (holidaySubmit) {
+                        holidaySubmit.disabled = true;
+                        const originalHTML = holidaySubmit.innerHTML;
+                        holidaySubmit.innerHTML = '<span class="loader-spin w-5 h-5 border-2 border-current border-t-transparent rounded-full"></span> Saving...';
+                        try {
+                            const res = await fetch(holidayForm.action, { method: 'POST', body: formData, credentials: 'same-origin' });
+                            const data = await res.json();
+                            if (!res.ok) throw data;
+                            showAlert(200, data.message || 'Holiday added');
+                            this.closeModal(holidayModal);
+                            // Optionally trigger a refresh of UI if you have a holidays list
+                        } catch (err) {
+                            console.error('Holiday save error', err);
+                            showAlert(err.status || 500, err.error || 'Failed to add holiday');
+                        } finally {
+                            holidaySubmit.disabled = false;
+                            holidaySubmit.innerHTML = originalHTML;
+                        }
+                    }
+                });
             }
 
             // Message Modal
